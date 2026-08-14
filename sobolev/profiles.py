@@ -28,5 +28,20 @@ def gaussian(dnu, dnu_doppler):
 
 
 def voigt(dnu, dnu_doppler, gamma):
-    """Normalized Voigt profile. Deferred to Week 1 -- Phase 0 is Gaussian-only."""
-    raise NotImplementedError("Voigt profile: Week 1, not Phase 0")
+    """Normalized Voigt profile evaluated at frequency offset `dnu`.
+
+    Gaussian core of Doppler width `dnu_doppler` convolved with a Lorentzian of
+    FWHM `gamma` (both in Hz), via the Faddeeva function:
+
+        phi(dnu) = Re[w(z)] / (sqrt(pi) dnu_D),
+        z = (dnu + i gamma/2) / dnu_D
+
+    gamma is the full damping width (natural + collisional); for a purely
+    radiative line gamma = A_ul / (2 pi). In the gamma -> 0 limit this reduces
+    to `gaussian` exactly, which tests/test_profiles.py checks.
+    """
+    from scipy.special import wofz
+
+    dnu = np.asarray(dnu, dtype=float)
+    z = (dnu + 0.5j * gamma) / dnu_doppler
+    return wofz(z).real / (np.sqrt(np.pi) * dnu_doppler)
