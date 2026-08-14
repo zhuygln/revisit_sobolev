@@ -1,0 +1,40 @@
+Energy levels of La II
+Authors: Floers A., et al.
+Number of levels: 472
+Number of xmatch levels: 108
+Number of configurations: 44
+---------------------------------------------------------------------------------
+ Column Name     Unit   Description    
+---------------------------------------------------------------------------------
+ Index           ----   Number of energy level sorted by energy
+ Z               ----   Atomic number 
+ Charge          ----   Ion charge
+ Energy          cm-1   Energy of energy level
+ J               ----   Angular momentum
+ Parity          ----   Parity: 0 = even, 1 = odd
+ Configuration   ----   Leading order configuration
+ LS1             ----   Leading order LS term
+ LS2             ----   Second-leading LS term
+ Method          ----   Calibration method: uncalib / shifted / xmatch
+---------------------------------------------------------------------------------
+ Index       Z  Charge      Energy       J  Parity  Configuration    LS1    LS2    Method 
+     0      57       1        0.00       2       0            5d2     3F     1D    xmatch 
+     1      57       1     1016.10       3       0            5d2     3F     3F    xmatch 
+     2      57       1     1394.46       2       0            5d2     1D     1D    xmatch 
+     3      57       1     1895.15       1       0        5d1.6s1     3D     3D    xmatch 
+     4      57       1     1970.70       4       0            5d2     3F     3F    xmatch 
+     5      57       1     2591.60       2       0        5d1.6s1     3D     3D    xmatch 
+     6      57       1     3250.35       3       0        5d1.6s1     3D     3D    xmatch 
+     7      57       1     5249.70       0       0            5d2     3P     3P    xmatch 
+     8      57       1     5718.12       1       0            5d2     3P     3P    xmatch 
+     9      57       1     6227.42       2       0            5d2     3P     3P    xmatch 
+    10      57       1     7394.57       0       0            6s2     1S     1S    xmatch 
+    11      57       1     7473.32       4       0            5d2     1G     1G    xmatch 
+    12      57       1    10094.86       2       0        5d1.6s1     1D     1D    xmatch 
+    13      57       1    12363.92       0       0            5d2     1S     1S   shifted 
+    14      57       1    14147.98       2       1        4f1.6s1     3F     3F    xmatch 
+    15      57       1    14375.17       3       1        4f1.6s1     3F     1F    xmatch 
+    16      57       1    15698.74       4       1        4f1.6s1     3F     3F    xmatch 
+    17      57       1    15773.77       3       1        4f1.6s1     1F     3F    xmatch 
+    18      57       1    16599.17       4       1        4f1.5d1     1G     3H    xmatch 
+    19      57       1    17211.93       2       1        4f1.5d1     3F     1D    xmatch 
