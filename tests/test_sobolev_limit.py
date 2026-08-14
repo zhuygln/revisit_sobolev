@@ -8,7 +8,6 @@ the specification for Session 1, not regression cover for finished code.
 """
 
 import numpy as np
-import pytest
 
 from sobolev.constants import C
 from sobolev.optical_depth import (
@@ -50,7 +49,23 @@ def test_error_shrinks_under_grid_refinement():
     assert errors[1] < errors[0]
 
 
-@pytest.mark.xfail(reason="Phase 0B result -- write this once the gradient sweep runs")
 def test_gradient_breaks_sobolev():
-    """Phase 0B: E_Sob must grow as epsilon = v_D / v_scale approaches unity."""
-    raise NotImplementedError
+    """Phase 0B: E_Sob must grow as epsilon = v_D / v_scale approaches unity.
+
+    The resonance is placed off-centre on the tanh (see sweep_gradient_error's
+    docstring) so the curvature term survives; the expected scaling is then
+    E_Sob ~ epsilon^2 until it saturates near epsilon ~ 1.
+    """
+    from sobolev.optical_depth import sweep_gradient_error
+
+    eps = np.array([1e-4, 1e-3, 1e-2, 0.1, 1.0])
+    errors = sweep_gradient_error(eps, NU0, F_OSC, N0, 0.5, T_SECONDS, V_DOPPLER)
+
+    # Sobolev regime: essentially exact.
+    assert errors[0] < 1e-8
+    # Breakdown: error grows monotonically and becomes percent-level.
+    assert np.all(np.diff(errors) > 0)
+    assert errors[-1] > 1e-2
+    # Quadratic scaling in the small-epsilon regime (one decade -> x100).
+    ratio = errors[2] / errors[1]
+    assert 50 < ratio < 200
