@@ -1,0 +1,30 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+
+# Windows NTFS alternate data streams (leak download URLs via WSL)
+*:Zone.Identifier
+*:*.Zone.Identifier
+*:PG$Secure
+.vscode/
+.idea/
+*.swp
+
+# Environments & secrets
+.env
+.env.*
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+.pytest_cache/
+.ruff_cache/
+
+# Data & outputs
+data/
+outputs/
+*.log
