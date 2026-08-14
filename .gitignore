@@ -25,6 +25,7 @@ __pycache__/
 .ruff_cache/
 
 # Data & outputs
-data/
+data/*
+!data/README.md
 outputs/
 *.log

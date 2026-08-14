@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sobolev-kilonova"
+version = "0.0.0"
+description = "Validity of the Sobolev approximation in kilonova ejecta"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=2.0",
+    "scipy",
+    "matplotlib",
+    "pandas",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "jupyterlab"]
+
+[tool.setuptools]
+packages = ["sobolev"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
