@@ -1,0 +1,49 @@
+Transitions of La II
+Authors: Floers A., et al.
+Total number of transitions: 17743
+Total number of transitions with both upper and lower xmatch level: 1239
+Total number of transitions with either upper or lower xmatch level: 7672
+---------------------------------------------------------------------------------
+ Column Name     Unit   Description    
+---------------------------------------------------------------------------------
+ Lower           ----   Index of the lower level
+ E_Lower         cm-1   Energy of the lower level
+ J_Lower         ----   Angular momentum of the lower level
+ P_Lower         ----   Parity of the lower level: 0 = even, 1 = odd
+ Config_Lower    ----   Leading order configuration of the lower level
+ LS_Lower        ----   Leading order LS term of the lower level
+ Method_Lower    ----   Lower level calibration method: uncalib / shifted / xmatch
+ Upper           ----   Index of the upper level
+ E_Upper         cm-1   Energy of the upper level
+ J_Upper         ----   Angular momentum of the upper level
+ P_Upper         ----   Parity of the upper level: 0 = even, 1 = odd
+ Config_Upper    ----   Leading order configuration of the upper level
+ LS_Upper        ----   Leading order LS term of the upper level
+ Method_Upper    ----   Upper level calibration method: uncalib / shifted / xmatch
+ Type            ----   Transitions type: E1 / M1 / E2
+ E_Transition    cm-1   Transition energy
+ WV_Transition   A      Transition wavelength
+ Log(gf)         ----   log10 of the weighted oscillator strength gf
+ A               s-1    Radiative transition rate / Einstein A-value
+---------------------------------------------------------------------------------
+ Lower     E_Lower J_Lower P_Lower Config_Lower  LS_Lower Method_Lower  Upper     E_Upper J_Upper P_Upper Config_Upper  LS_Upper Method_Upper   Type  E_Transition WV_Transition       Log(gf)             A 
+     0        0.00       2       0          5d2        3F       xmatch     14    14147.98       2       1      4f1.6s1        3F       xmatch     E1      14147.98       7068.15       -1.0213    2.5424e+06 
+     0        0.00       2       0          5d2        3F       xmatch     15    14375.17       3       1      4f1.6s1        3F       xmatch     E1      14375.17       6956.44       -1.9309    2.3086e+05 
+     0        0.00       2       0          5d2        3F       xmatch     17    15773.77       3       1      4f1.6s1        1F       xmatch     E1      15773.77       6339.64       -3.6378    5.4593e+03 
+     0        0.00       2       0          5d2        3F       xmatch     19    17211.93       2       1      4f1.5d1        3F       xmatch     E1      17211.93       5809.92       -1.4129    1.5272e+06 
+     0        0.00       2       0          5d2        3F       xmatch     21    18235.56       3       1      4f1.5d1        3F       xmatch     E1      18235.56       5483.79       -2.0328    2.9385e+05 
+     0        0.00       2       0          5d2        3F       xmatch     23    18895.41       2       1      4f1.5d1        1D       xmatch     E1      18895.41       5292.29       -1.3232    2.2631e+06 
+     0        0.00       2       0          5d2        3F       xmatch     26    20402.82       3       1      4f1.5d1        3G       xmatch     E1      20402.82       4901.28       -0.2445    2.2592e+07 
+     0        0.00       2       0          5d2        3F       xmatch     28    21441.73       1       1      4f1.5d1        3D       xmatch     E1      21441.73       4663.80       -0.6398    2.3429e+07 
+     0        0.00       2       0          5d2        3F       xmatch     29    22106.02       2       1      4f1.5d1        3D       xmatch     E1      22106.02       4523.65       -1.3769    2.7370e+06 
+     0        0.00       2       0          5d2        3F       xmatch     31    22537.30       3       1      4f1.5d1        3D       xmatch     E1      22537.30       4437.09       -1.4071    1.8955e+06 
+     0        0.00       2       0          5d2        3F       xmatch     33    22705.15       1       1      4f1.5d1        3P       xmatch     E1      22705.15       4404.29       -1.6800    2.3950e+06 
+     0        0.00       2       0          5d2        3F       xmatch     34    23246.93       2       1      4f1.5d1        3P       xmatch     E1      23246.93       4301.64       -1.7556    1.2656e+06 
+     0        0.00       2       0          5d2        3F       xmatch     35    24462.66       2       1      5d1.6p1        1D       xmatch     E1      24462.66       4087.86       -0.1804    5.2697e+07 
+     0        0.00       2       0          5d2        3F       xmatch     36    24522.70       3       1      4f1.5d1        1F       xmatch     E1      24522.70       4077.85       -1.7765    9.5871e+05 
+     0        0.00       2       0          5d2        3F       xmatch     37    25973.37       1       1      5d1.6p1        3D       xmatch     E1      25973.37       3850.10       -0.2697    8.0612e+07 
+     0        0.00       2       0          5d2        3F       xmatch     38    26414.01       2       1      5d1.6p1        3F       xmatch     E1      26414.01       3785.87       -0.8328    1.3680e+07 
+     0        0.00       2       0          5d2        3F       xmatch     39    26837.66       3       1      5d1.6p1        3F       xmatch     E1      26837.66       3726.11       -1.3915    2.7863e+06 
+     0        0.00       2       0          5d2        3F       xmatch     40    27388.11       2       1      5d1.6p1        3D       xmatch     E1      27388.11       3651.22       -1.0682    8.5517e+06 
+     0        0.00       2       0          5d2        3F       xmatch     42    28154.55       1       1      6s1.6p1        3P       xmatch     E1      28154.55       3551.82       -2.7414    3.1966e+05 
+     0        0.00       2       0          5d2        3F       xmatch     43    28315.25       3       1      5d1.6p1        3D       xmatch     E1      28315.25       3531.67       -2.5111    2.3551e+05 
