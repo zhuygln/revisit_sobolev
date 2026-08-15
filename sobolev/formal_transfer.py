@@ -35,7 +35,7 @@ that the Week 3+ SEDONA comparisons must control for explicitly.
 import numpy as np
 
 from .constants import C, H, K_B, SIGMA_CLASSICAL
-from .profiles import doppler_width_hz, gaussian
+from .profiles import doppler_width_hz, gaussian, voigt
 
 
 def planck_bnu(nu, temperature):
@@ -62,16 +62,21 @@ def emergent_luminosity(
     v_doppler,
     n_impact=100,
     n_z_per_doppler=8.0,
+    cutoff_widths=None,
 ):
     """Emergent line spectrum L_nu (erg s^-1 Hz^-1) of the core+shell system.
 
     Parameters
     ----------
     nu_grid : observer-frame frequencies (Hz)
-    lines : sequence of (nu0, f_osc) or (nu0, f_osc, pop_frac) tuples -- one
-        entry per transition. pop_frac (default 1) multiplies n_l_of_r for
-        that line: for a real forest it is the Boltzmann fraction of the
-        line's own lower level, with n_l_of_r the total ion density.
+    lines : sequence of (nu0, f_osc), (nu0, f_osc, pop_frac) or
+        (nu0, f_osc, pop_frac, gamma) tuples -- one entry per transition.
+        pop_frac (default 1) multiplies n_l_of_r for that line: for a real
+        forest it is the Boltzmann fraction of the line's own lower level,
+        with n_l_of_r the total ion density. gamma (Hz, default 0) is the
+        Lorentzian FWHM of a Voigt profile; for natural broadening
+        gamma = A_ul / (2 pi), which reproduces SEDONA's damping parameter
+        a = A_ul / (4 pi dnu_D). gamma = 0 keeps the pure Gaussian.
     n_l_of_r : callable r -> lower-level number density (cm^-3)
     temp_of_r : callable r -> gas temperature (K), used for the LTE source
     t_exp : ejecta age (s); v = r / t_exp
@@ -82,16 +87,25 @@ def emergent_luminosity(
     n_z_per_doppler : z-resolution in units of the Doppler length v_D * t_exp.
         The resonance region of every line must be resolved; unresolved grids
         underestimate tau exactly like an unconverged tau_exact.
+    cutoff_widths : if not None, each line's profile is zeroed beyond this
+        many Doppler widths from its centre -- mimicking SEDONA's hard-coded
+        +-5-width truncation (AtomicSpecies_opacities.cpp). None (default)
+        evaluates profiles everywhere.
 
     Returns L_nu on nu_grid. Luminosity from intensity: L = 8 pi^2 int I p dp.
     """
     nu_grid = np.asarray(nu_grid, dtype=float)
-    # Normalize entries to (nu0, f_osc, pop_frac) and precompute widths.
+    # Normalize entries to (nu0, f_osc, pop_frac, gamma) and precompute widths.
     lines = [
-        (entry[0], entry[1], entry[2] if len(entry) > 2 else 1.0)
+        (
+            entry[0],
+            entry[1],
+            entry[2] if len(entry) > 2 else 1.0,
+            entry[3] if len(entry) > 3 else 0.0,
+        )
         for entry in lines
     ]
-    dnu_d = {nu0: doppler_width_hz(nu0, v_doppler) for nu0, _, _ in lines}
+    dnu_d = {nu0: doppler_width_hz(nu0, v_doppler) for nu0, _, _, _ in lines}
 
     # z step from the Doppler length; the same uniform grid serves all rays.
     dz = v_doppler * t_exp / n_z_per_doppler
@@ -123,14 +137,17 @@ def emergent_luminosity(
         # alpha(z, nu): sum the resolved profiles of all lines.
         nu_com = nu_grid[None, :] * (1.0 - z[:, None] / (C * t_exp))
         alpha = np.zeros((n_z, nu_grid.size))
-        for nu0, f_osc, pop in lines:
-            alpha += (
-                SIGMA_CLASSICAL
-                * f_osc
-                * pop
-                * n_l[:, None]
-                * gaussian(nu_com - nu0, dnu_d[nu0])
-            )
+        for nu0, f_osc, pop, gamma in lines:
+            dnu = nu_com - nu0
+            if gamma > 0.0:
+                phi = voigt(dnu, dnu_d[nu0], gamma)
+            else:
+                phi = gaussian(dnu, dnu_d[nu0])
+            if cutoff_widths is not None:
+                phi = np.where(
+                    np.abs(dnu) <= cutoff_widths * dnu_d[nu0], phi, 0.0
+                )
+            alpha += SIGMA_CLASSICAL * f_osc * pop * n_l[:, None] * phi
 
         # Formal solution via cumulative optical depth (trapezoidal steps):
         #   I_out = I_0 e^{-tau_tot} + sum_k S_k (e^{-t_above_k+1} - e^{-t_above_k})

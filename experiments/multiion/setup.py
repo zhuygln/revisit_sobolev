@@ -111,23 +111,25 @@ with open(here / "multiion.mod", "w") as fh:
 
 # --- line list for the Python solver: per-line pop_frac folds in the
 #     species' ion density relative to the reference density rho/m_p ---
-lam_out, f_out, pf_out, tau_out, z_out = [], [], [], [], []
+lam_out, f_out, pf_out, tau_out, z_out, a_out = [], [], [], [], [], []
 for s in per_species:
     n_species_per_rho = s["x"] / (s["a"] * M_P)  # ions per gram
-    for lam, f_lu, pop, tau in zip(
-        s["win"]["WV_Transition"], s["f_lu"], s["pop"], s["taus"]
+    for lam, f_lu, pop, tau, a_ul in zip(
+        s["win"]["WV_Transition"], s["f_lu"], s["pop"], s["taus"],
+        s["win"]["A"],
     ):
         lam_out.append(lam)
         f_out.append(f_lu)
         pf_out.append(pop * n_species_per_rho)  # multiply by rho later
         tau_out.append(tau)
         z_out.append(s["z"])
+        a_out.append(a_ul)
 
 np.savez(
     here / "multiion_lines.npz",
     lam=np.array(lam_out), f_lu=np.array(f_out),
     popfrac_per_rho=np.array(pf_out), tau=np.array(tau_out),
-    z=np.array(z_out), rho=rho,
+    z=np.array(z_out), a_ul=np.array(a_out), rho=rho,
 )
 print(f"total window lines: {len(lam_out)}")
 

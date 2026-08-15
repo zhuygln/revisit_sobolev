@@ -104,6 +104,28 @@ def test_two_lines_blend_multiplicatively():
     assert np.isclose(lum[0] / lum0[0], np.exp(-(tau_a + tau_b)), rtol=3e-2)
 
 
+def test_voigt_and_cutoff_options():
+    """4-tuple lines select Voigt; a tiny gamma with a generous cutoff must
+    reproduce the Gaussian trough, and a cutoff cannot deepen absorption."""
+    n0 = 2.0
+    z_res = 2.0e14
+    nu = np.array([NU0 / (1.0 - z_res / (C * T_EXP))])
+    base = emergent_luminosity(
+        nu, [(NU0, F_OSC)], const_n(n0), const_n(10.0), T_EXP,
+        R_CORE, R_OUT, T_CORE, V_D,
+    )
+    tiny_gamma = emergent_luminosity(
+        nu, [(NU0, F_OSC, 1.0, 1e-6 * NU0 * V_D / C)], const_n(n0),
+        const_n(10.0), T_EXP, R_CORE, R_OUT, T_CORE, V_D, cutoff_widths=30.0,
+    )
+    assert np.isclose(tiny_gamma[0], base[0], rtol=1e-3)
+    truncated = emergent_luminosity(
+        nu, [(NU0, F_OSC)], const_n(n0), const_n(10.0), T_EXP,
+        R_CORE, R_OUT, T_CORE, V_D, cutoff_widths=5.0,
+    )
+    assert truncated[0] >= base[0] * (1 - 1e-9)  # less opacity, never more
+
+
 def test_warm_shell_fills_in_the_trough():
     """With S = B_nu(T_shell) > 0 the trough must be shallower than pure
     absorption -- emission partially refills it."""
