@@ -29,3 +29,6 @@ data/*
 !data/README.md
 outputs/
 *.log
+
+# SEDONA experiment run outputs
+experiments/**/run_*/
