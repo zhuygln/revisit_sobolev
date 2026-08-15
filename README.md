@@ -73,6 +73,11 @@ All four weekend deliverables from [docs/babystep_plan.md](docs/babystep_plan.md
 
 Week 2 is complete.
 
+**Detailed documentation:** [docs/results_report.md](docs/results_report.md)
+(methods, all experiments with figures, findings register F1–F6, caveats,
+reproduction guide) and [docs/lab_notebook.md](docs/lab_notebook.md)
+(chronological log including dead ends and fixes).
+
 ## Weeks 3–4 status (babystep_plan.md §20)
 
 - **Real GSI La II forest** (`experiments/laII_forest/`, Figure 6): the
