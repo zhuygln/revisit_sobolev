@@ -18,9 +18,29 @@ from .constants import C, H, K_B
 HC = H * C
 
 
+def parse_j(j):
+    """Angular momenta as floats.
+
+    GSI files write integer J numerically but HALF-integer J as fractions
+    ('7/2') -- even-electron ions like La II never trip this, odd-electron
+    ions like Ce II always do. Accept both forms, scalar or array.
+    """
+    def one(v):
+        s = str(v)
+        if "/" in s:
+            num, _, den = s.partition("/")
+            return float(num) / float(den)
+        return float(s)
+
+    j = np.asarray(j)
+    if j.dtype.kind in "OUS":
+        return np.array([one(v) for v in j.ravel()]).reshape(j.shape)
+    return j.astype(float)
+
+
 def statistical_weight(j):
-    """g = 2J + 1."""
-    return 2.0 * np.asarray(j, dtype=float) + 1.0
+    """g = 2J + 1 (J may be numeric or a '7/2'-style fraction string)."""
+    return 2.0 * parse_j(j) + 1.0
 
 
 def partition_function(g, energy_cm, temperature):

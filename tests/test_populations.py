@@ -14,11 +14,22 @@ from sobolev.constants import C, H, K_B
 from sobolev.populations import (
     boltzmann_fractions,
     boltzmann_fractions_from_levels,
+    parse_j,
     partition_function,
     statistical_weight,
 )
 
 LEVELS_EXCERPT = Path(__file__).parent / "data" / "57LaII_levels_calib_excerpt.txt"
+
+
+def test_half_integer_j_fractions():
+    """Odd-electron ions (e.g. Ce II) carry half-integer J written as
+    fraction strings in the GSI files; even-electron ions are numeric."""
+    assert np.allclose(parse_j(np.array(["7/2", "2", "1/2"])), [3.5, 2.0, 0.5])
+    assert np.allclose(
+        statistical_weight(np.array(["7/2", "0", "9/2"])), [8.0, 1.0, 10.0]
+    )
+    assert statistical_weight(2) == 5.0  # numeric path unchanged
 
 
 def test_two_level_analytic():
