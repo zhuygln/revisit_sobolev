@@ -292,6 +292,40 @@ The cost curve scales ≈ 1/v_D (transport bins), reaching ~35 min per run at
 1 km/s — and the *expansion* runs pay the same grid cost (2305 s at 1 km/s):
 fine grids, not the resolved mode per se, drive the expense.
 
+### 4.10 Weeks 3–4 — multi-ion blend: La II + Ce II (Figure 9)
+
+![Figure 9](figures/fig9_multiion_forest.png)
+
+Two-element forest in the same window (equal mass fractions; total density
+set so the strongest line of either species has τ_S = 5; Ce III extracted but
+deliberately excluded — two stages of one element would hand the II/III split
+to Saha and break exact population control). Ce II floods the window:
+**2,376 lines** vs La's 153 (2,529 total; 40 with τ > 0.1; minimum spacing
+between strong lines **8 km/s** — genuine sub-Doppler cross-species
+blending). Band-averaged L/L_cont:
+
+| leg | band flux |
+|---|---|
+| Python solver | 0.2426 |
+| SEDONA resolved | 0.2277 (6.5% from solver) |
+| SEDONA expansion | 0.2610 (**Δ_Sob = +14.6%**) |
+
+**Finding F7 (non-monotonic density dependence).** The blend saturates the
+whole window to near-black in *every* treatment — with enough crossings,
+even capped per-crossing contributions sum to blackness — so the relative
+band-flux error *shrinks* to +14.6%. Δ_Sob is non-monotonic in forest
+density: ~τ²-small for weak forests, maximal (+45%) for strong sparse
+forests, declining again toward full line blanketing. The dangerous regime
+for expansion opacity is the *intermediate* one — strong lines that are not
+yet fully blanketed — which is exactly where spectral features form.
+
+Caveats: the resolved-legs gap widened to 6.5% in the dense blend,
+plausibly the profile-wing difference (SEDONA's Voigt with 2,376 lines'
+cumulative Lorentzian tails vs the solver's pure Gaussian) — a physical
+setup difference to be resolved by adding Voigt to the solver. Data note:
+Ce II carries half-integer J as fraction strings ('7/2'), now handled by
+`sobolev.populations.parse_j`.
+
 ## 5. Findings register
 
 | # | Finding | Where |
@@ -302,6 +336,7 @@ fine grids, not the resolved mode per se, drive the expense.
 | F4 | Expansion opacity attenuates by exp(−(1−e^−τ)) per crossing, not e^−τ | §4.5 |
 | F5 | That error is per-resonance: it does not average away with line count, only as τ→0 | §4.6 |
 | F6 | Δ_Sob = strength-set floor + v_D-growing wing term; error survives the v_D→0 limit | §4.8 |
+| F7 | Δ_Sob is non-monotonic in forest density: maximal for strong sparse forests, suppressed at full blanketing | §4.10 |
 
 ## 6. Caveats and limitations
 

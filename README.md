@@ -107,8 +107,15 @@ reproduction guide) and [docs/lab_notebook.md](docs/lab_notebook.md)
   thermal width (0.6 km/s). Cost scales ≈ 1/v_D for *both* modes (~35 min/run
   at 1 km/s) — fine transport grids, not the resolved treatment, drive it.
 
-Next: Ce II/III multi-ion overlap (needs re-downloading the GSI transition
-zip); other windows/epochs; a true per-line Sobolev leg to separate
+- **Multi-ion blend** (`experiments/multiion/`, Figure 9): La II + Ce II,
+  2,529 lines (Ce II floods the window), strong-line spacing down to 8 km/s.
+  The blend saturates the window to near-black in every treatment and
+  **Δ_Sob drops to +14.6%** — the error is *non-monotonic* in forest density
+  (F7): maximal for strong sparse forests, suppressed at full blanketing.
+  The dangerous regime is the intermediate one, where spectral features form.
+
+Next: Voigt profiles in the solver (to close the 6.5% resolved-legs gap in
+dense blends); other windows/epochs; a true per-line Sobolev leg to separate
 approximation error from expansion-opacity implementation error.
 
 ---

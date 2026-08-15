@@ -167,6 +167,25 @@ The no-root build recipe (WSL2, Ubuntu 22.04):
   fill-in; same-code differentials stay clean, but solver QC at high T needs
   the emission term compared explicitly.
 
+## 9c. Weeks 3–4 — multi-ion blend (2026-08-15)
+
+- Re-downloaded the GSI calibrated zips (deleted earlier to save disk),
+  extracted Ce II and Ce III, deleted zips again.
+- **Bug found by real data:** Ce II (odd-electron) writes half-integer J as
+  fraction strings (`7/2`); `statistical_weight` assumed numeric J and died.
+  Fixed with `parse_j` (accepts both), regression test added. La II never
+  triggered this — even-electron ions have integer J.
+- Blend: 2,529 window lines (Ce II contributes 2,376), 40 strong, minimum
+  strong-line spacing 8 km/s. SEDONA runs ~44 s each (line count barely
+  matters; the grid does). The Python solver became the slow leg (~16× the
+  single-ion cost) — precomputed in parallel via `solve_py.py` with a cache
+  the comparison script picks up.
+- Result: Δ_Sob = +14.6%, *smaller* than single-ion (+44.9%) → Finding F7
+  (non-monotonic density dependence; full blanketing suppresses the
+  relative error). Resolved-legs gap widened to 6.5% — suspected Voigt-wing
+  vs Gaussian difference across 2,376 lines; add Voigt to the solver before
+  chasing this further.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,
