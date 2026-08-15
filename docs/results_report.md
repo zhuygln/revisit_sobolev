@@ -257,6 +257,41 @@ widths does **not** rehabilitate expansion opacity — the error converges to
 the strength floor, not to zero. Lanthanide-rich kilonova ejecta live in the
 strong-line regime, where the floor dominates.
 
+### 4.9 Weeks 3–4 — temperature axis and thermal-width frontier (Figure 8)
+
+![Figure 8](figures/fig8_T_and_frontier.png)
+
+**Temperature axis** (τ_max pinned at 5 by rescaling n_ion at each T, so the
+measurement isolates population *redistribution* from the strength scale):
+
+| T [K] | n_ion [cm⁻³] | lines τ>1 / 0.1–1 | Δ_Sob |
+|---|---|---|---|
+| 2500 | 1866 | 3 / 5 | +40.8% |
+| 3000 | 2146 | 3 / 6 | +43.6% |
+| 4000 | 2647 | 3 / 6 | +46.7% |
+| 5000 | 2934 | 4 / 5 | +46.2% |
+
+T is a **weak axis** for this window: the same few strong lines dominate at
+every temperature, so redistribution barely moves the error (±3% over a
+factor-2 range in T). Caveat: at 5000 K the shell's thermal emission at
+3900 Å reaches ~30% of the core surface brightness, so absolute fluxes
+include fill-in; Δ_Sob remains a same-code differential.
+
+**Thermal-width frontier** (T = 3000 K, τ_max = 5):
+
+| v_D [km/s] | Δ_Sob | resolved wall time |
+|---|---|---|
+| 10 | +37.3% | ~25 s |
+| 3 | +38.1% | 719 s |
+| 1 | +37.8% | 2109 s |
+
+**Finding F6 confirmed to 1 km/s** — within MC noise of the La thermal width
+(0.6 km/s): Δ_Sob is flat below 10 km/s at the strength-set floor of ~38%.
+The wing term is gone; the per-crossing substitution error remains in full.
+The cost curve scales ≈ 1/v_D (transport bins), reaching ~35 min per run at
+1 km/s — and the *expansion* runs pay the same grid cost (2305 s at 1 km/s):
+fine grids, not the resolved mode per se, drive the expense.
+
 ## 5. Findings register
 
 | # | Finding | Where |

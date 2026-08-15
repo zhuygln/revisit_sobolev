@@ -100,9 +100,16 @@ reproduction guide) and [docs/lab_notebook.md](docs/lab_notebook.md)
   Practical reading: the error does **not** vanish as v_D → thermal — it
   converges to the strength floor.
 
-Next: extend the map along T (population changes), window, and epoch; add
-Ce II/III for multi-ion overlap; then the thermal-width frontier at real
-0.6 km/s widths.
+- **T axis + thermal-width frontier** (`tsweep.py`, Figure 8): T is a weak
+  axis in this window (+41→+47% over 2500–5000 K at pinned τ_max = 5 — the
+  same strong lines dominate throughout). The frontier confirms the floor:
+  **Δ_Sob ≈ 38% flat from 10 km/s down to 1 km/s**, essentially at the La
+  thermal width (0.6 km/s). Cost scales ≈ 1/v_D for *both* modes (~35 min/run
+  at 1 km/s) — fine transport grids, not the resolved treatment, drive it.
+
+Next: Ce II/III multi-ion overlap (needs re-downloading the GSI transition
+zip); other windows/epochs; a true per-line Sobolev leg to separate
+approximation error from expansion-opacity implementation error.
 
 ---
 

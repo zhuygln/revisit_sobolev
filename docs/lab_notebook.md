@@ -149,6 +149,24 @@ The no-root build recipe (WSL2, Ubuntu 22.04):
   environment. Second attempt: 24/24 clean, ~30 s each → Figure 7 and
   Finding F6 (strength floor + v_D wing term).
 
+## 9b. Weeks 3–4 — T sweep + thermal-width frontier (2026-08-15)
+
+- `tsweep.py`: 12 runs. T axis at pinned τ_max = 5 (n_ion rescaled per T from
+  fresh Boltzmann fractions); frontier at v_D = 3 and 1 km/s (46k / 140k
+  transport bins, `timeout=3000` needed — the 1 km/s pair runs ~35 min each).
+- Launched with `python -u` this time: the earlier sweep's `| tail` pipe
+  buffered all progress output until exit, which made a live monitor useless.
+- Results: T is a weak axis in this window (+40.8 → +46.7% over 2500–5000 K,
+  same 3–4 strong lines dominate throughout). Frontier: Δ_Sob flat at ~38%
+  from 10 km/s down to 1 km/s — the strength floor survives essentially to
+  the thermal width. Cost scales ≈ 1/v_D for BOTH modes (the expansion run
+  at 1 km/s took 2305 s): the fine transport grid, not the resolved
+  treatment itself, is what costs.
+- Note for future sweeps: at T = 5000 K the shell emits non-negligibly at
+  3900 Å (B ratio ~0.3 to the core), so absolute fluxes include thermal
+  fill-in; same-code differentials stay clean, but solver QC at high T needs
+  the emission term compared explicitly.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,
