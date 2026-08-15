@@ -68,9 +68,10 @@ def emergent_luminosity(
     Parameters
     ----------
     nu_grid : observer-frame frequencies (Hz)
-    lines : sequence of (nu0, f_osc) pairs -- one entry per transition; all
-        share the same lower-level population field and Doppler width. This is
-        the 1 -> 2 -> 20 line ladder of babystep_plan.md section 19.
+    lines : sequence of (nu0, f_osc) or (nu0, f_osc, pop_frac) tuples -- one
+        entry per transition. pop_frac (default 1) multiplies n_l_of_r for
+        that line: for a real forest it is the Boltzmann fraction of the
+        line's own lower level, with n_l_of_r the total ion density.
     n_l_of_r : callable r -> lower-level number density (cm^-3)
     temp_of_r : callable r -> gas temperature (K), used for the LTE source
     t_exp : ejecta age (s); v = r / t_exp
@@ -85,9 +86,12 @@ def emergent_luminosity(
     Returns L_nu on nu_grid. Luminosity from intensity: L = 8 pi^2 int I p dp.
     """
     nu_grid = np.asarray(nu_grid, dtype=float)
-    dnu_d = {  # per-line Doppler width in Hz
-        nu0: doppler_width_hz(nu0, v_doppler) for nu0, _ in lines
-    }
+    # Normalize entries to (nu0, f_osc, pop_frac) and precompute widths.
+    lines = [
+        (entry[0], entry[1], entry[2] if len(entry) > 2 else 1.0)
+        for entry in lines
+    ]
+    dnu_d = {nu0: doppler_width_hz(nu0, v_doppler) for nu0, _, _ in lines}
 
     # z step from the Doppler length; the same uniform grid serves all rays.
     dz = v_doppler * t_exp / n_z_per_doppler
@@ -119,10 +123,11 @@ def emergent_luminosity(
         # alpha(z, nu): sum the resolved profiles of all lines.
         nu_com = nu_grid[None, :] * (1.0 - z[:, None] / (C * t_exp))
         alpha = np.zeros((n_z, nu_grid.size))
-        for nu0, f_osc in lines:
+        for nu0, f_osc, pop in lines:
             alpha += (
                 SIGMA_CLASSICAL
                 * f_osc
+                * pop
                 * n_l[:, None]
                 * gaussian(nu_com - nu0, dnu_d[nu0])
             )
