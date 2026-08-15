@@ -23,8 +23,27 @@ All four weekend deliverables from [docs/babystep_plan.md](docs/babystep_plan.md
   exist in this release: `opacity_line_expansion` (Sobolev) and
   `opacity_bound_bound` (resolved), `defaults/sedona_defaults.lua:115,118`.
 
-Next: Week 1–2 of the plan — Voigt profiles, Boltzmann populations, and a minimal
-1-element/1-line SEDONA model compared against the Python solver.
+## Week 1 status (babystep_plan.md §18)
+
+- **Voigt profile** — implemented via the Faddeeva function; normalization,
+  Gaussian-limit, and Lorentzian-wing tests.
+- **Boltzmann populations** — partition function and level fractions straight from
+  the GSI levels files (parsed by the same `load_gsi`); analytic two-level and
+  temperature-limit tests, plus the per-statistical-weight monotonicity invariant
+  on real La II levels.
+- **SEDONA Type Ia pair** (`param_d20_lte_exp` vs `param_d20_lte_bb`, run in
+  `~/personal/pubsed/examples/supernova/TypeIa/spectrum/run_{exp,bb}/`): the two
+  configs differ **only** in the line treatment — the built-in controlled
+  experiment this project needs. Results (Figure 3, `outputs/`):
+  - cost: **14 s (Sobolev) vs 88 min (resolved)** for the same 4 iterations —
+    a ~378× ratio, empirically confirming the §11 frequency-resolution cost and
+    the necessity of narrow wavelength windows;
+  - physics: the resolved treatment blankets the UV harder and redistributes
+    ~3× more flux into the NIR (8000–12000 Å) — qualitatively the effect that
+    matters for lanthanide-rich kilonova ejecta (toy model; qualitative only).
+
+Next: Week 2 — a minimal 1-element/1-line SEDONA model compared against the
+Python deterministic solver, then 2 → 20 lines.
 
 ---
 
