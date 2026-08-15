@@ -114,9 +114,17 @@ reproduction guide) and [docs/lab_notebook.md](docs/lab_notebook.md)
   (F7): maximal for strong sparse forests, suppressed at full blanketing.
   The dangerous regime is the intermediate one, where spectral features form.
 
-Next: Voigt profiles in the solver (to close the 6.5% resolved-legs gap in
-dense blends); other windows/epochs; a true per-line Sobolev leg to separate
-approximation error from expansion-opacity implementation error.
+- **Resolved-legs gap closed** (F8): the solver-vs-SEDONA offset was neither
+  profile wings (3×10⁻⁵ effect) nor resolution (converged), but **shell
+  thermal emission** — the solver integrates S = B_ν(T_shell), SEDONA at
+  fixed T deposits absorbed energy without re-emitting. Like-for-like the two
+  independent codes agree to **~1%**, at the Monte Carlo noise floor, in both
+  the single-ion and blended forests. Δ_Sob is unaffected (same-code
+  differential).
+
+Next: other windows/epochs; a true per-line Sobolev leg to separate
+approximation error from expansion-opacity implementation error; fold F7–F8
+into the manuscript.
 
 ---
 

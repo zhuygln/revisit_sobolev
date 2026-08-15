@@ -186,6 +186,37 @@ The no-root build recipe (WSL2, Ubuntu 22.04):
   vs Gaussian difference across 2,376 lines; add Voigt to the solver before
   chasing this further.
 
+## 9d. Closing the resolved-legs gap (2026-08-15)
+
+Three rounds, two dead hypotheses, one answer.
+
+1. **Voigt wings — wrong.** Extended the solver with Voigt (γ = A/2π) and a
+   `cutoff_widths` option mimicking SEDONA's ±5-width truncation (found in
+   `AtomicSpecies_opacities.cpp`; its comment says 20 widths, the code says
+   5 — and SEDONA's `line_profile` parameter is declared in the defaults but
+   never read, so the profile is always Voigt). Effect on the blend band
+   flux: **3×10⁻⁵**. a ≈ 3×10⁻⁵ here; wings are irrelevant at these
+   strengths. Also checked Ce II's f(A) vs f(log gf): consistent to 10⁻⁴,
+   same as La II.
+2. **Path/ray resolution — wrong.** 0.2410→0.2411 over 4→64 z-points per
+   Doppler width; 0.2414→0.2408 over 20→320 rays. Converged.
+3. **Shell thermal emission — right.** The solver integrates
+   S = B_ν(T_shell); SEDONA at fixed T with radiative equilibrium off
+   deposits absorbed energy without re-emitting. T_shell→0 in the solver:
+   blend 0.2410→0.2249 vs SEDONA 0.2277 (−1.2%); single-ion 0.3538→0.3390
+   vs 0.3426 (−1.0%). Like-for-like the codes agree at the MC noise floor.
+
+Lesson worth keeping: the offset scaled with saturation (3.6% sparse →
+6.5% blend), which *looked* like a line-count/blending effect and sent me
+after profile wings first. The sign was the real clue all along — the
+solver was too BRIGHT, and an extra emission source explains brightness far
+more directly than a missing opacity would.
+
+Process note: a session restart killed a 30-min solver run (no output file,
+no completion record) and reset the shell's cwd, which then broke a
+relative `../../.venv/bin/python` invocation (exit 127). Use absolute paths
+for long background jobs.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

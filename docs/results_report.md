@@ -319,12 +319,47 @@ forests, declining again toward full line blanketing. The dangerous regime
 for expansion opacity is the *intermediate* one — strong lines that are not
 yet fully blanketed — which is exactly where spectral features form.
 
-Caveats: the resolved-legs gap widened to 6.5% in the dense blend,
-plausibly the profile-wing difference (SEDONA's Voigt with 2,376 lines'
-cumulative Lorentzian tails vs the solver's pure Gaussian) — a physical
-setup difference to be resolved by adding Voigt to the solver. Data note:
-Ce II carries half-integer J as fraction strings ('7/2'), now handled by
-`sobolev.populations.parse_j`.
+Data note: Ce II carries half-integer J as fraction strings ('7/2'), now
+handled by `sobolev.populations.parse_j`.
+
+### 4.11 Resolution of the resolved-legs gap (Finding F8)
+
+The solver-vs-SEDONA offset (+3.6% single-ion, +6.5% blend) was tracked to
+its cause. Two hypotheses were tested and **disconfirmed**:
+
+- *Profile wings.* Running the solver with Voigt profiles (γ = A/2π) and
+  SEDONA's hard-coded ±5-width truncation changed the band flux by
+  **3×10⁻⁵**. The damping parameter here is a ≈ 3×10⁻⁵, so Lorentzian
+  wings never rise above the Gaussian where opacity matters. (Ce II's
+  f(A) vs f(log gf) is self-consistent to 10⁻⁴, matching La II.)
+- *Path resolution.* Band flux is flat at 0.2410–0.2411 across 4→64
+  z-points per Doppler width, and 0.2414→0.2408 across 20→320 rays. Both
+  quadratures are converged.
+
+**Finding F8 (the cause): shell thermal emission.** The solver integrates
+the LTE source term S = B_ν(T_shell) along every ray; SEDONA, run at fixed
+temperature with radiative equilibrium disabled, deposits absorbed packet
+energy without re-emitting it. Setting T_shell → 0 in the solver isolates
+the term exactly:
+
+| experiment | solver *with* emission | *without* | SEDONA resolved |
+|---|---|---|---|
+| La II (single-ion) | 0.3538 (+3.3%) | 0.3390 (**−1.0%**) | 0.3426 |
+| La II + Ce II blend | 0.2410 (+6.5%) | 0.2249 (**−1.2%**) | 0.2277 |
+
+Like-for-like, the two independent codes agree to **~1%** — at the Monte
+Carlo noise floor, and better than the 3.6% previously quoted. The term is
+larger than the naive B_ν(3000)/B_ν(6000) = 2×10⁻³ estimate because the
+emitting shell subtends 9× the core's projected area, and it grows with
+saturation, which is why the blend showed a bigger offset than the sparse
+single-ion forest.
+
+Interpretation: the solver's treatment is the physically complete one
+(Kirchhoff's law demands an LTE gas emit what it absorbs); SEDONA in this
+configuration performs a pure-attenuation calculation. Absolute band fluxes
+quoted from SEDONA here are therefore attenuation-only. **Δ_Sob is
+unaffected**, being a differential between two SEDONA runs sharing the
+identical convention.
 
 ## 5. Findings register
 
@@ -337,6 +372,7 @@ Ce II carries half-integer J as fraction strings ('7/2'), now handled by
 | F5 | That error is per-resonance: it does not average away with line count, only as τ→0 | §4.6 |
 | F6 | Δ_Sob = strength-set floor + v_D-growing wing term; error survives the v_D→0 limit | §4.8 |
 | F7 | Δ_Sob is non-monotonic in forest density: maximal for strong sparse forests, suppressed at full blanketing | §4.10 |
+| F8 | The resolved-legs offset is shell thermal emission, not profile wings or resolution; like-for-like the codes agree to ~1% | §4.11 |
 
 ## 6. Caveats and limitations
 
