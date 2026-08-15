@@ -62,8 +62,18 @@ All four weekend deliverables from [docs/babystep_plan.md](docs/babystep_plan.md
   `exp(-τ_S(1−z/ct))` exactly). Week 3 comparisons must place resonances at low
   bulk velocity or match frame conventions.
 
-Next: the 2 → 20 line ladder in the same framework, then realistic GSI line
-forests in narrow windows (Weeks 3–4).
+- **2 → 20 line ladder** (`experiments/line_ladder/`, Figure 5): custom SEDONA
+  atoms (2 lines at 1500 km/s; 20-line forest at 750 km/s), τ_S = 0.5 per line.
+  Forest-center depth: analytic Sobolev **0.2405**, Python solver **0.2407**,
+  SEDONA resolved **0.2435** — locked within ~1%, sawtooth reproduced tooth for
+  tooth. SEDONA expansion opacity **0.3257** vs its own analytic prediction
+  0.3194: the per-line `(1−e^−τ)` substitution error is per-resonance and does
+  **not** average away with line count — only as τ→0. Expansion opacity is a
+  weak-line approximation, not a many-line one.
+
+Week 2 is complete. Next (Weeks 3–4): realistic GSI La II line forests in narrow
+wavelength windows through the same three-way harness, sweeping T, ρ, t, v_D —
+the first real validity-map data.
 
 ---
 
