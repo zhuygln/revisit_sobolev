@@ -84,6 +84,26 @@ def test_two_lines_are_independent_when_separated():
     assert np.isclose(lum[1] / lum0[1], np.exp(-tau_b), rtol=2e-2)
 
 
+def test_two_lines_blend_multiplicatively():
+    """Overlapping troughs: a frequency whose path crosses BOTH resonance
+    planes in front of the core is attenuated by exp(-(tau_1 + tau_2))."""
+    n0 = 2.0
+    dv = 1.5e8  # 1500 km/s separation -- well inside the shell's 4000 km/s span
+    nu_b = NU0 / (1.0 - dv / C)
+    # Probe so that line A resonates at z = 3e14 and line B at ~1.7e14: both
+    # planes lie between the core front (1e14) and the outer edge.
+    z_a = 3.0e14
+    nu = np.array([NU0 / (1.0 - z_a / (C * T_EXP))])
+    lum = emergent_luminosity(
+        nu, [(NU0, F_OSC), (nu_b, F_OSC)], const_n(n0), const_n(10.0),
+        T_EXP, R_CORE, R_OUT, T_CORE, V_D,
+    )
+    lum0 = 4.0 * np.pi**2 * R_CORE**2 * planck_bnu(nu, T_CORE)
+    tau_a = tau_sobolev(F_OSC, n0, LAMBDA0, T_EXP)
+    tau_b = tau_sobolev(F_OSC, n0, C / nu_b, T_EXP)
+    assert np.isclose(lum[0] / lum0[0], np.exp(-(tau_a + tau_b)), rtol=3e-2)
+
+
 def test_warm_shell_fills_in_the_trough():
     """With S = B_nu(T_shell) > 0 the trough must be shallower than pure
     absorption -- emission partially refills it."""
