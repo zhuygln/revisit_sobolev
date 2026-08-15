@@ -71,9 +71,24 @@ All four weekend deliverables from [docs/babystep_plan.md](docs/babystep_plan.md
   **not** average away with line count — only as τ→0. Expansion opacity is a
   weak-line approximation, not a many-line one.
 
-Week 2 is complete. Next (Weeks 3–4): realistic GSI La II line forests in narrow
-wavelength windows through the same three-way harness, sweeping T, ρ, t, v_D —
-the first real validity-map data.
+Week 2 is complete.
+
+## Weeks 3–4 status (babystep_plan.md §20)
+
+- **Real GSI La II forest** (`experiments/laII_forest/`, Figure 6): the
+  3850–3950 Å window — 153 calibrated lines, 3 with τ_S > 1 — at T = 3000 K,
+  day 1, v_D = 100 km/s. The SEDONA atom file is generated *from* the GSI data
+  (all 472 levels, ionization disabled) so both codes carry byte-identical
+  levels, populations, and line strengths. Band-averaged L/L_cont:
+  Python solver **0.355**, SEDONA resolved **0.343** (3.6% apart);
+  SEDONA expansion **0.497** — **Δ_Sob = +45% band flux**, the first
+  validity-map datapoint. Real forests fail *worse* than the uniform ladder:
+  a few strong lines dominate, and `(1−e^−τ)` caps each crossing at 1 while
+  the true attenuation saturates to black.
+
+Next: sweep the datapoint into a map — T, ρ (line-strength scale), v_D, and
+window; then the thermal-width frontier (v_D → 1 km/s) where the resolved
+calculation becomes expensive.
 
 ---
 
