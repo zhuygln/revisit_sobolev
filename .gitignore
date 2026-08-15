@@ -41,3 +41,7 @@ docs/paper/*.log
 docs/paper/*.out
 docs/paper/*.toc
 docs/paper/*.pdf
+experiments/**/sweep_*/
+experiments/**/tsweep_*/
+experiments/**/sweep_*.mod
+experiments/**/tsweep_*.mod
