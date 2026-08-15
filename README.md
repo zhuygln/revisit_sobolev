@@ -86,9 +86,18 @@ Week 2 is complete.
   a few strong lines dominate, and `(1−e^−τ)` caps each crossing at 1 while
   the true attenuation saturates to black.
 
-Next: sweep the datapoint into a map — T, ρ (line-strength scale), v_D, and
-window; then the thermal-width frontier (v_D → 1 km/s) where the resolved
-calculation becomes expensive.
+- **First validity-map slice** (`sweep.py`, Figure 7): 24 SEDONA runs,
+  τ_max ∈ {0.5, 5, 50} × v_D ∈ {10, 30, 100, 300} km/s. Δ_Sob decomposes into
+  **(1)** a v_D-independent floor set by line strength — the per-crossing
+  `(1−e^−τ)` substitution: ~3% at τ_max = 0.5, ~40% at 5, ~45% at 50 — and
+  **(2)** a wing term growing with v_D (expansion opacity is width-blind while
+  resolved profiles absorb continuum as they widen): +91% at (τ=50, 300 km/s).
+  Practical reading: the error does **not** vanish as v_D → thermal — it
+  converges to the strength floor.
+
+Next: extend the map along T (population changes), window, and epoch; add
+Ce II/III for multi-ion overlap; then the thermal-width frontier at real
+0.6 km/s widths.
 
 ---
 
