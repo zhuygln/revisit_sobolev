@@ -42,8 +42,28 @@ All four weekend deliverables from [docs/babystep_plan.md](docs/babystep_plan.md
     ~3× more flux into the NIR (8000–12000 Å) — qualitatively the effect that
     matters for lanthanide-rich kilonova ejecta (toy model; qualitative only).
 
-Next: Week 2 — a minimal 1-element/1-line SEDONA model compared against the
-Python deterministic solver, then 2 → 20 lines.
+## Week 2 status (babystep_plan.md §19)
+
+- **Formal transfer solver** (`sobolev/formal_transfer.py`) — deterministic
+  impact-parameter ray integration through a homologous shell around a blackbody
+  core; validated against the analytic blackbody-sphere luminosity, the Sobolev
+  trough `e^-τs`, two-line independence, and emission fill-in.
+- **Minimal 1-line cross-validation** (`experiments/minimal_1line/`, Figure 4):
+  fake Ly-α (SEDONA's 2-level atom), τ_S = 2, neutral 2000 K shell. Trough
+  depths vs analytic 0.1353:
+  - Python solver **0.1372**, SEDONA resolved bound-bound **0.1420** — the two
+    independent codes agree across the whole profile;
+  - SEDONA expansion opacity **0.4285** = the predicted single-line failure
+    `exp(-(1-e^-τs))` = 0.4212. **Expansion opacity ≠ Sobolev line transfer for
+    a single strong line** — the statistical treatment attenuates by the
+    bin-averaged opacity. First quantitative discrepancy of the project.
+- **Documented systematic**: the observer-frame formal solution and the
+  comoving-frame Sobolev formula differ at O(v_bulk/c) (7% at 0.077c, matching
+  `exp(-τ_S(1−z/ct))` exactly). Week 3 comparisons must place resonances at low
+  bulk velocity or match frame conventions.
+
+Next: the 2 → 20 line ladder in the same framework, then realistic GSI line
+forests in narrow windows (Weeks 3–4).
 
 ---
 
