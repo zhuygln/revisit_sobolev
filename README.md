@@ -122,9 +122,23 @@ reproduction guide) and [docs/lab_notebook.md](docs/lab_notebook.md)
   the single-ion and blended forests. Δ_Sob is unaffected (same-code
   differential).
 
-Next: other windows/epochs; a true per-line Sobolev leg to separate
-approximation error from expansion-opacity implementation error; fold F7–F8
-into the manuscript.
+- **The two errors separated** (`experiments/sobolev_proper/`, Figure 10, F9):
+  measuring the Sobolev approximation *proper* — per-line `e^−τs`, which in
+  this pure-absorption setup is exact analytics, so it cost no new transport
+  runs. Against the resolved truth on the La II forest: **Sobolev proper
+  +2.4%, expansion opacity +44.9%**. Across the sweep the two components of
+  F6 turn out to have different owners: the **strength floor is expansion
+  opacity's alone** (Sobolev shows none — +5–7% at τ_max = 0.5, 5 and 50
+  alike), while the **width term is a genuine Sobolev failure** (a
+  delta-function resonance has no width, so all v_D dependence is unmodelled;
+  +39% at τ_max = 50, 300 km/s). Net: the Sobolev approximation is good to
+  **≈5–8%** at kilonova line widths; its standard expansion-opacity
+  implementation errs by **40–90%**. The literature conflates them.
+
+Next: finish the windows × epochs × ions breadth sweep (in flight) to test
+whether F9 is window-universal; explain the residual Sobolev offset;
+frame-consistent comparison at realistic velocities (F3); then scattering,
+where the analytic Sobolev leg stops being exact.
 
 ---
 

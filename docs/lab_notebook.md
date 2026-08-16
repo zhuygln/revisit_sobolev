@@ -217,6 +217,45 @@ no completion record) and reset the shell's cwd, which then broke a
 relative `../../.venv/bin/python` invocation (exit 127). Use absolute paths
 for long background jobs.
 
+## 9e. The Sobolev-proper leg (2026-08-16, `233db88`, `3fdbe9a`)
+
+The paper had a framing problem: everything measured so far was the
+*expansion-opacity implementation*, while the title claimed the *Sobolev
+approximation*. Fixing it turned out to cost almost no compute.
+
+- **The enabling realization:** in this pure-absorption LTE setup the
+  p-averaged analytic staircase **is** the per-line Sobolev prediction,
+  exactly. A Monte Carlo implementation of per-line Sobolev interactions
+  would add only noise. So the work was refactoring, not simulation:
+  `sobolev_staircase` was promoted out of `experiments/line_ladder/compare.py`
+  into `sobolev/sobolev_leg.py`, generalized to accept per-line populations
+  and arbitrary geometry, with the ladder's five numbers
+  (0.2405 / 0.2407 / 0.2435 / 0.3194 / 0.3257) as the regression check. They
+  are unchanged. The same function yields the expansion prediction through
+  its `damp` argument.
+- **Dead end worth recording.** The first run reported Δ_Sobolev = +7.0%
+  *exceeding* Δ_expansion = +2.8% at τ_max = 0.5 — impossible, since the cap
+  `1−e^−τ < τ` must always transmit *more*. Cause: I was comparing my
+  analytic Sobolev against *SEDONA's* expansion run, not against the analytic
+  cap. Adding the analytic expansion column restored the correct ordering
+  (0.8199 > 0.7967) and turned the anomaly into a real observation:
+  **SEDONA's expansion implementation runs ~6% darker than the pure
+  per-crossing cap**, because binning smears absorption into the gaps between
+  lines. At τ_max = 0.5 that darkening accidentally cancels the cap's
+  over-transmission, which is why SEDONA's expansion looks *better* than
+  Sobolev there — compensating errors, not accuracy.
+  Lesson: compare analytic against analytic before concluding anything about
+  a formalism.
+- **Result (F9):** the strength-set floor is expansion opacity's alone
+  (Sobolev proper is +5–7% at τ_max = 0.5, 5 and 50 alike), while the
+  v_D-growing term is a genuine Sobolev failure (the leg is exactly
+  v_D-independent by construction, so all width dependence is unmodelled).
+- **Open:** the residual +5–7% Sobolev floor at small v_D is not explained by
+  line strength; the candidate is overlap within a Doppler width. Early
+  breadth-sweep numbers complicate it further — in the 4300 Å window
+  Δ_Sobolev is *negative* (−0.2% to −2.5%), so the residual is not a fixed
+  positive offset and may be window-dependent. Flagged, not resolved.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

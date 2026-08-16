@@ -64,7 +64,8 @@ Boltzmann over byte-identical level lists. Verified in the SEDONA gas state
 | `optical_depth.py` | resolved τ_exact, Sobolev τ_S, tanh gradient sweep | τ_exact → τ_S to 2×10⁻¹⁶; ε² breakdown law |
 | `populations.py` | partition function, Boltzmann fractions from GSI levels | two-level closed form; T→0/∞ limits; per-g monotonicity on real La II |
 | `atomic_data.py` | GSI file parser (transitions *and* levels), spacing stats | format regression on committed 20-row excerpts |
-| `formal_transfer.py` | the deterministic solver (§2) | blackbody-sphere luminosity exact; e^−τs trough; 2-line independence & blend; emission fill-in |
+| `formal_transfer.py` | the deterministic solver (§2); Gaussian or Voigt profiles, optional truncation | blackbody-sphere luminosity exact; e^−τs trough; 2-line independence & blend; emission fill-in |
+| `sobolev_leg.py` | p-averaged per-line Sobolev attenuation; `damp` switches to the expansion cap | single line → exp(−τ_S) to 1e-12; damp variant → exp(−(1−e^−τ)); pop_frac scales τ; partial shadowing bracketed |
 
 Test suite: **19 tests, all green** (`pytest`).
 
@@ -441,24 +442,33 @@ statistics of §4.3 say is present.
 
 ## 6. Caveats and limitations
 
-- **Scope of "Sobolev mode":** SEDONA's expansion-opacity implementation is
-  the measured Sobolev-class treatment. A direct per-line Sobolev interaction
-  scheme (as in TARDIS-style codes) would show different (likely smaller)
-  errors on F4/F5; the harness can be extended to test one.
+- **Both treatments are now measured, but not in a scattering code.** F9
+  measures the Sobolev approximation proper alongside the expansion-opacity
+  implementation. The Sobolev leg is *analytically exact* here **only because
+  the setup is pure absorption with no scattering** — that is what makes the
+  p-averaged staircase equal to per-line Sobolev transport. A per-line
+  Sobolev scheme inside a Monte Carlo code with scattering or fluorescence
+  (TARDIS-style macroatoms) is a genuinely different object and remains
+  untested; F9's headline should not be read as covering it.
 - **Pure absorption only:** ε = 1, no scattering, no fluorescence, no NLTE.
-  These are deferred by design (babystep_plan.md §9) — differences measured
-  here are attributable to line transfer alone.
+  Deferred by design (babystep_plan.md §9) — differences measured here are
+  attributable to line transfer alone.
 - **Controlled geometry:** shell velocities 1000–3000 km/s keep the O(v/c)
   frame systematic (F3) below the measurement level. Realistic kilonova
   velocities (0.1–0.3c) require frame-consistent treatment before the
   comparison is repeated there.
-- **v_D = 10–300 km/s, not thermal:** the real La thermal width is
-  ~0.6 km/s. F6 argues the floor persists in that limit, but the wing term at
-  thermal widths remains to be measured (the expensive frontier).
-- **Single ion, single window, single (T, t):** one slice of the eventual
-  map. T sweeps (populations), multi-ion overlap, and other windows are next.
-- **MC noise:** ~1–2% per SEDONA band flux at 2×10⁶ core particles; the
-  resolved-trio agreements (1–4%) are at or near this floor.
+- **v_D = 1–300 km/s:** the frontier reached 1 km/s, within a factor ~2 of
+  the La thermal width (0.6 km/s), where F6's floor is flat. The last factor
+  of two is untested and costs ~1/v_D in transport bins.
+- **Coverage:** one window (3850–3950 Å) and one epoch (day 1) carry the
+  detailed map; the T axis (§4.9), multi-ion blending (§4.10), and a
+  windows × epochs × ions breadth sweep extend it. Until that sweep is
+  analyzed, F6/F7/F9 are established on a single window.
+- **MC noise:** ~1–2% per SEDONA band flux at 2×10⁶ core particles. The
+  resolved-leg agreement is ~1% once the F8 emission convention is matched
+  (§4.11) — i.e. at the noise floor.
+- **Emission convention:** absolute SEDONA band fluxes quoted here are
+  attenuation-only (F8). Δ values are same-code differentials and unaffected.
 
 ## 7. Reproduction
 
@@ -466,7 +476,7 @@ statistics of §4.3 say is present.
 # environment
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]" h5py
-pytest                    # 19 passed
+pytest                    # 27 passed
 
 # data (once): Zenodo 19335084 -> data/, see data/README.md
 # SEDONA (once): see lab_notebook.md "SEDONA build" entry
@@ -484,23 +494,50 @@ python compare.py
 cd ../line_ladder && python make_atoms.py   # then the four run_* dirs as above
 python compare.py
 
-# La II forest + sweep (Figures 6-7)
+# La II forest + sweeps (Figures 6-8)
 cd ../laII_forest && python setup.py        # atom + model + line data
 # run_bb / run_exp as above, then:
 python compare.py
-python sweep.py && python fig7.py
+python sweep.py && python fig7.py           # tau x v_D slice
+python tsweep.py && python fig8.py          # T axis + thermal-width frontier
+
+# multi-ion blend (Figure 9)
+cd ../multiion && python setup.py
+# run_bb / run_exp as above; the solver leg is slow, precompute it:
+python solve_py.py && python compare.py
+
+# Sobolev-proper vs expansion separation (Figure 10) -- analytic, no runs
+cd ../sobolev_proper && python compare.py
+
+# breadth: windows x epochs x ions
+cd ../breadth && python sweep.py            # ~36 conditions, 72 SEDONA runs
 ```
+
+Long jobs: launch in the background with `python -u` and an **absolute** path
+to the venv interpreter. A session restart resets the shell's working
+directory, which silently breaks relative `../../.venv/bin/python`
+invocations (exit 127) and kills in-flight runs.
 
 ## 8. Next steps (in rough order of value)
 
-1. **T sweep** (2500–5000 K): populations shift and new lines activate — the
-   G-parameter axis of the map.
-2. **Multi-ion overlap:** add Ce II/III from the same GSI database; the
-   crowding statistics (Figure 2) say blending grows quickly.
-3. **Thermal-width frontier:** v_D 10 → 0.6 km/s; measure both Δ_Sob's wing
-   term and the cost curve.
-4. **A true per-line Sobolev leg** in the harness, to separate
-   "Sobolev approximation error" from "expansion-opacity implementation
-   error" — the distinction F4 exposed.
-5. **Frame-consistent comparison at realistic velocities** (0.1–0.3c),
-   resolving F3 properly rather than avoiding it.
+Completed since the first draft of this report: the T sweep (§4.9), the
+thermal-width frontier to 1 km/s (§4.9), multi-ion overlap (§4.10), and the
+per-line Sobolev leg (§4.12) — the last of which resolved the
+approximation-vs-implementation distinction that F4 exposed.
+
+1. **Finish and analyze the breadth sweep** (windows × epochs × ions, in
+   flight): is F9's separation window-universal? Early 4300 Å numbers show
+   Δ_Sobolev *negative* (−0.2 to −2.5%) where the reference window gave
+   +5–7%, so the residual Sobolev offset may not be a fixed positive floor.
+2. **Explain the residual Sobolev error.** Neither strength (F9) nor, on
+   early evidence, a constant offset. The candidate is overlap within a
+   Doppler width — testable by correlating per-condition Δ_Sobolev against
+   the crowding statistic O = v_D/Δv of §4.3.
+3. **Frame-consistent comparison at realistic velocities** (0.1–0.3c),
+   resolving F3 properly rather than avoiding it. Required before any
+   statement about real kilonova ejecta.
+4. **Scattering and fluorescence.** Beyond its intrinsic importance, this is
+   where the analytic Sobolev leg stops being exact, so it is the regime in
+   which a per-line Sobolev *transport* scheme must be built and tested
+   rather than computed in closed form.
+5. **NLTE populations**, the deferred Stage D of babystep_plan.md §16.
