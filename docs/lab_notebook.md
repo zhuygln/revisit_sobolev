@@ -256,6 +256,49 @@ approximation*. Fixing it turned out to cost almost no compute.
   Δ_Sobolev is *negative* (−0.2% to −2.5%), so the residual is not a fixed
   positive offset and may be window-dependent. Flagged, not resolved.
 
+## 9f. Breadth sweep, and a normalization bug caught by a control (2026-08-16)
+
+36 conditions (4 windows × 3 epochs × 3 ion mixes), 72 SEDONA runs, 41 min.
+Windows auto-selected by τ-richness: 4300, 4900, 7000, 9100 Å — deliberately
+none of them the reference window.
+
+**The bug.** The first pass reported Δ_Sobolev ≈ −7% everywhere, apparently
+contradicting §4.12's +5–7%. What gave it away was a *control that should
+have been trivial*: the 9100 Å window at τ_max = 0.00 — no absorbing lines
+at all — reported a resolved band flux of **1.0746** instead of 1.000.
+
+Cause: SEDONA's final spectrum bin is a partial bin and collapses
+(L/L_cont drops 48.5 → 15.4 in that last bin). My red normalization margin
+ran to `hi*1.008` while the transport grid ended at `hi*1.010`, so the margin
+straddled the bad bin, depressing the reference and inflating every band flux
+by ~7%.
+
+Effect by quantity, and this is the reusable lesson:
+- **Δ_expansion was safe** — both fluxes carry the same bias and it cancels.
+  The line-free controls correctly showed ≈0%.
+- **Δ_Sobolev was contaminated** — the analytic leg is correctly normalized
+  to 1, so it was compared against an inflated SEDONA number and picked up a
+  spurious −7%, which masqueraded as a physical sign flip.
+
+Same-code differentials are robust; cross-code comparisons are only as good
+as the shared normalization. That is F8's lesson recurring in a new guise,
+and it is now two for two — worth treating as a standing rule.
+
+Fixed by `recompute.py`, which re-derives band fluxes from the saved spectra
+with the margin pulled inside the grid (`hi*1.002` → `hi*1.006`); no SEDONA
+re-runs needed. Line-free controls now give 0.9943 ± 0.0038. Corrected
+Δ_Sobolev is positive and τ-tracking (+0.0% → +11.3%), consistent with the
+reference window.
+
+**Practice to keep:** every sweep should include a line-free control
+condition. This one was free — the 9100 Å window happens to have no strong
+La II lines — and it caught a 7% systematic that would otherwise have been
+written up as a finding.
+
+Result: **F10** — the F9 separation is universal, and realized τ_max is the
+sole controlling variable (windows, epochs and ion mixes collapse onto one
+trend).
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

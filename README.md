@@ -135,10 +135,18 @@ reproduction guide) and [docs/lab_notebook.md](docs/lab_notebook.md)
   **≈5–8%** at kilonova line widths; its standard expansion-opacity
   implementation errs by **40–90%**. The literature conflates them.
 
-Next: finish the windows × epochs × ions breadth sweep (in flight) to test
-whether F9 is window-universal; explain the residual Sobolev offset;
-frame-consistent comparison at realistic velocities (F3); then scattering,
-where the analytic Sobolev leg stops being exact.
+- **Breadth: the separation is universal** (`experiments/breadth/`, Figure 11,
+  F10): 36 conditions — 4 windows (4300–9100 Å, none of them the reference
+  window) × 3 epochs × 3 ion mixes, 72 SEDONA runs. Δ expansion reaches
+  **+61%** (median +20% for τ_max > 3); Δ Sobolev never exceeds **+12%**
+  (median +6.6%). Everything collapses onto a single trend in **realized
+  τ_max** — window, epoch and composition enter only through the τ they
+  produce — and both errors vanish together as τ_max → 0.
+
+Next: explain the residual Sobolev error (candidate: overlap within a Doppler
+width — correlate against the crowding statistic); frame-consistent
+comparison at realistic velocities (F3); then scattering, where the analytic
+Sobolev leg stops being exact.
 
 ---
 

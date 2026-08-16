@@ -426,6 +426,40 @@ real and un-explained by strength; the natural candidate is line overlap
 within a Doppler width (the isolation assumption), which the crowding
 statistics of §4.3 say is present.
 
+### 4.13 Breadth sweep: is the separation universal? (Figure 11, Finding F10)
+
+![Figure 11](figures/fig11_breadth.png)
+
+36 conditions — 4 windows (4300, 4900, 7000, 9100 Å, auto-selected by
+optical-depth richness, *none* of them the reference window) × 3 epochs
+(0.5, 1, 3 days at fixed ejecta mass, so ρ ∝ t⁻³ and τ_S ∝ t⁻²) × 3 ion
+mixes (La II; +Ce II; +Ce III) — 72 SEDONA runs in 41 minutes. Line counts
+range 71 → 2504, realized τ_max spans 0.003 → 34.
+
+| | median | max | τ_max > 3 | τ_max < 0.5 |
+|---|---|---|---|---|
+| Δ expansion | +5.1% | **+61.3%** | +20.0% | +0.3% |
+| Δ Sobolev | +3.6% | **+11.3%** | +6.6% | +0.5% |
+
+Median ratio for τ_max > 1: **expansion errs 3.5× more than Sobolev**.
+
+**Finding F10: the separation is universal, and realized τ_max is the
+controlling variable.** All 36 conditions collapse onto a single trend in
+τ_max regardless of window, epoch, or ion mix — wavelength and composition
+enter only through the τ they produce. Both errors vanish together as
+τ_max → 0 (the weak-line sanity check), and both grow with τ_max, but
+expansion opacity reaches +61% where Sobolev proper never exceeds +12%.
+F9's separation, established on one window, holds across the optical–NIR.
+
+The τ_max-only scaling is a useful practical result in itself: a modeller
+can estimate the error from the strongest line in a band without knowing
+which ion or epoch produced it.
+
+**Caveat on the earlier sign flip.** The first pass of this sweep reported
+Δ_Sobolev ≈ −7% and appeared to contradict §4.12. That was a normalization
+artifact, not physics — see the notebook entry 9f. The corrected values are
+above; Δ_expansion was unaffected because it is a same-code differential.
+
 ## 5. Findings register
 
 | # | Finding | Where |
@@ -439,6 +473,7 @@ statistics of §4.3 say is present.
 | F7 | Δ_Sob is non-monotonic in forest density: maximal for strong sparse forests, suppressed at full blanketing | §4.10 |
 | F8 | The resolved-legs offset is shell thermal emission, not profile wings or resolution; like-for-like the codes agree to ~1% | §4.11 |
 | F9 | The strength floor belongs to expansion opacity alone; the v_D wing term is a genuine Sobolev failure. Sobolev proper ≈5–8%, expansion 40–90% | §4.12 |
+| F10 | The separation is universal across windows, epochs and ion mixes; realized τ_max is the controlling variable, and expansion errs ~3.5× more than Sobolev | §4.13 |
 
 ## 6. Caveats and limitations
 
