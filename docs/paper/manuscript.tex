@@ -62,10 +62,13 @@ rehabilitates it. The \emph{Sobolev approximation itself}, by contrast, shows
 no strength floor whatever and is accurate to $\approx5$--$8\%$ at
 kilonova-relevant line widths; its own failure mode is the neglect of finite
 line width, invisible at narrow widths and reaching $+39\%$ only for strong
-lines at $300\kms$. In the strong-line, incompletely-blanketed regime where
-kilonova spectral features form, the shortcut in common use is thus wrong by
-tens of percent for reasons largely unrelated to the approximation it is
-named after. We also report a measured cost curve for resolved transport
+lines at $300\kms$. A sweep of 36 conditions across four wavelength windows,
+three epochs and three ion mixtures shows this separation to be universal,
+with the realized maximum line optical depth---not wavelength, epoch or
+composition---as the controlling variable. In the strong-line,
+incompletely-blanketed regime where kilonova spectral features form, the
+shortcut in common use is thus wrong by tens of percent for reasons largely
+unrelated to the approximation it is named after. We also report a measured cost curve for resolved transport
 and several methodological findings, including an exact symmetry that makes
 gradient-based Sobolev validity diagnostics systematically conservative.
 \end{abstract}
@@ -752,6 +755,63 @@ is not explained by line strength; the natural candidate is overlap within a
 Doppler width---the isolation assumption---which the crowding statistics of
 \S\ref{sec:results} show is present in these data.
 
+\subsection{Is the separation universal? A breadth sweep}
+\label{sec:breadth}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\textwidth]{fig11_breadth.png}
+  \caption{Thirty-six conditions---four wavelength windows (none of them the
+  window of \S\ref{sec:separation}), three epochs, three ion mixtures---with
+  both panels on the same vertical scale. Every condition collapses onto a
+  single trend in the realized $\tau_{\max}$; expansion opacity reaches
+  $+61\%$ while the Sobolev approximation never exceeds $+12\%$.}
+  \label{fig:breadth}
+\end{figure}
+
+The measurements above rest on one wavelength window at one epoch. To test
+their generality we ran a sweep over four windows (4300, 4900, 7000 and
+9100\,\AA, selected automatically by optical-depth richness and deliberately
+excluding the window used so far), three epochs ($t = 0.5$, 1 and 3 days at
+fixed ejecta mass, so $\rho \propto t^{-3}$ and $\taus \propto t^{-2}$), and
+three ion mixtures (La\,\textsc{ii}; $+$Ce\,\textsc{ii};
+$+$Ce\,\textsc{iii}). That is 36 conditions and 72 transport calculations,
+spanning 71 to 2504 lines per window and realized $\tau_{\max}$ from $0.003$
+to $34$.
+
+\begin{center}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+ & median & max & $\tau_{\max}>3$ & $\tau_{\max}<0.5$ \\
+\midrule
+$\Delta$ expansion & $+5.1\%$ & $\mathbf{+61.3\%}$ & $+20.0\%$ & $+0.3\%$ \\
+$\Delta$ Sobolev   & $+3.6\%$ & $\mathbf{+11.3\%}$ & $+6.6\%$  & $+0.5\%$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Finding F10}: the separation is universal, and the realized
+$\tau_{\max}$ is the controlling variable. All 36 conditions fall on one
+trend (Fig.~\ref{fig:breadth}) regardless of window, epoch or composition;
+those enter only through the optical depths they produce. Both errors vanish
+together as $\tau_{\max}\to0$---the weak-line limit both approximations
+share---and both grow with $\tau_{\max}$, but expansion opacity errs by a
+median factor $3.5$ more than the Sobolev approximation wherever
+$\tau_{\max}>1$. This has a practical corollary: the error can be estimated
+from the strongest line in a band without knowing which ion or epoch produced
+it.
+
+We note one methodological point that the sweep itself exposed. The
+9100\,\AA{} window contains no strong La\,\textsc{ii} lines
+($\tau_{\max}\simeq0$) and therefore acts as a free null control: its band
+flux must be unity. An early pass returned $1.075$ instead, tracing to a
+normalization reference that straddled the final (partial, and unreliable)
+bin of the transport grid. The bias cancelled exactly in $\Delta$ expansion,
+a same-code differential, but contaminated $\Delta$ Sobolev, which compares
+a Monte Carlo result against an analytic one---the same asymmetry as the
+emission convention of \S\ref{sec:conventions-f8}. Null controls of this kind
+cost nothing and are worth including by default.
+
 \subsection{A convention that must be matched: thermal emission}
 \label{sec:conventions-f8}
 
@@ -820,6 +880,8 @@ F8 & Solver-vs-MC offsets trace to the thermal-emission convention, & \S\ref{sec
    & not to profiles or resolution; matched, the codes agree to $\sim1\%$ & \\
 F9 & The strength floor is expansion opacity's alone; the width term & \S\ref{sec:separation} \\
    & is a genuine Sobolev failure. Sobolev $\approx5$--$8\%$ vs $40$--$90\%$ & \\
+F10 & The separation is universal across windows, epochs and ion mixes; & \S\ref{sec:breadth} \\
+    & realized $\tau_{\max}$ is the controlling variable & \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -853,27 +915,46 @@ Pure absorption with LTE populations (no scattering, fluorescence, or
 NLTE); fixed temperatures; controlled shell velocities
 ($1000$--$3000\kms$) rather than realistic $0.1$--$0.3c$ (pending
 frame-consistent treatment, F3); Doppler widths down to $1\kms$ but not the
-$0.6\kms$ thermal value; one ion, one window, one epoch so far; Monte Carlo
-noise $\sim1$--$2\%$ per band flux. None of these caveats touches the sign
+$0.6\kms$ thermal value; two elements and three ionization stages across four
+windows and three epochs, but no full lanthanide mixture; Monte Carlo noise
+$\sim1$--$2\%$ per band flux. None of these caveats touches the sign
 or order of magnitude of the central result, which is reproduced
 independently by analytic theory (Appendix~\ref{app:expop}).
 
 %=====================================================================
 \section{Conclusions and next steps}
 
-We built and validated a three-way harness that isolates the line-transfer
-treatment in expanding ejecta, and used it to make the first controlled
-measurements of the expansion-opacity error on calibrated lanthanide data.
-The headline: the error has a floor set by line strength alone ($\sim38\%$
-in band flux for a realistic La\,\textsc{ii} forest with $\tau_{\max}=5$)
-that survives to thermal line widths. In the strong-line regime that
-kilonovae occupy, ``Sobolev mode'' as commonly implemented is a
-weak-line approximation being used outside its domain.
+We built and validated a harness that isolates the line-transfer treatment in
+expanding ejecta---three independent calculations agreeing to $\sim1\%$ once
+conventions are matched---and used it to measure, on calibrated lanthanide
+data, two errors that the literature carries under a single name.
 
-Next: multi-ion forests (Ce\,\textsc{ii}/\textsc{iii} from the same
-database), additional windows and epochs, a per-line Sobolev leg to
-separate approximation from implementation, and frame-consistent
-comparisons at realistic velocities.
+The Sobolev approximation itself is accurate to $\approx5$--$8\%$ at
+kilonova-relevant line widths and shows no dependence on line strength; its
+one real failure is the neglect of finite line width, which matters only for
+strong lines at large Doppler widths. Its standard expansion-opacity
+implementation is a different matter: a per-resonance substitution
+$\tau\to1-e^{-\tau}$ gives it a strength-set error floor of $40$--$90\%$ in
+band flux that no refinement of line widths removes, because the substitution
+is not a discretization but part of the formalism. Across 36 conditions
+spanning four windows, three epochs and three ion mixtures, the separation is
+universal and controlled by the realized $\tau_{\max}$ alone. The error is
+largest not in fully blanketed bands, where both treatments agree that little
+escapes, but in the intermediate regime where strong lines have not yet
+merged---which is where spectral features form and where composition is read
+off.
+
+The practical implication for kilonova modelling is that ``we use the Sobolev
+approximation'' and ``we use expansion opacity'' should not be treated as
+interchangeable statements, and that the second deserves a quantified error
+budget wherever strong lines are present.
+
+Next: explaining the residual few-percent Sobolev error, whose natural
+candidate is line overlap within a Doppler width; frame-consistent comparison
+at realistic ejecta velocities ($0.1$--$0.3c$); and extension to scattering
+and fluorescence, which is where the analytic equivalence exploited here
+breaks down and a per-line Sobolev \emph{transport} scheme must be built and
+tested rather than computed in closed form.
 
 \section*{Reproducibility}
 
