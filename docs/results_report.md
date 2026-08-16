@@ -361,6 +361,70 @@ quoted from SEDONA here are therefore attenuation-only. **Δ_Sob is
 unaffected**, being a differential between two SEDONA runs sharing the
 identical convention.
 
+### 4.12 Separating the two errors (Figure 10, Finding F9)
+
+![Figure 10](figures/fig10_sobolev_vs_expansion.png)
+
+Everything before this section measured the **expansion-opacity
+implementation**. This section measures the **Sobolev approximation proper**
+— per-line `exp(-τ_S)` with delta-function resonances — and reports both
+against the same truth.
+
+In this pure-absorption LTE setup the Sobolev prediction is exact analytics:
+the p-averaged staircase of Appendix A.5, now promoted to
+`sobolev/sobolev_leg.py` and shared with the ladder experiment (whose five
+numbers are unchanged — the regression check). A Monte Carlo implementation
+of per-line Sobolev interactions would add only noise. The same function
+yields the expansion prediction via `damp = 1 − e^(−τ)`.
+
+La II forest, band-averaged L/L_cont against SEDONA resolved = 0.3426:
+
+| treatment | band flux | Δ |
+|---|---|---|
+| Sobolev proper | 0.3507 | **+2.4%** |
+| expansion (analytic cap) | 0.4844 | +41.4% |
+| expansion (SEDONA) | 0.4965 | +44.9% |
+
+Across the τ_max × v_D sweep (Δ in %, vs SEDONA resolved):
+
+| τ_max | v_D | Δ Sobolev | Δ expansion |
+|---|---|---|---|
+| 0.5 | 10 | +7.1 | +3.0 |
+| 0.5 | 300 | +7.0 | +2.8 |
+| 5 | 10 | +5.4 | +37.3 |
+| 5 | 300 | +15.1 | +51.2 |
+| 50 | 10 | +7.1 | +44.6 |
+| 50 | 300 | +39.4 | +91.1 |
+
+**Finding F9: F6's two error components have different owners.**
+
+1. The **strength-set floor is expansion-opacity's alone**. Sobolev proper
+   shows *no* strength floor: at v_D = 10 km/s it is +5–7% at τ_max = 0.5,
+   5, and 50 alike, while expansion climbs +3% → +37% → +45%. The floor is
+   the per-crossing `1 − e^(−τ)` cap, not a failure of Sobolev's locality or
+   isolation assumptions.
+2. The **v_D-growing wing term is a genuine Sobolev failure**, shared by
+   both. A delta-function resonance has no width by construction, so the
+   Sobolev leg is *exactly* v_D-independent (0.3507 at every v_D); all of
+   the resolved calculation's width dependence is un-modelled. At
+   (τ_max = 50, 300 km/s) this alone reaches +39%.
+
+So the Sobolev approximation itself is accurate to **≈5–8%** at
+kilonova-relevant line widths (≤ 30 km/s), while its standard
+expansion-opacity implementation is off by **40–90%** in the same regime.
+The two are conflated in the literature under one name; they are not the
+same approximation and they fail for different reasons.
+
+Two honest caveats. (i) At τ_max = 0.5 SEDONA's expansion result (+3.0%) is
+*closer* to truth than Sobolev proper (+7.1%) — but the analytic cap there
+is +10.1%, so this is a compensating error, not accuracy: SEDONA's binning
+smears absorption into inter-line gaps, darkening the spectrum by ~6%
+relative to the pure per-crossing cap and accidentally offsetting the cap's
+over-transmission. (ii) The residual +5–7% Sobolev floor at small v_D is
+real and un-explained by strength; the natural candidate is line overlap
+within a Doppler width (the isolation assumption), which the crowding
+statistics of §4.3 say is present.
+
 ## 5. Findings register
 
 | # | Finding | Where |
@@ -373,6 +437,7 @@ identical convention.
 | F6 | Δ_Sob = strength-set floor + v_D-growing wing term; error survives the v_D→0 limit | §4.8 |
 | F7 | Δ_Sob is non-monotonic in forest density: maximal for strong sparse forests, suppressed at full blanketing | §4.10 |
 | F8 | The resolved-legs offset is shell thermal emission, not profile wings or resolution; like-for-like the codes agree to ~1% | §4.11 |
+| F9 | The strength floor belongs to expansion opacity alone; the v_D wing term is a genuine Sobolev failure. Sobolev proper ≈5–8%, expansion 40–90% | §4.12 |
 
 ## 6. Caveats and limitations
 

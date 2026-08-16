@@ -18,6 +18,7 @@ import matplotlib.pyplot as plt
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from sobolev.constants import C, SIGMA_CLASSICAL
 from sobolev.formal_transfer import emergent_luminosity, planck_bnu
+from sobolev.sobolev_leg import sobolev_attenuation
 
 T_EXP = 20 * 86400.0
 R_CORE = 1.728e14
@@ -45,26 +46,11 @@ def load_sedona(run):
 
 
 def sobolev_staircase(nu_grid, lams, fs, damp, n_p=200):
-    """p-averaged Sobolev attenuation of the core light.
-
-    A core ray at impact parameter p crosses line k's resonance plane iff
-    sqrt(r_core^2 - p^2) < z_res,k < sqrt(r_out^2 - p^2); its attenuation is
-    exp(-sum damp(tau_k)) over crossed lines. Averaging exp(...) over p with
-    weight p is essential: planes at z_res < r_core are crossed by only the
-    outer core rays, and dropping them (a plane-counting shortcut) predicts a
-    visibly too-shallow trough.
-    """
-    p = np.linspace(0.0, R_CORE, n_p, endpoint=False) + R_CORE / (2 * n_p)
-    z_lo = np.sqrt(R_CORE**2 - p**2)
-    z_hi = np.sqrt(R_OUT**2 - p**2)
-    att = np.zeros((p.size, nu_grid.size))
-    for lam, f in zip(lams, fs):
-        nu_k = C / (lam * 1e-8)
-        tau_k = SIGMA_CLASSICAL * f * N_H * (lam * 1e-8) * T_EXP
-        z_res = C * T_EXP * (1.0 - nu_k / nu_grid)
-        crossed = (z_res[None, :] > z_lo[:, None]) & (z_res[None, :] < z_hi[:, None])
-        att += np.where(crossed, damp(tau_k), 0.0)
-    return np.sum(p[:, None] * np.exp(-att), axis=0) / np.sum(p)
+    """p-averaged Sobolev attenuation -- thin wrapper over the shared leg."""
+    lines = [(C / (lam * 1e-8), f) for lam, f in zip(lams, fs)]
+    return sobolev_attenuation(
+        nu_grid, lines, R_CORE, R_OUT, T_EXP, N_H, damp=damp, n_p=n_p
+    )
 
 
 fig, axes = plt.subplots(2, 1, figsize=(8, 7), sharex=True)
