@@ -40,7 +40,7 @@ docs/paper/*.blg
 docs/paper/*.log
 docs/paper/*.out
 docs/paper/*.toc
-docs/paper/*.pdf
+# manuscript.pdf IS tracked: readable without a LaTeX toolchain.
 experiments/**/sweep_*/
 experiments/**/tsweep_*/
 experiments/**/sweep_*.mod
