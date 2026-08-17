@@ -1,7 +1,7 @@
 # Sobolev Validity in Kilonova Ejecta — Results Report
 
-**Status:** Phase 0 through the validity maps, complete — findings F1–F10,
-11 figures, 27 tests. **Date:** 2026-08-17. **Repo:** `zhuygln/revisit_sobolev`.
+**Status:** Phase 0 through the validity maps and mechanism isolation, complete
+— findings F1–F12, 12 figures, 52 tests. **Date:** 2026-08-18. **Repo:** `zhuygln/revisit_sobolev`.
 
 **Manuscript:** [paper/manuscript.pdf](paper/manuscript.pdf) — the paper drawn
 from this report, written for readers without a radiative-transfer background.
@@ -68,9 +68,10 @@ Boltzmann over byte-identical level lists. Verified in the SEDONA gas state
 | `populations.py` | partition function, Boltzmann fractions from GSI levels | two-level closed form; T→0/∞ limits; per-g monotonicity on real La II |
 | `atomic_data.py` | GSI file parser (transitions *and* levels), spacing stats | format regression on committed 20-row excerpts |
 | `formal_transfer.py` | the deterministic solver (§2); Gaussian or Voigt profiles, optional truncation | blackbody-sphere luminosity exact; e^−τs trough; 2-line independence & blend; emission fill-in |
+| `spectra.py` | **the one** band-ratio convention for SEDONA spectra: continuum-ratio normalization, margin clear of the final bin | null spectrum returns exactly 1; scale- and Planck-slope-invariant; known trough recovered |
 | `sobolev_leg.py` | p-averaged per-line Sobolev attenuation; `damp` switches to the expansion cap | single line → exp(−τ_S) to 1e-12; damp variant → exp(−(1−e^−τ)); pop_frac scales τ; partial shadowing bracketed |
 
-Test suite: **19 tests, all green** (`pytest`).
+Test suite: **52 tests, all green** (`pytest`).
 
 ### 3.2 SEDONA build (WSL2, no root)
 
@@ -387,20 +388,26 @@ La II forest, band-averaged L/L_cont against SEDONA resolved = 0.3426:
 
 | treatment | band flux | Δ |
 |---|---|---|
-| Sobolev proper | 0.3507 | **+2.4%** |
-| expansion (analytic cap) | 0.4844 | +41.4% |
-| expansion (SEDONA) | 0.4965 | +44.9% |
+| Sobolev proper | 0.3508 | **+2.1%** |
+| expansion (analytic cap) | 0.4844 | +41.0% |
+| expansion (SEDONA) | 0.4973 | +44.8% |
 
 Across the τ_max × v_D sweep (Δ in %, vs SEDONA resolved):
 
 | τ_max | v_D | Δ Sobolev | Δ expansion |
 |---|---|---|---|
-| 0.5 | 10 | +7.1 | +3.0 |
-| 0.5 | 300 | +7.0 | +2.8 |
-| 5 | 10 | +5.4 | +37.3 |
-| 5 | 300 | +15.1 | +51.2 |
-| 50 | 10 | +7.1 | +44.6 |
-| 50 | 300 | +39.4 | +91.1 |
+| 0.5 | 10 | +0.2 | +3.2 |
+| 0.5 | 300 | +0.0 | +2.8 |
+| 5 | 10 | −0.2 | +38.5 |
+| 5 | 300 | +9.2 | +53.0 |
+| 50 | 10 | +1.1 | +45.3 |
+| 50 | 300 | +32.9 | +93.8 |
+
+**Corrected.** An earlier version of this table reported a v_D-independent
+Sobolev error of 5–8%. That was a normalization artifact — SEDONA band fluxes
+normalized by raw luminosity rather than by the continuum ratio, leaving the
+Planck slope in the answer, compared against a correctly-normalized analytic
+leg. Δ_expansion barely moved, being a same-code differential. See §4.15.
 
 **Finding F9: F6's two error components have different owners.**
 
@@ -540,6 +547,66 @@ expansion mode ran ~6% darker than the analytic cap through bin smearing —
 which would average out across a 153-line forest. Unresolved; it does not
 affect Δ values, which are same-code differentials.
 
+### 4.15 The residual was an artifact; what remains is geometry (F12)
+
+![Figure 12](figures/fig12_boundary.png)
+
+Two reviewer arguments closed this out.
+
+**Overlap cannot be the cause — an analytic proof.** With fixed populations
+and pure absorption, opacities add, so τ_ν = Σᵢ∫α_ν,ᵢds = Σᵢτ_ν,ᵢ *exactly*
+and I = I₀exp(−Στ_S,ᵢ) whether profiles overlap or not. Driving two identical
+lines from 20 Doppler widths apart to exact coincidence reproduces the
+Sobolev prediction to **six decimal places** at every separation. Overlap
+becomes real only with scattering, fluorescence or NLTE — all off here by
+design. **The isolation assumption cannot be probed by an attenuation-only
+harness**, so correlating the residual against a crowding statistic would
+have measured a confound (strength, density and edge-proximity are mutually
+correlated).
+
+**Most of the residual was a normalization artifact.** Computing the
+Sobolev residual for the *existing* v_D = 1 and 3 km/s runs exposed that
+`sweep.py` normalized SEDONA band fluxes by **raw luminosity** in the red
+margin rather than by the **continuum ratio**, leaving the Planck slope in
+the answer while the analytic leg was correctly normalized. This is the third
+instance of the class (cf. F8, and the breadth red-edge bug). Corrected, at
+τ_max = 5:
+
+| v_D [km/s] | Δ Sobolev | Δ expansion |
+|---|---|---|
+| 1 | **−0.3%** | +39.1% |
+| 3 | −0.3% | +39.2% |
+| 10 | −0.2% | +38.5% |
+| 30 | +0.5% | +41.3% |
+| 100 | +2.5% | +45.0% |
+| 300 | +9.2% | +53.0% |
+
+Δ_expansion moved by ≤2 points everywhere — same-code differentials are
+immune, which is the check that the fix changed only what it should.
+
+**Finding F12: what remains is geometric.** Where a resonance falls within a
+few Doppler widths of a boundary of the line-forming region, the resolved
+profile is clipped while Sobolev applies a hard step:
+
+  τ_resolved/τ_S = ½[erf((z_hi−z_res)/Δ) − erf((z_lo−z_res)/Δ)], Δ = v_D·t
+
+— unity deep inside, exactly ½ at an edge, zero outside. Direct integration
+matches to four decimals at every width, and the curves collapse when plotted
+against d/v_D (Figure 12, left). The band-averaged effect is the fraction of
+the velocity span within a few widths of an edge, ~v_D/Δv_shell: 0.5% at
+v_D = 10 km/s, 30% at 300 km/s, which is the observed scaling.
+
+**This is an artifact of the setup, not of the approximation.** It scales with
+the thermal width, ~0.6 km/s for lanthanides against ejecta spans of
+10⁴ km/s — utterly negligible in reality. Our sensitivity to it at
+v_D = 100–300 km/s comes from using artificially broad lines to keep frequency
+grids affordable.
+
+**Net:** at physical line widths the Sobolev approximation is accurate to
+≲0.5%, while expansion opacity errs by ~39%. Essentially all of the error
+commonly attributed to "Sobolev" belongs to the expansion-opacity
+construction.
+
 ## 5. Findings register
 
 | # | Finding | Where |
@@ -555,6 +622,7 @@ affect Δ values, which are same-code differentials.
 | F9 | The strength floor belongs to expansion opacity alone; the v_D wing term is a genuine Sobolev failure. Sobolev proper ≈5–8%, expansion 40–90% | §4.12 |
 | F10 | The separation is universal across windows, epochs and ion mixes; realized τ_max is the controlling variable, and expansion errs ~3.5× more than Sobolev | §4.13 |
 | F11 | Neglect of light-travel-time evolution is a distinct approximation: frozen τ/τ_S = (1−β)/γ vs worldline 1/γ. The physical law has no O(β) term | §4.14 |
+| F12 | Overlap is inert in pure absorption (optical depths add exactly); the Sobolev residual is a finite-region boundary effect ∝ v_D/Δv_shell, negligible at thermal widths | §4.15 |
 
 ## 6. Caveats and limitations
 
@@ -648,15 +716,16 @@ frontier (§4.9), multi-ion overlap (§4.10), the per-line Sobolev leg (§4.12)
 exposed — and the breadth sweep (§4.13), which established that the
 separation is universal.
 
-1. **Explain the residual Sobolev error.** It is ~5–8% and is *not* explained
-   by line strength (F9). The candidate is overlap within a Doppler width —
-   the isolation assumption — testable by correlating per-condition
-   Δ_Sobolev against the crowding statistic O = v_D/Δv of §4.3, using the
-   36 breadth conditions and 12 sweep points already on disk.
+1. ~~Explain the residual Sobolev error.~~ **Done (§4.15).** It was mostly a
+   normalization artifact; what remains is a finite-region boundary effect,
+   not a failure of either Sobolev assumption. Overlap was excluded
+   analytically and numerically.
 2. **Frame-consistent comparison at realistic velocities** (0.1–0.3c),
    resolving F3 properly rather than avoiding it. Required before any
    statement about real kilonova ejecta: at 0.1–0.3c the frame systematic is
-   10–30%, comparable to the effects being measured.
+   0.5–4.6% (F11's worldline law), while the frozen-vs-worldline difference
+   is much larger — a different statement, and SEDONA's steady mode cannot
+   supply the time-dependent side.
 3. **Scattering and fluorescence.** Beyond their intrinsic importance, this
    is where the analytic Sobolev leg stops being exact, so it is the regime
    in which a per-line Sobolev *transport* scheme must be built and tested

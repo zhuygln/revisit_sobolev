@@ -449,6 +449,49 @@ a law from ~1% orderings when the discriminating experiment, already running
 in the background, had 23× the leverage and pointed the other way. Wait for
 the high-leverage measurement before announcing the conclusion.
 
+## 9j. The residual was mine, not Sobolev's (2026-08-18)
+
+Two reviewer arguments, both right, and the second exposed a bug I had
+already fixed twice elsewhere.
+
+**Overlap can't be the cause, provably.** In pure absorption with fixed
+populations opacities add, so tau = sum tau_i exactly and the emergent
+intensity is exp(-sum tau_S,i) whether profiles overlap or not. My own
+two-line unit test had asserted this since Week 2. I had been carrying
+"overlap / isolation failure" as the leading hypothesis in the manuscript,
+the report and the README for days without noticing that the harness cannot
+express it. Numerically confirmed: two identical lines from 20 Doppler widths
+apart to exact coincidence reproduce Sobolev to six decimals.
+
+**Third instance of the normalization bug.** Asked to compute the Sobolev
+residual for the v_D = 1 and 3 km/s runs that already existed, I found that
+`sweep.py` normalized SEDONA band fluxes by RAW LUMINOSITY in the red margin
+instead of the continuum ratio -- leaving the Planck slope across the band in
+the answer, while the analytic leg was correctly normalized. That single
+mismatch manufactured the entire "v_D-independent 5-8% Sobolev floor" that
+three documents had been trying to explain.
+
+Corrected, Delta_Sobolev is -0.3% at 1 km/s and -0.2% at 10 km/s, rising to
++9.2% only at 300 km/s. Delta_expansion moved by <2 points anywhere, because
+same-code differentials cancel the bias -- exactly as in F8 and the breadth
+red-edge case.
+
+**Fix, structural this time.** Added `sobolev/spectra.py` with ONE band-ratio
+routine and six tests, including a null spectrum that must return exactly 1.
+Every experiment now calls it. Three occurrences of one bug class is enough
+evidence that ad-hoc per-experiment normalization was the real defect.
+
+**What the residual actually is (F12).** A finite-region boundary effect:
+within a few Doppler widths of an edge the resolved profile is clipped while
+Sobolev applies a step, giving an erf law confirmed to four decimals, with
+band-averaged size ~v_D/Delta v_shell. It is a property of imposing a finite
+line-forming region, not of the approximation, and at real thermal widths
+(0.6 km/s against 10^4 km/s spans) it is negligible.
+
+**Standing rule, now earned three times over:** same-code differentials are
+robust; every cross-code comparison must share one normalization convention,
+and every sweep should carry a null control that is required to return unity.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,
