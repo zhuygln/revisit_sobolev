@@ -375,6 +375,58 @@ there are 27.
 deferring documentation to "after the next experiment," and both produced
 statements that were not merely out of date but wrong.
 
+## 9i. The A.6 derivation was wrong (2026-08-18)
+
+External review caught it, and it is the most instructive error of the
+project so far.
+
+**What I did wrong.** Appendix A.6 derived the relativistic Sobolev depth by
+differentiating `D = γ(1−b)` **at fixed t** — a frozen snapshot. But β = r/(ct)
+in homologous flow depends on the ejecta age, and a photon takes time to
+cross a resonance, so along the worldline `db/dt = (1−b)/t` rather than
+`db/dz = 1/(ct)`. The difference is a factor (1−b): **first order**, the same
+order as the effect I was computing.
+
+The trap: I reasoned that the crossing time is a negligible fraction of t
+(~v_D/c ~ 3e-4) and therefore that time-dependence was ignorable. Wrong test.
+What enters is the *gradient*, and the time term is proportional to b itself.
+
+**Settled numerically before writing any new code**: integrating the resolved
+opacity along the path, with and without the age advancing, reproduces
+(1−β)/γ and 1/γ respectively to five decimals. My published formula equals
+(1−β)/γ exactly for radial rays — right algebra, wrong problem.
+
+**The empirical payoff.** Switching the solver default to worldline improved
+agreement with SEDONA on the La II forest monotonically: −1.04% (frozen 1st
+order) → −0.53% (frozen exact SR) → **−0.06%** (worldline). An independent
+time-dependent Monte Carlo code agreeing to 0.06% is much stronger evidence
+than my algebra, and it retires F8's "~1%" — that residual was my frozen
+approximation, not MC noise.
+
+**Consequence, opposite to the campaign premise.** The whole mechanism-
+isolation campaign was motivated by the idea that an O(v/c) effect might
+explain the +5–11% Sobolev residual. The physical law has *no* O(v/c) term,
+so at β ≤ 0.01 the correction is 5e-5 and explains none of it. The hypothesis
+is dead and overlap is now the only live candidate.
+
+**Test-design trap, second occurrence.** Worldline anchoring makes the ejecta
+age grow along the ray, so b = z/(c t_exp + z − z0) saturates near 0.26 for
+the test shell; a nominal β = 0.3 probe then falls *outside* the shell,
+absorbs nothing, and every comparison passes trivially. Same failure mode as
+the earlier high-β probe. There is now an explicit test asserting the probes
+absorb.
+
+**Also checked and cleared:** time anchoring (ray-start vs centre-plane)
+changes results by 0.4%, so it is not behind the single-line discrepancy
+noted in report §4.14.
+
+**Process note.** Three readings of F3 — frame ambiguity, leading relativistic
+correction, frozen-snapshot artifact — and the second was committed, pushed
+and written into the manuscript before review caught it. The lesson is not
+"derive more carefully" but that a derivation should be checked against a
+first-principles numerical integration *before* it goes into the paper. That
+check took minutes and would have caught it.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

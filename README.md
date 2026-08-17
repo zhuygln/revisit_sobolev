@@ -37,7 +37,7 @@ Source is [manuscript.tex](docs/paper/manuscript.tex); rebuild with
 |---|---|---|
 | F1 | Gradients symmetric about a resonance cancel the Sobolev error at leading order, so gradient-based validity diagnostics are conservative | [§4.2](docs/results_report.md) |
 | F2 | Resolved transport cost 378× expansion opacity on a standard example | §4.4 |
-| F3 | Observer-frame integration and comoving Sobolev τ differ at O(v_bulk/c) | §4.5 |
+| F3 | The O(v_bulk/c) offset is an artifact of frozen-snapshot integration, not relativity — superseded by F11 | §4.5, §4.14 |
 | F4 | Expansion opacity attenuates by `e^−(1−e^−τ)` per crossing, not `e^−τ` | §4.5 |
 | F5 | That error is per-resonance: it does not average away with line count, only as τ→0 | §4.6 |
 | F6 | Δ = a strength-set floor plus a width-growing term; the floor survives to thermal widths | §4.8 |
@@ -45,6 +45,7 @@ Source is [manuscript.tex](docs/paper/manuscript.tex); rebuild with
 | F8 | Solver-vs-Monte-Carlo offsets traced to the thermal-emission convention, not physics; matched, the codes agree to ~1% | §4.11 |
 | F9 | The strength floor is expansion opacity's alone; the width term is a genuine Sobolev failure | §4.12 |
 | F10 | The separation is universal across windows, epochs and ion mixes; realized τ_max is the controlling variable | §4.13 |
+| F11 | Neglect of light-travel-time evolution is a distinct approximation: frozen τ/τ_S = (1−β)/γ vs worldline 1/γ, which has no O(β) term | §4.14 |
 
 Full write-up with figures and numbers:
 **[docs/results_report.md](docs/results_report.md)**.
@@ -95,14 +96,14 @@ the report §4. The original plans are preserved unmodified as
 Phase 0 through the validity maps is complete; the manuscript covers
 everything above. Outstanding:
 
-1. **The residual Sobolev error** (~5–8%) is not explained by line strength.
-   The candidate is overlap within a Doppler width — testable by correlating
-   per-condition Δ against the crowding statistic already computed for
-   Figure 2.
-2. **Realistic velocities.** All results use 1000–3000 km/s shells to keep
-   F3's frame systematic below the measurement floor; real ejecta move at
-   0.1–0.3c, where it is comparable to the effects measured. Frame-consistent
-   treatment is required before claiming these numbers for real kilonovae.
+1. **The residual Sobolev error** (~5–8%) is not explained by line strength,
+   and F11 has now eliminated v/c as a candidate (the correct correction at
+   these velocities is 5×10⁻⁵). Overlap within a Doppler width is the only
+   live hypothesis — testable directly by the controlled-spacing experiments.
+2. **Realistic velocities.** All results use 1000–3000 km/s shells. With the
+   worldline law the relativistic correction there is negligible, but at the
+   0.1–0.3c of real ejecta it reaches 0.5–4.6% and the CD/CP resonance
+   surfaces stop being planes.
 3. **Scattering and fluorescence** — also the regime where the analytic
    Sobolev leg stops being exact, so a per-line Sobolev *transport* scheme
    would have to be built rather than computed.

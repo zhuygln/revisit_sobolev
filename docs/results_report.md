@@ -172,12 +172,12 @@ analytic e^−τs = 0.1353:
 | SEDONA resolved bound-bound | 0.1420 |
 | SEDONA expansion opacity | **0.4285** |
 
-**Finding F3 (frame systematic).** The observer-frame formal solution and the
-comoving-frame Sobolev formula differ at O(v_bulk/c): a resonance at
-z/ct = 7.7% produced a trough matching exp(−τ_S(1−z/ct)) to four digits.
-Documented in `formal_transfer.py`; tests place resonances at v/c < 1%.
-Cross-code comparisons must control this (low-velocity resonances, or matched
-frame conventions).
+**Finding F3 (frozen-snapshot artifact — see §4.14).** A resonance at
+z/ct = 7.7% produced a trough matching exp(−τ_S(1−z/ct)) to four digits
+rather than exp(−τ_S). Read first as a frame ambiguity and then as the
+leading relativistic correction; **both readings were wrong**. It is an
+artifact of integrating a frozen snapshot of the ejecta. The physical law is
+τ/τ_S = 1/γ, which has no first-order term. Superseded by F11.
 
 **Finding F4 (expansion opacity ≠ Sobolev line transfer).** The
 expansion-opacity trough is not e^−τs but **exp(−(1−e^−τs)) = 0.4212**
@@ -225,8 +225,8 @@ T = 3000 K, day 1, shell 1000–3000 km/s, v_D = 100 km/s, n_ion = 2146 cm⁻³
 
 | leg | band flux |
 |---|---|
-| Python formal solver | 0.3549 |
-| SEDONA resolved | 0.3426 (3.6% from solver) |
+| Python formal solver | 0.3583 |
+| SEDONA resolved | 0.3426 (4.6% from solver as tabulated; **0.06%** like-for-like once the F8 emission convention and F11 worldline transport are both matched) |
 | SEDONA expansion | 0.4965 (**Δ_Sob = +44.9%**) |
 
 The resolved complex saturates to black across 3812–3860 Å; expansion opacity
@@ -351,8 +351,9 @@ the term exactly:
 | La II (single-ion) | 0.3538 (+3.3%) | 0.3390 (**−1.0%**) | 0.3426 |
 | La II + Ce II blend | 0.2410 (+6.5%) | 0.2249 (**−1.2%**) | 0.2277 |
 
-Like-for-like, the two independent codes agree to **~1%** — at the Monte
-Carlo noise floor, and better than the 3.6% previously quoted. The term is
+Like-for-like, the two independent codes agree to **~1%** — better than the
+3.6% previously quoted. (§4.14 later reduced this to **0.06%**: the residual
+1% was the solver's frozen-snapshot transport, not Monte Carlo noise.) The term is
 larger than the naive B_ν(3000)/B_ν(6000) = 2×10⁻³ estimate because the
 emitting shell subtends 9× the core's projected area, and it grows with
 saturation, which is why the blend showed a bigger offset than the sparse
@@ -463,13 +464,73 @@ which ion or epoch produced it.
 artifact, not physics — see the notebook entry 9f. The corrected values are
 above; Δ_expansion was unaffected because it is a same-code differential.
 
+### 4.14 Frozen snapshot vs photon worldline (Finding F11)
+
+Prompted by external review of the Appendix A.6 derivation, which was wrong.
+
+That derivation differentiated the Doppler factor `D = γ(1−b)` **at fixed t**
+— pushing a photon through a frozen snapshot. A photon takes time to cross a
+resonance, and in homologous flow β = r/(ct) depends on the age as well as
+the position. Along the worldline `db/dt = (1−b)/t`, against the frozen
+`db/dz = 1/(ct)`: a factor (1−b) difference, **first order in β**, the same
+order as the effect. The time term does not vanish just because the crossing
+is brief — what matters is the gradient.
+
+**The two laws, confirmed to five decimals** by integrating the resolved
+opacity along the path with no Sobolev assumption anywhere:
+
+| β | frozen (t fixed) | worldline (t advances) | 1/γ |
+|---|---|---|---|
+| 0.05 | 0.94881 | 0.99875 | 0.99875 |
+| 0.10 | 0.89549 | 0.99499 | 0.99499 |
+| 0.20 | 0.78384 | 0.97980 | 0.97980 |
+| 0.30 | 0.66776 | 0.95394 | 0.95394 |
+
+So frozen gives (1−β)/γ and the physical law gives **1/γ = 1 − β²/2**, with
+**no first-order term**. The correction at β = 0.1/0.2/0.3 is 0.5%/2.0%/4.6%,
+not the 10%/22%/33% the frozen law implies.
+
+**Independent confirmation.** Switching the solver from frozen to worldline
+transport improves agreement with SEDONA on the La II forest monotonically
+as the treatment improves — all like-for-like, emission off:
+
+| solver mode | vs SEDONA resolved |
+|---|---|
+| `first` (frozen, 1st order) | −1.04% |
+| `exact` (frozen, full SR) | −0.53% |
+| `worldline` (physical) | **−0.06%** |
+
+SEDONA does genuinely time-dependent Monte Carlo transport, so this is an
+independent code agreeing with 1/γ. It also **improves F8**: the harness's
+cross-code agreement goes from ~1% to below 0.1%, and that residual 1% was
+the solver's frozen approximation rather than Monte Carlo noise.
+
+**Finding F11.** Neglect of light-travel-time evolution is a distinct
+approximation — separate from Sobolev localization, from the independent-line
+assumption, and from expansion-opacity binning. A fourth member of the family
+this project is mapping.
+
+**Consequence, opposite to the hypothesis that prompted the work.** At the
+shell velocities used throughout (β ≤ 0.01) the correct relativistic
+correction is 5×10⁻⁵. It therefore explains **no part** of the +5–11% Sobolev
+residual, which belongs to overlap or something else. The v/c hypothesis is
+eliminated, and the controlled-overlap experiments become the decisive test.
+
+**Open discrepancy.** The single-line minimal model moved the other way
+(solver-vs-SEDONA −3.4% → −5.6%). Time-anchoring was tested and is not the
+cause (ray-start vs centre-plane differ by 0.4%). The gap is most plausibly
+SEDONA-side discretization of a single sharp line — recall §4.12 found its
+expansion mode ran ~6% darker than the analytic cap through bin smearing —
+which would average out across a 153-line forest. Unresolved; it does not
+affect Δ values, which are same-code differentials.
+
 ## 5. Findings register
 
 | # | Finding | Where |
 |---|---|---|
 | F1 | Symmetric gradients cancel the Sobolev error at leading order; G-based diagnostics are conservative | §4.2 |
 | F2 | Resolved vs expansion cost: 378× on the Type Ia toy | §4.4 |
-| F3 | O(v_bulk/c) frame systematic between observer-frame integration and comoving Sobolev τ | §4.5 |
+| F3 | ~~O(v_bulk/c) frame systematic~~ → an artifact of frozen-snapshot integration; superseded by F11 | §4.5, §4.14 |
 | F4 | Expansion opacity attenuates by exp(−(1−e^−τ)) per crossing, not e^−τ | §4.5 |
 | F5 | That error is per-resonance: it does not average away with line count, only as τ→0 | §4.6 |
 | F6 | Δ_Sob = strength-set floor + v_D-growing wing term; error survives the v_D→0 limit | §4.8 |
@@ -477,6 +538,7 @@ above; Δ_expansion was unaffected because it is a same-code differential.
 | F8 | The resolved-legs offset is shell thermal emission, not profile wings or resolution; like-for-like the codes agree to ~1% | §4.11 |
 | F9 | The strength floor belongs to expansion opacity alone; the v_D wing term is a genuine Sobolev failure. Sobolev proper ≈5–8%, expansion 40–90% | §4.12 |
 | F10 | The separation is universal across windows, epochs and ion mixes; realized τ_max is the controlling variable, and expansion errs ~3.5× more than Sobolev | §4.13 |
+| F11 | Neglect of light-travel-time evolution is a distinct approximation: frozen τ/τ_S = (1−β)/γ vs worldline 1/γ. The physical law has no O(β) term | §4.14 |
 
 ## 6. Caveats and limitations
 
