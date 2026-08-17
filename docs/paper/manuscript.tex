@@ -546,8 +546,7 @@ wrong. Appendix~\ref{app:frame} shows it is an artifact of integrating a
 \emph{frozen snapshot} of the ejecta: allowing the ejecta age to advance
 along the photon path, as it physically must, gives
 $\tau_{\rm rel}/\taus = 1/\gamma$, which has no first-order term at all.
-Correcting the solver accordingly improves its agreement with \textsc{sedona}
-from $-1.04\%$ to $-0.06\%$ on the La\,\textsc{ii} forest. The practical
+The practical
 consequence is the opposite of what the $\mathcal{O}(v/c)$ reading implied:
 at our shell velocities the relativistic correction is $5\times10^{-5}$, so
 it cannot account for any part of the residual in \S\ref{sec:separation}.
@@ -1232,15 +1231,28 @@ So the relativistic correction at $\beta = 0.1$, $0.2$, $0.3$ is $0.5\%$,
 $2.0\%$, $4.6\%$---not the $10\%$, $22\%$, $33\%$ that the frozen law implies
 and that the previous draft of this appendix claimed.
 
-\paragraph{Independent confirmation, and a sharper harness.} Switching our
-deterministic solver from frozen to worldline transport improves its
-agreement with \textsc{sedona} on the 153-line La\,\textsc{ii} forest
-monotonically as the treatment improves: $-1.04\%$ (frozen, first order),
-$-0.53\%$ (frozen, exact SR), $-0.06\%$ (worldline). \textsc{sedona} performs
-genuinely time-dependent Monte Carlo transport, so this is an independent
-code agreeing with Eq.~(\ref{eq:taurel}), and it improves the harness's
-cross-code agreement (Finding F8) from $\sim1\%$ to below $0.1\%$: the
-residual $1\%$ was our frozen approximation, not Monte Carlo noise.
+\paragraph{Which problem does the Monte Carlo code solve?} It is natural to
+assume a Monte Carlo transport code supplies the time-dependent answer, and
+we briefly did. It does not, in the configuration used here. Sweeping a
+single line's resonance velocity from $\beta = 0.001$ to $0.34$ and comparing
+the measured $\tau_{\rm eff} = -\ln(F/F_{\rm cont})$ against both laws gives
+an RMS deviation over $\beta_{\rm res} \gtrsim 0.1$ of $0.024$ from the
+frozen law and $0.55$ from the worldline law---a factor $23$, and at
+$\beta_{\rm res} = 0.34$ the measurement is $0.613$ against a frozen
+prediction of $0.618$ and a worldline prediction of $1.43$. \textsc{sedona}
+run with \texttt{transport\_steady\_iterate} iterates the radiation field on
+a fixed grid at fixed epoch; its source disables hydrodynamics in that mode
+and reads no time-stepping parameters. It is a frozen-snapshot calculation.
+
+This matters for the harness. Cross-code comparison requires matching the
+\emph{transport treatment} as well as the thermal-emission convention (F8)
+and the spectral normalization (\S\ref{sec:breadth}): a third convention,
+and the one with the largest lever arm at high velocity. Like-for-like
+against a frozen \textsc{sedona} means running the solver in its frozen
+mode. At the shell velocities used for the measurements in this paper
+($\beta \le 0.01$) the two laws differ by $\lesssim 2\%$ in $\tau$, so this
+choice does not affect any result reported here; at kilonova velocities it
+would dominate.
 
 \paragraph{What F3 is, finally.} Not a frame ambiguity (our first reading),
 not the leading relativistic correction (our second, published, reading), but

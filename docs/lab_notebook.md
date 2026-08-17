@@ -396,12 +396,27 @@ opacity along the path, with and without the age advancing, reproduces
 (1−β)/γ and 1/γ respectively to five decimals. My published formula equals
 (1−β)/γ exactly for radial rays — right algebra, wrong problem.
 
-**The empirical payoff.** Switching the solver default to worldline improved
-agreement with SEDONA on the La II forest monotonically: −1.04% (frozen 1st
-order) → −0.53% (frozen exact SR) → **−0.06%** (worldline). An independent
-time-dependent Monte Carlo code agreeing to 0.06% is much stronger evidence
-than my algebra, and it retires F8's "~1%" — that residual was my frozen
-approximation, not MC noise.
+**An over-claim I made and retracted within the hour.** Switching the solver
+default to worldline moved its forest agreement with SEDONA from −1.04%
+(frozen 1st order) through −0.53% (frozen exact) to −0.06% (worldline), and I
+announced that as an independent time-dependent code confirming the worldline
+law. **Wrong.** At β ≤ 0.01 the two laws differ by only ~1–2%, comparable to
+other systematics; I read an ordering out of noise-level differences because
+it agreed with the conclusion I wanted.
+
+The v/c sweep, with 23× more leverage, says the opposite: SEDONA's τ_eff
+tracks the *frozen* law (RMS 0.024) not the worldline law (RMS 0.552), and at
+β_res = 0.34 gives 0.613 against frozen 0.618 and worldline 1.43. The cause
+is in the SEDONA source: `transport_steady_iterate` sets `use_hydro_ = 0` and
+reads no time-stepping parameters. In this configuration it is a
+frozen-snapshot calculation.
+
+So the worldline law stands on the first-principles integration alone, which
+is solid; SEDONA neither confirms nor refutes it, because it solves the other
+problem. The real finding is that **transport treatment is a third convention
+that cross-code comparison must match**, alongside thermal emission (F8) and
+spectral normalization (§4.13) — and it is the one with the largest lever arm
+at high velocity.
 
 **Consequence, opposite to the campaign premise.** The whole mechanism-
 isolation campaign was motivated by the idea that an O(v/c) effect might
@@ -422,10 +437,17 @@ noted in report §4.14.
 
 **Process note.** Three readings of F3 — frame ambiguity, leading relativistic
 correction, frozen-snapshot artifact — and the second was committed, pushed
-and written into the manuscript before review caught it. The lesson is not
-"derive more carefully" but that a derivation should be checked against a
-first-principles numerical integration *before* it goes into the paper. That
-check took minutes and would have caught it.
+and written into the manuscript before review caught it. Then, in the same
+session, an over-claim about SEDONA confirming the fix, also pushed, also
+retracted.
+
+Two distinct lessons. (1) A derivation should be checked against a
+first-principles numerical integration *before* it goes into the paper; that
+check took minutes and would have caught the frozen error. (2) A cross-code
+agreement is only evidence if the effect exceeds the systematics — I inferred
+a law from ~1% orderings when the discriminating experiment, already running
+in the background, had 23× the leverage and pointed the other way. Wait for
+the high-leverage measurement before announcing the conclusion.
 
 ## 10. Standing environment notes
 

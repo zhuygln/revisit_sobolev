@@ -225,8 +225,8 @@ T = 3000 K, day 1, shell 1000–3000 km/s, v_D = 100 km/s, n_ion = 2146 cm⁻³
 
 | leg | band flux |
 |---|---|
-| Python formal solver | 0.3583 |
-| SEDONA resolved | 0.3426 (4.6% from solver as tabulated; **0.06%** like-for-like once the F8 emission convention and F11 worldline transport are both matched) |
+| Python formal solver | 0.3583 (worldline default) |
+| SEDONA resolved | 0.3426. Like-for-like — emission off (F8) *and* solver in frozen mode to match SEDONA's frozen transport (§4.14) — the gap is **−0.53%** |
 | SEDONA expansion | 0.4965 (**Δ_Sob = +44.9%**) |
 
 The resolved complex saturates to black across 3812–3860 Å; expansion opacity
@@ -310,8 +310,8 @@ blending). Band-averaged L/L_cont:
 
 | leg | band flux |
 |---|---|
-| Python solver | 0.2426 |
-| SEDONA resolved | 0.2277 (6.5% from solver) |
+| Python solver | 0.2456 (worldline default; 0.2426 under the frozen mode used originally) |
+| SEDONA resolved | 0.2277 (7.8% from the worldline solver, 6.5% from the frozen one — see §4.14 on matching transport treatments) |
 | SEDONA expansion | 0.2610 (**Δ_Sob = +14.6%**) |
 
 **Finding F7 (non-monotonic density dependence).** The blend saturates the
@@ -352,8 +352,9 @@ the term exactly:
 | La II + Ce II blend | 0.2410 (+6.5%) | 0.2249 (**−1.2%**) | 0.2277 |
 
 Like-for-like, the two independent codes agree to **~1%** — better than the
-3.6% previously quoted. (§4.14 later reduced this to **0.06%**: the residual
-1% was the solver's frozen-snapshot transport, not Monte Carlo noise.) The term is
+3.6% previously quoted. (§4.14 sharpens this to **−0.53%** once the transport
+treatment is also matched; an intermediate claim of 0.06% there was retracted.)
+The term is
 larger than the naive B_ν(3000)/B_ν(6000) = 2×10⁻³ estimate because the
 emitting shell subtends 9× the core's projected area, and it grows with
 saturation, which is why the blend showed a bigger offset than the sparse
@@ -490,20 +491,35 @@ So frozen gives (1−β)/γ and the physical law gives **1/γ = 1 − β²/2**, 
 **no first-order term**. The correction at β = 0.1/0.2/0.3 is 0.5%/2.0%/4.6%,
 not the 10%/22%/33% the frozen law implies.
 
-**Independent confirmation.** Switching the solver from frozen to worldline
-transport improves agreement with SEDONA on the La II forest monotonically
-as the treatment improves — all like-for-like, emission off:
+**Which problem does SEDONA solve? — a retraction.** I first read the forest
+numbers (solver vs SEDONA: −1.04% frozen-1st-order, −0.53% frozen-exact,
+−0.06% worldline) as SEDONA independently confirming the worldline law, and
+said so. **That was wrong.** At β ≤ 0.01 the two laws differ by only ~1–2%,
+comparable to other systematics, and I over-read an ordering.
 
-| solver mode | vs SEDONA resolved |
-|---|---|
-| `first` (frozen, 1st order) | −1.04% |
-| `exact` (frozen, full SR) | −0.53% |
-| `worldline` (physical) | **−0.06%** |
+The v/c sweep has 23× more leverage and says the opposite. Comparing SEDONA's
+measured τ_eff = −ln(F/F_cont) against both laws at the exact resonance
+velocity b_res = (1−k)/(1+k), k = (1−β_label)²:
 
-SEDONA does genuinely time-dependent Monte Carlo transport, so this is an
-independent code agreeing with 1/γ. It also **improves F8**: the harness's
-cross-code agreement goes from ~1% to below 0.1%, and that residual 1% was
-the solver's frozen approximation rather than Monte Carlo noise.
+| β_res | SEDONA τ/τ_S | frozen (1−b)/γ | worldline |
+|---|---|---|---|
+| 0.105 | 0.923 | 0.890 | 1.111 |
+| 0.220 | 0.788 | 0.762 | 1.250 |
+| 0.342 | 0.613 | **0.618** | 1.429 |
+
+RMS deviation for β_res ≳ 0.1: **0.024 from frozen, 0.552 from worldline.**
+
+Cause confirmed in the SEDONA source: `transport_steady_iterate` sets
+`use_hydro_ = 0` and reads no time-stepping parameters — it iterates the
+radiation field on a fixed grid at fixed epoch. **It is a frozen-snapshot
+calculation.**
+
+**Consequence for the harness.** Cross-code comparison requires matching the
+*transport treatment* as a third convention, alongside thermal emission (F8)
+and spectral normalization (§4.13). Like-for-like against this SEDONA
+configuration means running the solver in frozen mode. At the velocities used
+throughout (β ≤ 0.01) the choice shifts τ by ≲2% and changes no reported
+result; at kilonova velocities it would dominate.
 
 **Finding F11.** Neglect of light-travel-time evolution is a distinct
 approximation — separate from Sobolev localization, from the independent-line

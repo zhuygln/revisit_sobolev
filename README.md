@@ -45,7 +45,7 @@ Source is [manuscript.tex](docs/paper/manuscript.tex); rebuild with
 | F8 | Solver-vs-Monte-Carlo offsets traced to the thermal-emission convention, not physics; matched, the codes agree to ~1% | §4.11 |
 | F9 | The strength floor is expansion opacity's alone; the width term is a genuine Sobolev failure | §4.12 |
 | F10 | The separation is universal across windows, epochs and ion mixes; realized τ_max is the controlling variable | §4.13 |
-| F11 | Neglect of light-travel-time evolution is a distinct approximation: frozen τ/τ_S = (1−β)/γ vs worldline 1/γ, which has no O(β) term | §4.14 |
+| F11 | Neglect of light-travel-time evolution is a distinct approximation: frozen τ/τ_S = (1−β)/γ vs worldline 1/γ, which has no O(β) term. SEDONA in steady-iterate mode solves the frozen problem, so transport treatment is a third convention cross-code comparisons must match | §4.14 |
 
 Full write-up with figures and numbers:
 **[docs/results_report.md](docs/results_report.md)**.
