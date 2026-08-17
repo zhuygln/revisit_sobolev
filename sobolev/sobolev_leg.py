@@ -88,8 +88,51 @@ def sobolev_attenuation(
     return np.sum(p[:, None] * np.exp(-att), axis=0) / np.sum(p)
 
 
-def tau_sobolev_relativistic(f_osc, n_l, lambda0, t_exp, beta_z, beta=None):
-    """Sobolev optical depth for homologous flow, keeping v/c exactly.
+def tau_sobolev_relativistic(f_osc, n_l, lambda0, t_exp, beta):
+    """Sobolev optical depth for homologous flow along the photon worldline.
+
+    THIS is the physical law. The photon takes time to cross the resonance,
+    so the ejecta age advances as it goes. For homologous flow the photon
+    worldline gives
+
+        dbeta_vec/dt = (n_hat - beta_vec)/t   =>   db/dt = (1 - b)/t,
+
+    and with D = gamma(1-b), dD/dt = -D gamma^2 (1-b)/t. Using the opacity
+    transformation chi_lab = D chi' and the resonance condition D nu = nu0,
+    the profile integral collapses to
+
+        tau = D chi' c / |dnu'/dt| = sigma f n_l c t D / (nu0 gamma^2 (1-b))
+
+    and since D = gamma(1-b) the bracket reduces to a single 1/gamma:
+
+        tau_rel / tau_S = 1/gamma = sqrt(1 - beta^2).
+
+    There is NO first-order term: 1/gamma = 1 - beta^2/2 + O(beta^4). At
+    beta = 0.1/0.2/0.3 the correction is 0.5%/2.0%/4.6%.
+
+    tau_S must be evaluated with the density and the ejecta age local to the
+    resonance; with that convention the result is anchoring-independent.
+
+    Contrast `tau_sobolev_frozen`, which holds t fixed and yields
+    (1-beta)/gamma -- a first-order effect that is an artifact of the frozen
+    snapshot, not physics. Both laws are confirmed against a first-principles
+    integration to five decimals in tests/test_relativistic.py.
+    """
+    beta = np.asarray(beta, dtype=float)
+    lorentz = 1.0 / np.sqrt(np.maximum(1.0 - beta**2, 1e-300))
+    return tau_sobolev(f_osc, n_l, lambda0, t_exp) / lorentz
+
+
+def tau_sobolev_frozen(f_osc, n_l, lambda0, t_exp, beta_z, beta=None):
+    """Sobolev optical depth for a FROZEN SNAPSHOT of homologous flow.
+
+    Retained because it is what an observer-frame integration at fixed t
+    computes -- including this project's solver before the worldline mode
+    existed -- and because the difference from the physical law is itself a
+    result. It is NOT the correct relativistic Sobolev depth; see
+    `tau_sobolev_relativistic`.
+
+    Original derivation follows.
 
     Derivation (the relativistic counterpart of Appendix A.2). Along a ray
     toward the observer the gas at coordinate z has line-of-sight velocity
@@ -125,10 +168,13 @@ def tau_sobolev_relativistic(f_osc, n_l, lambda0, t_exp, beta_z, beta=None):
     factors. This matters for interpreting Finding F3. The solver's "first"
     mode, which omits the opacity transformation entirely, also yields
     tau_S (1 - beta_z) at first order -- so the empirically measured
-    exp[-tau_S(1-beta)] of F3 is not a bug in that mode but the correct
-    relativistic behaviour, and it is the NONRELATIVISTIC tau_S that is wrong
-    at O(v/c). The two solver modes therefore agree at O(beta) and separate
-    only at O(beta^2).
+    exp[-tau_S(1-beta)] of F3 is reproduced by this frozen law. For radial
+    rays the expression above equals (1-beta)/gamma exactly.
+
+    What that means was misread twice. It is not a frame ambiguity, and it is
+    not the leading relativistic correction either: holding t fixed while a
+    photon crosses the resonance is simply the wrong problem, and the O(beta)
+    term is the price of that choice. See `tau_sobolev_relativistic`.
 
     Parameters
     ----------
@@ -136,7 +182,7 @@ def tau_sobolev_relativistic(f_osc, n_l, lambda0, t_exp, beta_z, beta=None):
     beta : total speed / c there. Defaults to |beta_z| (exact for a ray
         through the centre, where the velocity is purely radial along z).
 
-    Returns the relativistic Sobolev optical depth. Reduces to
+    Returns the frozen-snapshot Sobolev optical depth. Reduces to
     `tau_sobolev` as beta_z -> 0.
     """
     beta_z = np.asarray(beta_z, dtype=float)

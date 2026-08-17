@@ -20,31 +20,43 @@ Deliberately NOT here: electron scattering, non-LTE source functions,
 relativistic terms beyond first order, time dependence. This solver's job
 is to be small enough to trust, not complete.
 
-FRAME TREATMENT (`relativity` argument):
+FRAME TREATMENT (`relativity` argument). The important distinction here is
+not first-order versus exact special relativity -- it is whether the ejecta
+is treated as a FROZEN SNAPSHOT or as a genuinely time-dependent flow.
 
-  "first"  -- nu' = nu (1 - z/ct), opacity used as sigma f n phi with NO
-              Doppler factor. This is the historical behaviour of this
-              module and the default, so that previously reported numbers
-              are reproducible. It is NOT the correct relativistic result.
-  "exact"  -- full special relativity: nu' = gamma nu (1 - beta_z) with
-              beta = r/(ct) and beta_z = z/(ct); the comoving opacity is
-              transformed to the lab frame as chi_lab = D chi', with the
-              Doppler factor D = nu'/nu (from the invariance of nu*chi_nu);
-              and the source function as S_lab = S'(nu')/D^3 (from the
-              invariance of I_nu/nu^3).
+  "worldline" -- DEFAULT and the physical one. The photon takes time to
+              travel, so t advances along the path: t(s) = t_exp + s/c,
+              with s measured from the ray's starting point. In homologous
+              flow beta = r/(c t) then changes because BOTH r and t change,
+              giving db/dt = (1-b)/t rather than the frozen db/dz = 1/(ct).
+  "exact"   -- frozen snapshot, exact special relativity. t is held fixed
+              while integrating over z. Exact Doppler nu' = gamma nu (1-b),
+              chi_lab = D chi' from the invariance of nu*chi_nu, and
+              S_lab = S'/D^3 from the invariance of I_nu/nu^3.
+  "first"   -- frozen snapshot, first order, no opacity transformation.
+              The module's original behaviour; retained to reproduce
+              previously published numbers.
 
-The two modes agree at O(beta) and separate only at O(beta^2): the D factor
-the "first" mode omits is cancelled, to leading order, by the sweep-rate
-factor it also gets wrong (see sobolev_leg.tau_sobolev_relativistic for the
-algebra). Both give an effective optical depth tau_S (1 - beta) at first
-order. Consequently the systematic recorded as Finding F3 -- a resonance at
-beta = 7.7% giving a 7% shallower trough than exp(-tau_S) -- is NOT an error
-in this module: it is the correct relativistic behaviour, and it is the
-nonrelativistic tau_S that is wrong at O(v/c).
+For a single line of comoving depth tau_S the three give, relative to
+tau_S evaluated with the local density and the local ejecta age at the
+resonance,
 
-Which mode is physically right is settled by experiment: see
-experiments/vc_control/, which sweeps beta with both solver modes, SEDONA,
-and every candidate Sobolev expression on one axis.
+    worldline : tau/tau_S = 1/gamma        = 1 - beta^2/2 + ...
+    exact     : tau/tau_S = (1-beta)/gamma = 1 - beta + ...
+    first     : tau/tau_S = (1-beta)          (to first order)
+
+verified against a first-principles integration in tests/test_relativistic.py
+to five decimals. The physical law therefore has NO first-order term: at
+beta = 0.1/0.2/0.3 the correction is 0.5%/2.0%/4.6%, not 10%/20%/30%.
+
+This supersedes two earlier readings of Finding F3. The offset measured at
+beta = 7.7% is neither a frame ambiguity nor "the leading relativistic
+correction": it is an artifact of integrating a frozen snapshot, which is
+not the problem the photon solves.
+
+Caveat: only the KINEMATICS are made time-dependent here. The density field
+is still the snapshot supplied by `n_l_of_r`; a homologously expanding
+density also evolves as t^-3, which is a further effect not modelled.
 """
 
 import numpy as np
@@ -78,7 +90,7 @@ def emergent_luminosity(
     n_impact=100,
     n_z_per_doppler=8.0,
     cutoff_widths=None,
-    relativity="first",
+    relativity="worldline",
 ):
     """Emergent line spectrum L_nu (erg s^-1 Hz^-1) of the core+shell system.
 
@@ -153,16 +165,26 @@ def emergent_luminosity(
         # alpha(z, nu): sum the resolved profiles of all lines.
         # Frame transformation. beta_z is the line-of-sight component of the
         # homologous velocity; beta is its magnitude (both < 1 by construction
-        # for a shell with v_max < c).
-        beta_z = z / (C * t_exp)
-        if relativity == "exact":
-            beta = r / (C * t_exp)
+        # for a shell with v_max < c). In "worldline" mode the ejecta age
+        # advances along the photon path, so beta = r/(c t) changes through
+        # BOTH r and t -- that time term is the whole difference between the
+        # frozen and physical laws, and it is O(beta), not O(beta^2).
+        if relativity == "worldline":
+            t_local = t_exp + (z - z[0]) / C
+        elif relativity in ("exact", "first"):
+            t_local = np.full_like(z, t_exp)
+        else:
+            raise ValueError(
+                f"relativity must be 'worldline', 'exact' or 'first', got {relativity!r}"
+            )
+
+        beta_z = z / (C * t_local)
+        if relativity in ("exact", "worldline"):
+            beta = r / (C * t_local)
             lorentz = 1.0 / np.sqrt(np.maximum(1.0 - beta**2, 1e-300))
             doppler = lorentz * (1.0 - beta_z)  # D = nu'/nu
-        elif relativity == "first":
-            doppler = 1.0 - beta_z
         else:
-            raise ValueError(f"relativity must be 'first' or 'exact', got {relativity!r}")
+            doppler = 1.0 - beta_z
         nu_com = nu_grid[None, :] * doppler[:, None]
 
         alpha = np.zeros((n_z, nu_grid.size))
@@ -177,7 +199,7 @@ def emergent_luminosity(
                     np.abs(dnu) <= cutoff_widths * dnu_d[nu0], phi, 0.0
                 )
             chi_comoving = SIGMA_CLASSICAL * f_osc * pop * n_l[:, None] * phi
-            if relativity == "exact":
+            if relativity in ("exact", "worldline"):
                 # nu * chi_nu is a Lorentz invariant, so chi_lab = D chi'.
                 alpha += doppler[:, None] * chi_comoving
             else:
@@ -196,7 +218,7 @@ def emergent_luminosity(
         s_mid = 0.5 * (
             planck_bnu(nu_com[1:, :], t_mid) + planck_bnu(nu_com[:-1, :], t_mid)
         )
-        if relativity == "exact":
+        if relativity in ("exact", "worldline"):
             d_mid = 0.5 * (doppler[1:] + doppler[:-1])[:, None]
             s_mid = s_mid / d_mid**3
         emis = np.sum(

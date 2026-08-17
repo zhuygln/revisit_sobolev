@@ -1,23 +1,27 @@
-"""Frame-treatment tests: the beta -> 0 limit, and the size of the O(beta)
-term that separates the solver's historical mode from exact relativity.
+"""Frozen snapshot versus photon worldline.
 
-These exist because Finding F3 recorded an O(v_bulk/c) discrepancy as an
-unexplained systematic. The derivation in sobolev_leg.tau_sobolev_relativistic
-attributes it to a missing Doppler factor on the opacity; these tests pin both
-the limit and the leading correction so the attribution cannot silently rot.
+The central fact pinned here: for a single line in homologous flow,
+
+    frozen snapshot (t held fixed)   tau/tau_S = (1-beta)/gamma
+    photon worldline (t advances)    tau/tau_S = 1/gamma
+
+The first has an O(beta) term, the second does not. Finding F3 was read first
+as a frame ambiguity and then as "the leading relativistic correction"; both
+readings were wrong, and the offset is an artifact of integrating a frozen
+snapshot. `test_ground_truth_*` establish this from first principles -- direct
+integration of the resolved opacity along the path, with no Sobolev assumption
+anywhere -- so the attribution rests on a calculation rather than on algebra.
 """
 
 import numpy as np
+import pytest
 
-from sobolev.constants import C
+from sobolev.constants import C, SIGMA_CLASSICAL
 from sobolev.formal_transfer import emergent_luminosity, planck_bnu
 from sobolev.optical_depth import tau_sobolev
-from sobolev.sobolev_leg import tau_sobolev_relativistic
+from sobolev.sobolev_leg import tau_sobolev_frozen, tau_sobolev_relativistic
 
 T_EXP = 864000.0
-R_CORE = 1.0e14
-R_OUT = 5.0e14
-T_CORE = 2.0e4
 LAMBDA0 = 4000e-8
 NU0 = C / LAMBDA0
 F_OSC = 0.5
@@ -29,89 +33,134 @@ def const(v):
     return lambda r: np.full_like(np.asarray(r, dtype=float), v)
 
 
-# ---------------------------------------------------------------- tau formula
+# ------------------------------------------------------- ground truth
 
 
-def test_relativistic_tau_reduces_to_classical():
-    """beta -> 0 must recover the textbook Sobolev depth exactly."""
+def _ground_truth_tau(beta, worldline, v_d=1.0e6, half_widths=400, n=200001):
+    """Integrate the resolved line opacity along the photon path directly.
+
+    No Sobolev approximation is used: this is the quantity the candidate tau
+    laws are trying to predict. `worldline=False` freezes the ejecta age.
+    """
+    dnu_d = NU0 * v_d / C
+    g_res = 1.0 / np.sqrt(1.0 - beta**2)
+    nu = NU0 / (g_res * (1.0 - beta))  # resonates exactly at beta
+    r_res = beta * C * T_EXP
+    half = half_widths * v_d * T_EXP
+    s = np.linspace(-half, half, n)
+
+    r = r_res + s
+    t = T_EXP + s / C if worldline else T_EXP
+    b = r / (C * t)
+    lorentz = 1.0 / np.sqrt(1.0 - b**2)
+    d = lorentz * (1.0 - b)
+    phi = np.exp(-(((nu * d - NU0) / dnu_d) ** 2)) / (np.sqrt(np.pi) * dnu_d)
+    tau = np.trapezoid(d * SIGMA_CLASSICAL * F_OSC * N0 * phi, s)
+    return tau / tau_sobolev(F_OSC, N0, LAMBDA0, T_EXP)
+
+
+@pytest.mark.parametrize("beta", [0.01, 0.05, 0.1, 0.2, 0.3])
+def test_ground_truth_worldline_is_one_over_gamma(beta):
+    lorentz = 1.0 / np.sqrt(1.0 - beta**2)
+    assert np.isclose(_ground_truth_tau(beta, worldline=True), 1.0 / lorentz, rtol=1e-4)
+
+
+@pytest.mark.parametrize("beta", [0.01, 0.05, 0.1, 0.2, 0.3])
+def test_ground_truth_frozen_is_one_minus_beta_over_gamma(beta):
+    lorentz = 1.0 / np.sqrt(1.0 - beta**2)
+    assert np.isclose(
+        _ground_truth_tau(beta, worldline=False), (1.0 - beta) / lorentz, rtol=1e-4
+    )
+
+
+# ------------------------------------------------------- the tau laws
+
+
+def test_worldline_law_has_no_first_order_term():
+    """1/gamma = 1 - beta^2/2: the deficit must scale as beta^2, not beta."""
     classical = tau_sobolev(F_OSC, N0, LAMBDA0, T_EXP)
-    rel = tau_sobolev_relativistic(F_OSC, N0, LAMBDA0, T_EXP, 0.0)
-    assert np.isclose(rel, classical, rtol=1e-12)
+    b = np.array([0.01, 0.02, 0.04])
+    deficit = 1.0 - tau_sobolev_relativistic(F_OSC, N0, LAMBDA0, T_EXP, b) / classical
+    # quadrupling beta must roughly sixteen-fold the deficit
+    assert np.isclose(deficit[2] / deficit[0], 16.0, rtol=0.05)
 
 
-def test_relativistic_tau_leading_order_is_one_doppler_factor():
-    """tau_rel ~ tau_S (1 - beta) at small beta. The opacity transformation
-    contributes D^2 but the sweep rate cancels one factor, so the net leading
-    behaviour is a SINGLE Doppler factor -- which is why the solver's
-    first-order mode, despite omitting D entirely, agrees at O(beta)."""
+def test_frozen_law_has_a_first_order_term():
     classical = tau_sobolev(F_OSC, N0, LAMBDA0, T_EXP)
-    for beta in (1e-4, 1e-3, 1e-2):
-        rel = tau_sobolev_relativistic(F_OSC, N0, LAMBDA0, T_EXP, beta)
-        assert np.isclose(rel / classical, 1.0 - beta, rtol=5 * beta**2 + 1e-9)
+    b = np.array([0.01, 0.04])
+    deficit = 1.0 - tau_sobolev_frozen(F_OSC, N0, LAMBDA0, T_EXP, b) / classical
+    assert np.isclose(deficit[1] / deficit[0], 4.0, rtol=0.05)
 
 
-def test_relativistic_tau_departs_from_one_minus_beta_at_second_order():
-    """At beta = 0.3 the exact result must differ measurably from (1-beta),
-    otherwise the gamma terms are not actually being carried."""
+def test_frozen_law_equals_one_minus_beta_over_gamma_for_radial_rays():
     classical = tau_sobolev(F_OSC, N0, LAMBDA0, T_EXP)
-    rel = tau_sobolev_relativistic(F_OSC, N0, LAMBDA0, T_EXP, 0.3) / classical
-    assert abs(rel - 0.7) > 0.01 * 0.7
+    b = np.array([0.01, 0.05, 0.1, 0.2, 0.3])
+    lorentz = 1.0 / np.sqrt(1.0 - b**2)
+    ratio = tau_sobolev_frozen(F_OSC, N0, LAMBDA0, T_EXP, b) / classical
+    assert np.allclose(ratio, (1.0 - b) / lorentz, rtol=1e-9)
 
 
-def test_relativistic_tau_decreases_with_beta():
-    betas = np.array([0.0, 0.01, 0.05, 0.1, 0.2, 0.3])
-    taus = tau_sobolev_relativistic(F_OSC, N0, LAMBDA0, T_EXP, betas)
-    assert np.all(np.diff(taus) < 0)
+def test_both_laws_reduce_to_classical():
+    classical = tau_sobolev(F_OSC, N0, LAMBDA0, T_EXP)
+    assert np.isclose(
+        tau_sobolev_relativistic(F_OSC, N0, LAMBDA0, T_EXP, 0.0), classical, rtol=1e-12
+    )
+    assert np.isclose(
+        tau_sobolev_frozen(F_OSC, N0, LAMBDA0, T_EXP, 0.0), classical, rtol=1e-12
+    )
 
 
-# ---------------------------------------------------------------- solver modes
+def test_worldline_absorbs_less_than_frozen():
+    """1/gamma > (1-beta)/gamma, so the frozen treatment overstates how much
+    the relativistic correction removes."""
+    b = np.array([0.05, 0.1, 0.2, 0.3])
+    rel = tau_sobolev_relativistic(F_OSC, N0, LAMBDA0, T_EXP, b)
+    fro = tau_sobolev_frozen(F_OSC, N0, LAMBDA0, T_EXP, b)
+    assert np.all(rel > fro)
 
 
-# A shell wide enough in velocity to place resonances from beta ~ 1e-3 out to
-# beta ~ 0.3. The earlier fixed geometry only reached beta = 0.019, so a
-# "high beta" probe fell outside the shell and absorbed nothing.
+# ------------------------------------------------------- solver modes
+
 BETA_LO, BETA_HI = 5.0e-4, 0.35
 R_CORE_W = BETA_LO * C * T_EXP
 R_OUT_W = BETA_HI * C * T_EXP
 
 
 def _trough(relativity, beta, n_impact=60):
-    """Transmitted fraction at the frequency whose resonance sits at beta."""
-    z_res = beta * C * T_EXP
     nu = np.array([NU0 / (1.0 - beta)])
     lum = emergent_luminosity(
         nu, [(NU0, F_OSC)], const(N0), const(10.0), T_EXP,
-        R_CORE_W, R_OUT_W, T_CORE, V_D, n_impact=n_impact,
-        relativity=relativity,
+        R_CORE_W, R_OUT_W, 2.0e4, V_D, n_impact=n_impact, relativity=relativity,
     )
-    cont = 4.0 * np.pi**2 * R_CORE_W**2 * planck_bnu(nu, T_CORE)
+    cont = 4.0 * np.pi**2 * R_CORE_W**2 * planck_bnu(nu, 2.0e4)
     return float(lum[0] / cont[0])
 
 
-def test_modes_agree_at_low_beta():
-    """At beta ~ 2e-3 the modes must agree to well under a percent, since
-    they differ only at O(beta^2)."""
-    assert np.isclose(_trough("first", 0.002), _trough("exact", 0.002), rtol=3e-3)
+def test_solver_modes_agree_at_low_beta():
+    for mode in ("exact", "first"):
+        assert np.isclose(
+            _trough("worldline", 0.002), _trough(mode, 0.002), rtol=5e-3
+        )
 
 
-def test_modes_absorb_something_in_the_wide_shell():
-    """Guard against the failure that fooled the first draft of this file:
-    a resonance outside the shell absorbs nothing and every comparison
-    trivially passes."""
-    for beta in (0.002, 0.1, 0.3):
-        assert _trough("exact", beta) < 0.95
+def test_solver_probes_actually_absorb():
+    # Probes are labelled by the FROZEN resonance velocity nu = nu0/(1-beta).
+    # Under worldline anchoring the ejecta age grows along the ray, so
+    # b = z/(c t_exp + z - z0) saturates at ~0.26 for this shell and a
+    # nominal beta = 0.3 has no resonance inside it at all. Stay below that:
+    # the guard exists because a probe outside the shell absorbs nothing and
+    # would make every comparison pass trivially.
+    for beta in (0.002, 0.1, 0.2):
+        assert _trough("worldline", beta) < 0.95
 
 
-def test_modes_separate_at_second_order():
-    """The two modes agree at O(beta) but must visibly separate by beta = 0.3,
-    where O(beta^2) is several percent."""
-    lo = abs(_trough("exact", 0.002) - _trough("first", 0.002))
-    hi = abs(_trough("exact", 0.3) - _trough("first", 0.3))
-    assert hi > 10 * lo
+def test_solver_worldline_absorbs_more_than_frozen():
+    """1/gamma > (1-beta)/gamma, so the worldline treatment gives the deeper
+    trough; the frozen snapshot understates the absorption."""
+    for beta in (0.05, 0.1, 0.2):
+        assert _trough("worldline", beta) < _trough("exact", beta)
 
 
 def test_invalid_mode_rejected():
-    import pytest
-
     with pytest.raises(ValueError):
         _trough("newtonian", 0.01)
