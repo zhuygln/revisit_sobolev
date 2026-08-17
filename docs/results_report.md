@@ -584,6 +584,3 @@ separation is universal.
    in which a per-line Sobolev *transport* scheme must be built and tested
    rather than computed in closed form.
 4. **NLTE populations**, the deferred Stage D of babystep_plan.md §16.
-5. **One bibliography field**: the GSI atomic-data paper's journal volume and
-   year require a manual check — APS returns 403 and ADS blocks automated
-   retrieval (lab notebook §9g).

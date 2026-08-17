@@ -106,5 +106,3 @@ everything above. Outstanding:
 3. **Scattering and fluorescence** — also the regime where the analytic
    Sobolev leg stops being exact, so a per-line Sobolev *transport* scheme
    would have to be built rather than computed.
-4. **One bibliography field**: the GSI atomic-data paper's journal volume and
-   year need a manual check (APS and ADS both refuse automated retrieval).

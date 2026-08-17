@@ -322,13 +322,20 @@ memory. Checked all of them against publisher records. The scoreboard:
   alternatives (experimentally calibrated wavelengths), which the draft had
   never justified.
 
-**Standing constraint worth recording:** `gsi_atomic` could not be fully
-verified — APS returns 403 and ADS blocks automated retrieval, so neither
-the journal volume nor the publication year is confirmed. Its authors, title,
-arXiv ID (2507.07785) and DOI (10.1103/jxqw-7ynk) are. The blanket TODO is
-replaced by a narrow one naming just that field, so the residual risk is
-visible without overstating it. Publisher pages generally cannot be scraped;
-plan on a manual check for any citation that matters.
+**Standing constraint worth recording:** `gsi_atomic` could not be verified
+from here — APS returns 403 and ADS blocks automated retrieval — so the
+journal volume and year were left as an explicit narrow TODO rather than
+guessed. **Resolved 2026-08-18**: the author supplied the published record
+(Flörs, da Silva, Marques, Sampaio & Martínez-Pinedo, *Phys. Rev. D* **113**,
+063041, 2026), which is now in the bibliography with the full author list,
+and the TODO is gone. Note the published title uses a colon rather than the
+arXiv version's "I."; the PRD form is what the entry carries.
+
+The constraint itself still holds: publisher pages generally cannot be
+scraped, so any citation that matters needs a human check. The useful
+pattern was to write down exactly which *field* was unverified rather than
+flagging the whole entry — it made the outstanding work a two-minute lookup
+instead of a re-verification.
 
 All 15 entries now resolve, no orphans, manuscript compiles clean at 23 pages.
 
