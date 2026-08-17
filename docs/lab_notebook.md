@@ -332,6 +332,42 @@ plan on a manual check for any citation that matters.
 
 All 15 entries now resolve, no orphans, manuscript compiles clean at 23 pages.
 
+## 9h. Manuscript restructure and documentation sweep (2026-08-17)
+
+**Manuscript.** Retitled from "How Large Is the Error of the Sobolev-Class
+Line-Transfer Approximation" to *Two Approximations Under One Name* — the old
+title asked a question the paper outgrew once F9 showed there are two
+approximations, not one. Results reordered so the separation leads instead of
+arriving fifth, and the thermal-emission convention subsection moved out of
+Results into Methods, where it belongs: it is a measurement convention, not a
+finding about ejecta. Every seam the reorder created needed rewriting — the
+separation section had opened "Everything above measures the implementation,"
+which became false the moment it moved to the front.
+
+While checking the reorder I found the Discussion still promising a per-line
+Sobolev leg as future work, months after building it, and Reproducibility
+still claiming 19 tests. Both fixed.
+
+**Docs sweep.** The surrounding documentation had drifted behind the work
+twice in three days. The worst case was a genuine contradiction rather than
+staleness: the report's next-steps section still carried the *retracted*
+claim that Δ_Sobolev is negative (−0.2 to −2.5%) — the normalization artifact
+of §9f — while §4.13, in the same document, explained that it was an
+artifact. A reader arriving at the end would have been told something the
+middle had already withdrawn.
+
+Also fixed: neither the README nor the report linked the manuscript at all,
+despite the paper being the project's main deliverable; the README had grown
+into a chronological diary (Phase 0 / Week 1 / Week 2 / Weeks 3–4) with
+Layout and Setup buried 150 lines down, still opening with the
+single-approximation question F9 superseded, and still listing 7 tests when
+there are 27.
+
+**Practice worth adopting:** update the report, notebook and README in the
+*same commit* as the result they describe. Both drift episodes came from
+deferring documentation to "after the next experiment," and both produced
+statements that were not merely out of date but wrong.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

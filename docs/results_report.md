@@ -1,9 +1,12 @@
 # Sobolev Validity in Kilonova Ejecta — Results Report
 
-**Status:** Phase 0 through the first Weeks 3–4 validity-map slice, complete.
-**Date:** 2026-08-14. **Repo:** `zhuygln/revisit_sobolev`.
-Companion document: [lab_notebook.md](lab_notebook.md) (chronological log,
-including dead ends and fixes). Planning documents:
+**Status:** Phase 0 through the validity maps, complete — findings F1–F10,
+11 figures, 27 tests. **Date:** 2026-08-17. **Repo:** `zhuygln/revisit_sobolev`.
+
+**Manuscript:** [paper/manuscript.pdf](paper/manuscript.pdf) — the paper drawn
+from this report, written for readers without a radiative-transfer background.
+Companion: [lab_notebook.md](lab_notebook.md) (chronological log, including
+dead ends and fixes). Planning inputs, preserved unmodified:
 [babystep_plan.md](babystep_plan.md), [research_requirements.md](research_requirements.md).
 
 ---
@@ -495,10 +498,12 @@ above; Δ_expansion was unaffected because it is a same-code differential.
 - **v_D = 1–300 km/s:** the frontier reached 1 km/s, within a factor ~2 of
   the La thermal width (0.6 km/s), where F6's floor is flat. The last factor
   of two is untested and costs ~1/v_D in transport bins.
-- **Coverage:** one window (3850–3950 Å) and one epoch (day 1) carry the
-  detailed map; the T axis (§4.9), multi-ion blending (§4.10), and a
-  windows × epochs × ions breadth sweep extend it. Until that sweep is
-  analyzed, F6/F7/F9 are established on a single window.
+- **Coverage:** the detailed maps use one window (3850–3950 Å) at day 1; the
+  breadth sweep (§4.13) extends to four windows spanning 4300–9100 Å, three
+  epochs and three ion mixtures, and confirms the separation there. What is
+  still absent is a full lanthanide mixture — two elements and three
+  ionization stages is not the dozen-plus species of real r-process ejecta,
+  and F7 says density matters.
 - **MC noise:** ~1–2% per SEDONA band flux at 2×10⁶ core particles. The
   resolved-leg agreement is ~1% once the F8 emission convention is matched
   (§4.11) — i.e. at the noise floor.
@@ -544,8 +549,12 @@ python solve_py.py && python compare.py
 # Sobolev-proper vs expansion separation (Figure 10) -- analytic, no runs
 cd ../sobolev_proper && python compare.py
 
-# breadth: windows x epochs x ions
+# breadth: windows x epochs x ions (Figure 11)
 cd ../breadth && python sweep.py            # ~36 conditions, 72 SEDONA runs
+python recompute.py && python fig11.py      # band fluxes + figure
+
+# the paper
+cd ../../docs/paper && make                 # pdflatex x2 + bibtex -> manuscript.pdf
 ```
 
 Long jobs: launch in the background with `python -u` and an **absolute** path
@@ -555,24 +564,26 @@ invocations (exit 127) and kills in-flight runs.
 
 ## 8. Next steps (in rough order of value)
 
-Completed since the first draft of this report: the T sweep (§4.9), the
-thermal-width frontier to 1 km/s (§4.9), multi-ion overlap (§4.10), and the
-per-line Sobolev leg (§4.12) — the last of which resolved the
-approximation-vs-implementation distinction that F4 exposed.
+Completed since the first draft of this report: the T sweep and thermal-width
+frontier (§4.9), multi-ion overlap (§4.10), the per-line Sobolev leg (§4.12)
+— which resolved the approximation-vs-implementation distinction that F4
+exposed — and the breadth sweep (§4.13), which established that the
+separation is universal.
 
-1. **Finish and analyze the breadth sweep** (windows × epochs × ions, in
-   flight): is F9's separation window-universal? Early 4300 Å numbers show
-   Δ_Sobolev *negative* (−0.2 to −2.5%) where the reference window gave
-   +5–7%, so the residual Sobolev offset may not be a fixed positive floor.
-2. **Explain the residual Sobolev error.** Neither strength (F9) nor, on
-   early evidence, a constant offset. The candidate is overlap within a
-   Doppler width — testable by correlating per-condition Δ_Sobolev against
-   the crowding statistic O = v_D/Δv of §4.3.
-3. **Frame-consistent comparison at realistic velocities** (0.1–0.3c),
+1. **Explain the residual Sobolev error.** It is ~5–8% and is *not* explained
+   by line strength (F9). The candidate is overlap within a Doppler width —
+   the isolation assumption — testable by correlating per-condition
+   Δ_Sobolev against the crowding statistic O = v_D/Δv of §4.3, using the
+   36 breadth conditions and 12 sweep points already on disk.
+2. **Frame-consistent comparison at realistic velocities** (0.1–0.3c),
    resolving F3 properly rather than avoiding it. Required before any
-   statement about real kilonova ejecta.
-4. **Scattering and fluorescence.** Beyond its intrinsic importance, this is
-   where the analytic Sobolev leg stops being exact, so it is the regime in
-   which a per-line Sobolev *transport* scheme must be built and tested
+   statement about real kilonova ejecta: at 0.1–0.3c the frame systematic is
+   10–30%, comparable to the effects being measured.
+3. **Scattering and fluorescence.** Beyond their intrinsic importance, this
+   is where the analytic Sobolev leg stops being exact, so it is the regime
+   in which a per-line Sobolev *transport* scheme must be built and tested
    rather than computed in closed form.
-5. **NLTE populations**, the deferred Stage D of babystep_plan.md §16.
+4. **NLTE populations**, the deferred Stage D of babystep_plan.md §16.
+5. **One bibliography field**: the GSI atomic-data paper's journal volume and
+   year require a manual check — APS returns 403 and ADS blocks automated
+   retrieval (lab notebook §9g).
