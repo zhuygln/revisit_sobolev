@@ -538,14 +538,17 @@ This is \textbf{Finding F4}: for a single strong line, ``Sobolev mode'' as
 implemented via expansion opacity is \emph{not} Sobolev line transfer.
 
 The same experiment surfaced \textbf{Finding F3}: the deterministic solver's
-$1.4\%$ excess over the analytic value is exactly the
-$\mathcal{O}(v_{\rm bulk}/c)$ frame ambiguity between observer-frame
-integration and the comoving-frame Sobolev formula
-(Appendix~\ref{app:frame}); at a resonance placed at $7.7\%$ of $c$ the
-deviation grows to $7\%$ and matches $e^{-\taus(1-z_{\rm res}/ct)}$ to four
-digits. All comparisons in this paper therefore keep resonances at
-$v_{\rm bulk}/c < 1\%$; realistic-velocity comparisons will require matched
-frame conventions.
+$1.4\%$ excess over the analytic value scales with the bulk velocity at the
+resonance, and at a resonance placed at $7.7\%$ of $c$ grows to $7\%$,
+matching $e^{-\taus(1-z_{\rm res}/ct)}$ to four digits. We first read this as
+a frame ambiguity between observer- and comoving-frame conventions. It is
+not: Appendix~\ref{app:frame} derives the Sobolev optical depth keeping $v/c$
+exactly and obtains $\tau_{\rm rel} \simeq \taus(1-v/c)$ at first order, so
+the offset is the leading \emph{relativistic correction} and it is the
+nonrelativistic $\taus$ that is in error. The comparisons in this paper keep
+resonances at $v_{\rm bulk}/c < 1\%$, where the correction is below the Monte
+Carlo noise floor; at the $0.1$--$0.3c$ of real ejecta it is a $10$--$30\%$
+effect on $\tau$ and cannot be neglected.
 
 \subsection{From two lines to a twenty-line ladder}
 
@@ -928,8 +931,8 @@ affordable, which is the strategy this program uses.
 F1 & Symmetric gradients cancel the Sobolev error at leading order; & \S\ref{sec:verification} \\
    & gradient-based diagnostics are conservative & \\
 F2 & Resolved vs expansion cost: $378\times$ on a standard example & \S\ref{sec:results} \\
-F3 & $\mathcal{O}(v_{\rm bulk}/c)$ frame ambiguity between observer-frame & \S\ref{sec:verification} \\
-   & integration and comoving Sobolev $\tau$ & \\
+F3 & The $\mathcal{O}(v_{\rm bulk}/c)$ offset from comoving Sobolev $\tau$ is & \S\ref{sec:verification}, \\
+   & not a frame ambiguity but the leading relativistic correction & App.~\ref{app:frame} \\
 F4 & Expansion opacity transmits $e^{-(1-e^{-\tau})}$ per crossing, not $e^{-\tau}$ & \S\ref{sec:verification} \\
 F5 & That error is per-resonance: it does not average away with line count & \S\ref{sec:verification} \\
 F6 & $\dsob$ = strength-set floor + $v_D$-growing wing term; & \S\ref{sec:results} \\
@@ -1150,20 +1153,100 @@ $z_{\rm res} < r_{\rm core}$ shadow only part of the disk. Ignoring this
 ($\sim$plane counting) predicts measurably too-shallow troughs in the
 ladder experiment.
 
-\subsection{The $\mathcal{O}(v/c)$ frame ambiguity (F3)}
+\subsection{The relativistic Sobolev optical depth, and what F3 really was}
 \label{app:frame}
 
-The comoving-frame Sobolev derivation uses the sweep rate
-$|\mathrm{d}\nu'/\mathrm{d}z| = \nu_0/ct$; a fixed-observer-frame
-integration uses $\nu/ct$ with $\nu = \nu_0/(1-z_{\rm res}/ct)$. The two
-differ by the factor $(1-z_{\rm res}/ct)$, i.e.\ first order in the bulk
-velocity at the resonance---distinct from, and generally much larger than,
-the $\mathcal{O}(v_D/c)$ accuracy of the profile treatment. Our measured
-trough at $z_{\rm res}/ct = 7.7\%$ matched
-$\exp[-\taus(1-z_{\rm res}/ct)]$ to four digits. Consistent comparisons
-must either keep $v_{\rm bulk}/c$ small (as done here) or adopt a single
-frame convention with the appropriate $\mathcal{O}(v/c)$ transformation
-terms.
+Appendix~\ref{app:sobolev} derived $\taus$ to first order in $v/c$. Kilonova
+ejecta move at $0.1$--$0.3c$, so the neglected terms are not small, and we
+found empirically (Finding F3) that a resonance at $z_{\rm res}/ct = 7.7\%$
+produced a trough matching $\exp[-\taus(1-z_{\rm res}/ct)]$ to four digits
+rather than $\exp(-\taus)$. We originally recorded that as a frame
+\emph{ambiguity} to be avoided by keeping resonances slow. The derivation
+below shows it is not an ambiguity: it is the leading relativistic
+correction, and it is the nonrelativistic $\taus$ that is wrong.
+
+\paragraph{Kinematics.} For homologous flow the gas at position $\mathbf{r}$
+moves with $\boldsymbol\beta = \mathbf{r}/(ct)$. Along a ray toward the
+observer write $b \equiv \beta_z = z/(ct)$ for the line-of-sight component and
+$\beta = r/(ct)$ for the speed. The exact Doppler relation between the
+observer frequency $\nu$ and the comoving frequency $\nu'$ is
+\begin{equation}
+  \nu' = D\,\nu, \qquad D = \gamma\,(1 - b), \qquad
+  \gamma = (1-\beta^2)^{-1/2} .
+  \label{eq:doppler}
+\end{equation}
+
+\paragraph{Two transformations enter.} First, the opacity. The combination
+$\nu\chi_\nu$ is a Lorentz invariant, so the lab-frame opacity is
+\begin{equation}
+  \chi_{\rm lab} = D\,\chi'_{\rm comoving} ,
+\end{equation}
+i.e.\ absorption is \emph{weaker} in the lab frame by one factor of $D$.
+(Our deterministic solver originally omitted this transformation entirely;
+see below for why that omission was nearly harmless.) Second, the sweep rate.
+Using $\mathrm{d}b/\mathrm{d}z = 1/(ct)$ and
+$\mathrm{d}\gamma/\mathrm{d}b = \gamma^3 b$,
+\begin{equation}
+  \frac{\mathrm{d}\nu'}{\mathrm{d}z}
+  = \frac{\nu}{ct}\Big[\gamma^3 b\,(1-b) - \gamma\Big].
+  \label{eq:sweep}
+\end{equation}
+
+\paragraph{Collapsing the integral.} As in Appendix~\ref{app:sobolev} the
+profile integrates to unity in $\nu'$, so
+$\tau = D\,\chi' / |\mathrm{d}\nu'/\mathrm{d}z|$ carries only one
+\emph{explicit} $D$. But the resonance condition $\nu' = \nu_0$ fixes
+$\nu = \nu_0/D$, which puts a second $D$ into Eq.~(\ref{eq:sweep}). With
+$\taus = \sigma_{\rm cl} f n_l \lambda_0 t$ as before,
+\begin{equation}
+  \boxed{\;
+  \frac{\tau_{\rm rel}}{\taus}
+  = \frac{D^2}{\big|\gamma^3 b\,(1-b) - \gamma\big|}
+  \;}
+  \label{eq:taurel}
+\end{equation}
+which reduces to unity as $b\to0$.
+
+\paragraph{The leading behaviour is one Doppler factor, not two.} It is
+tempting---we made this error first---to expect $\tau_{\rm rel} \simeq
+\taus(1-b)^2$, one factor from each transformation. Expanding
+Eq.~(\ref{eq:taurel}) instead gives $D^2 \simeq 1-2b$ over a denominator
+$\simeq 1-b$, so
+\begin{equation}
+  \tau_{\rm rel} \;\simeq\; \taus\,(1 - b)
+  \qquad\text{to first order:}
+\end{equation}
+the denominator cancels one of the two factors. This explains the empirical
+F3 result exactly, and it explains something else: an observer-frame
+integration that omits the opacity transformation but also mis-states the
+sweep rate---our solver's original mode---makes two errors that cancel at
+$\mathcal{O}(b)$ and therefore agrees with the exact treatment to that
+order, separating from it only at $\mathcal{O}(b^2)$. The agreement was
+fortuitous, not by design.
+
+\paragraph{Consequence, and a caution about sign.} If the correct depth is
+$\taus(1-b) < \taus$, then a resolved calculation transmits \emph{more} light
+than nonrelativistic Sobolev predicts, so the relativistic term contributes
+\emph{negatively} to a residual defined as
+$(F_{\rm Sobolev} - F_{\rm resolved})/F_{\rm resolved}$. The residual we
+measure in \S\ref{sec:separation} is positive. Removing the $v/c$ term would
+therefore \emph{increase} the part left to be explained by line overlap,
+rather than absorbing it. We flag this because the opposite expectation is
+natural, and because the algebra above is not by itself evidence: the
+experiment that settles it sweeps the resonance velocity with both solver
+modes, \textsc{sedona}, and each candidate $\tau$ on one axis.
+
+\paragraph{A further relativistic subtlety.} Nonrelativistically the
+resonance locus is a plane $z = \mathrm{const}$, which is what makes the
+$p$-averaging of Appendix~\ref{app:pavg} elementary. Relativistically
+$\gamma$ depends on $r$ rather than $z$, so Eq.~(\ref{eq:doppler}) defines a
+curved surface; these are the common-direction and common-point frequency
+surfaces of \citet{jeffery1993}, whose relativistic Sobolev method for
+homologously expanding atmospheres is the established treatment. Our
+controlled experiments keep the emitting core small compared with the
+resonance radii, so all core rays are nearly radial and the plane picture
+remains a good approximation; a general treatment would need the CD/CP
+surfaces explicitly.
 
 %=====================================================================
 \vspace{1em}
