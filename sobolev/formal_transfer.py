@@ -20,16 +20,31 @@ Deliberately NOT here: electron scattering, non-LTE source functions,
 relativistic terms beyond first order, time dependence. This solver's job
 is to be small enough to trust, not complete.
 
-KNOWN FIRST-ORDER LIMITATION: this observer-frame integration and the
-comoving-frame Sobolev formula tau_S = sigma f n lambda0 t disagree at
-O(v_bulk/c), where v_bulk is the flow velocity at the resonance point --
-the observer-frame sweep rate is nu/(ct) while the comoving derivation
-uses nu0/(ct), and the path-length transformation adds another such
-factor. Measured empirically: a resonance at v/c = 7.7% produced a 7%
-shallower trough than exp(-tau_S). Comparisons against Sobolev
-predictions are only clean when the resonance lies at v_bulk << c, or
-when both sides adopt the same frame convention. This is a systematic
-that the Week 3+ SEDONA comparisons must control for explicitly.
+FRAME TREATMENT (`relativity` argument):
+
+  "first"  -- nu' = nu (1 - z/ct), opacity used as sigma f n phi with NO
+              Doppler factor. This is the historical behaviour of this
+              module and the default, so that previously reported numbers
+              are reproducible. It is NOT the correct relativistic result.
+  "exact"  -- full special relativity: nu' = gamma nu (1 - beta_z) with
+              beta = r/(ct) and beta_z = z/(ct); the comoving opacity is
+              transformed to the lab frame as chi_lab = D chi', with the
+              Doppler factor D = nu'/nu (from the invariance of nu*chi_nu);
+              and the source function as S_lab = S'(nu')/D^3 (from the
+              invariance of I_nu/nu^3).
+
+The two modes agree at O(beta) and separate only at O(beta^2): the D factor
+the "first" mode omits is cancelled, to leading order, by the sweep-rate
+factor it also gets wrong (see sobolev_leg.tau_sobolev_relativistic for the
+algebra). Both give an effective optical depth tau_S (1 - beta) at first
+order. Consequently the systematic recorded as Finding F3 -- a resonance at
+beta = 7.7% giving a 7% shallower trough than exp(-tau_S) -- is NOT an error
+in this module: it is the correct relativistic behaviour, and it is the
+nonrelativistic tau_S that is wrong at O(v/c).
+
+Which mode is physically right is settled by experiment: see
+experiments/vc_control/, which sweeps beta with both solver modes, SEDONA,
+and every candidate Sobolev expression on one axis.
 """
 
 import numpy as np
@@ -63,6 +78,7 @@ def emergent_luminosity(
     n_impact=100,
     n_z_per_doppler=8.0,
     cutoff_widths=None,
+    relativity="first",
 ):
     """Emergent line spectrum L_nu (erg s^-1 Hz^-1) of the core+shell system.
 
@@ -135,7 +151,20 @@ def emergent_luminosity(
         temp = temp_of_r(r)
 
         # alpha(z, nu): sum the resolved profiles of all lines.
-        nu_com = nu_grid[None, :] * (1.0 - z[:, None] / (C * t_exp))
+        # Frame transformation. beta_z is the line-of-sight component of the
+        # homologous velocity; beta is its magnitude (both < 1 by construction
+        # for a shell with v_max < c).
+        beta_z = z / (C * t_exp)
+        if relativity == "exact":
+            beta = r / (C * t_exp)
+            lorentz = 1.0 / np.sqrt(np.maximum(1.0 - beta**2, 1e-300))
+            doppler = lorentz * (1.0 - beta_z)  # D = nu'/nu
+        elif relativity == "first":
+            doppler = 1.0 - beta_z
+        else:
+            raise ValueError(f"relativity must be 'first' or 'exact', got {relativity!r}")
+        nu_com = nu_grid[None, :] * doppler[:, None]
+
         alpha = np.zeros((n_z, nu_grid.size))
         for nu0, f_osc, pop, gamma in lines:
             dnu = nu_com - nu0
@@ -147,7 +176,12 @@ def emergent_luminosity(
                 phi = np.where(
                     np.abs(dnu) <= cutoff_widths * dnu_d[nu0], phi, 0.0
                 )
-            alpha += SIGMA_CLASSICAL * f_osc * pop * n_l[:, None] * phi
+            chi_comoving = SIGMA_CLASSICAL * f_osc * pop * n_l[:, None] * phi
+            if relativity == "exact":
+                # nu * chi_nu is a Lorentz invariant, so chi_lab = D chi'.
+                alpha += doppler[:, None] * chi_comoving
+            else:
+                alpha += chi_comoving
 
         # Formal solution via cumulative optical depth (trapezoidal steps):
         #   I_out = I_0 e^{-tau_tot} + sum_k S_k (e^{-t_above_k+1} - e^{-t_above_k})
@@ -155,11 +189,16 @@ def emergent_luminosity(
         tau_below = np.vstack([np.zeros_like(nu_grid), np.cumsum(dtau, axis=0)])
         tau_tot = tau_below[-1, :]
         tau_above = tau_tot[None, :] - tau_below
-        # Source at segment midpoints, at the local comoving frequency.
+        # Source at segment midpoints, at the local comoving frequency. In
+        # exact mode the comoving source must be carried back to the lab
+        # frame: I_nu/nu^3 is invariant, so S_lab(nu) = S'(nu')/D^3.
+        t_mid = 0.5 * (temp[1:] + temp[:-1])[:, None]
         s_mid = 0.5 * (
-            planck_bnu(nu_com[1:, :], 0.5 * (temp[1:] + temp[:-1])[:, None])
-            + planck_bnu(nu_com[:-1, :], 0.5 * (temp[1:] + temp[:-1])[:, None])
+            planck_bnu(nu_com[1:, :], t_mid) + planck_bnu(nu_com[:-1, :], t_mid)
         )
+        if relativity == "exact":
+            d_mid = 0.5 * (doppler[1:] + doppler[:-1])[:, None]
+            s_mid = s_mid / d_mid**3
         emis = np.sum(
             s_mid * (np.exp(-tau_above[1:, :]) - np.exp(-tau_above[:-1, :])), axis=0
         )

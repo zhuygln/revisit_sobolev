@@ -88,6 +88,74 @@ def sobolev_attenuation(
     return np.sum(p[:, None] * np.exp(-att), axis=0) / np.sum(p)
 
 
+def tau_sobolev_relativistic(f_osc, n_l, lambda0, t_exp, beta_z, beta=None):
+    """Sobolev optical depth for homologous flow, keeping v/c exactly.
+
+    Derivation (the relativistic counterpart of Appendix A.2). Along a ray
+    toward the observer the gas at coordinate z has line-of-sight velocity
+    beta_z = z/(ct) and speed beta = r/(ct), so the comoving frequency is
+
+        nu' = D nu,      D = gamma (1 - beta_z),   gamma = 1/sqrt(1-beta^2).
+
+    Two separate Doppler factors then enter the optical depth:
+
+    1. The opacity itself. nu*chi_nu is a Lorentz invariant, so the lab-frame
+       opacity is chi_lab = D chi'_comoving -- absorption is WEAKER in the lab
+       frame by D.
+    2. The sweep rate. tau = integral of chi dz collapses to chi / |dnu'/dz|,
+       and the resonance condition nu' = nu0 fixes nu = nu0/D, so the sweep
+       rate carries a further factor.
+
+    Keeping gamma exact and using db/dz = 1/(ct),
+
+        dnu'/dz = (nu/(ct)) [ gamma^3 b (1-b) - gamma ],      b = beta_z,
+
+    and the resonance condition nu' = nu0 fixes nu = nu0/D. Since the profile
+    integrates to unity in nu', tau = D chi' / |dnu'/dz| carries only ONE
+    explicit D, but substituting nu = nu0/D puts a second one in the sweep
+    rate:
+
+        tau_rel / tau_S  =  D^2 / |gamma^3 b (1-b) - gamma| .
+
+    Expanding, D^2 ~ 1 - 2b while the denominator ~ 1 - b, so
+
+        tau_rel  ~  tau_S (1 - beta_z)      to first order,
+
+    NOT (1 - beta_z)^2: the denominator cancels one of the two Doppler
+    factors. This matters for interpreting Finding F3. The solver's "first"
+    mode, which omits the opacity transformation entirely, also yields
+    tau_S (1 - beta_z) at first order -- so the empirically measured
+    exp[-tau_S(1-beta)] of F3 is not a bug in that mode but the correct
+    relativistic behaviour, and it is the NONRELATIVISTIC tau_S that is wrong
+    at O(v/c). The two solver modes therefore agree at O(beta) and separate
+    only at O(beta^2).
+
+    Parameters
+    ----------
+    beta_z : line-of-sight velocity / c at the resonance point.
+    beta : total speed / c there. Defaults to |beta_z| (exact for a ray
+        through the centre, where the velocity is purely radial along z).
+
+    Returns the relativistic Sobolev optical depth. Reduces to
+    `tau_sobolev` as beta_z -> 0.
+    """
+    beta_z = np.asarray(beta_z, dtype=float)
+    if beta is None:
+        beta = np.abs(beta_z)
+    beta = np.asarray(beta, dtype=float)
+
+    lorentz = 1.0 / np.sqrt(np.maximum(1.0 - beta**2, 1e-300))
+    d_factor = lorentz * (1.0 - beta_z)  # D = nu'/nu
+
+    # |dnu'/dz| in units of nu0/(ct), with nu = nu0/D at resonance:
+    #   dnu'/dz = nu [ gamma^3 beta_z (1-beta_z)/(ct) - gamma/(ct) ]
+    # so   |dnu'/dz| (ct/nu0) = |gamma^3 beta_z (1-beta_z) - gamma| / D.
+    sweep = np.abs(lorentz**3 * beta_z * (1.0 - beta_z) - lorentz) / d_factor
+
+    tau_nonrel = tau_sobolev(f_osc, n_l, lambda0, t_exp)
+    return tau_nonrel * d_factor / sweep
+
+
 def expansion_damp(tau):
     """The per-crossing substitution the binned expansion-opacity formalism
     applies: tau -> 1 - exp(-tau), capped at one effective optical depth."""
