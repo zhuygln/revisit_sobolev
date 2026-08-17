@@ -299,6 +299,39 @@ Result: **F10** — the F9 separation is universal, and realized τ_max is the
 sole controlling variable (windows, epochs and ion mixes collapse onto one
 trend).
 
+## 9g. Bibliography verification (2026-08-17)
+
+The manuscript carried a blanket red TODO: every reference was drafted from
+memory. Checked all of them against publisher records. The scoreboard:
+
+- **Wrong**: `metzger2019` — Metzger's *Kilonovae* review is Living Reviews
+  in Relativity **23**, 1 (**2020**), not 2019. Key renamed `metzger2020`.
+- **Misleading key**: `rothkasen2014` is ApJS 217, 9 (**2015**); the key
+  carried the arXiv year. Renamed `rothkasen2015`.
+- **Correct but thin**: the other ten were right on author/journal/volume but
+  lacked DOIs, arXiv IDs and end pages. All now complete (Karp 161--178,
+  Eastman 731--751, Castor 111--127, Kerzendorf 387--404, Tanaka
+  1369--1392). Sobolev 1960 gained its translator and the note that it
+  renders a 1947 Russian original — the bare 1960 date misleads.
+- **Uncited**: five entries were in the file but never cited. Rather than
+  deleting them they were placed where the text already implied them.
+- **Missing**: the Discussion named "TARDIS-class codes" and the Introduction
+  asserted lanthanide opacity dominance, both with no citation at all. Added
+  Kerzendorf & Sim (2014), Tanaka et al. (2020, 2025) and Barnes & Kasen
+  (2013). The data section now also says *why* GSI was chosen over the
+  alternatives (experimentally calibrated wavelengths), which the draft had
+  never justified.
+
+**Standing constraint worth recording:** `gsi_atomic` could not be fully
+verified — APS returns 403 and ADS blocks automated retrieval, so neither
+the journal volume nor the publication year is confirmed. Its authors, title,
+arXiv ID (2507.07785) and DOI (10.1103/jxqw-7ynk) are. The blanket TODO is
+replaced by a narrow one naming just that field, so the residual risk is
+visible without overstating it. Publisher pages generally cannot be scraped;
+plan on a manual check for any citation that matters.
+
+All 15 entries now resolve, no orphans, manuscript compiles clean at 23 pages.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

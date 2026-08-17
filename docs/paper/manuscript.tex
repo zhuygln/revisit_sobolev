@@ -90,9 +90,11 @@ universe dense enough in free neutrons to build the heaviest elements
 (gold, platinum, uranium, and the lanthanide row of the periodic table)
 through the rapid neutron-capture process, or \emph{r-process}. The
 radioactive decay of these freshly made nuclei heats the expanding cloud,
-which then glows for days to weeks: this glow is a \emph{kilonova}. One has
-been observed in detail, AT\,2017gfo, the optical counterpart of the
-gravitational-wave event GW170817 \citep{gw170817}.
+which then glows for days to weeks: this glow is a \emph{kilonova}
+\citep[for a review see][]{metzger2020}. One has been observed in detail,
+AT\,2017gfo, the optical counterpart of the gravitational-wave event GW170817
+\citep{gw170817}, whose modelling gave the first direct evidence that such
+mergers synthesize heavy r-process elements \citep{kasen2017}.
 
 Everything we want to learn from a kilonova---how much matter was ejected,
 how fast, and above all \emph{which elements were made}---must be read out of
@@ -100,9 +102,12 @@ its light. The light escapes only after filtering through the ejecta, and the
 filtering is dominated by an enormous number of atomic absorption lines.
 Lanthanide ions are the worst offenders: because of their complex open
 $4f$ electron shells, a single lanthanide ion can have tens of thousands of
-energy levels and millions of radiative transitions \citep{gsi_atomic}. The
-opacity of the ejecta, and therefore the color, brightness, and spectral
-features of the kilonova, is controlled by these line forests.
+energy levels and millions of radiative transitions
+\citep{tanaka2020,gsi_atomic}. Their presence raises the ejecta opacity by
+orders of magnitude and reddens and lengthens the transient
+\citep{barneskasen2013}. The opacity of the ejecta, and therefore the color,
+brightness, and spectral features of the kilonova, is controlled by these
+line forests.
 
 Simulating light transport through millions of lines, each intrinsically
 narrower than one part per million in frequency, is prohibitively expensive
@@ -259,7 +264,8 @@ $z = \mathrm{const}$.
 \subsection{The Sobolev approximation}
 
 \citet{sobolev1960} realized that this geometry makes the line optical depth
-computable without resolving the profile at all. The photon crosses the
+computable without resolving the profile at all; \citet{castor1970} cast the
+same idea in the escape-probability form used by most modern codes. The photon crosses the
 narrow resonance region quickly; if the gas properties ($n_l$, temperature)
 are constant across that thin region, the integral in Eq.~(\ref{eq:tau})
 collapses (Appendix~\ref{app:sobolev}) to the \emph{Sobolev optical depth}
@@ -334,7 +340,7 @@ Analytic & Sobolev theory, Eq.~(\ref{eq:tausob}), & prediction \\
 Deterministic & \texttt{sobolev/formal\_transfer.py} (this work): & resolved
 reference \\
  & frequency-resolved formal solution along rays & \\
-Monte Carlo & \textsc{sedona} \citep{sedona}, public release: & production
+Monte Carlo & \textsc{sedona} \citep{sedona,rothkasen2015}: & production
 code \\
  & (a) resolved bound--bound mode & resolved cross-check \\
  & (b) expansion-opacity mode & \textbf{the treatment under test} \\
@@ -436,7 +442,11 @@ therefore attenuation-only; $\dsob$, a differential between two
 \label{sec:data}
 
 Real-line experiments use the GSI Database for Kilonova Radiative Transfer
-\citep{gsi_atomic,gsi_zenodo}: calibrated energy levels and E1 transitions
+\citep{gsi_atomic,gsi_zenodo}. It is one of several recent efforts to supply
+r-process opacity data \citep[cf.][]{tanaka2020,tanaka2025}; we adopt it
+because its wavelengths are calibrated against experiment, which matters when
+the physical question turns on separations of a few $\kms$. It provides
+calibrated energy levels and E1 transitions
 for singly and doubly ionized lanthanides, with per-level calibration flags
 (\texttt{xmatch} = matched to experiment, \texttt{shifted} = calibrated
 shift, \texttt{uncalib}). For La\,\textsc{ii}: 472 levels and 17{,}743
@@ -953,10 +963,11 @@ line, resonances treated as planes---evaluated analytically. That evaluation
 is \emph{exact} rather than approximate, but only because the configuration
 is pure absorption without scattering: it is precisely that restriction which
 makes the $p$-averaged staircase equal to per-line Sobolev transport. A
-per-line Sobolev scheme inside a scattering Monte Carlo code (TARDIS-class
-macroatoms, say) is a different object, and our numbers should not be read as
-bounding it; extending the harness there is the natural sequel, and is the
-regime in which the leg would have to be built rather than computed.
+per-line Sobolev scheme inside a scattering Monte Carlo code---the
+macroatom treatment of TARDIS-class codes \citep{tardis}, say---is a
+different object, and our numbers should not be read as bounding it;
+extending the harness there is the natural sequel, and is the regime in which
+the leg would have to be built rather than computed.
 
 Within that scope the attribution is clean. The per-crossing cap (F4, F5) is
 absent from the Sobolev leg by construction and present in expansion opacity
@@ -1156,9 +1167,10 @@ terms.
 
 %=====================================================================
 \vspace{1em}
-\noindent\todo{All bibliography entries below were written from memory and
-must be verified against ADS/publisher records before any circulation
-beyond the author.}
+\noindent\todo{One field outstanding: the journal volume and publication year
+of \citet{gsi_atomic}. Its authors, title, arXiv identifier and DOI are
+confirmed, but the APS and ADS records refused automated retrieval; check the
+publisher page directly. Every other entry has been verified field by field.}
 
 \bibliographystyle{plainnat}
 \bibliography{references}

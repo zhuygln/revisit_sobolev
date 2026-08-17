@@ -1,21 +1,29 @@
-% NOTE: entries drafted from memory -- verify every field against ADS
-% before circulation (see TODO in manuscript.tex).
+% Verified 2026-08-17 against publisher records / ADS, except where noted.
+% One field remains unconfirmed: the journal volume and year of gsi_atomic
+% (APS returns 403 and ADS blocks automated fetch). Its arXiv ID and DOI are
+% confirmed. Everything else here has been checked field by field.
 
 @book{sobolev1960,
   author    = {Sobolev, V. V.},
   title     = {Moving Envelopes of Stars},
   publisher = {Harvard University Press},
   address   = {Cambridge, MA},
-  year      = {1960}
+  series    = {Harvard Books on Astronomy},
+  volume    = {10},
+  year      = {1960},
+  note      = {Translated by S. Gaposchkin from the 1947 Russian original},
+  doi       = {10.4159/harvard.9780674864658}
 }
 
 @article{castor1970,
   author  = {Castor, J. I.},
-  title   = {Spectral line formation in Wolf-Rayet envelopes},
+  title   = {Spectral line formation in {W}olf--{R}ayet envelopes},
   journal = {Monthly Notices of the Royal Astronomical Society},
   volume  = {149},
-  pages   = {111},
-  year    = {1970}
+  number  = {2},
+  pages   = {111--127},
+  year    = {1970},
+  doi     = {10.1093/mnras/149.2.111}
 }
 
 @article{karp1977,
@@ -23,8 +31,9 @@
   title   = {The opacity of expanding media: the effect of spectral lines},
   journal = {The Astrophysical Journal},
   volume  = {214},
-  pages   = {161},
-  year    = {1977}
+  pages   = {161--178},
+  year    = {1977},
+  doi     = {10.1086/155241}
 }
 
 @article{eastman1993,
@@ -32,28 +41,50 @@
   title   = {Spectrum formation in supernovae: numerical techniques},
   journal = {The Astrophysical Journal},
   volume  = {412},
-  pages   = {731},
-  year    = {1993}
+  pages   = {731--751},
+  year    = {1993},
+  doi     = {10.1086/172957}
 }
 
 @article{sedona,
   author  = {Kasen, D. and Thomas, R. C. and Nugent, P.},
-  title   = {Time-dependent Monte Carlo radiative transfer calculations for
-             three-dimensional supernova spectra, light curves, and
+  title   = {Time-dependent {M}onte {C}arlo radiative transfer calculations
+             for three-dimensional supernova spectra, light curves, and
              polarization},
   journal = {The Astrophysical Journal},
   volume  = {651},
-  pages   = {366},
-  year    = {2006}
+  number  = {1},
+  pages   = {366--380},
+  year    = {2006},
+  doi     = {10.1086/506190},
+  eprint  = {astro-ph/0606111},
+  archivePrefix = {arXiv}
 }
 
-@article{rothkasen2014,
+@article{rothkasen2015,
   author  = {Roth, N. and Kasen, D.},
-  title   = {Monte Carlo radiation-hydrodynamics with implicit methods},
+  title   = {{M}onte {C}arlo radiation-hydrodynamics with implicit methods},
   journal = {The Astrophysical Journal Supplement Series},
   volume  = {217},
+  number  = {1},
   pages   = {9},
-  year    = {2015}
+  year    = {2015},
+  doi     = {10.1088/0067-0049/217/1/9},
+  eprint  = {1404.4652},
+  archivePrefix = {arXiv}
+}
+
+@article{tardis,
+  author  = {Kerzendorf, W. E. and Sim, S. A.},
+  title   = {A spectral synthesis code for rapid modelling of supernovae},
+  journal = {Monthly Notices of the Royal Astronomical Society},
+  volume  = {440},
+  number  = {1},
+  pages   = {387--404},
+  year    = {2014},
+  doi     = {10.1093/mnras/stu055},
+  eprint  = {1401.5469},
+  archivePrefix = {arXiv}
 }
 
 @article{barneskasen2013,
@@ -62,28 +93,61 @@
              powered transients from compact object mergers},
   journal = {The Astrophysical Journal},
   volume  = {775},
+  number  = {1},
   pages   = {18},
-  year    = {2013}
+  year    = {2013},
+  doi     = {10.1088/0004-637X/775/1/18},
+  eprint  = {1303.5787},
+  archivePrefix = {arXiv}
+}
+
+@article{tanaka2020,
+  author  = {Tanaka, M. and Kato, D. and Gaigalas, G. and Kawaguchi, K.},
+  title   = {Systematic opacity calculations for kilonovae},
+  journal = {Monthly Notices of the Royal Astronomical Society},
+  volume  = {496},
+  number  = {2},
+  pages   = {1369--1392},
+  year    = {2020},
+  doi     = {10.1093/mnras/staa1576},
+  eprint  = {1906.08914},
+  archivePrefix = {arXiv}
+}
+
+@article{tanaka2025,
+  author  = {Tanaka, M. and others},
+  title   = {Systematic opacity calculations for kilonovae -- {II}. Improved
+             atomic data for singly ionized lanthanides},
+  journal = {Monthly Notices of the Royal Astronomical Society},
+  year    = {2025},
+  doi     = {10.1093/mnras/stae2504},
+  eprint  = {2501.13286},
+  archivePrefix = {arXiv}
 }
 
 @article{kasen2017,
   author  = {Kasen, D. and Metzger, B. and Barnes, J. and Quataert, E. and
              Ramirez-Ruiz, E.},
-  title   = {Origin of the heavy elements in binary neutron-star mergers
-             from a gravitational-wave event},
+  title   = {Origin of the heavy elements in binary neutron-star mergers from
+             a gravitational-wave event},
   journal = {Nature},
   volume  = {551},
-  pages   = {80},
-  year    = {2017}
+  number  = {7678},
+  pages   = {80--84},
+  year    = {2017},
+  doi     = {10.1038/nature24453},
+  eprint  = {1710.05463},
+  archivePrefix = {arXiv}
 }
 
-@article{metzger2019,
+@article{metzger2020,
   author  = {Metzger, B. D.},
   title   = {Kilonovae},
   journal = {Living Reviews in Relativity},
   volume  = {23},
   pages   = {1},
-  year    = {2019}
+  year    = {2020},
+  doi     = {10.1007/s41114-019-0024-0}
 }
 
 @article{gw170817,
@@ -91,23 +155,33 @@
   title   = {Multi-messenger observations of a binary neutron star merger},
   journal = {The Astrophysical Journal Letters},
   volume  = {848},
+  number  = {2},
   pages   = {L12},
-  year    = {2017}
+  year    = {2017},
+  doi     = {10.3847/2041-8213/aa91c9},
+  eprint  = {1710.05833},
+  archivePrefix = {arXiv}
 }
 
+% Authors, title, arXiv ID and DOI confirmed; journal volume and year still
+% to be checked against the published record.
 @article{gsi_atomic,
   author  = {Fl{\"o}rs, A. and others},
   title   = {Calibrated lanthanide atomic data for kilonova radiative
-             transfer. I. Atomic structure and opacities},
+             transfer. {I}. Atomic structure and opacities},
   journal = {Physical Review D},
-  note    = {DOI 10.1103/jxqw-7ynk},
-  year    = {2026}
+  doi     = {10.1103/jxqw-7ynk},
+  eprint  = {2507.07785},
+  archivePrefix = {arXiv},
+  year    = {2025},
+  note    = {Journal volume and publication year to be confirmed}
 }
 
 @misc{gsi_zenodo,
-  author = {Fl{\"o}rs, A. and others},
-  title  = {GSI Database for Kilonova Radiative Transfer},
-  howpublished = {Zenodo record 19335084, concept DOI
-                  10.5281/zenodo.15835360},
-  year   = {2026}
+  author       = {Fl{\"o}rs, A. and others},
+  title        = {{GSI} Database for Kilonova Radiative Transfer},
+  howpublished = {Zenodo},
+  note         = {Record 19335084; concept DOI 10.5281/zenodo.15835360},
+  doi          = {10.5281/zenodo.15835360},
+  year         = {2026}
 }
