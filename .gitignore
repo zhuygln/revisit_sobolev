@@ -45,3 +45,4 @@ experiments/**/sweep_*/
 experiments/**/tsweep_*/
 experiments/**/sweep_*.mod
 experiments/**/tsweep_*.mod
+experiments/**/blend_*/
