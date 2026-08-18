@@ -1,7 +1,7 @@
 # Sobolev Validity in Kilonova Ejecta — Results Report
 
 **Status:** Phase 0 through the validity maps and mechanism isolation, complete
-— findings F1–F12, 12 figures, 52 tests. **Date:** 2026-08-18. **Repo:** `zhuygln/revisit_sobolev`.
+— findings F1–F13, 13 figures, 52 tests. **Date:** 2026-08-18. **Repo:** `zhuygln/revisit_sobolev`.
 
 **Manuscript:** [paper/manuscript.pdf](paper/manuscript.pdf) — the paper drawn
 from this report, written for readers without a radiative-transfer background.
@@ -607,6 +607,39 @@ grids affordable.
 commonly attributed to "Sobolev" belongs to the expansion-opacity
 construction.
 
+### 4.16 Is the expansion-opacity error a bin-width artifact? (F13)
+
+![Figure 13](figures/fig13_binwidth.png)
+
+The sharpest referee objection to Paper I: expansion opacity is derived for
+bins containing *many* lines, and our grids are far finer — 12.5 km/s bins
+against ~50 km/s mean La II spacing, about one line per four bins. Have we
+measured the formalism outside its design regime?
+
+Appendix A.4 says no analytically (the bin width cancels; each crossing
+contributes 1−e^−τ at any resolution). Confirmed numerically over two decades
+of transport resolution at fixed physics:
+
+| line list | lines/bin | F_resolved spread | Δ_expansion |
+|---|---|---|---|
+| La II (153 lines) | 0.025–2.5 | 0.13% | **+43.7% ± 1.2** |
+| + Ce II (2529 lines) | 4.1–41 | 0.5% | **+15.3% ± 0.7** |
+
+The two lists give different errors (F7 — the blend is denser and partly
+blanketed) but neither depends on bin width, **including at 41 lines per bin**,
+squarely inside the regime the construction targets. The error is intrinsic.
+
+**A methodological trap, recorded because it nearly reversed the conclusion.**
+Extending the sweep to bins several times wider than the line profile makes
+Δ_expansion appear to collapse and change sign (+8.6%, −32.7%). It has not:
+past that point the *resolved* leg stops resolving, its band flux climbing
+0.342 → 0.442 → 0.679, and the comparison measures the reference rather than
+the approximation. My first script computed a verdict over all resolutions and
+printed "NOT INVARIANT → reframe the claim". **The reference's own convergence
+must be established before its disagreement with anything else means
+anything** — and excluded points must be shown with their reason, not dropped
+silently.
+
 ## 5. Findings register
 
 | # | Finding | Where |
@@ -623,6 +656,7 @@ construction.
 | F10 | The separation is universal across windows, epochs and ion mixes; realized τ_max is the controlling variable, and expansion errs ~3.5× more than Sobolev | §4.13 |
 | F11 | Neglect of light-travel-time evolution is a distinct approximation: frozen τ/τ_S = (1−β)/γ vs worldline 1/γ. The physical law has no O(β) term | §4.14 |
 | F12 | Overlap is inert in pure absorption (optical depths add exactly); the Sobolev residual is a finite-region boundary effect ∝ v_D/Δv_shell, negligible at thermal widths | §4.15 |
+| F13 | The expansion-opacity error is bin-width invariant from 0.025 to 41 lines per bin — intrinsic to the formalism, not a usage artifact | §4.16 |
 
 ## 6. Caveats and limitations
 

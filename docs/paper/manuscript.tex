@@ -161,7 +161,7 @@ paper reports:
   epoch, wavelength and composition---36 further conditions showing the
   separation to be universal and controlled by the realized maximum line
   optical depth alone;
-  \item twelve \textbf{methodological findings} (F1--F12, collected in
+  \item thirteen \textbf{methodological findings} (F1--F13, collected in
   Table~\ref{tab:findings}), among them an exact symmetry cancellation that
   makes gradient-based validity diagnostics conservative (F1); the
   demonstration that expansion opacity attenuates a single strong line by
@@ -858,6 +858,59 @@ window the same few strong lines dominate at all temperatures, so
 population redistribution is a weak axis (single-ion result; multi-ion
 mixtures may differ).
 
+\subsection{Is the error an artifact of bin choice?}
+\label{sec:binwidth}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\textwidth]{fig13_binwidth.png}
+  \caption{Left: the resolved reference is stable to $0.13\%$ while the
+  transport bin stays narrower than the line profile, and runs away once it
+  does not---those points measure the reference failing, not the
+  approximation changing, and are excluded. Right: across the valid range
+  $\Delta_{\rm expansion}$ is flat from $0.025$ to $41$ lines per bin, two
+  line lists and three decades.}
+  \label{fig:binwidth}
+\end{figure}
+
+Expansion opacity is derived for frequency bins containing \emph{many} lines;
+the statistical averaging is what gives the construction its meaning. Our
+transport grids are much finer than that---$12.5\kms$ bins against a mean
+La\,\textsc{ii} line spacing of $\sim50\kms$, i.e.\ about one line per four
+bins---so it is fair to ask whether we have measured the formalism outside its
+design regime.
+
+Appendix~\ref{app:expop} answers this analytically: the bin width cancels, and
+each resonance crossing contributes $1-e^{-\taus}$ at any resolution. The
+numerical test confirms it. Sweeping the transport resolution over two decades
+at fixed physics (Fig.~\ref{fig:binwidth}):
+
+\begin{center}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+line list & lines/bin & $F_{\rm resolved}$ spread & $\Delta_{\rm expansion}$ \\
+\midrule
+La\,\textsc{ii} (153 lines)  & $0.025$--$2.5$ & $0.13\%$ & $+43.7\% \pm 1.2$ \\
+$+$ Ce\,\textsc{ii} (2529)   & $4.1$--$41$    & $0.5\%$  & $+15.3\% \pm 0.7$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The two line lists give different errors---the blend is denser and partly
+blanketed, which is F7---but neither error depends on the bin width, including
+at $41$ lines per bin, which is squarely inside the many-line regime the
+construction targets. The error is intrinsic to the formalism.
+
+One methodological point deserves stating because it nearly produced the
+opposite conclusion. Extending the sweep to bins several times wider than the
+line profile appears to make $\Delta_{\rm expansion}$ collapse and change sign.
+It does not: past that point the \emph{resolved} calculation is no longer
+resolving anything, its band flux climbing from $0.342$ to $0.679$, and the
+comparison is measuring the reference rather than the approximation. A
+verdict computed over all resolutions without that check reports
+``not invariant''. The reference's own convergence has to be established
+before its disagreement with anything else can be interpreted.
+
 \subsection{Is the separation universal? A breadth sweep}
 \label{sec:breadth}
 
@@ -998,6 +1051,8 @@ F11 & Neglect of light-travel-time evolution is a distinct approximation: & App.
     & frozen $\tau/\taus = (1-\beta)/\gamma$ vs worldline $1/\gamma$ & \\
 F12 & Overlap is inert in pure absorption (optical depths add exactly); & App.~\ref{app:boundary} \\
     & the Sobolev residual is a finite-region boundary effect $\propto v_D$ & \\
+F13 & The expansion-opacity error is bin-width invariant from $0.025$ to & \S\ref{sec:binwidth} \\
+    & $41$ lines per bin, so it is intrinsic and not a usage artifact & \\
 \bottomrule
 \end{tabular}
 \end{table}

@@ -492,6 +492,37 @@ line-forming region, not of the approximation, and at real thermal widths
 robust; every cross-code comparison must share one normalization convention,
 and every sweep should carry a null control that is required to return unity.
 
+## 9k. Bin-width control, and a verdict I nearly published (2026-08-18)
+
+Ran the P1-B control: does Delta_expansion depend on transport bin width? If
+it does, the central claim is a usage artifact and Paper I needs reframing.
+
+**The script told me it did.** It printed "NOT INVARIANT -> the error depends
+on usage; reframe the claim", computed over all seven resolutions.
+
+It was wrong, and the tell was in a column I had put there for context rather
+than as a check: F_resolved. Stable at 0.3416-0.3420 for five points, then
+0.4415, then 0.6789. Once the bin exceeds the line profile the RESOLVED leg
+stops resolving; those points measure my reference failing, not expansion
+opacity changing. Restricted to where the reference is converged
+(bin <= 1.5 v_D), Delta_expansion is +43.7% +- 1.2 points across two decades.
+
+**Closing the objection properly.** The valid range only reaches ~2.5
+lines/bin, because resolving profiles (bin << v_D) and filling bins with lines
+(bin >> spacing) pull opposite ways. The fix is denser lines, not coarser
+bins: the La+Ce blend has 2529 lines in the same window and reaches 41
+lines/bin with the reference still converged. Delta = +15.3% +- 0.7 there,
+flat. Objection closed in both directions.
+
+**Two lessons.**
+1. Establish the reference's own convergence before interpreting its
+   disagreement with anything else. I have now been bitten by the reference
+   being wrong three times (frozen transport, normalization, and this), and
+   each time the symptom looked like a property of the thing under test.
+2. An automated verdict is only as good as its validity criterion. The script
+   now excludes unconverged points AND prints them with the reason, because a
+   silent exclusion is indistinguishable from cherry-picking.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

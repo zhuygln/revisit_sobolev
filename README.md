@@ -25,7 +25,7 @@ controlled by the realized maximum line optical depth and nothing else.
 
 ## The paper
 
-**[docs/paper/manuscript.pdf](docs/paper/manuscript.pdf)** — 25 pp, working
+**[docs/paper/manuscript.pdf](docs/paper/manuscript.pdf)** — 28 pp, working
 draft, readable directly on GitHub. Written for a reader with no
 radiative-transfer background: a primer builds every concept from scratch and
 an appendix derives every formula.
@@ -49,6 +49,7 @@ Source is [manuscript.tex](docs/paper/manuscript.tex); rebuild with
 | F10 | The separation is universal across windows, epochs and ion mixes; realized τ_max is the controlling variable | §4.13 |
 | F11 | Neglect of light-travel-time evolution is a distinct approximation: frozen τ/τ_S = (1−β)/γ vs worldline 1/γ, which has no O(β) term. SEDONA in steady-iterate mode solves the frozen problem, so transport treatment is a third convention cross-code comparisons must match | §4.14 |
 | F12 | Overlap is inert in pure absorption (optical depths add exactly); the Sobolev residual is a finite-region boundary effect ∝ v_D/Δv_shell, negligible at thermal widths | §4.15 |
+| F13 | The expansion-opacity error is bin-width invariant from 0.025 to 41 lines per bin — intrinsic to the formalism, not a usage artifact | §4.16 |
 
 Full write-up with figures and numbers:
 **[docs/results_report.md](docs/results_report.md)**.

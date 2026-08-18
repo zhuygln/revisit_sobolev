@@ -102,13 +102,34 @@ for dnu in RESOLUTIONS:
     results.append(row)
     (HERE / "binwidth_results.json").write_text(json.dumps(results, indent=1))
 
-ok = [r for r in results if r.get("d_exp") is not None]
+# The comparison is only meaningful where the RESOLVED leg is still resolved.
+# Once a bin is wider than the line profile the reference itself stops sampling
+# the profile and its band flux runs away (0.342 -> 0.44 -> 0.68 here). Those
+# points measure the reference failing, not expansion opacity changing, and
+# including them in a verdict is how the first version of this script wrongly
+# reported "NOT INVARIANT".
+V_D_KMS = 100.0
+ok = [r for r in results
+      if r.get("d_exp") is not None and r["bin_kms"] <= 1.5 * V_D_KMS]
+bad = [r for r in results
+       if r.get("d_exp") is not None and r["bin_kms"] > 1.5 * V_D_KMS]
+
 if ok:
     d = np.array([r["d_exp"] for r in ok])
-    print(f"\nDelta_expansion over {len(ok)} resolutions spanning "
-          f"{ok[0]['bin_kms']:.1f}-{ok[-1]['bin_kms']:.0f} km/s bins:")
-    print(f"  mean {d.mean():+.1%},  spread {d.max()-d.min():.1%},  "
-          f"std {d.std():.1%}")
-    print("  INVARIANT -> the error is intrinsic to the formalism"
-          if d.std() < 0.03 else
-          "  NOT INVARIANT -> the error depends on usage; reframe the claim")
+    f = np.array([r["bb"] for r in ok])
+    print(f"\nVALID range (bin <= 1.5 v_D, reference converged): "
+          f"{ok[0]['bin_kms']:.2f}-{ok[-1]['bin_kms']:.0f} km/s bins, "
+          f"{ok[0]['lines_per_bin']:.3f}-{ok[-1]['lines_per_bin']:.2f} lines/bin")
+    print(f"  F_resolved  mean {f.mean():.4f}, spread {f.max()-f.min():.4f} "
+          f"({(f.max()-f.min())/f.mean():.2%}) -- reference is stable")
+    print(f"  Delta_exp   mean {d.mean():+.1%}, spread "
+          f"{100*(d.max()-d.min()):.1f} points, std {100*d.std():.1f} points")
+    print("  => INVARIANT: the error is intrinsic to the formalism, not a"
+          " consequence of bin choice"
+          if (d.max() - d.min()) < 0.05 else
+          "  => NOT INVARIANT: reframe the claim")
+if bad:
+    print("\nEXCLUDED (bin > 1.5 v_D -- the reference is no longer resolved):")
+    for r in bad:
+        print(f"  bin {r['bin_kms']:7.0f} km/s: F_res = {r['bb']:.4f} "
+              f"(vs {ok[0]['bb']:.4f} converged), Delta_exp {r['d_exp']:+.1%}")
