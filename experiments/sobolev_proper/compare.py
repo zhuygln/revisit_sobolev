@@ -127,69 +127,23 @@ for r in sweep:
         f"D_exp_ana={rows[-1]['d_exp_ana']:+7.1%} D_exp_sed={rows[-1]['d_exp']:+7.1%}"
     )
 
-(Path(__file__).parent / "separation_results.json").write_text(
-    json.dumps(
-        dict(
-            la_forest=dict(res=F_res, sob=F_sob, exp=F_exp_sed),
-            blend=dict(res=Fm_res, sob=Fm_sob, exp=Fm_exp),
-            sweep=rows,
-        ),
-        indent=1,
-    )
-)
+# NOTE (P1-D): this script no longer writes separation_results.json, and no
+# longer draws Figure 10.
+#
+# It normalizes SEDONA band fluxes the old way -- by raw luminosity rather
+# than through sobolev.spectra.band_ratio -- which is the bug that
+# manufactured the retracted "v_D-independent Sobolev floor" of ~5-8%. When
+# recompute_all.py corrected the numbers, this file kept its own private copy
+# of the wrong ones, kept plotting them, and would have silently overwritten
+# separation_results.json with pre-fix values had anyone re-run it. The stale
+# figure sat in the manuscript directly opposite the paragraph retracting the
+# number it showed.
+#
+# recompute_all.py is the single source of truth for both the JSON and the
+# figure. This script is kept only for its spectrum overlay and blend
+# printout, which do not feed any published number.
+print("\n[compare.py writes no results file and no figure -- "
+      "run recompute_all.py for both]")
 
-# ---------------- figure ----------------
-fig = plt.figure(figsize=(11, 7.5))
-gs = fig.add_gridspec(2, 2, height_ratios=[1.15, 1])
-
-ax = fig.add_subplot(gs[0, :])
-ax.plot(lam_bb, r_bb, "C1", lw=0.9, label="SEDONA resolved (truth)")
-ax.plot(lam_grid, sob_la, "C2", lw=1.0, label=r"Sobolev proper: $e^{-\tau_S}$/line")
-ax.plot(lam_grid, exp_la, "C0", lw=1.0,
-        label=r"expansion: $e^{-(1-e^{-\tau_S})}$/crossing")
-ax.set_xlim(3790, 3980)
-ax.set_ylim(0, 1.3)
-ax.set_xlabel(r"wavelength [$\AA$]")
-ax.set_ylabel(r"$L_\lambda/L_\lambda^{\rm cont}$")
-ax.set_title(
-    "La II forest: the Sobolev approximation vs its expansion-opacity "
-    "implementation (T = 3000 K, day 1)"
-)
-ax.legend(fontsize=8, loc="lower left")
-
-ax2 = fig.add_subplot(gs[1, 0])
-for tau, color in [(0.5, "C2"), (5.0, "C1"), (50.0, "C3")]:
-    sel = sorted([r for r in rows if r["tau_max"] == tau], key=lambda r: r["v_d"])
-    ax2.semilogx([r["v_d"] for r in sel], [100 * r["d_exp"] for r in sel],
-                 "o-", color=color, label=rf"$\tau_{{\max}}$={tau:g}")
-    ax2.semilogx([r["v_d"] for r in sel], [100 * r["d_sob"] for r in sel],
-                 "s--", color=color, alpha=0.6)
-ax2.set_xlabel(r"$v_D$ [km/s]")
-ax2.set_ylabel(r"$\Delta$ [%]")
-ax2.set_title("solid: expansion   dashed: Sobolev proper", fontsize=9)
-ax2.axhline(0, color="k", lw=0.6)
-ax2.legend(fontsize=7)
-ax2.grid(alpha=0.3)
-
-ax3 = fig.add_subplot(gs[1, 1])
-width = 0.35
-taus = [0.5, 5.0, 50.0]
-at_100 = [next(r for r in rows if r["tau_max"] == t and r["v_d"] == 100.0) for t in taus]
-x = np.arange(len(taus))
-ax3.bar(x - width / 2, [100 * r["d_sob"] for r in at_100], width,
-        color="C2", label="Sobolev proper")
-ax3.bar(x + width / 2, [100 * r["d_exp"] for r in at_100], width,
-        color="C0", label="expansion opacity")
-ax3.set_xticks(x)
-ax3.set_xticklabels([f"{t:g}" for t in taus])
-ax3.set_xlabel(r"$\tau_{\max}$")
-ax3.set_ylabel(r"$\Delta$ [%]")
-ax3.set_title(r"at $v_D$ = 100 km/s", fontsize=9)
-ax3.axhline(0, color="k", lw=0.6)
-ax3.legend(fontsize=7)
-ax3.grid(alpha=0.3, axis="y")
-
-fig.tight_layout()
-out = ROOT / "outputs" / "fig10_sobolev_vs_expansion.png"
-fig.savefig(out, dpi=200)
-print("saved", out)
+# The figure that used to be built here now lives in recompute_all.py, next
+# to the data it plots. See the note above.
