@@ -523,6 +523,70 @@ flat. Objection closed in both directions.
    now excludes unconverged points AND prints them with the reason, because a
    silent exclusion is indistinguishable from cherry-picking.
 
+## 9l. Paper II Phase 0: both reference codes were wrong for the job (2026-08-18)
+
+Paper II needs a code where a photon absorbed in one line can leave in
+another. I went looking for one. Neither candidate works.
+
+**SEDONA (P2-0A).** I expected to find fluorescence switched off and to switch
+it on. It is not switched off — it does not exist. Outside `sandbox/` the only
+hit for fluor|branch|macroatom|downbranch in the whole source tree is a comment
+about nuclear decay. `opacity_epsilon` is one global scalar, and an interaction
+is either coherent scattering or a redraw from the zone's thermal pool. Neither
+channel knows which line absorbed the photon, and the expansion-opacity path
+throws that identity away by construction — the same information loss that
+produces F4. Implementing branching is core packet-interaction work.
+
+**TARDIS (P2-0D recon).** The opposite problem. `downbranch` and `macroatom`
+are configuration-level options and the code is there. It installs — but only
+via the repo lockfile: conda-forge has no package at all, and `pip install
+tardis-sn` pulls a 2015-era stub that dies calling `ez_setup.py`. Then all
+three modes fail identically at atomic-data load, before any transport. Its
+bundled downloader 404s because `tardis-regression-data`'s LFS objects are gone
+server-side (I checked three files — repo-wide), and the one file still
+retrievable via LFS anywhere, from `tardis-atomdata`, is `database_version
+v0.9`: plain HDF5 datasets, not the pandas tables the current reader wants.
+`pip install carsus` doesn't exist either.
+
+So I learned nothing about TARDIS's modes. That is worth stating plainly rather
+than filing the install as a success: the blocker is upstream data
+distribution, and all I verified is that the package imports.
+
+**The decision.** Build the instrument. Not just because both candidates were
+blocked, but because of the shape of the problem: TARDIS has branching and no
+expansion opacity, SEDONA has expansion opacity and no branching. Comparing
+them would be cross-code — the exact thing that has burned this project three
+times. One code that varies both is what Phase 1 actually needs.
+`paper2/phase0/three_level_atom/branching_mc.py`, ~250 lines.
+
+**Calibration.** Branching yields match A₃₂/(A₃₁+A₃₂) to 0.96σ across five
+ratios; interaction probabilities match 1−e^(−τ_S) to 1.41σ over τ = 0.1–10.
+Those were never in much doubt. The real check was the pure-absorption
+spectrum against `sobolev_attenuation` — Paper I's analytic leg, written
+independently, reaching the same answer by integrating over impact parameter
+instead of sampling rays. 2.07σ worst bin, max absolute difference 0.0070.
+
+**And it failed the first time, at 27σ, in exactly two bins.** I was comparing
+a bin-averaged MC against a midpoint-evaluated analytic. The trough edges are
+near-vertical — the resonance plane leaves the shell over a fraction of a
+percent in frequency — so at the edges midpoint and average differ hugely while
+every other bin agreed to under 1%. Averaging both sides over the bin fixed it
+completely.
+
+That is the third time (§9k, §4.13, here) that an alarming disagreement was the
+two sides being asked slightly different questions. The tell is the same every
+time: the discrepancy is confined to where the quantity varies fastest, and it
+is large where it appears at all rather than spread thin. I should check that
+before checking the physics — and it is now written into the test's docstring
+so the next person doesn't rediscover it.
+
+Also worth recording: my first draft of the interaction-probability test
+launched packets over a band 97% of which had no resonance in the shell at all,
+and reported "too few packets to measure". The fix was to derive the band from
+the geometry — require r_core < z_res < sqrt(r_out² − r_core²) and every ray
+crosses, whatever its impact parameter — and then assert that the offered
+fraction is exactly 1. A denominator you assume is a denominator you get wrong.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

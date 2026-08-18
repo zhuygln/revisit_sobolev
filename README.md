@@ -50,6 +50,7 @@ Source is [manuscript.tex](docs/paper/manuscript.tex); rebuild with
 | F11 | Neglect of light-travel-time evolution is a distinct approximation: frozen τ/τ_S = (1−β)/γ vs worldline 1/γ, which has no O(β) term. SEDONA in steady-iterate mode solves the frozen problem, so transport treatment is a third convention cross-code comparisons must match | §4.14 |
 | F12 | Overlap is inert in pure absorption (optical depths add exactly); the Sobolev residual is a finite-region boundary effect ∝ v_D/Δv_shell, negligible at thermal widths | §4.15 |
 | F13 | The expansion-opacity error is bin-width invariant from 0.025 to 41 lines per bin — intrinsic to the formalism, not a usage artifact | §4.16 |
+| F14 | Neither candidate reference code can answer Paper II alone: SEDONA has no line branching at all, TARDIS has no expansion opacity. A ~250-line branching Sobolev MC, validated to ≤2.1σ against the analytic Sobolev leg, supplies the same-code differential both lack | §4.17 |
 
 Full write-up with figures and numbers:
 **[docs/results_report.md](docs/results_report.md)**.
@@ -63,7 +64,9 @@ sobolev/       the package: constants, line profiles, optical depths,
 experiments/   one directory per experiment; generators and comparison
                scripts committed, SEDONA run outputs gitignored
 notebooks/     Phase 0: single-line toy model, GSI line spacing
-tests/         52 tests pinning the physics of every module
+paper2/        Paper II Phase 0: the SEDONA fluorescence source audit, the
+               TARDIS install record, and the branching Monte Carlo
+tests/         68 tests pinning the physics of every module
 docs/          results report, lab notebook, planning inputs, paper/
 data/          raw atomic data (gitignored; provenance in data/README.md)
 outputs/       working figures (gitignored; committed copies in docs/figures/)
@@ -74,7 +77,7 @@ outputs/       working figures (gitignored; committed copies in docs/figures/)
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]" h5py
-pytest                      # 52 passed
+pytest                      # 68 passed
 ```
 
 Atomic data is not committed — see [data/README.md](data/README.md) for the
@@ -110,4 +113,6 @@ everything above. Outstanding:
    surfaces stop being planes.
 3. **Scattering and fluorescence** — also the regime where the analytic
    Sobolev leg stops being exact, so a per-line Sobolev *transport* scheme
-   would have to be built rather than computed.
+   would have to be built rather than computed. This is now Paper II, and its
+   Phase 0 is done: the instrument exists and is calibrated (F14, `paper2/`).
+   What it has not yet done is measure anything.

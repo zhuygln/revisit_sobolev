@@ -643,6 +643,86 @@ must be established before its disagreement with anything else means
 anything** — and excluded points must be shown with their reason, not dropped
 silently.
 
+### 4.17 Paper II Phase 0 — a branching instrument, built and calibrated (F14)
+
+Paper II's question is whether the expansion-opacity bias of F9/F13 survives
+radiative redistribution. Answering it needs a code in which a photon absorbed
+in one line can leave in another. Two audits decided which code that would be.
+
+**P2-0A: the public SEDONA cannot do it at all.**
+`paper2/phase0/sedona_source_audit/NOTES.md` records the search. Outside
+`sandbox/` there is no fluorescence path, no macroatom, no downbranching. What
+exists is `opacity_epsilon`, a single global scalar
+(`opacity/GasState_opacities.cpp:438`), splitting extinction into an absorptive
+part; an interaction is then either coherent scattering or a redraw from the
+zone's total emissivity (`transport/scatter.cpp:12,303`). **Neither channel
+knows which line absorbed the photon.** Adding real branching means carrying
+upper-level identity through the interaction — information the expansion-opacity
+path deliberately discards, which is the same loss that produces F4's
+per-crossing cap. That is core packet-interaction work, not a configuration
+switch. Verdict: absent, not deprecated.
+
+**P2-0D reconnaissance: TARDIS has the physics but not the data.**
+`paper2/phase0/tardis_install/NOTES.md`. TARDIS 2026.8.10.dev7 installs
+(only via the repo lockfile — conda-forge has no package and the PyPI name is
+a 2015 stub) and `line_interaction_type: scatter | downbranch | macroatom` is
+a first-class configuration option. But every mode fails at atomic-data load,
+before transport: TARDIS's bundled downloader 404s because the LFS objects of
+`tardis-regression-data` are gone server-side, and the one file still
+retrievable (`tardis-atomdata`, `database_version v0.9`) predates the pandas-HDF
+format the current reader expects. The blocker is upstream data distribution,
+so **nothing has yet been learned about the modes themselves.**
+
+**The instrument was therefore built here** —
+`paper2/phase0/three_level_atom/branching_mc.py`, ~250 lines, the same shape as
+the formal solver that produced this project's most defensible results. It is
+also the only option that preserves the standing rule: TARDIS has branching but
+no expansion opacity, SEDONA has expansion opacity but no branching, so a
+comparison between them would be cross-code. One code that can vary *both* is
+what Phase 1 needs.
+
+Physics: 1-D homologous shell, opaque lightbulb core, Sobolev point
+interactions, frozen populations, first-order Doppler. The three-level atom is
+ground 1, metastable sink 2, upper 3; the 1→3 line carries the only opacity and
+level 3 branches to 1 (resonant) or 2 (fluorescent, redder). Because comoving
+frequency decreases monotonically along any ray, a packet re-emitted at a line
+centre can never reach that resonance again — enforced by a positive distance
+tolerance, not by special-casing.
+
+**F11 does not bite here.** The worldline correction is τ→τ/γ, i.e. O(β²); at
+the 0.003–0.017 c of this geometry that is ≤3×10⁻⁴, below MC noise at any
+practical packet count. F11 matters because it distinguishes 1/γ from a
+spurious O(β) law; there is no O(β) term to get wrong.
+
+**Calibration** (`run.py`, 2×10⁵ packets; `results.json`):
+
+| check | predicted | measured | worst |
+|---|---|---|---|
+| fluorescent yield, A₃₂/(A₃₁+A₃₂) at 5 ratios | 0.00–0.75 | matches | 0.96σ |
+| interaction probability, 1−e^(−τ_S) at τ = 0.1–10 | 0.095–1.000 | matches | 1.41σ |
+| pure-absorption spectrum vs the analytic Sobolev leg | — | max abs. diff 0.0070 | 2.07σ |
+
+The third is the one that matters. `sobolev.sobolev_leg.sobolev_attenuation`
+was written for Paper I, is independently tested, and reaches the same emergent
+spectrum by integrating over impact parameter rather than by sampling rays.
+Agreement pins the geometry, the resonance-plane solve and τ_S together; the
+first two checks alone would not catch a transport bug.
+
+**One methodological catch, and it is the familiar one.** The first version of
+that comparison reported a 27σ disagreement in exactly two bins. It was
+comparing a *bin-averaged* MC against a *midpoint-evaluated* analytic. The
+trough edges are near-vertical — the resonance plane leaves the shell over a
+fraction of a percent in frequency — so at those two bins the midpoint value
+and the bin average differ enormously while everything else agrees to <1%. This
+is the same failure as the red-margin straddle that once manufactured a 7%
+error in the breadth sweep (§4.13), and the same as the bin-width verdict of
+§4.16. Averaging both sides over the bin removed it entirely. **Three times
+now, a "disagreement" has turned out to be the two sides being asked different
+questions.**
+
+The instrument is calibrated; it has measured nothing new. Phase 1 is where
+branching gets switched on against an expansion-opacity leg in the same code.
+
 ## 5. Findings register
 
 | # | Finding | Where |
@@ -660,6 +740,7 @@ silently.
 | F11 | Neglect of light-travel-time evolution is a distinct approximation: frozen τ/τ_S = (1−β)/γ vs worldline 1/γ. The physical law has no O(β) term | §4.14 |
 | F12 | Overlap is inert in pure absorption (optical depths add exactly); the Sobolev residual is a finite-region boundary effect ∝ v_D/Δv_shell, negligible at thermal widths | §4.15 |
 | F13 | The expansion-opacity error is bin-width invariant from 0.025 to 41 lines per bin — intrinsic to the formalism, not a usage artifact | §4.16 |
+| F14 | Neither candidate reference code can answer Paper II alone: SEDONA has no line branching whatsoever, TARDIS has no expansion opacity. A ~250-line branching Sobolev MC, validated to ≤2.1σ against the analytic Sobolev leg, supplies the same-code differential both lack | §4.17 |
 
 ## 6. Caveats and limitations
 
