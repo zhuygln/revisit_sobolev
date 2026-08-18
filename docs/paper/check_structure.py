@@ -166,10 +166,15 @@ def main():
                 f"{words} words (< {MIN_WORDS}) -- content loss?"
             )
 
-    # 3. figures exist
+    # 3. figures exist. The manuscript cites them without an extension so that
+    # graphicx picks the vector version where a generator emitted one, so try
+    # the candidates in the same order LaTeX would.
     for fig in re.findall(r"\\includegraphics\[[^\]]*\]\{([^}]+)\}", text):
-        if not (FIG_DIR / fig).exists():
-            problems.append(f"missing figure {fig}")
+        found = (FIG_DIR / fig).exists() or any(
+            (FIG_DIR / (fig + ext)).exists() for ext in (".pdf", ".png")
+        )
+        if not found:
+            problems.append(f"missing figure {fig} (no .pdf or .png)")
 
     # 4. no leftover TODOs
     todos = [l for l in text.splitlines()

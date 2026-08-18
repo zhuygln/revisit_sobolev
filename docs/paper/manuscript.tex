@@ -6,6 +6,9 @@
 \usepackage{booktabs}
 
 \graphicspath{{../figures/}}
+% Prefer vector where a generator emitted it; the three remaining
+% raster figures are all above 400 dpi at their placed width.
+\DeclareGraphicsExtensions{.pdf,.png}
 
 \newcommand{\dexp}{\Delta_{\mathrm{exp}}}
 \newcommand{\dsobp}{\Delta_{\mathrm{Sob}}}
@@ -318,10 +321,10 @@ design requirement that only the line-transfer treatment may differ, every
 experiment in this paper evaluates \emph{one} physical configuration three
 ways:
 
-\begin{table}
+\begin{table*}
 \centering
 \small
-\begin{tabular}{@{}ll@{}}
+\begin{tabular}{@{}lll@{}}
 \toprule
 Leg & Role \\
 \midrule
@@ -335,7 +338,7 @@ Monte Carlo: \textsc{sedona} \citep{sedona,rothkasen2015} & \\
 \quad (b) expansion-opacity mode & \textbf{under test} \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
 Agreement of the first three (analytic, deterministic, \textsc{sedona}
 resolved) validates the harness; the offset of the fourth is the measured
@@ -418,9 +421,11 @@ Three deliberate simplifications keep the comparison interpretable:
   the gas state never feedbacks on the radiation. Populations are therefore
   known exactly.
   \item \textbf{Controlled velocities.} Shell velocities span
-  $1000$--$3000\kms$ (not the realistic $0.1$--$0.3c$), keeping an
-  $\mathcal{O}(v/c)$ frame ambiguity (Finding F3,
-  Appendix~\ref{app:frame}) below the measurement level.
+  $1000$--$3000\kms$ rather than the realistic $0.1$--$0.3c$. This keeps the
+  difference between \textsc{sedona}'s frozen steady-state transport and a
+  worldline-consistent treatment negligible for the present measurements
+  (F3/F11, Appendix~\ref{app:frame}), and keeps the frequency-grid cost of
+  resolving line profiles affordable.
 \end{enumerate}
 
 \subsection{Population control}
@@ -533,7 +538,7 @@ codes carry identical line strengths regardless of which column they read.
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\columnwidth]{fig1_sobolev_error_vs_gradient.png}
+  \includegraphics[width=\columnwidth]{fig1_sobolev_error_vs_gradient}
   \caption{Controlled breakdown of the Sobolev locality assumption. A
   $\tanh$-shaped population gradient of velocity scale $v_{\rm scale}$ is
   imposed; the relative error $E_{\rm Sob}$ between the resolved integral
@@ -569,7 +574,7 @@ below the $G$-based bound.
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\columnwidth]{fig4_minimal_1line_threeway.png}
+  \includegraphics[width=\columnwidth]{fig4_minimal_1line_threeway}
   \caption{Minimal one-line model (artificial Ly$\alpha$-like line,
   $\taus=2$, cold neutral shell). Top: emergent spectra. Bottom: ratio to
   the continuum. \textsc{sedona}'s resolved mode (orange) lies on top of the
@@ -627,7 +632,7 @@ it cannot account for any part of the residual in \S\ref{sec:separation}.
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\columnwidth]{fig5_line_ladder.png}
+  \includegraphics[width=\columnwidth]{fig5_line_ladder}
   \caption{Line ladder at $\taus = 0.5$ per line. Top: two lines separated
   by $1500\kms$ (overlapping troughs). Bottom: twenty lines spaced
   $750\kms$ (a mini forest). The resolved trio---\textsc{sedona} resolved
@@ -689,25 +694,30 @@ computer time (\S\ref{sec:cost}).
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\columnwidth]{fig2_laII_line_spacing.png}
+  \includegraphics[width=\columnwidth]{fig2_laII_line_spacing}
   \caption{Nearest-neighbor velocity spacing of GSI La\,\textsc{ii} lines
   (3000\,\AA--3\,$\mu$m): in the broader subset, $11.3\%$ of lines have a
   neighbor within $10\kms$ and $3.3\%$ within $3\kms$.}
   \label{fig:crowding}
 \end{figure}
 
-The Sobolev isolation assumption fails when lines crowd within a Doppler
-width. Fig.~\ref{fig:crowding} shows that even for this \emph{single} ion,
+The geometric isolated-line condition is violated when profiles crowd within
+a Doppler width; whether that violation produces a \emph{transport} error
+depends on the interaction physics, and \S\ref{sec:separation} shows it does
+not in the pure-absorption case studied here, where optical depths add
+exactly. Fig.~\ref{fig:crowding} shows that even for this \emph{single} ion
 the calibrated data contain a real crowding tail: $11.3\%$ of the broader
 line sample has a neighbor within $10\kms$. Multi-ion mixtures only add
-lines, so the potentially problematic regime exists in nature.
+lines, so the geometrically crowded regime exists in nature---which is what
+makes it worth establishing that crowding alone is not sufficient for a
+transport error.
 
 \subsection{A realistic forest: 153 calibrated lines}
 \label{sec:forest}
 
 \begin{figure*}[t]
   \centering
-  \includegraphics[width=\textwidth]{fig6_laII_forest.png}
+  \includegraphics[width=\textwidth]{fig6_laII_forest}
   \caption{The 3850--3950\,\AA{} La\,\textsc{ii} forest (153 calibrated
   lines, 3 with $\taus>1$, max 5) at $T=3000$\,K, one day after merger.
   The resolved treatments (orange, black dashed) saturate to black where
@@ -753,7 +763,7 @@ implemented.
 
 \begin{figure*}[t]
   \centering
-  \includegraphics[width=\textwidth]{fig10_sobolev_vs_expansion.png}
+  \includegraphics[width=\textwidth]{fig10_sobolev_vs_expansion}
   \caption{Top: the La\,\textsc{ii} forest under three treatments. The
   Sobolev approximation proper (green, per-line $e^{-\taus}$) tracks the
   resolved calculation (orange) closely; expansion opacity (blue) sits well
@@ -873,7 +883,8 @@ derives it: where a resonance lies within a few Doppler widths of a boundary
 of the line-forming region, the resolved profile is clipped while Sobolev
 applies a hard step, giving
 $\tau/\taus = \tfrac12[\mathrm{erf}((z_{\rm hi}-z_{\rm res})/\Delta) -
-\mathrm{erf}((z_{\rm lo}-z_{\rm res})/\Delta)]$ with $\Delta = v_D t$. The
+\mathrm{erf}((z_{\rm lo}-z_{\rm res})/\ell_{\rm S})]$ with the Sobolev
+length $\ell_{\rm S} = v_D t$. The
 affected fraction of the band is $\sim v_D/\Delta v_{\rm shell}$, which is
 why the error is invisible at thermal widths and reaches tens of percent only
 when $v_D$ is a sizeable fraction of the velocity span of the shell.
@@ -883,7 +894,7 @@ when $v_D$ is a sizeable fraction of the velocity span of the shell.
 
 \begin{figure*}[t]
   \centering
-  \includegraphics[width=\textwidth]{fig7_validity_slice.png}
+  \includegraphics[width=\textwidth]{fig7_validity_slice}
   \caption{First validity-map slice: $\dexp$ vs Doppler width for three
   overall line-strength scalings of the La\,\textsc{ii} forest. Right
   panel: expansion-opacity fluxes (dashed) are blind to $v_D$, while
@@ -893,7 +904,7 @@ when $v_D$ is a sizeable fraction of the velocity span of the shell.
 
 \begin{figure*}[t]
   \centering
-  \includegraphics[width=\textwidth]{fig8_T_and_frontier.png}
+  \includegraphics[width=\textwidth]{fig8_T_and_frontier}
   \caption{Left: temperature axis at pinned $\tau_{\max}=5$ (weak
   dependence; annotations count strong lines). Right: the Doppler-width
   frontier: $\dexp$ is flat at $\sim38\%$ from $10\kms$ down to $1\kms$,
@@ -953,7 +964,7 @@ mixtures may differ).
 
 \begin{figure*}[t]
   \centering
-  \includegraphics[width=\textwidth]{fig13_binwidth.png}
+  \includegraphics[width=\textwidth]{fig13_binwidth}
   \caption{Left: the resolved reference is stable to $0.13\%$ while the
   transport bin stays narrower than the line profile, and runs away once it
   does not---those points measure the reference failing, not the
@@ -1009,7 +1020,7 @@ before its disagreement with anything else can be interpreted.
 
 \begin{figure*}[t]
   \centering
-  \includegraphics[width=\textwidth]{fig11_breadth.png}
+  \includegraphics[width=\textwidth]{fig11_breadth}
   \caption{Thirty-six conditions---four wavelength windows (none of them the
   window of \S\ref{sec:separation}), three epochs, three ion mixtures---with
   both panels on the same vertical scale. Every condition collapses onto a
@@ -1073,7 +1084,7 @@ cost nothing and are worth including by default.
 
 \begin{figure*}[t]
   \centering
-  \includegraphics[width=\textwidth]{fig9_multiion_forest.png}
+  \includegraphics[width=\textwidth]{fig9_multiion_forest}
   \caption{La\,\textsc{ii} + Ce\,\textsc{ii} blend in the same window. Ce
   floods it with 2376 additional lines (2529 total; strong-line spacings
   down to $8\kms$), saturating the band to near-black in every treatment.}
@@ -1091,16 +1102,35 @@ $\dexp = +14.6\%$ (Fig.~\ref{fig:blend}).
 \textbf{Finding F7}: $\dexp$ is non-monotonic in forest density. With enough
 crossings, even capped per-crossing contributions sum to blackness, so both
 treatments agree that almost nothing escapes and the relative error is
-suppressed. The regime that maximizes the error is the \emph{intermediate}
-one---strong lines that do not yet fully blanket the band---which is exactly
-where spectral features form and where composition is read off.
+suppressed.
+
+F7 therefore defines the domain of relevance rather than weakening the
+result. The error is small in two limiting regimes---weak lines, and bands
+driven completely black---and largest in the \emph{intermediate} one, where
+optically thick lines coexist with nonzero escaping flux. Partially
+transparent, feature-forming regions of exactly this kind do occur in
+realistic kilonova calculations: multi-element models retain identifiable
+La, Ce and Sr features rather than becoming featureless
+\citep{domoto2022}, and r-process opacity varies strongly with composition
+and by roughly an order of magnitude with epoch, so ``lanthanide-rich'' does
+not imply uniform blanketing at all wavelengths and times
+\citep{tanaka2020}.
+
+We are explicit about what this does and does not license. It does not
+license reading $+38$--$48\%$ as the error of a fully mixed kilonova
+spectrum; F7 shows directly that the error is suppressed as a band
+approaches complete blanketing, and our La\,\textsc{ii}$+$Ce\,\textsc{ii}
+case already demonstrates the suppression. What it does license is the
+statement that expansion opacity can generate tens-of-percent attenuation
+errors in strong, incompletely blanketed bands, and that such bands are not
+a contrived configuration.
 
 \subsection{Computational cost: what the shortcut buys}
 \label{sec:cost}
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\columnwidth]{fig3_sedona_typeIa_exp_vs_bb.png}
+  \includegraphics[width=\columnwidth]{fig3_sedona_typeIa_exp_vs_bb}
   \caption{Motivating cost anecdote from a standard \textsc{sedona}
   Type~Ia supernova example: the same model runs in 14\,s with expansion
   opacity and 88\,min resolved ($378\times$), while redistributing flux
@@ -1185,15 +1215,14 @@ conserved; only its spectral distribution differs. A $+45\%$ error in
 attenuated band flux is therefore an upper bound on the corresponding error
 in an emergent spectrum, not a measurement of it.
 
-Two things nonetheless survive that step, and one does not. The sign
-survives: the per-crossing cap can only ever \emph{under}-attenuate
-(Appendix~\ref{app:expop}), so expansion opacity leaks flux out of strong-line
-bands in one direction, and thermal re-emission returns it redward of where
-it was lost rather than restoring the band. The order of magnitude plausibly
-survives, because the leak is a systematic per-resonance defect rather than a
-random one and does not average away with line count (F5). What does
-\emph{not} survive without further work is the quantitative transfer to
-inferred ejecta masses and lanthanide fractions. Repeating these measurements
+What survives that step is the \emph{sign}, which is fixed by the
+per-crossing cap: the substitution can only ever under-attenuate
+(Appendix~\ref{app:expop}), so expansion opacity leaks flux out of
+strong-line bands in one direction, and thermal re-emission returns it
+redward of where it was lost rather than restoring the band. The
+\emph{magnitude} in an emergent spectrum does not follow from anything
+measured here and must be obtained with energy-conserving transport;
+redistribution is nonlinear, and we decline to predict its outcome. Repeating these measurements
 with radiative equilibrium enabled is the natural next experiment, and it is
 a well-posed one: the configuration here differs from an energy-conserving
 run by a single \textsc{sedona} switch.
@@ -1265,8 +1294,11 @@ $\tau_{\max}$ is the controlling variable among those axes; the error retains
 a separate, measured dependence on $v_D$ (\S\ref{sec:map}). The error is
 largest not in fully blanketed bands, where both treatments agree that little
 escapes, but in the intermediate regime where strong lines have not yet
-merged---which is where spectral features form and where composition is read
-off.
+merged---the regime in which realistic calculations still show identifiable
+spectral features \citep{domoto2022,tanaka2020}. We do not claim this value
+as the error of a fully mixed kilonova spectrum: F7 shows the error is
+suppressed as a band goes black, and measuring the mixed case is future
+work.
 
 The practical implication for kilonova modelling is that ``we use the Sobolev
 approximation'' and ``we use expansion opacity'' should not be treated as
@@ -1337,14 +1369,14 @@ $\nu' = \nu\,(1 - z/ct)$ to first order in $v/c$. Insert the line opacity
 (Eq.~\ref{eq:tau}) and change variables from $z$ to $\nu'$
 ($\mathrm{d}\nu' = -(\nu/ct)\,\mathrm{d}z \approx -(\nu_0/ct)\,\mathrm{d}z$
 near resonance):
-\begin{equation}
+\begin{multline}
   \tau
-  = \sigma_{\rm cl} f \int n_l(z)\, \phi(\nu'-\nu_0)\, \mathrm{d}z
-  \;\approx\;
+  = \sigma_{\rm cl} f \int n_l(z)\, \phi(\nu'-\nu_0)\, \mathrm{d}z \\
+  \approx
   \sigma_{\rm cl} f\, n_l(z_{\rm res})\, \frac{ct}{\nu_0}
   \underbrace{\int \phi\, \mathrm{d}\nu'}_{=1}
   = \sigma_{\rm cl} f\, n_l\, \lambda_0\, t ,
-\end{equation}
+\end{multline}
 which is Eq.~(\ref{eq:tausob}). The two approximations made are exactly the
 two Sobolev assumptions: $n_l$ was pulled out of the integral at its
 resonance-point value (locality), and the profile was integrated as if no
@@ -1371,16 +1403,17 @@ path over which the moving gas keeps one line inside one frequency bin.
 The Doppler sweep rate ties path length to bin width,
 $\Delta z = ct\,\Delta\nu_{\rm bin}/\nu$, so the effective optical depth
 contributed by line $k$ is
-\begin{equation}
+\begin{multline}
   \tau^{\rm eff}_k
-  = \alpha^{\rm exp}\,\Delta z
+  = \alpha^{\rm exp}\,\Delta z \\
   = \frac{1}{ct}\,\frac{\nu_k}{\Delta\nu_{\rm bin}}
-    \left(1-e^{-\tau_{{\rm S},k}}\right)\times \frac{ct\,
-    \Delta\nu_{\rm bin}}{\nu_k}
+    \left(1-e^{-\tau_{{\rm S},k}}\right)
+    \times \frac{ct\,\Delta\nu_{\rm bin}}{\nu_k}
   = 1-e^{-\tau_{{\rm S},k}} .
-\end{equation}
+\end{multline}
 The bin width cancels: independent of resolution, each resonance crossing
-contributes at most $\tau^{\rm eff}=1$, and the transmitted fraction is
+contributes at most $\tau^{\rm eff}=1$ \emph{per line}, and the
+transmitted fraction is
 $e^{-(1-e^{-\taus})}$ per line---Eq.~(\ref{eq:capped}), the measured
 0.421 at $\taus=2$. Note this is \emph{not} a discretization error: it is
 built into the formalism and no bin refinement removes it. It disappears
@@ -1409,7 +1442,7 @@ ladder experiment.
 
 \begin{figure*}[t]
   \centering
-  \includegraphics[width=\textwidth]{fig12_boundary.png}
+  \includegraphics[width=\textwidth]{fig12_boundary}
   \caption{Left: a single line's resolved optical depth as its resonance is
   walked out through the outer edge of the line-forming region, in units of
   the Doppler width. The curves for $v_D = 10$, $100$ and $300\kms$ coincide
@@ -1445,12 +1478,12 @@ has its profile clipped by the edges, so for a central ray
 \begin{equation}
   \frac{\tau_{\rm resolved}}{\taus}
   = \frac12\left[
-      \mathrm{erf}\!\left(\frac{z_{\rm hi}-z_{\rm res}}{\Delta}\right)
-    - \mathrm{erf}\!\left(\frac{z_{\rm lo}-z_{\rm res}}{\Delta}\right)
+      \mathrm{erf}\!\left(\frac{z_{\rm hi}-z_{\rm res}}{\ell_{\rm S}}\right)
+    - \mathrm{erf}\!\left(\frac{z_{\rm lo}-z_{\rm res}}{\ell_{\rm S}}\right)
     \right],
-  \qquad \Delta = v_D\,t ,
 \end{equation}
-which is unity deep inside, exactly $1/2$ at an edge and zero outside---while
+with the Sobolev length $\ell_{\rm S} = v_D t$. This is
+unity deep inside, exactly $1/2$ at an edge and zero outside---while
 the Sobolev prescription applies a step of $1$ inside and $0$ outside. Direct
 integration reproduces this to four decimals at every width tested
 (Fig.~\ref{fig:boundary}, left), and the curves collapse when plotted against
