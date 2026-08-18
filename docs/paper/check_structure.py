@@ -39,6 +39,52 @@ MIN_WORDS = 60
 FIG_DIR = HERE.parent / "figures"
 
 
+SEPARATION_JSON = (
+    HERE.parents[1] / "experiments/sobolev_proper/separation_results.json"
+)
+
+
+def check_headline_numbers(text):
+    """The La II headline must agree with the file that produced it."""
+    import json
+
+    if not SEPARATION_JSON.exists():
+        return [f"missing {SEPARATION_JSON.name} -- cannot verify numbers"]
+    h = json.loads(SEPARATION_JSON.read_text())["headline"]
+    d_sob = (h["sob"] - h["res"]) / h["res"]
+    d_exp = (h["exp"] - h["res"]) / h["res"]
+
+    out = []
+    # Anchor on the headline sentence and search only inside it -- a loose
+    # regex over the whole document happily matches a similar-looking number
+    # from an unrelated section.
+    anchor = re.search(
+        r"For the La\\,\\textsc\{ii\} forest, against .{0,400}?"
+        r"Across the sweep",
+        text, re.S,
+    )
+    if not anchor:
+        return ["headline sentence not found -- has it been reworded?"]
+    span = anchor.group(0)
+
+    nums = [float(x) for x in re.findall(r"\$=?([\d.]+)\$", span)]
+    pcts = [float(x) for x in re.findall(r"\$([+-][\d.]+)\\%\$", span)]
+    for label, value in (("resolved", h["res"]), ("Sobolev", h["sob"]),
+                         ("expansion", h["exp"])):
+        if not any(abs(n - value) < 5e-5 for n in nums):
+            out.append(
+                f"headline {label} = {value:.4f} (from "
+                f"{SEPARATION_JSON.name}) not quoted; sentence has {nums}"
+            )
+    for label, value in (("Sobolev", 100 * d_sob), ("expansion", 100 * d_exp)):
+        if not any(abs(p - value) < 0.05 for p in pcts):
+            out.append(
+                f"headline Delta {label} = {value:+.1f}% not quoted; "
+                f"sentence has {pcts}"
+            )
+    return out
+
+
 def main():
     text = TEX.read_text()
     problems = []
@@ -81,6 +127,12 @@ def main():
              if "\\todo{" in l and "newcommand" not in l]
     for t in todos:
         problems.append(f"unresolved TODO: {t.strip()[:70]}")
+
+    # 5. headline numbers must match the file that generated them. Every
+    # quoted result here has been wrong at least once from hand-copying, so
+    # the numbers the abstract and separation section rest on are checked
+    # against experiments/sobolev_proper/separation_results.json directly.
+    problems.extend(check_headline_numbers(text))
 
     if problems:
         print("MANUSCRIPT STRUCTURE CHECK FAILED:", file=sys.stderr)

@@ -70,7 +70,7 @@ region and so becomes visible only at artificially broad widths.
 A sweep of 36 conditions across four wavelength windows,
 three epochs and three ion mixtures shows this separation to be universal,
 with the realized maximum line optical depth---not wavelength, epoch or
-composition---as the controlling variable. In the strong-line,
+composition---as the controlling variable at fixed geometry and line width. In the strong-line,
 incompletely-blanketed regime where kilonova spectral features form, the
 shortcut in common use is thus wrong by tens of percent for reasons largely
 unrelated to the approximation it is named after. We also report a measured cost curve for resolved transport
@@ -947,10 +947,15 @@ $\Delta$ Sobolev   & $+3.6\%$ & $\mathbf{+11.3\%}$ & $+6.6\%$  & $+0.5\%$ \\
 \end{center}
 
 \textbf{Finding F10}: the separation is universal, and the realized
-$\tau_{\max}$ is the controlling variable. All 36 conditions fall on one
-trend (Fig.~\ref{fig:breadth}) regardless of window, epoch or composition;
-those enter only through the optical depths they produce. Both errors vanish
-together as $\tau_{\max}\to0$---the weak-line limit both approximations
+$\tau_{\max}$ is the controlling variable \emph{among the axes swept}. All 36
+conditions fall on one trend (Fig.~\ref{fig:breadth}) regardless of window,
+epoch or composition;
+those enter only through the optical depths they produce. The sweep holds
+the shell geometry and the Doppler width fixed, and \S\ref{sec:map} shows
+$\Delta$ does depend on $v_D$; the collapse is therefore onto
+$\tau_{\max}$ within a fixed $(v_D,\ \Delta v_{\rm shell})$ slice, not a
+claim that $\tau_{\max}$ alone determines the error everywhere. Both errors
+vanish together as $\tau_{\max}\to0$---the weak-line limit both approximations
 share---and both grow with $\tau_{\max}$, but expansion opacity errs by a
 median factor $3.5$ more than the Sobolev approximation wherever
 $\tau_{\max}>1$. This has a practical corollary: the error can be estimated
@@ -1046,7 +1051,7 @@ F8 & Solver-vs-MC offsets trace to the thermal-emission convention, & \S\ref{sec
 F9 & The strength floor is expansion opacity's alone; the width term & \S\ref{sec:separation} \\
    & is a genuine Sobolev failure. Sobolev $\approx5$--$8\%$ vs $40$--$90\%$ & \\
 F10 & The separation is universal across windows, epochs and ion mixes; & \S\ref{sec:breadth} \\
-    & realized $\tau_{\max}$ is the controlling variable & \\
+    & realized $\tau_{\max}$ controls it at fixed $v_D$ and geometry & \\
 F11 & Neglect of light-travel-time evolution is a distinct approximation: & App.~\ref{app:frame} \\
     & frozen $\tau/\taus = (1-\beta)/\gamma$ vs worldline $1/\gamma$ & \\
 F12 & Overlap is inert in pure absorption (optical depths add exactly); & App.~\ref{app:boundary} \\

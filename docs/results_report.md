@@ -456,7 +456,10 @@ range 71 → 2504, realized τ_max spans 0.003 → 34.
 Median ratio for τ_max > 1: **expansion errs 3.5× more than Sobolev**.
 
 **Finding F10: the separation is universal, and realized τ_max is the
-controlling variable.** All 36 conditions collapse onto a single trend in
+controlling variable among the axes swept.** (The sweep holds shell geometry
+and v_D fixed; §4.12 shows Δ does depend on v_D, so the collapse is onto
+τ_max *within a fixed (v_D, Δv_shell) slice* — not a claim that τ_max alone
+determines the error everywhere.) All 36 conditions collapse onto a single trend in
 τ_max regardless of window, epoch, or ion mix — wavelength and composition
 enter only through the τ they produce. Both errors vanish together as
 τ_max → 0 (the weak-line sanity check), and both grow with τ_max, but
@@ -653,7 +656,7 @@ silently.
 | F7 | Δ_Sob is non-monotonic in forest density: maximal for strong sparse forests, suppressed at full blanketing | §4.10 |
 | F8 | The resolved-legs offset is shell thermal emission, not profile wings or resolution; like-for-like the codes agree to ~1% | §4.11 |
 | F9 | The strength floor belongs to expansion opacity alone; the v_D wing term is a genuine Sobolev failure. Sobolev proper ≈5–8%, expansion 40–90% | §4.12 |
-| F10 | The separation is universal across windows, epochs and ion mixes; realized τ_max is the controlling variable, and expansion errs ~3.5× more than Sobolev | §4.13 |
+| F10 | The separation is universal across windows, epochs and ion mixes; realized τ_max controls it **at fixed v_D and geometry** (§4.12 shows the v_D dependence), and expansion errs ~3.5× more than Sobolev | §4.13 |
 | F11 | Neglect of light-travel-time evolution is a distinct approximation: frozen τ/τ_S = (1−β)/γ vs worldline 1/γ. The physical law has no O(β) term | §4.14 |
 | F12 | Overlap is inert in pure absorption (optical depths add exactly); the Sobolev residual is a finite-region boundary effect ∝ v_D/Δv_shell, negligible at thermal widths | §4.15 |
 | F13 | The expansion-opacity error is bin-width invariant from 0.025 to 41 lines per bin — intrinsic to the formalism, not a usage artifact | §4.16 |
