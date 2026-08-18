@@ -1,7 +1,7 @@
 # Sobolev Validity in Kilonova Ejecta — Results Report
 
 **Status:** Phase 0 through the validity maps and mechanism isolation, complete
-— findings F1–F13, 13 figures, 52 tests. **Date:** 2026-08-18. **Repo:** `zhuygln/revisit_sobolev`.
+— findings F1–F14, 13 figures, 68 tests. **Date:** 2026-08-18. **Repo:** `zhuygln/revisit_sobolev`.
 
 **Manuscript:** [paper/manuscript.pdf](paper/manuscript.pdf) — the paper drawn
 from this report, written for readers without a radiative-transfer background.
@@ -71,7 +71,7 @@ Boltzmann over byte-identical level lists. Verified in the SEDONA gas state
 | `spectra.py` | **the one** band-ratio convention for SEDONA spectra: continuum-ratio normalization, margin clear of the final bin | null spectrum returns exactly 1; scale- and Planck-slope-invariant; known trough recovered |
 | `sobolev_leg.py` | p-averaged per-line Sobolev attenuation; `damp` switches to the expansion cap | single line → exp(−τ_S) to 1e-12; damp variant → exp(−(1−e^−τ)); pop_frac scales τ; partial shadowing bracketed |
 
-Test suite: **52 tests, all green** (`pytest`).
+Test suite: **68 tests, all green** (`pytest`).
 
 ### 3.2 SEDONA build (WSL2, no root)
 
@@ -420,11 +420,13 @@ leg. Δ_expansion barely moved, being a same-code differential. See §4.15.
    both. A delta-function resonance has no width by construction, so the
    Sobolev leg is *exactly* v_D-independent (0.3507 at every v_D); all of
    the resolved calculation's width dependence is un-modelled. At
-   (τ_max = 50, 300 km/s) this alone reaches +39%.
+   (τ_max = 50, 300 km/s) this alone reaches +32.9% — but F12 later showed
+   this to be a finite-region boundary artifact, not a Sobolev failure.
 
-So the Sobolev approximation itself is accurate to **≈5–8%** at
-kilonova-relevant line widths (≤ 30 km/s), while its standard
-expansion-opacity implementation is off by **40–90%** in the same regime.
+So the Sobolev approximation itself is accurate to **≲2%** at
+kilonova-relevant line widths (≤ 30 km/s) and to **≲0.5%** at τ_max = 5 down
+to 1 km/s, while its standard expansion-opacity implementation is off by
+**+38–48%** in the same regime.
 The two are conflated in the literature under one name; they are not the
 same approximation and they fail for different reasons.
 
@@ -596,8 +598,12 @@ profile is clipped while Sobolev applies a hard step:
 — unity deep inside, exactly ½ at an edge, zero outside. Direct integration
 matches to four decimals at every width, and the curves collapse when plotted
 against d/v_D (Figure 12, left). The band-averaged effect is the fraction of
-the velocity span within a few widths of an edge, ~v_D/Δv_shell: 0.5% at
-v_D = 10 km/s, 30% at 300 km/s, which is the observed scaling.
+the velocity span within a few widths of an edge. With two edges that is
+~2 v_D/Δv_shell: 1% at v_D = 10 km/s, 30% at 300 km/s. That is an upper
+bound rather than a prediction — only the clipped part of each profile is
+misassigned, and the measured |Δ_Sob| is 0.2% and 9.2%. What it captures is
+the linear scaling, hence the two orders of magnitude the effect loses at
+physical widths.
 
 **This is an artifact of the setup, not of the approximation.** It scales with
 the thermal width, ~0.6 km/s for lanthanides against ejecta spans of
@@ -735,7 +741,7 @@ branching gets switched on against an expansion-opacity leg in the same code.
 | F6 | Δ_Sob = strength-set floor + v_D-growing wing term; error survives the v_D→0 limit | §4.8 |
 | F7 | Δ_Sob is non-monotonic in forest density: maximal for strong sparse forests, suppressed at full blanketing | §4.10 |
 | F8 | The resolved-legs offset is shell thermal emission, not profile wings or resolution; like-for-like the codes agree to ~1% | §4.11 |
-| F9 | The strength floor belongs to expansion opacity alone; the v_D wing term is a genuine Sobolev failure. Sobolev proper ≈5–8%, expansion 40–90% | §4.12 |
+| F9 | The strength floor belongs to expansion opacity alone; the v_D wing term is the finite-region boundary effect of F12, not a Sobolev failure. At v_D ≤ 30 km/s: Sobolev ≲2%, expansion +38–48% | §4.12 |
 | F10 | The separation is universal across windows, epochs and ion mixes; realized τ_max controls it **at fixed v_D and geometry** (§4.12 shows the v_D dependence), and expansion errs ~3.5× more than Sobolev | §4.13 |
 | F11 | Neglect of light-travel-time evolution is a distinct approximation: frozen τ/τ_S = (1−β)/γ vs worldline 1/γ. The physical law has no O(β) term | §4.14 |
 | F12 | Overlap is inert in pure absorption (optical depths add exactly); the Sobolev residual is a finite-region boundary effect ∝ v_D/Δv_shell, negligible at thermal widths | §4.15 |
@@ -780,7 +786,7 @@ branching gets switched on against an expansion-opacity leg in the same code.
 # environment
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]" h5py
-pytest                    # 27 passed
+pytest                    # 68 passed
 
 # data (once): Zenodo 19335084 -> data/, see data/README.md
 # SEDONA (once): see lab_notebook.md "SEDONA build" entry

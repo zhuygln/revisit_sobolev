@@ -44,17 +44,66 @@ SEPARATION_JSON = (
 )
 
 
+def check_retracted_numbers(text):
+    """Nothing the paper has retracted may reappear anywhere in it.
+
+    Added after the P1-D referee pass found the retracted "5-8% Sobolev
+    error" -- a normalization artifact the manuscript explicitly disowns in
+    Section 5 -- still standing as the paper's bolded headline, in the
+    findings table, and in the Conclusions, while the abstract and the table
+    ten lines above gave the corrected value. Three of the four sites were
+    outside the one sentence this checker used to inspect.
+
+    A retracted number is not a typo: it is a claim the paper argues against
+    elsewhere in its own text. Grep for it on every build.
+    """
+    banned = [
+        (r"5\$--\$8\\%|5--8\\%|\\approx\s*5\$--\$8",
+         "the retracted 5-8% Sobolev error (normalization artifact)"),
+        (r"40\$--\$90\\%|40--90\\%",
+         "the 40-90% expansion range, whose upper end is only reached at "
+         "the unphysical v_D = 300 km/s"),
+    ]
+    # A retraction has to name the number it retracts, so a mention inside the
+    # retracting sentence is exactly right. Allow it, and only there.
+    exempt = ("normalization artifact", "earlier version", "earlier draft",
+              "previous draft")
+    out = []
+    for pattern, why in banned:
+        for m in re.finditer(pattern, text):
+            near = text[max(0, m.start() - 400): m.end() + 400].lower()
+            if any(k in near for k in exempt):
+                continue
+            line = text[: m.start()].count("\n") + 1
+            out.append(f"line {line}: retracted value reappears -- {why}")
+    return out
+
+
 def check_headline_numbers(text):
     """The La II headline must agree with the file that produced it."""
     import json
 
     if not SEPARATION_JSON.exists():
         return [f"missing {SEPARATION_JSON.name} -- cannot verify numbers"]
-    h = json.loads(SEPARATION_JSON.read_text())["headline"]
+    data = json.loads(SEPARATION_JSON.read_text())
+    h = data["headline"]
     d_sob = (h["sob"] - h["res"]) / h["res"]
     d_exp = (h["exp"] - h["res"]) / h["res"]
 
     out = []
+
+    # The validity-map table duplicates the sweep grid. The two were sourced
+    # from different pipelines and disagreed by up to 2.7 percentage points at
+    # identical parameters -- the same measurement printed twice, two pages
+    # apart, with different values. Check every grid point appears somewhere.
+    for row in data["grid"]:
+        want = 100 * row["d_exp"]
+        if not re.search(rf"\+{want:.1f}\b", text):
+            out.append(
+                f"grid point (tau_max={row['tau_max']:g}, v_D={row['v_d']:g}) "
+                f"-> Delta_exp = {want:+.1f}% is not quoted anywhere; the "
+                f"validity map may be stale again"
+            )
     # Anchor on the headline sentence and search only inside it -- a loose
     # regex over the whole document happily matches a similar-looking number
     # from an unrelated section.
@@ -133,6 +182,7 @@ def main():
     # the numbers the abstract and separation section rest on are checked
     # against experiments/sobolev_proper/separation_results.json directly.
     problems.extend(check_headline_numbers(text))
+    problems.extend(check_retracted_numbers(text))
 
     if problems:
         print("MANUSCRIPT STRUCTURE CHECK FAILED:", file=sys.stderr)

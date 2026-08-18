@@ -1,84 +1,59 @@
-\documentclass[11pt]{article}
+\documentclass[fleqn,usenatbib]{mnras}
 
-\usepackage[margin=1.1in]{geometry}
+\usepackage[T1]{fontenc}
 \usepackage{amsmath,amssymb}
 \usepackage{graphicx}
 \usepackage{booktabs}
-\usepackage[round]{natbib}
-\usepackage{xcolor}
-\usepackage[colorlinks=true,linkcolor=blue!60!black,citecolor=blue!60!black,urlcolor=blue!60!black]{hyperref}
-\usepackage{fancyhdr}
 
 \graphicspath{{../figures/}}
 
-\pagestyle{fancy}
-\fancyhf{}
-\fancyhead[L]{\textcolor{red!70!black}{\textsc{working draft --- not for distribution}}}
-\fancyhead[R]{\thepage}
-
-\newcommand{\dsob}{\Delta_{\mathrm{Sob}}}
+\newcommand{\dexp}{\Delta_{\mathrm{exp}}}
+\newcommand{\dsobp}{\Delta_{\mathrm{Sob}}}
 \newcommand{\taus}{\tau_{\mathrm{S}}}
 \newcommand{\kms}{\,\mathrm{km\,s^{-1}}}
-\newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
 
-\title{Two Approximations Under One Name: Separating Sobolev Line Transfer
-from Expansion Opacity in Kilonova Ejecta\\[4pt]
-\large I. A controlled three-way harness and validity maps with calibrated
-lanthanide data}
-\author{Yonglin Zhu}
-\date{August 17, 2026 --- working draft}
+\title[Separating Sobolev transfer from expansion opacity]{Two Approximations
+Under One Name: Separating Sobolev Line Transfer from Expansion Opacity in
+Kilonova Ejecta}
+\author[Y. Zhu]{Yonglin Zhu\thanks{E-mail: zhuygln@gmail.com}}
 
 \begin{document}
+\label{firstpage}
 \maketitle
 
 \begin{abstract}
-\noindent
-The light emitted by a kilonova---the radioactive glow of matter ejected when
-two neutron stars merge---must pass through a gas containing millions of
-absorption lines of freshly synthesized heavy elements. Simulating this is so
-expensive that essentially all kilonova radiative-transfer codes replace the
-true, frequency-resolved interaction of light with each line by a shortcut
-built on the \emph{Sobolev approximation}, most commonly in its binned
-``expansion opacity'' form. These are routinely described as one
-approximation. This paper shows that they are two, with different error
-budgets, and asks of each: \emph{how large is the error, and where in
-kilonova parameter space does it matter?}
-We construct a deliberately small, fully controlled test harness in which the
-same ejecta model, the same atomic data, and the same level populations are
-pushed through three independent calculations: an analytic Sobolev
-prediction, a deterministic frequency-resolved reference solver written for
-this work, and the Monte Carlo code \textsc{sedona}, which implements both a
-resolved line treatment and the expansion-opacity treatment. The three
-resolved-physics calculations agree to $\sim1\%$ once a thermal-emission
-convention is matched, in every experiment from a single artificial line to a
-realistic forest of 153 calibrated La\,\textsc{ii} lines from the GSI
-kilonova atomic database. Against this validated baseline we separate two
-errors that the literature conflates under a single name. The
-\emph{expansion-opacity implementation} carries a strength-set error floor,
-arising from a per-resonance substitution $\tau \to 1-e^{-\tau}$, that grows
-from $\sim3\%$ for weak-line forests to $40$--$90\%$ for strong-line forests
-and survives undiminished down to a Doppler width of $1\kms$---essentially
-the thermal width of lanthanum---so that no refinement of line widths
-rehabilitates it. The \emph{Sobolev approximation itself}, by contrast, shows
-no strength floor whatever and is accurate to $\lesssim 0.5\%$ at
-kilonova-relevant line widths ($v_D \le 10\kms$, including the thermal width
-of lanthanum). Its one failure mode is geometric rather than physical: where a
-resonance falls within a few Doppler widths of a boundary of the line-forming
-region, the finite profile is clipped while the Sobolev prescription applies a
-hard step, an error that scales as $v_D$ divided by the velocity span of the
-region and so becomes visible only at artificially broad widths.
-A sweep of 36 conditions across four wavelength windows,
-three epochs and three ion mixtures shows this separation to be universal,
-with the realized maximum line optical depth---not wavelength, epoch or
-composition---as the controlling variable at fixed geometry and line width. In the strong-line,
-incompletely-blanketed regime where kilonova spectral features form, the
-shortcut in common use is thus wrong by tens of percent for reasons largely
-unrelated to the approximation it is named after. We also report a measured cost curve for resolved transport
-and several methodological findings, including an exact symmetry that makes
-gradient-based Sobolev validity diagnostics systematically conservative.
+Kilonova radiative-transfer codes routinely describe their line treatment as
+``the Sobolev approximation'', usually meaning its binned expansion-opacity
+form. We show these are two approximations with very different error budgets,
+and measure each separately. The harness is deliberately restricted---a 1-D
+homologous shell, pure absorption with fixed LTE populations, shell velocities
+of $1000$--$3000\kms$---because that restriction is what makes the two errors
+separable. Three independent calculations of one model---analytic Sobolev
+theory, a deterministic frequency-resolved solver, and the Monte Carlo code
+\textsc{sedona}---agree to $\sim1\%$ on multi-line problems once a
+thermal-emission convention is matched. On a forest
+of 153 calibrated La\,\textsc{ii} lines from the GSI database, the
+\emph{expansion-opacity implementation} carries a strength-set error floor
+from its per-resonance substitution $\tau\to1-e^{-\tau}$, growing from
+$\sim3\%$ for weak-line forests to $+38$--$48\%$ for strong ones and surviving
+undiminished to a Doppler width of $1\kms$, so no refinement of line widths
+rehabilitates it. It is invariant under transport bin width from $0.025$ to
+$41$ lines per bin, and so is intrinsic to the formalism rather than an
+artifact of use outside its design regime. The \emph{Sobolev approximation
+itself} shows no strength floor and is accurate to $\lesssim2\%$; its only
+measured failure is geometric, where a resonance falls near a boundary of the
+finite line-forming region. Across 36 conditions spanning four wavelength
+windows, three epochs and three ion mixtures the separation is universal,
+controlled by the realized maximum line optical depth at fixed geometry and
+line width. The shortcut in common use is thus wrong by tens of percent, in
+pure absorption, for reasons largely unrelated to the approximation it is
+named after.
 \end{abstract}
 
-\tableofcontents
+\begin{keywords}
+radiative transfer -- opacity -- methods: numerical -- stars: neutron --
+nuclear reactions, nucleosynthesis, abundances
+\end{keywords}
 
 %=====================================================================
 \section{Introduction}
@@ -115,11 +90,15 @@ line forests.
 
 Simulating light transport through millions of lines, each intrinsically
 narrower than one part per million in frequency, is prohibitively expensive
-if done directly. Every practical kilonova radiative-transfer code therefore
-leans on an approximation introduced by \citet{sobolev1960} for expanding
-stellar envelopes, usually packaged in the ``expansion opacity'' form of
-\citet{karp1977} and \citet{eastman1993}. Section~\ref{sec:primer} explains
-both ideas from scratch. The approximation is standard, venerable, and
+if done directly. Practical kilonova radiative-transfer codes therefore lean
+on an approximation introduced by \citet{sobolev1960} for expanding stellar
+envelopes. It reaches them in two distinct packagings. One family applies it
+line by line inside a Monte Carlo scheme with macroatom or downbranching
+redistribution \citep{lucy2002,lucy2003,tardis}; the other bins it into the
+``expansion opacity'' of \citet{karp1977} and \citet{eastman1993}, which is
+what we test here. Section~\ref{sec:primer} explains both ideas from scratch.
+The distinction matters for how our results should be read, and we return to
+it in \S\ref{sec:discussion}. The approximation is standard, venerable, and
 almost never checked against a resolved calculation \emph{under kilonova
 conditions}. This work begins that check.
 
@@ -148,19 +127,23 @@ paper reports:
   Carlo code \textsc{sedona} \citep{sedona} in both its resolved and its
   expansion-opacity modes;
   \item \textbf{verification experiments} (Section~\ref{sec:verification})
-  in which the resolved-physics calculations agree at the $\sim1\%$ level,
-  from one artificial line to a twenty-line ladder, establishing the baseline
-  everything else is measured against;
+  in which the resolved-physics calculations agree at the $\sim1\%$ level on
+  the multi-line problems, and at the few-percent level on a single isolated
+  line, establishing the baseline everything else is measured against;
   \item \textbf{the separation itself} (Section~\ref{sec:separation}), the
   central result: on a forest of 153 calibrated La\,\textsc{ii} lines from
   the GSI database \citep{gsi_atomic,gsi_zenodo}, the Sobolev approximation
-  errs by $+2.4\%$ in band flux while expansion opacity errs by $+44.9\%$,
+  errs by $+2.1\%$ in band flux while expansion opacity errs by $+44.8\%$,
   and the two fail through different mechanisms;
   \item \textbf{validity maps} (Sections~\ref{sec:map}--\ref{sec:breadth}):
   both errors as functions of line strength, Doppler width, temperature,
   epoch, wavelength and composition---36 further conditions showing the
-  separation to be universal and controlled by the realized maximum line
-  optical depth alone;
+  separation to be universal and, at fixed Doppler width and shell geometry,
+  controlled by the realized maximum line optical depth;
+  \item a \textbf{bin-width control} (Section~\ref{sec:binwidth}) showing the
+  expansion-opacity error to be invariant from $0.025$ to $41$ lines per
+  transport bin, so that it is intrinsic to the formalism rather than an
+  artifact of applying it outside the many-line regime it was built for (F13);
   \item thirteen \textbf{methodological findings} (F1--F13, collected in
   Table~\ref{tab:findings}), among them an exact symmetry cancellation that
   makes gradient-based validity diagnostics conservative (F1); the
@@ -300,8 +283,9 @@ depths of all the lines inside it,
   \left(1 - e^{-\tau_{{\rm S},k}}\right).
   \label{eq:expop}
 \end{equation}
-This is enormously convenient and it is what most kilonova (and supernova)
-codes mean when they say they use ``the Sobolev approximation.'' But notice
+This is enormously convenient, and it is what a code means by ``the Sobolev
+approximation'' whenever it works from binned opacities rather than from
+individual line interactions. But notice
 what it does to a single line: integrating $\alpha^{\rm exp}$ over the path
 on which that line stays inside one bin gives an effective optical depth of
 $1-e^{-\taus}$, so the transmitted fraction is
@@ -334,34 +318,47 @@ design requirement that only the line-transfer treatment may differ, every
 experiment in this paper evaluates \emph{one} physical configuration three
 ways:
 
-\begin{center}
-\begin{tabular}{@{}lll@{}}
+\begin{table}
+\centering
+\small
+\begin{tabular}{@{}ll@{}}
 \toprule
-Leg & Implementation & Role \\
+Leg & Role \\
 \midrule
-Analytic & Sobolev theory, Eq.~(\ref{eq:tausob}), & prediction \\
-         & $p$-averaged over the source disk (App.~\ref{app:pavg}) & \\
-Deterministic & \texttt{sobolev/formal\_transfer.py} (this work): & resolved
-reference \\
- & frequency-resolved formal solution along rays & \\
-Monte Carlo & \textsc{sedona} \citep{sedona,rothkasen2015}: & production
-code \\
- & (a) resolved bound--bound mode & resolved cross-check \\
- & (b) expansion-opacity mode & \textbf{the treatment under test} \\
+Analytic: Sobolev theory, Eq.~(\ref{eq:tausob}), & prediction \\
+$p$-averaged over the source disk (App.~\ref{app:pavg}) & \\[2pt]
+Deterministic: \texttt{formal\_transfer.py} (this work), & resolved \\
+frequency-resolved formal solution along rays & reference \\[2pt]
+Monte Carlo: \textsc{sedona} \citep{sedona,rothkasen2015} & \\
+\quad (a) resolved bound--bound mode & resolved \\
+ & cross-check \\
+\quad (b) expansion-opacity mode & \textbf{under test} \\
 \bottomrule
 \end{tabular}
-\end{center}
+\end{table}
 
 Agreement of the first three (analytic, deterministic, \textsc{sedona}
 resolved) validates the harness; the offset of the fourth is the measured
 error, reported as
 \begin{equation}
-  \dsob \;=\; \frac{F_{\rm exp} - F_{\rm resolved}}{F_{\rm resolved}},
+  \dexp \;=\; \frac{F_{\rm exp} - F_{\rm resolved}}{F_{\rm resolved}},
+  \qquad
+  \dsobp \;=\; \frac{F_{\rm Sob} - F_{\rm resolved}}{F_{\rm resolved}},
 \end{equation}
-where $F$ is the band-averaged transmitted flux. $\dsob$ is always formed
-from the \emph{two \textsc{sedona} runs}, so Monte Carlo conventions,
-frequency grids, and normalizations cancel; the deterministic solver serves
-as an independent check of the resolved leg.
+where $F$ is the band-averaged transmitted flux. The two differ in an
+important way. $\dexp$ is always formed from the \emph{two} \textsc{sedona}
+runs, so Monte Carlo conventions, frequency grids and normalizations cancel
+identically; the deterministic solver serves as an independent check of the
+resolved leg. $\dsobp$ cannot be formed that way, because \textsc{sedona} has
+no per-line Sobolev mode: it necessarily compares an analytic leg against a
+\textsc{sedona} run, and is therefore exposed to three conventions that must
+be matched by hand---thermal emission (\S\ref{sec:conventions-f8}), spectral
+normalization (\S\ref{sec:breadth}) and transport treatment
+(Appendix~\ref{app:frame}). Each of the three has produced a spurious
+few-percent result in the course of this work, and one of them produced a
+retracted one (\S\ref{sec:separation}). Same-code differentials are the
+robust ones; cross-code differentials are only as good as their shared
+normalization.
 
 \subsection{Geometry and physical conventions}
 \label{sec:conventions}
@@ -371,8 +368,44 @@ All experiments use a spherical, homologously expanding shell
 radius $r_{\rm core}$ and temperature $T_{\rm core}$: the shell imprints
 absorption lines on the core's smooth continuum, and the emergent spectrum
 is measured far away. Rays that hit the core start with its blackbody
-intensity; rays that miss it start dark. Three deliberate simplifications
-keep the comparison interpretable:
+intensity; rays that miss it start dark. Table~\ref{tab:params} gives the
+numerical configuration in full.
+
+\begin{table}
+\centering
+\small
+\caption{Numerical configuration of the production runs. The values are
+identical across every leg and every comparison unless a section states
+otherwise; the sweeps vary only $\tau_{\max}$ (through the ion density),
+$v_D$, $T_{\rm shell}$ and the epoch.}
+\label{tab:params}
+\begin{tabular}{@{}ll@{}}
+\toprule
+Quantity & Value \\
+\midrule
+Core radius $r_{\rm core}$ & $8.64\times10^{12}$\,cm \\
+Outer radius $r_{\rm out}$ & $2.592\times10^{13}$\,cm ($3\,r_{\rm core}$) \\
+Epoch $t$ & $86400$\,s (day 1) \\
+Velocity span $\Delta v_{\rm shell}$ & $1000$--$3000\kms$ \\
+Core temperature $T_{\rm core}$ & $6000$\,K \\
+Core luminosity & $6.894\times10^{37}$\,erg\,s$^{-1}$ \\
+Shell temperature $T_{\rm shell}$ & $3000$\,K (2500--5000\,K on the $T$ axis) \\
+Fiducial Doppler width $v_D$ & $100\kms$ ($1$--$300\kms$ swept) \\
+Transport grid & $\nu \in [7.50,7.95]\times10^{14}$\,Hz, \\
+  & $\Delta\nu/\nu = 4.17\times10^{-5}$ \\
+Spectrum grid & $\Delta\nu/\nu = 10^{-4}$ \\
+Band averaged & $3800$--$3955$\,\AA \\
+Normalization margin & $3952$--$3970$\,\AA{} (line-free) \\
+\textsc{sedona} packets & $2\times10^{6}$ per run \\
+Solver impact parameters & $150$ rays \\
+Solver frequency points & $1600$ \\
+Electron scattering & off ($\epsilon = 1$) \\
+Radiative equilibrium & disabled \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Three deliberate simplifications keep the comparison interpretable:
 
 \begin{enumerate}
   \item \textbf{Pure absorption, local thermal emission.} Scattering and
@@ -380,7 +413,7 @@ keep the comparison interpretable:
   function $S_\nu = B_\nu(T)$ (the Planck function). Shell temperatures are
   chosen so the shell's own glow in the measured band is negligible
   ($B_\nu(T_{\rm shell}) \ll B_\nu(T_{\rm core})$); every leg treats the
-  identical source, so any residual emission cancels in $\dsob$.
+  identical source, so any residual emission cancels in $\dexp$.
   \item \textbf{Fixed temperatures.} Radiative equilibrium is disabled;
   the gas state never feedbacks on the radiation. Populations are therefore
   known exactly.
@@ -420,8 +453,39 @@ blackbody-sphere luminosity; a single line's absorption trough reaches
 $e^{-\taus}$ in the Sobolev limit; two well-separated lines absorb
 independently while overlapping ones multiply
 ($e^{-(\tau_1+\tau_2)}$); and a warm shell partially refills the trough.
-The full test suite of the accompanying repository (52 tests) passes at
+The full test suite of the accompanying repository (68 tests) passes at
 every commit reported here.
+
+\subsection{The Monte Carlo noise floor, measured}
+\label{sec:noise}
+
+Every number quoted from \textsc{sedona} carries sampling noise, and since
+several results below are at the sub-percent level that noise has to be
+measured rather than asserted. We reran identical configurations with
+different random-number seeds, holding model, atomic data, grid and packet
+count fixed, so that the spread is pure sampling error. Five seeds at
+$(\tau_{\max},v_D)=(5,100\kms)$ give a fractional standard deviation of
+$0.26\%$ on the resolved band flux and $0.30\%$ on the expansion band flux;
+five seeds at $v_D=10\kms$ give $0.30\%$.
+
+That the two widths agree to within $15\%$ of each other matters. The band
+flux is a sum over all bins in the window, so its sampling error is set by
+the number of packets landing in the band rather than by how finely the band
+is subdivided, and should therefore be independent of $v_D$ at fixed
+$\mathtt{core\_n\_emit}$. Measuring at two widths an order of magnitude apart
+tests that expectation instead of assuming it, which is what licenses quoting
+the same uncertainty at the $v_D = 1\kms$ frontier point, where repeating the
+run five times would cost some sixty times more.
+
+We therefore attach $\pm0.3\%$ ($1\sigma$) to every band flux, and
+$\pm0.3\%$ to $\dsobp$, in which only the \textsc{sedona} reference
+fluctuates (the Sobolev leg being analytic). For $\dexp$, adding
+the two \textsc{sedona} legs in quadrature gives $\pm0.4\%$, which is an
+upper bound: the two runs share a model and differ only in opacity treatment,
+so their sampling errors are partially correlated. One consequence is worth
+stating plainly, because it cuts against us: the production runs quoted
+throughout are single realizations, and the headline resolved band flux
+($0.3435$) sits about $2\sigma$ above the five-seed mean ($0.3419$).
 
 \subsection{A convention that must be matched: thermal emission}
 \label{sec:conventions-f8}
@@ -432,14 +496,16 @@ LTE source term $S_\nu = B_\nu(T_{\rm shell})$ along every ray;
 \textsc{sedona}, run at fixed temperature with radiative equilibrium
 disabled, deposits absorbed packet energy without re-emitting it. Setting
 $T_{\rm shell}\to0$ in the solver isolates the difference exactly: the
-single-ion forest moves $0.3538 \to 0.3390$ against \textsc{sedona}'s
-$0.3426$ ($+3.3\% \to -1.0\%$), and the blend $0.2410 \to 0.2249$ against
-$0.2277$ ($+6.5\% \to -1.2\%$). Like for like, the two independent codes
-agree at the $\sim1\%$ Monte Carlo noise floor. The term exceeds the naive
+single-ion forest moves $0.3587 \to 0.3439$ against \textsc{sedona}'s
+$0.3435$ ($+4.4\% \to +0.1\%$), and the blend $0.2410 \to 0.2249$ against
+$0.2277$ ($+5.8\% \to -1.2\%$). Like for like, the two independent codes
+agree to $0.1\%$ on the single-ion forest---inside the $0.3\%$ Monte Carlo
+noise of \S\ref{sec:noise}, so the residual is not resolvable---and to
+$1.2\%$ on the blend. The term exceeds the naive
 $B_\nu(3000)/B_\nu(6000) = 2\times10^{-3}$ estimate because the shell
 subtends nine times the core's projected area, and it grows with saturation.
 Absolute band fluxes quoted from \textsc{sedona} in this configuration are
-therefore attenuation-only; $\dsob$, a differential between two
+therefore attenuation-only; $\dexp$, a differential between two
 \textsc{sedona} runs sharing one convention, is unaffected.
 
 \subsection{Atomic data}
@@ -467,7 +533,7 @@ codes carry identical line strengths regardless of which column they read.
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=0.78\textwidth]{fig1_sobolev_error_vs_gradient.png}
+  \includegraphics[width=\columnwidth]{fig1_sobolev_error_vs_gradient.png}
   \caption{Controlled breakdown of the Sobolev locality assumption. A
   $\tanh$-shaped population gradient of velocity scale $v_{\rm scale}$ is
   imposed; the relative error $E_{\rm Sob}$ between the resolved integral
@@ -503,7 +569,7 @@ below the $G$-based bound.
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=0.85\textwidth]{fig4_minimal_1line_threeway.png}
+  \includegraphics[width=\columnwidth]{fig4_minimal_1line_threeway.png}
   \caption{Minimal one-line model (artificial Ly$\alpha$-like line,
   $\taus=2$, cold neutral shell). Top: emergent spectra. Bottom: ratio to
   the continuum. \textsc{sedona}'s resolved mode (orange) lies on top of the
@@ -522,7 +588,9 @@ gas would be fully ionized, destroying population control; at 2000\,K the
 gas is neutral to one part in $10^{10}$.
 
 The measured absorption-trough depths (Fig.~\ref{fig:minimal}):
-\begin{center}
+\begin{table}
+\centering
+\small
 \begin{tabular}{@{}lc@{}}
 \toprule
 analytic $e^{-\taus}$ & 0.1353 \\
@@ -532,7 +600,7 @@ deterministic solver & 0.1372 \\
 predicted cap $e^{-(1-e^{-\taus})}$ & 0.4212 \\
 \bottomrule
 \end{tabular}
-\end{center}
+\end{table}
 
 Two independent resolved implementations---deterministic rays and Monte
 Carlo---agree with each other and with theory at the few-percent level
@@ -559,7 +627,7 @@ it cannot account for any part of the residual in \S\ref{sec:separation}.
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=0.9\textwidth]{fig5_line_ladder.png}
+  \includegraphics[width=\columnwidth]{fig5_line_ladder.png}
   \caption{Line ladder at $\taus = 0.5$ per line. Top: two lines separated
   by $1500\kms$ (overlapping troughs). Bottom: twenty lines spaced
   $750\kms$ (a mini forest). The resolved trio---\textsc{sedona} resolved
@@ -573,9 +641,11 @@ it cannot account for any part of the residual in \S\ref{sec:separation}.
 Custom \textsc{sedona} atomic files with 2 and then 20 identical-strength
 lines ($\taus = 0.5$ each) test multi-line behavior
 (Fig.~\ref{fig:ladder}). In the center of the 20-line forest, where each
-photon crosses $\sim4$ resonances, five determinations of the transmitted
+photon crosses $\sim3$ resonances, five determinations of the transmitted
 fraction give:
-\begin{center}
+\begin{table}
+\centering
+\small
 \begin{tabular}{@{}lc@{}}
 \toprule
 analytic Sobolev ($p$-averaged) & 0.2405 \\
@@ -585,7 +655,7 @@ analytic expansion cap & 0.3194 \\
 \textsc{sedona} expansion opacity & 0.3257 \\
 \bottomrule
 \end{tabular}
-\end{center}
+\end{table}
 
 \textbf{Finding F5}: the expansion-opacity error tracks its own per-line
 cap prediction, i.e.\ the error is incurred \emph{per resonance
@@ -619,7 +689,7 @@ computer time (\S\ref{sec:cost}).
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=0.8\textwidth]{fig2_laII_line_spacing.png}
+  \includegraphics[width=\columnwidth]{fig2_laII_line_spacing.png}
   \caption{Nearest-neighbor velocity spacing of GSI La\,\textsc{ii} lines
   (3000\,\AA--3\,$\mu$m): in the broader subset, $11.3\%$ of lines have a
   neighbor within $10\kms$ and $3.3\%$ within $3\kms$.}
@@ -635,7 +705,7 @@ lines, so the potentially problematic regime exists in nature.
 \subsection{A realistic forest: 153 calibrated lines}
 \label{sec:forest}
 
-\begin{figure}[t]
+\begin{figure*}[t]
   \centering
   \includegraphics[width=\textwidth]{fig6_laII_forest.png}
   \caption{The 3850--3950\,\AA{} La\,\textsc{ii} forest (153 calibrated
@@ -644,7 +714,7 @@ lines, so the potentially problematic regime exists in nature.
   strong troughs overlap; expansion opacity (blue) never drops below
   $\sim0.2$ because each crossing is capped.}
   \label{fig:forest}
-\end{figure}
+\end{figure*}
 
 We select the 100\,\AA{} window with the richest optical-depth distribution
 (3850--3950\,\AA), build the population-controlled \textsc{sedona} atom from
@@ -652,23 +722,27 @@ the GSI data (Section~\ref{sec:popcontrol}), and run the three-way
 comparison at $T = 3000$\,K, $t = 1$\,day, Doppler width $100\kms$
 (Fig.~\ref{fig:forest}). Band-averaged transmitted flux over
 3800--3955\,\AA:
-\begin{center}
+\begin{table}
+\centering
+\small
 \begin{tabular}{@{}lc@{}}
 \toprule
-deterministic solver & 0.3549 \\
-\textsc{sedona} resolved & 0.3426 \\
-\textsc{sedona} expansion opacity & 0.4965 \\
+deterministic solver, $S_\nu = B_\nu(T_{\rm shell})$ & 0.3587 \\
+deterministic solver, $T_{\rm shell}\to0$ & 0.3439 \\
+\textsc{sedona} resolved & 0.3435 \\
+\textsc{sedona} expansion opacity & 0.4973 \\
 \midrule
-$\dsob$ & $\mathbf{+44.9\%}$ \\
+$\dexp$ & $\mathbf{+44.8\%}$ \\
 \bottomrule
 \end{tabular}
-\end{center}
+\end{table}
 
-The resolved pair agree to $3.6\%$ as tabulated---and to $1.0\%$ once the
+The resolved pair agree to $4.4\%$ as tabulated---and to $0.1\%$, well
+inside the $0.3\%$ Monte Carlo noise of \S\ref{sec:noise}, once the
 thermal-emission convention is matched (Finding F8,
 \S\ref{sec:conventions-f8})---while the expansion-opacity run overestimates
 the transmitted band flux by $45\%$. Notably this exceeds the uniform-ladder
-error ($+35\%$ at $\tau=0.5$ per line): real forests are dominated by a few
+error ($+33.8\%$ at $\tau=0.5$ per line): real forests are dominated by a few
 strong lines, precisely where the per-crossing cap is most wrong. That
 observation prompts the question the next subsection answers---whether the
 fault lies with the Sobolev approximation or with the way it has been
@@ -677,7 +751,7 @@ implemented.
 \subsection{Which approximation is at fault? Separating the two errors}
 \label{sec:separation}
 
-\begin{figure}[t]
+\begin{figure*}[t]
   \centering
   \includegraphics[width=\textwidth]{fig10_sobolev_vs_expansion.png}
   \caption{Top: the La\,\textsc{ii} forest under three treatments. The
@@ -687,7 +761,7 @@ implemented.
   line-strength scalings (solid: expansion; dashed: Sobolev). Bottom right:
   the two at $v_D = 100\kms$.}
   \label{fig:separation}
-\end{figure}
+\end{figure*}
 
 We now put both approximations to the same forest and the same truth. The
 distinction drawn in \S\ref{sec:primer-expop} becomes operational here: the
@@ -705,10 +779,12 @@ For the La\,\textsc{ii} forest, against \textsc{sedona} resolved $=0.3435$:
 Sobolev proper gives $0.3508$ ($+2.1\%$) while expansion opacity gives
 $0.4973$ ($+44.8\%$). Across the sweep (Fig.~\ref{fig:separation}):
 
-\begin{center}
+\begin{table}
+\centering
+\small
 \begin{tabular}{@{}cccc@{}}
 \toprule
-$\tau_{\max}$ & $v_D$ [km/s] & $\Delta$ Sobolev & $\Delta$ expansion \\
+$\tau_{\max}$ & $v_D$ [km\,s$^{-1}$] & $\dsobp$ & $\dexp$ \\
 \midrule
 0.5 & 10  & $+0.2\%$ & $+3.2\%$ \\
 0.5 & 300 & $+0.0\%$ & $+2.8\%$ \\
@@ -718,16 +794,18 @@ $\tau_{\max}$ & $v_D$ [km/s] & $\Delta$ Sobolev & $\Delta$ expansion \\
 50  & 300 & $+32.9\%$ & $+93.8\%$ \\
 \bottomrule
 \end{tabular}
-\end{center}
+\end{table}
 
 Down the width axis at $\tau_{\max}=5$, where \textsc{sedona} resolved runs
 already existed at the thermal end, the Sobolev error simply switches off
 while the expansion error does not:
 
-\begin{center}
+\begin{table}
+\centering
+\small
 \begin{tabular}{@{}ccc@{}}
 \toprule
-$v_D$ [km/s] & $\Delta$ Sobolev & $\Delta$ expansion \\
+$v_D$ [km\,s$^{-1}$] & $\dsobp$ & $\dexp$ \\
 \midrule
 1   & $-0.3\%$ & $+39.1\%$ \\
 3   & $-0.3\%$ & $+39.2\%$ \\
@@ -737,7 +815,7 @@ $v_D$ [km/s] & $\Delta$ Sobolev & $\Delta$ expansion \\
 300 & $+9.2\%$ & $+53.0\%$ \\
 \bottomrule
 \end{tabular}
-\end{center}
+\end{table}
 
 \textbf{An earlier version of this table reported a $v_D$-independent Sobolev
 error of $5$--$8\%$.} That was a normalization artifact: the sweep normalized
@@ -749,23 +827,31 @@ differential in which the bias cancels. All comparisons now go through a
 single shared routine, and a line-free control window is required to return
 unity.
 
-\textbf{Finding F9}: the two components of F6 have different owners.
+\textbf{Finding F9}: the two components of F6 have different owners. (F6, from
+\S\ref{sec:map} below, decomposes $\Delta$ into a strength-set floor plus a
+term that grows with $v_D$.)
 \emph{The strength-set floor belongs to expansion opacity alone.} Sobolev
-proper exhibits no strength floor at all---it is $+5$--$7\%$ at
-$\tau_{\max}=0.5$, $5$ and $50$ alike at small $v_D$---while expansion climbs
-$+3\% \to +37\% \to +45\%$. That floor is the per-crossing cap, not a failure
-of locality or isolation. \emph{The width-growing term, by contrast, is a
-genuine Sobolev failure}: a delta-function resonance has no width by
-construction, so the Sobolev leg is exactly $v_D$-independent and all of the
-resolved calculation's width dependence is unmodelled, reaching $+39\%$ at
-$(\tau_{\max}, v_D) = (50, 300\kms)$.
+proper exhibits no strength floor at all---at $v_D = 10\kms$ it is $+0.2\%$,
+$-0.2\%$ and $+1.1\%$ at $\tau_{\max}=0.5$, $5$ and $50$ respectively, with no
+trend in strength---while expansion climbs
+$+3.2\% \to +38.5\% \to +45.3\%$ across the same three. That floor is the
+per-crossing cap, not a failure of locality or isolation.
+\emph{The width-growing term, by contrast, is not a strength effect at all}: a
+delta-function resonance has no width by construction, so the Sobolev leg is
+exactly $v_D$-independent, and the resolved calculation's width dependence
+appears as clipping of line profiles against the boundaries of the finite
+line-forming region (Appendix~\ref{app:boundary}). It reaches $+32.9\%$ at
+$(\tau_{\max}, v_D) = (50, 300\kms)$---where $v_D$ is $15\%$ of the shell's
+velocity span, a configuration with no counterpart in real ejecta, for which
+$v_D/\Delta v_{\rm shell} \sim 10^{-4}$.
 
 The headline is therefore sharper than either treatment alone suggests: at
-kilonova-relevant line widths ($\lesssim 30\kms$) \textbf{the Sobolev
-approximation is accurate to $\approx 5$--$8\%$, while its standard
-expansion-opacity implementation errs by $40$--$90\%$}. The literature
-conflates the two under one name; they are different approximations and they
-fail for different reasons.
+kilonova-relevant line widths ($v_D \le 30\kms$) \textbf{the Sobolev
+approximation is accurate to $\lesssim 2\%$ across the full strength range
+tested---and to $\lesssim0.5\%$ at $\tau_{\max}=5$, the case followed down to
+$1\kms$---while its standard expansion-opacity implementation errs by
+$+38$--$48\%$}. The literature conflates the two under one name; they are
+different approximations and they fail for different reasons.
 
 \paragraph{Overlap is not the residual, and cannot be.} It is tempting to
 attribute the remaining Sobolev error at broad $v_D$ to the isolation
@@ -795,26 +881,26 @@ when $v_D$ is a sizeable fraction of the velocity span of the shell.
 \subsection{Where each error lives: strength, width, temperature}
 \label{sec:map}
 
-\begin{figure}[t]
+\begin{figure*}[t]
   \centering
   \includegraphics[width=\textwidth]{fig7_validity_slice.png}
-  \caption{First validity-map slice: $\dsob$ vs Doppler width for three
+  \caption{First validity-map slice: $\dexp$ vs Doppler width for three
   overall line-strength scalings of the La\,\textsc{ii} forest. Right
   panel: expansion-opacity fluxes (dashed) are blind to $v_D$, while
   resolved fluxes (solid) drop as profiles widen.}
   \label{fig:slice}
-\end{figure}
+\end{figure*}
 
-\begin{figure}[t]
+\begin{figure*}[t]
   \centering
   \includegraphics[width=\textwidth]{fig8_T_and_frontier.png}
   \caption{Left: temperature axis at pinned $\tau_{\max}=5$ (weak
   dependence; annotations count strong lines). Right: the Doppler-width
-  frontier: $\dsob$ is flat at $\sim38\%$ from $10\kms$ down to $1\kms$,
+  frontier: $\dexp$ is flat at $\sim38\%$ from $10\kms$ down to $1\kms$,
   essentially the La thermal width; red annotations give the resolved-run
   wall time.}
   \label{fig:frontier}
-\end{figure}
+\end{figure*}
 
 The separation just established is a single point in parameter space. We now
 map where each error lives, by scaling the two quantities the two
@@ -825,25 +911,29 @@ treatment ignores by construction.
 Scaling the overall line strength ($\tau_{\max}\in\{0.5,5,50\}$ by scaling
 the ion density) and the Doppler width
 ($v_D \in \{1,3,10,30,100,300\}\kms$) yields the first rows of the validity
-map (Figs.~\ref{fig:slice}--\ref{fig:frontier}; $\dsob$ in percent):
+map (Figs.~\ref{fig:slice}--\ref{fig:frontier}; $\dexp$ in percent):
 
-\begin{center}
+\begin{table}
+\centering
+\small
 \begin{tabular}{@{}lcccccc@{}}
 \toprule
-$\tau_{\max}\backslash v_D$ & 1 & 3 & 10 & 30 & 100 & 300 km/s\\
+$\tau_{\max}$ & \multicolumn{6}{c}{$v_D$ [km\,s$^{-1}$]} \\
+\cmidrule(l){2-7}
+ & 1 & 3 & 10 & 30 & 100 & 300 \\
 \midrule
-0.5 & -- & -- & $+3.0$ & $+2.3$ & $+2.9$ & $+2.8$ \\
-5   & $+37.8$ & $+38.1$ & $+37.3$ & $+40.0$ & $+43.3$ & $+51.2$ \\
-50  & -- & -- & $+44.6$ & $+47.4$ & $+58.8$ & $+91.1$ \\
+0.5 & -- & -- & $+3.2$ & $+2.4$ & $+3.2$ & $+2.8$ \\
+5   & $+39.1$ & $+39.2$ & $+38.5$ & $+41.3$ & $+45.0$ & $+53.0$ \\
+50  & -- & -- & $+45.3$ & $+48.1$ & $+60.9$ & $+93.8$ \\
 \bottomrule
 \end{tabular}
-\end{center}
+\end{table}
 
 \textbf{Finding F6}: the error decomposes into
 \begin{enumerate}
   \item a \emph{strength-set floor}, independent of $v_D$: the pure
   per-crossing substitution error. Weak forests are safe at the $3\%$
-  level; by $\tau_{\max}=5$ the floor is $\sim38\%$;
+  level; by $\tau_{\max}=5$ the floor is $\sim39\%$;
   \item a \emph{wing term} growing with $v_D$: expansion opacity is
   width-blind (its transmitted flux is flat across a factor 300 in $v_D$),
   while genuinely wide lines absorb continuum between resonances.
@@ -853,7 +943,7 @@ La thermal width---confirms that the floor survives: \emph{no refinement of
 line widths rehabilitates expansion opacity in the strong-line regime}.
 
 The temperature axis (Fig.~\ref{fig:frontier}, left), with strength pinned,
-moves $\dsob$ only from $+41\%$ to $+47\%$ across 2500--5000\,K: in this
+moves $\dexp$ only from $+41.8\%$ to $+48.1\%$ across 2500--5000\,K: in this
 window the same few strong lines dominate at all temperatures, so
 population redistribution is a weak axis (single-ion result; multi-ion
 mixtures may differ).
@@ -861,7 +951,7 @@ mixtures may differ).
 \subsection{Is the error an artifact of bin choice?}
 \label{sec:binwidth}
 
-\begin{figure}[t]
+\begin{figure*}[t]
   \centering
   \includegraphics[width=\textwidth]{fig13_binwidth.png}
   \caption{Left: the resolved reference is stable to $0.13\%$ while the
@@ -871,9 +961,10 @@ mixtures may differ).
   $\Delta_{\rm expansion}$ is flat from $0.025$ to $41$ lines per bin, two
   line lists and three decades.}
   \label{fig:binwidth}
-\end{figure}
+\end{figure*}
 
-Expansion opacity is derived for frequency bins containing \emph{many} lines;
+Expansion opacity is derived for frequency bins containing \emph{many} lines
+\citep{karp1977,eastman1993};
 the statistical averaging is what gives the construction its meaning. Our
 transport grids are much finer than that---$12.5\kms$ bins against a mean
 La\,\textsc{ii} line spacing of $\sim50\kms$, i.e.\ about one line per four
@@ -885,7 +976,9 @@ each resonance crossing contributes $1-e^{-\taus}$ at any resolution. The
 numerical test confirms it. Sweeping the transport resolution over two decades
 at fixed physics (Fig.~\ref{fig:binwidth}):
 
-\begin{center}
+\begin{table}
+\centering
+\small
 \begin{tabular}{@{}lccc@{}}
 \toprule
 line list & lines/bin & $F_{\rm resolved}$ spread & $\Delta_{\rm expansion}$ \\
@@ -894,7 +987,7 @@ La\,\textsc{ii} (153 lines)  & $0.025$--$2.5$ & $0.13\%$ & $+43.7\% \pm 1.2$ \\
 $+$ Ce\,\textsc{ii} (2529)   & $4.1$--$41$    & $0.5\%$  & $+15.3\% \pm 0.7$ \\
 \bottomrule
 \end{tabular}
-\end{center}
+\end{table}
 
 The two line lists give different errors---the blend is denser and partly
 blanketed, which is F7---but neither error depends on the bin width, including
@@ -914,7 +1007,7 @@ before its disagreement with anything else can be interpreted.
 \subsection{Is the separation universal? A breadth sweep}
 \label{sec:breadth}
 
-\begin{figure}[t]
+\begin{figure*}[t]
   \centering
   \includegraphics[width=\textwidth]{fig11_breadth.png}
   \caption{Thirty-six conditions---four wavelength windows (none of them the
@@ -923,7 +1016,7 @@ before its disagreement with anything else can be interpreted.
   single trend in the realized $\tau_{\max}$; expansion opacity reaches
   $+61\%$ while the Sobolev approximation never exceeds $+12\%$.}
   \label{fig:breadth}
-\end{figure}
+\end{figure*}
 
 The measurements above rest on one wavelength window at one epoch. To test
 their generality we ran a sweep over four windows (4300, 4900, 7000 and
@@ -932,19 +1025,21 @@ excluding the window used so far), three epochs ($t = 0.5$, 1 and 3 days at
 fixed ejecta mass, so $\rho \propto t^{-3}$ and $\taus \propto t^{-2}$), and
 three ion mixtures (La\,\textsc{ii}; $+$Ce\,\textsc{ii};
 $+$Ce\,\textsc{iii}). That is 36 conditions and 72 transport calculations,
-spanning 71 to 2504 lines per window and realized $\tau_{\max}$ from $0.003$
+spanning 71 to 2504 lines per window and realized $\tau_{\max}$ from $8\times10^{-5}$
 to $34$.
 
-\begin{center}
+\begin{table}
+\centering
+\small
 \begin{tabular}{@{}lcccc@{}}
 \toprule
  & median & max & $\tau_{\max}>3$ & $\tau_{\max}<0.5$ \\
 \midrule
-$\Delta$ expansion & $+5.1\%$ & $\mathbf{+61.3\%}$ & $+20.0\%$ & $+0.3\%$ \\
-$\Delta$ Sobolev   & $+3.6\%$ & $\mathbf{+11.3\%}$ & $+6.6\%$  & $+0.5\%$ \\
+$\dexp$ & $+5.1\%$ & $\mathbf{+61.3\%}$ & $+20.0\%$ & $+0.3\%$ \\
+$\dsobp$   & $+3.6\%$ & $\mathbf{+11.3\%}$ & $+6.6\%$  & $+0.5\%$ \\
 \bottomrule
 \end{tabular}
-\end{center}
+\end{table}
 
 \textbf{Finding F10}: the separation is universal, and the realized
 $\tau_{\max}$ is the controlling variable \emph{among the axes swept}. All 36
@@ -967,8 +1062,8 @@ We note one methodological point that the sweep itself exposed. The
 ($\tau_{\max}\simeq0$) and therefore acts as a free null control: its band
 flux must be unity. An early pass returned $1.075$ instead, tracing to a
 normalization reference that straddled the final (partial, and unreliable)
-bin of the transport grid. The bias cancelled exactly in $\Delta$ expansion,
-a same-code differential, but contaminated $\Delta$ Sobolev, which compares
+bin of the transport grid. The bias cancelled exactly in $\dexp$,
+a same-code differential, but contaminated $\dsobp$, which compares
 a Monte Carlo result against an analytic one---the same asymmetry as the
 emission convention of \S\ref{sec:conventions-f8}. Null controls of this kind
 cost nothing and are worth including by default.
@@ -976,14 +1071,14 @@ cost nothing and are worth including by default.
 \subsection{Multi-ion blending and the density dependence}
 \label{sec:multiion}
 
-\begin{figure}[t]
+\begin{figure*}[t]
   \centering
   \includegraphics[width=\textwidth]{fig9_multiion_forest.png}
   \caption{La\,\textsc{ii} + Ce\,\textsc{ii} blend in the same window. Ce
   floods it with 2376 additional lines (2529 total; strong-line spacings
   down to $8\kms$), saturating the band to near-black in every treatment.}
   \label{fig:blend}
-\end{figure}
+\end{figure*}
 
 One axis remains: what happens when forests become dense enough that
 resonances stop being resolvable as individual features?
@@ -991,9 +1086,9 @@ resonances stop being resolvable as individual features?
 Adding Ce\,\textsc{ii} at equal mass fraction multiplies the line count by
 $16$ and drives strong-line separations down to $8\kms$---genuine
 sub-Doppler blending. The measured error, however, \emph{falls}, to
-$\dsob = +14.6\%$ (Fig.~\ref{fig:blend}).
+$\dexp = +14.6\%$ (Fig.~\ref{fig:blend}).
 
-\textbf{Finding F7}: $\dsob$ is non-monotonic in forest density. With enough
+\textbf{Finding F7}: $\dexp$ is non-monotonic in forest density. With enough
 crossings, even capped per-crossing contributions sum to blackness, so both
 treatments agree that almost nothing escapes and the relative error is
 suppressed. The regime that maximizes the error is the \emph{intermediate}
@@ -1005,7 +1100,7 @@ where spectral features form and where composition is read off.
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=0.9\textwidth]{fig3_sedona_typeIa_exp_vs_bb.png}
+  \includegraphics[width=\columnwidth]{fig3_sedona_typeIa_exp_vs_bb.png}
   \caption{Motivating cost anecdote from a standard \textsc{sedona}
   Type~Ia supernova example: the same model runs in 14\,s with expansion
   opacity and 88\,min resolved ($378\times$), while redistributing flux
@@ -1017,7 +1112,7 @@ Why does everyone use the shortcut? Cost. On a standard \textsc{sedona}
 Type~Ia example, switching from expansion opacity to the resolved treatment
 multiplied the run time by $378$ (Fig.~\ref{fig:cost}). Our sweep adds a
 cleaner measurement: in the controlled forest, resolved-run wall time scales
-as $1/v_D$ (25\,s at $100\kms$, 719\,s at $3\kms$, 2109\,s at $1\kms$),
+as $1/v_D$ ($33\,$s at $100\kms$, $719\,$s at $3\kms$, $2109\,$s at $1\kms$),
 driven entirely by the transport frequency grid---and the expansion run on
 the same fine grid costs the same (2305\,s at $1\kms$). The expense is the
 grid, not the physics; narrow windows keep resolved calculations
@@ -1027,7 +1122,7 @@ affordable, which is the strategy this program uses.
 \section{Discussion}
 \label{sec:discussion}
 
-\begin{table}[t]
+\begin{table*}[t]
 \centering
 \caption{Findings register.}
 \label{tab:findings}
@@ -1042,36 +1137,66 @@ F3 & The $\mathcal{O}(v_{\rm bulk}/c)$ offset from comoving Sobolev $\tau$ is & 
    & an artifact of frozen-snapshot integration, not of relativity & App.~\ref{app:frame} \\
 F4 & Expansion opacity transmits $e^{-(1-e^{-\tau})}$ per crossing, not $e^{-\tau}$ & \S\ref{sec:verification} \\
 F5 & That error is per-resonance: it does not average away with line count & \S\ref{sec:verification} \\
-F6 & $\dsob$ = strength-set floor + $v_D$-growing wing term; & \S\ref{sec:results} \\
+F6 & $\dexp$ = strength-set floor + $v_D$-growing wing term; & \S\ref{sec:results} \\
    & the floor survives to thermal widths & \\
-F7 & $\dsob$ is non-monotonic in forest density: maximal for strong & \S\ref{sec:multiion} \\
+F7 & $\dexp$ is non-monotonic in forest density: maximal for strong & \S\ref{sec:multiion} \\
    & sparse forests, suppressed at full line blanketing & \\
 F8 & Solver-vs-MC offsets trace to the thermal-emission convention, & \S\ref{sec:conventions-f8} \\
    & not to profiles or resolution; matched, the codes agree to $\sim1\%$ & \\
-F9 & The strength floor is expansion opacity's alone; the width term & \S\ref{sec:separation} \\
-   & is a genuine Sobolev failure. Sobolev $\approx5$--$8\%$ vs $40$--$90\%$ & \\
+F9 & The strength floor is expansion opacity's alone; the width term is & \S\ref{sec:separation} \\
+   & the boundary effect of F12. At $v_D\le30\kms$: Sobolev $\lesssim2\%$ & \\
+   & vs expansion $+38$--$48\%$ & \\
 F10 & The separation is universal across windows, epochs and ion mixes; & \S\ref{sec:breadth} \\
     & realized $\tau_{\max}$ controls it at fixed $v_D$ and geometry & \\
 F11 & Neglect of light-travel-time evolution is a distinct approximation: & App.~\ref{app:frame} \\
     & frozen $\tau/\taus = (1-\beta)/\gamma$ vs worldline $1/\gamma$ & \\
 F12 & Overlap is inert in pure absorption (optical depths add exactly); & App.~\ref{app:boundary} \\
-    & the Sobolev residual is a finite-region boundary effect $\propto v_D$ & \\
+    & the Sobolev residual is a finite-region boundary effect & \\
+    & $\propto v_D/\Delta v_{\rm shell}$, negligible at thermal widths & \\
 F13 & The expansion-opacity error is bin-width invariant from $0.025$ to & \S\ref{sec:binwidth} \\
     & $41$ lines per bin, so it is intrinsic and not a usage artifact & \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
 \paragraph{What the floor means for kilonova modeling.}
-Lanthanide-rich ejecta are the definition of the strong-line regime: Sobolev
-depths of important lines reach $10^{2}$--$10^{4}$ in the line-forming
-region. Our measurements say that in that regime the expansion-opacity
-treatment overestimates band-integrated transmitted flux by tens of percent
-\emph{as a floor}, independent of how finely line profiles are treated. Band
-fluxes feed directly into inferred ejecta masses and compositions; a
-systematic of this size and sign (too much blue light escaping) plausibly
-biases lanthanide-fraction inferences. Quantifying that propagation to
-observables is future work.
+Lanthanide-rich ejecta are the definition of the strong-line regime: the
+opacity calculations that motivate this work find bound--bound optical depths
+in the line-forming region far above unity across the optical and
+near-infrared \citep{tanaka2020,tanaka2025}, and our sweep spans
+$\tau_{\max}$ up to $50$, where the floor is already $\sim45\%$ and the
+analytic cap argument (Appendix~\ref{app:expop}) shows it does not turn over
+at larger $\tau$. Our measurements say that in that regime the
+expansion-opacity treatment overestimates band-integrated transmitted flux by
+tens of percent \emph{as a floor}, independent of how finely line profiles
+are treated.
+
+\paragraph{What the floor does \emph{not} yet mean.}
+One step separates that statement from a claim about kilonova spectra, and it
+is worth making explicit because it bounds every astrophysical reading of
+this paper. Radiative equilibrium is disabled throughout
+(\S\ref{sec:conventions}): \textsc{sedona} deposits absorbed packet energy
+without re-emitting it, so what we measure is the \emph{attenuation of an
+externally supplied continuum}, not an emergent spectrum. In an
+energy-conserving calculation the photons that expansion opacity wrongly
+lets through a strong line would, under resolved transport, have been
+absorbed and re-emitted at some other frequency. Total luminosity is
+conserved; only its spectral distribution differs. A $+45\%$ error in
+attenuated band flux is therefore an upper bound on the corresponding error
+in an emergent spectrum, not a measurement of it.
+
+Two things nonetheless survive that step, and one does not. The sign
+survives: the per-crossing cap can only ever \emph{under}-attenuate
+(Appendix~\ref{app:expop}), so expansion opacity leaks flux out of strong-line
+bands in one direction, and thermal re-emission returns it redward of where
+it was lost rather than restoring the band. The order of magnitude plausibly
+survives, because the leak is a systematic per-resonance defect rather than a
+random one and does not average away with line count (F5). What does
+\emph{not} survive without further work is the quantitative transfer to
+inferred ejecta masses and lanthanide fractions. Repeating these measurements
+with radiative equilibrium enabled is the natural next experiment, and it is
+a well-posed one: the configuration here differs from an energy-conserving
+run by a single \textsc{sedona} switch.
 
 \paragraph{What exactly was measured on the Sobolev side.}
 Our Sobolev leg is the approximation in its pure form---$e^{-\taus}$ per
@@ -1080,7 +1205,8 @@ is \emph{exact} rather than approximate, but only because the configuration
 is pure absorption without scattering: it is precisely that restriction which
 makes the $p$-averaged staircase equal to per-line Sobolev transport. A
 per-line Sobolev scheme inside a scattering Monte Carlo code---the
-macroatom treatment of TARDIS-class codes \citep{tardis}, say---is a
+macroatom treatment of TARDIS-class codes \citep{lucy2002,lucy2003,tardis},
+say---is a
 different object, and our numbers should not be read as bounding it;
 extending the harness there is the natural sequel, and is the regime in which
 the leg would have to be built rather than computed.
@@ -1102,9 +1228,17 @@ NLTE); fixed temperatures; controlled shell velocities
 worldline-consistent time-dependent treatment, F11); Doppler widths down to $1\kms$ but not the
 $0.6\kms$ thermal value; two elements and three ionization stages across four
 windows and three epochs, but no full lanthanide mixture; Monte Carlo noise
-$\sim1$--$2\%$ per band flux. None of these caveats touches the sign
-or order of magnitude of the central result, which is reproduced
-independently by analytic theory (Appendix~\ref{app:expop}).
+measured at $0.26$--$0.30\%$ per band flux (Section~\ref{sec:conventions}); and
+radiative equilibrium disabled, so the reported fluxes are attenuation of an
+externally supplied continuum rather than an emergent spectrum.
+
+Within that pure-absorption configuration these caveats do not touch the sign
+or order of magnitude of the central result, whose mechanism is reproduced
+independently by analytic theory (Appendix~\ref{app:expop}). We stress what
+that sentence does \emph{not} say. Whether the per-crossing cap survives
+radiative redistribution---where a photon absorbed in one line may re-emerge
+in another, or at another frequency---is not tested here, and no result in
+this paper bounds it. That is the subject of a companion study.
 
 %=====================================================================
 \section{Conclusions and next steps}
@@ -1114,16 +1248,21 @@ expanding ejecta---three independent calculations agreeing to $\sim1\%$ once
 conventions are matched---and used it to measure, on calibrated lanthanide
 data, two errors that the literature carries under a single name.
 
-The Sobolev approximation itself is accurate to $\approx5$--$8\%$ at
-kilonova-relevant line widths and shows no dependence on line strength; its
-one real failure is the neglect of finite line width, which matters only for
-strong lines at large Doppler widths. Its standard expansion-opacity
-implementation is a different matter: a per-resonance substitution
-$\tau\to1-e^{-\tau}$ gives it a strength-set error floor of $40$--$90\%$ in
+The Sobolev approximation itself is accurate to $\lesssim2\%$ at
+kilonova-relevant line widths ($v_D\le30\kms$), and to $\lesssim0.5\%$ at
+$\tau_{\max}=5$ down to $1\kms$, showing no dependence on line strength; its
+only measured departure is the neglect of finite line width, and that is a
+property of imposing a finite line-forming region rather than of the
+approximation (Appendix~\ref{app:boundary}). Its standard expansion-opacity
+implementation \citep{karp1977,eastman1993} is a different matter: a
+per-resonance substitution
+$\tau\to1-e^{-\tau}$ gives it a strength-set error floor of $+38$--$48\%$ in
 band flux that no refinement of line widths removes, because the substitution
 is not a discretization but part of the formalism. Across 36 conditions
-spanning four windows, three epochs and three ion mixtures, the separation is
-universal and controlled by the realized $\tau_{\max}$ alone. The error is
+spanning four windows, three epochs and three ion mixtures at fixed Doppler
+width and shell geometry, the separation is universal and the realized
+$\tau_{\max}$ is the controlling variable among those axes; the error retains
+a separate, measured dependence on $v_D$ (\S\ref{sec:map}). The error is
 largest not in fully blanketed bands, where both treatments agree that little
 escapes, but in the intermediate regime where strong lines have not yet
 merged---which is where spectral features form and where composition is read
@@ -1149,7 +1288,7 @@ this manuscript live at
 for Kilonova Radiative Transfer, Zenodo record 19335084 (CC-BY 4.0).
 Radiative transfer: the public \textsc{sedona} release
 (\url{https://github.com/dnkasen/pubsed}). Every figure regenerates from a
-committed script; the 52-test suite pins the physics of every module.
+committed script; the 68-test suite pins the physics of every module.
 
 %=====================================================================
 \appendix
@@ -1268,7 +1407,7 @@ ladder experiment.
 \subsection{Boundaries, not overlap: where the Sobolev error comes from}
 \label{app:boundary}
 
-\begin{figure}[t]
+\begin{figure*}[t]
   \centering
   \includegraphics[width=\textwidth]{fig12_boundary.png}
   \caption{Left: a single line's resolved optical depth as its resonance is
@@ -1280,7 +1419,7 @@ ladder experiment.
   only $\sim7$ Doppler widths wide and the inner edge clips as well. Right:
   the band-averaged consequence tracks $v_D/\Delta v_{\rm shell}$.}
   \label{fig:boundary}
-\end{figure}
+\end{figure*}
 
 Two Sobolev-intrinsic assumptions could in principle fail: locality and
 isolation. Neither produces the residual measured in \S\ref{sec:separation}.
@@ -1319,10 +1458,15 @@ $d/v_D$, confirming that the width enters only through the ratio.
 
 The band-averaged consequence follows: the affected fraction of the spectrum
 is the fraction of the velocity span lying within a few Doppler widths of an
-edge, $\sim v_D/\Delta v_{\rm shell}$. For our shell
-($\Delta v_{\rm shell} = 2000\kms$) that is $0.5\%$ at $v_D = 10\kms$ and
-$30\%$ at $300\kms$, which is the observed scaling
-(Fig.~\ref{fig:boundary}, right).
+edge. With two edges that is $\sim 2v_D/\Delta v_{\rm shell}$, so for our
+shell ($\Delta v_{\rm shell} = 2000\kms$) it runs from $1\%$ at
+$v_D = 10\kms$ to $30\%$ at $300\kms$. This is an upper bound on the band
+error rather than a prediction of it, since only the clipped part of each
+profile is misassigned: the measured $|\dsobp|$ over the same range is
+$0.2\%$ and $9.2\%$ (Fig.~\ref{fig:boundary}, right). What the estimate does
+capture, and what matters here, is the linear scaling in
+$v_D/\Delta v_{\rm shell}$ and hence the two orders of magnitude by which the
+effect shrinks at physical line widths.
 
 This is worth stating plainly because it is easy to mistake for physics: the
 error is a property of imposing a \emph{finite} line-forming region on a
@@ -1343,8 +1487,9 @@ Appendix~\ref{app:sobolev} derived $\taus$ to first order in $v/c$. Kilonova
 ejecta move at $0.1$--$0.3c$, and we measured (Finding F3) that a resonance at
 $z_{\rm res}/ct = 7.7\%$ gave a trough matching
 $\exp[-\taus(1-z_{\rm res}/ct)]$ to four digits rather than $\exp(-\taus)$.
-The natural conclusion---which we drew, and published---was that this is the
-leading relativistic correction and that it is $\mathcal{O}(v/c)$. It is not.
+The natural conclusion---which we drew, and which an earlier draft of this
+appendix argued---was that this is the leading relativistic correction and
+that it is $\mathcal{O}(v/c)$. It is not.
 
 \paragraph{The faulty step.} That derivation differentiated the Doppler factor
 $D = \gamma(1-b)$ \emph{at fixed $t$}, i.e.\ it pushed a photon through a
@@ -1388,7 +1533,9 @@ directly along the path---no Sobolev assumption anywhere---reproduces both
 expressions to five decimal places, with the ejecta age held fixed or allowed
 to advance:
 
-\begin{center}
+\begin{table}
+\centering
+\small
 \begin{tabular}{@{}cccc@{}}
 \toprule
 $\beta$ & frozen $\tau/\taus$ & worldline $\tau/\taus$ & $1/\gamma$ \\
@@ -1399,7 +1546,7 @@ $\beta$ & frozen $\tau/\taus$ & worldline $\tau/\taus$ & $1/\gamma$ \\
 0.30 & 0.66776 & 0.95394 & 0.95394 \\
 \bottomrule
 \end{tabular}
-\end{center}
+\end{table}
 
 So the relativistic correction at $\beta = 0.1$, $0.2$, $0.3$ is $0.5\%$,
 $2.0\%$, $4.6\%$---not the $10\%$, $22\%$, $33\%$ that the frozen law implies
@@ -1424,11 +1571,15 @@ the spectral normalization (\S\ref{sec:breadth}): a third convention, and the
 one with the largest lever arm at high velocity. Like-for-like against a frozen
 \textsc{sedona} means running the solver in its frozen mode. At the shell
 velocities used for the measurements in this paper ($\beta \le 0.01$) the two
-laws differ by $\lesssim 2\%$ in $\tau$, so this choice does not affect any
-result reported here; at kilonova velocities it would dominate.
+laws differ by $\lesssim 2\%$ in $\tau$. That is far below the level at
+which any $\dexp$ moves---those are same-code differentials---but it is
+comparable to the $\sim1\%$ resolved-leg agreement itself, so every
+solver-versus-\textsc{sedona} comparison in this paper is quoted with the
+solver in frozen mode, matching \textsc{sedona}s transport treatment. At
+kilonova velocities the choice would dominate.
 
 \paragraph{What F3 is, finally.} Not a frame ambiguity (our first reading), not
-the leading relativistic correction (our second, published, reading), but an
+the leading relativistic correction (our second reading), but an
 artifact of integrating a frozen snapshot---a problem the photon does not
 solve. The distinction earns its own entry in Table~\ref{tab:findings} as F11,
 because ``neglect of light-travel-time evolution'' is a separate approximation
@@ -1445,7 +1596,9 @@ core small compared with the resonance radii, so all core rays are nearly
 radial and the plane picture holds.
 
 %=====================================================================
-\bibliographystyle{plainnat}
+\bibliographystyle{mnras}
 \bibliography{references}
+
+\label{lastpage}
 
 \end{document}

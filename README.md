@@ -12,21 +12,22 @@ La II line forests:
 
 | treatment | band-flux error |
 |---|---|
-| Sobolev approximation proper (`e^−τs` per line) | **≲0.5%** at physical widths |
-| expansion opacity (its usual implementation) | **40–90%** |
+| Sobolev approximation proper (`e^−τs` per line) | **≲0.5%** at τ_max = 5, ≲2% overall |
+| expansion opacity (its usual implementation) | **+38–48%** |
 
 The gap comes from a per-resonance substitution `τ → 1−e^−τ` that belongs to
 expansion opacity alone — not to Sobolev's locality or isolation assumptions —
 and it does not vanish as line widths shrink. The Sobolev approximation's own
 residual, by contrast, switches off entirely at physical line widths: it is a
 finite-region boundary effect, not a failure of either Sobolev assumption. Across 36 conditions spanning
-four wavelength windows, three epochs and three ion mixtures, both errors are
-controlled by the realized maximum line optical depth and nothing else.
+four wavelength windows, three epochs and three ion mixtures, the separation
+holds, with the realized maximum line optical depth as the controlling
+variable at fixed line width and geometry.
 
 ## The paper
 
-**[docs/paper/manuscript.pdf](docs/paper/manuscript.pdf)** — 28 pp, working
-draft, readable directly on GitHub. Written for a reader with no
+**[docs/paper/manuscript.pdf](docs/paper/manuscript.pdf)** — 17 pp in MNRAS
+format, readable directly on GitHub. Written for a reader with no
 radiative-transfer background: a primer builds every concept from scratch and
 an appendix derives every formula.
 
@@ -44,7 +45,7 @@ Source is [manuscript.tex](docs/paper/manuscript.tex); rebuild with
 | F5 | That error is per-resonance: it does not average away with line count, only as τ→0 | §4.6 |
 | F6 | Δ_expansion = a strength-set floor plus a width-growing term; the floor survives to thermal widths | §4.8 |
 | F7 | Δ is non-monotonic in forest density — maximal for strong *sparse* forests, suppressed at full blanketing | §4.10 |
-| F8 | Solver-vs-Monte-Carlo offsets traced to the thermal-emission convention, not physics; matched, the codes agree to ~1% | §4.11 |
+| F8 | Solver-vs-Monte-Carlo offsets traced to the thermal-emission convention, not physics; matched, the codes agree to 0.1% on the La II forest — inside the measured 0.3% Monte Carlo noise | §4.11 |
 | F9 | The strength floor is expansion opacity’s alone; Sobolev’s own residual is small and width-driven (see F12) | §4.12 |
 | F10 | The separation is universal across windows, epochs and ion mixes; realized τ_max controls it at fixed v_D and geometry | §4.13 |
 | F11 | Neglect of light-travel-time evolution is a distinct approximation: frozen τ/τ_S = (1−β)/γ vs worldline 1/γ, which has no O(β) term. SEDONA in steady-iterate mode solves the frozen problem, so transport treatment is a third convention cross-code comparisons must match | §4.14 |
