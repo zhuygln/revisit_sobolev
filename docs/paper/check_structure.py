@@ -30,7 +30,7 @@ REQUIRED_LABELS = [
     "sec:separation", "sec:map", "sec:binwidth", "sec:breadth",
     "sec:multiion", "sec:cost",
     "app:formal", "app:sobolev", "app:symmetry", "app:expop", "app:pavg",
-    "app:boundary", "app:frame",
+    "app:boundary", "app:frame", "app:related",
     "tab:findings",
 ]
 # The destroyed appendix left ~30 words; the shortest legitimate subsection

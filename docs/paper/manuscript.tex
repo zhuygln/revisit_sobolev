@@ -115,6 +115,29 @@ papers commonly report using ``the Sobolev approximation'' when they mean the
 second. Our central result is that the two carry error budgets differing by
 roughly an order of magnitude, so the distinction is not pedantry.
 
+Several strands of previous work bear on this. \citet{fontes2020} introduced
+an area-preserving line-binned treatment and compared synthetic kilonova
+spectra against both expansion opacity and a continuous Monte Carlo Sobolev
+calculation, finding broad agreement but non-negligible spectral differences
+in a one-dimensional pure-Nd test. \citet{banerjee2022,banerjee2024} showed
+that in the highly ionized early ejecta the line density can become large
+enough that intrinsic profiles overlap and the independent-interaction
+assumption underlying expansion opacity fails, particularly in the far
+ultraviolet. Separately, line-by-line Sobolev transport now follows tens of
+millions of transitions with fluorescence in multidimensional merger ejecta
+\citep{shingles2023,collins2023,collins2026}, and \citet{morag2025} has
+questioned how much of the underlying line physics the
+\citet{eastman1993} coefficient actually reproduces.
+
+Our question is complementary to each. We neither propose a new opacity
+prescription nor construct a realistic kilonova spectrum. We hold the atomic
+data, populations, geometry and radiation source fixed and decompose the
+approximation hierarchy itself---finite-profile transfer $\rightarrow$
+per-line Sobolev transfer $\rightarrow$ binned expansion opacity---so that a
+measured discrepancy can be assigned to one step rather than to the stack.
+Appendix~\ref{app:related} sets out the relation to each of these treatments
+in more detail.
+
 \subsection{What this paper does}
 
 We do not build a kilonova pipeline. We build the smallest apparatus that can
@@ -307,6 +330,16 @@ effective optical depth, no matter how black the line really is
 (derivation in Appendix~\ref{app:expop}). \textbf{This substitution,
 $\tau \to 1-e^{-\tau}$ per resonance, is the central object measured in this
 paper.}
+
+A related distinction has recently been drawn by \citet{morag2025}, who
+argues that the \citet{eastman1993} prescription can capture photon
+mean free paths through a line forest correctly while substantially
+underestimating photon emissivity and reprocessing rates. That is a
+statement about what an effective opacity does when it is also used as an
+emissivity; ours is a statement about what it does to attenuation when
+inserted into otherwise identical transport. The two are complementary, and
+together they make the same broader point: an effective opacity calibrated
+to reproduce one property of a line ensemble need not reproduce the others.
 
 %=====================================================================
 \section{Methods: the three-way harness}
@@ -518,7 +551,7 @@ therefore attenuation-only; $\dexp$, a differential between two
 
 Real-line experiments use the GSI Database for Kilonova Radiative Transfer
 \citep{gsi_atomic,gsi_zenodo}. It is one of several recent efforts to supply
-r-process opacity data \citep[cf.][]{tanaka2020,tanaka2025}; we adopt it
+r-process opacity data \citep[cf.][]{tanaka2020,kato2024}; we adopt it
 because its wavelengths are calibrated against experiment, which matters when
 the physical question turns on separations of a few $\kms$. It provides
 calibrated energy levels and E1 transitions
@@ -529,6 +562,19 @@ transitions. Internal consistency of the dataset is excellent: oscillator
 strengths recomputed from the Einstein $A$ coefficients agree with the
 tabulated $\log gf$ values to $1.5\times10^{-4}$ across our window, so both
 codes carry identical line strengths regardless of which column they read.
+
+Atomic-data uncertainty is itself a leading error source in kilonova
+modelling, and it is deliberately \emph{not} varied here. Improved
+calculations for singly ionized lanthanides change individual-element
+opacities by factors of several and mixture opacities by tens of per cent
+\citep{kato2024}, and a recent comparison of three neodymium datasets found
+that changing the input line list alone moves kilonova spectra substantially
+and the peak bolometric luminosity by close to a factor of $1.5$
+\citep{fontes2026}. The present experiment addresses the orthogonal budget:
+every transport leg receives byte-identical atomic data and populations, so
+the differences reported here measure the transport approximation rather
+than uncertainty in the line list. They should be read as additional to the
+atomic-physics uncertainty now being quantified, not as an estimate of it.
 
 %=====================================================================
 \section{Verification experiments}
@@ -701,11 +747,19 @@ computer time (\S\ref{sec:cost}).
   \label{fig:crowding}
 \end{figure}
 
-The geometric isolated-line condition is violated when profiles crowd within
-a Doppler width; whether that violation produces a \emph{transport} error
-depends on the interaction physics, and \S\ref{sec:separation} shows it does
-not in the pure-absorption case studied here, where optical depths add
-exactly. Fig.~\ref{fig:crowding} shows that even for this \emph{single} ion
+The geometric isolated-line condition becomes questionable when neighbouring
+profiles lie within a Doppler width. That regime is not hypothetical in
+r-process ejecta: \citet{banerjee2022,banerjee2024} defined a critical
+opacity at which the characteristic line spacing becomes comparable to the
+intrinsic thermal width, and found that highly ionized lanthanides exceed it
+in the early-time far ultraviolet, so that the independent-interaction
+assumption entering expansion opacity can fail there. Whether crowding
+produces a \emph{transport} error depends on the interaction physics, and
+\S\ref{sec:separation} shows that it does not in the pure-absorption case
+studied here, where optical depths remain exactly additive. Our line-spacing
+diagnostic therefore asks a narrower question: whether analogous crowding
+exists in the lower-ionization data used here.
+Fig.~\ref{fig:crowding} shows that even for this \emph{single} ion
 the calibrated data contain a real crowding tail: $11.3\%$ of the broader
 line sample has a neighbor within $10\kms$. Multi-ion mixtures only add
 lines, so the geometrically crowded regime exists in nature---which is what
@@ -980,7 +1034,13 @@ the statistical averaging is what gives the construction its meaning. Our
 transport grids are much finer than that---$12.5\kms$ bins against a mean
 La\,\textsc{ii} line spacing of $\sim50\kms$, i.e.\ about one line per four
 bins---so it is fair to ask whether we have measured the formalism outside its
-design regime.
+design regime. The question also bears on how our result sits beside
+\citet{fontes2020}, who compared line-binned, expansion-opacity and
+continuous-Sobolev calculations for a one-dimensional Nd model and obtained
+broadly similar spectra. Our test is narrower: rather than comparing complete
+synthetic spectra, it varies the transport bin width at fixed underlying
+physics, and asks whether the attenuation offset survives on entering the
+many-lines-per-bin regime.
 
 Appendix~\ref{app:expop} answers this analytically: the bin width cancels, and
 each resonance crossing contributes $1-e^{-\taus}$ at any resolution. The
@@ -1109,12 +1169,15 @@ result. The error is small in two limiting regimes---weak lines, and bands
 driven completely black---and largest in the \emph{intermediate} one, where
 optically thick lines coexist with nonzero escaping flux. Partially
 transparent, feature-forming regions of exactly this kind do occur in
-realistic kilonova calculations: multi-element models retain identifiable
+realistic kilonova calculations. Multi-element models retain identifiable
 La, Ce and Sr features rather than becoming featureless
-\citep{domoto2022}, and r-process opacity varies strongly with composition
-and by roughly an order of magnitude with epoch, so ``lanthanide-rich'' does
-not imply uniform blanketing at all wavelengths and times
-\citep{tanaka2020}.
+\citep{domoto2022,gillanders2022}; three-dimensional line-by-line Sobolev
+calculations find spectra shaped by \ion{Sr}{ii}, \ion{Y}{ii},
+\ion{Zr}{ii}, \ion{La}{iii} and \ion{Ce}{iii} together with continuum
+shaping by Ce and Nd \citep{shingles2023,collins2023,collins2026}; and
+r-process opacity varies strongly with composition and by roughly an order
+of magnitude with epoch, so ``lanthanide-rich'' does not imply uniform
+blanketing at all wavelengths and times \citep{tanaka2020}.
 
 We are explicit about what this does and does not license. It does not
 license reading $+38$--$48\%$ as the error of a fully mixed kilonova
@@ -1193,7 +1256,7 @@ F13 & The expansion-opacity error is bin-width invariant from $0.025$ to & \S\re
 Lanthanide-rich ejecta are the definition of the strong-line regime: the
 opacity calculations that motivate this work find bound--bound optical depths
 in the line-forming region far above unity across the optical and
-near-infrared \citep{tanaka2020,tanaka2025}, and our sweep spans
+near-infrared \citep{tanaka2020,kato2024}, and our sweep spans
 $\tau_{\max}$ up to $50$, where the floor is already $\sim45\%$ and the
 analytic cap argument (Appendix~\ref{app:expop}) shows it does not turn over
 at larger $\tau$. Our measurements say that in that regime the
@@ -1627,6 +1690,121 @@ $r$, not $z$---and one needs the common-direction and common-point frequency
 surfaces of \citet{jeffery1993}. Our controlled experiments keep the emitting
 core small compared with the resonance radii, so all core rays are nearly
 radial and the plane picture holds.
+
+%=====================================================================
+\section{Relation to previous line-opacity treatments}
+\label{app:related}
+
+\subsection{Expansion opacity and line-binned alternatives}
+
+The problem addressed here sits inside a longer effort to represent extremely
+dense line forests without resolving every intrinsic profile. The
+\citet{karp1977} and \citet{eastman1993} construction converts each
+transition's Sobolev interaction probability $1-e^{-\taus}$ into an effective
+opacity over a frequency interval, replacing an enormous set of narrow lines
+by a tractable coarse-frequency coefficient. It is on that convenience that
+its wide adoption rests.
+
+\citet{fontes2020} approached the same computational problem differently.
+Their line-binned opacity preserves the frequency-integrated area of the
+underlying fine-structure opacity and can be tabulated independently of the
+velocity field. They compared line-binned calculations against both
+traditional expansion opacity and a continuous Monte Carlo Sobolev treatment
+for kilonova models, finding broadly similar light curves and spectra while
+retaining identifiable differences between the representations.
+
+The present work is not another prescription; its purpose is diagnostic. We
+use frequency-resolved transfer as a controlled reference, insert per-line
+Sobolev transfer as an intermediate leg, and apply expansion opacity to the
+identical configuration. The hierarchy resolved $\rightarrow$ Sobolev proper
+$\rightarrow$ expansion opacity lets an error in the final calculation be
+assigned either to Sobolev localization or to the opacity closure built on
+top of it. That assignment, rather than any individual band flux, is the
+contribution.
+
+\subsection{Line overlap as a distinct failure mechanism}
+
+A separate limitation concerns whether successive line interactions remain
+independent. \citet{banerjee2022} introduced a critical opacity corresponding
+to the condition that the characteristic line spacing becomes comparable to
+the intrinsic thermal width, and found far-ultraviolet expansion opacities of
+highly ionized lanthanides well above it at early epochs, implying
+substantial profile overlap. \citet{banerjee2024} extended the heavy-element
+calculations and likewise emphasized that expansion opacity can underestimate
+the true opacity once neighbouring resonance regions overlap, because free
+propagation between independent interactions is then no longer a good
+description.
+
+That mechanism is physically distinct from the one isolated here. Our
+production calculations use fixed populations and pure absorption, so
+$\alpha_\nu = \sum_i \alpha_{\nu,i}$ and hence
+$\tau_\nu = \sum_i \tau_{\nu,i}$ exactly, even when profiles coincide. The
+controlled coincidence experiment of \S\ref{sec:separation} confirms this
+numerically to six decimal places. Our measured expansion-opacity floor
+therefore does \emph{not} require any breakdown of line independence---which
+is worth stating, because it would be easy to attribute the two effects to
+one cause. Overlap becomes dynamically consequential once scattering,
+fluorescence or NLTE populations let one transition modify the radiation
+field another samples, and that lies outside the present scope.
+
+\subsection{Line-by-line Sobolev transport and fluorescence}
+
+A complementary direction avoids binning altogether and propagates packets
+through individual Sobolev resonances. Modern calculations now perform
+line-by-line Sobolev transfer for tens of millions of bound--bound
+transitions in multidimensional merger ejecta, following fluorescence and
+associating individual spectral structures with particular ions
+\citep{shingles2023,collins2023,collins2026}.
+
+Those calculations answer a different question: what spectra emerge from
+increasingly realistic ejecta once line-by-line Sobolev transport is adopted.
+We ask instead whether the Sobolev replacement is itself accurate relative to
+a finite-profile calculation, and how much further error binning introduces.
+The two are complementary in a specific and useful way: our finding that the
+per-line Sobolev leg tracks resolved transfer to $\lesssim0.5\%$ at
+thermal-like widths is a controlled justification for adopting line-by-line
+Sobolev transport as the reference treatment in exactly such calculations.
+
+\subsection{Recent scrutiny of the Eastman--Pinto prescription}
+
+\citet{morag2025} revisits the physical interpretation of the
+\citet{eastman1993} prescription in supernova transfer, arguing that it can
+capture the photon mean free path through a line forest while substantially
+underestimating photon emissivity and reprocessing rates when used as a
+coarse-frequency emissivity. The broader point is that an effective opacity
+need not reproduce every property of the ensemble it replaces.
+
+Our result is complementary rather than contradictory. We do not test an
+emissivity closure, and radiative equilibrium is deliberately disabled: we
+measure the attenuation obtained when the expansion-opacity coefficient is
+inserted into otherwise identical transport, against resolved and per-line
+Sobolev calculations of the same configuration. The bin-width experiment of
+\S\ref{sec:binwidth} matters in this context, because it shows the
+discrepancy persisting from well under one line per bin to tens of lines per
+bin while the resolved reference stays converged. The result therefore does
+not depend on using a statistical opacity in a numerically isolated-line
+regime. How much of this attenuation-level difference survives once absorbed
+packets are reprocessed and energy is conserved is left, deliberately, to the
+companion calculation described in \S\ref{sec:discussion}.
+
+\subsection{Atomic-data uncertainty versus transport uncertainty}
+
+Improvements in r-process atomic data define another, largely independent,
+uncertainty budget. \citet{kato2024} find that improved singly ionized
+lanthanide calculations alter individual-element opacities by factors of
+several and mixture opacities appreciably; the calibrated GSI calculations
+used here supply experimentally anchored wavelengths for a large fraction of
+the strong transitions \citep{gsi_atomic}; and \citet{fontes2026} show that
+changing the neodymium dataset alone moves kilonova spectra substantially and
+the peak bolometric luminosity by nearly a factor of $1.5$.
+
+These results motivate rather than confound the present experiment. We hold
+the atomic dataset fixed across every transport leg, so the differences
+reported here are not an estimate of the total uncertainty in kilonova
+modelling. They isolate a transport-formalism uncertainty that exists
+\emph{in addition} to the atomic-physics uncertainty now being actively
+quantified---and which, unlike that uncertainty, will not be removed by
+better line lists.
 
 %=====================================================================
 \bibliographystyle{mnras}
