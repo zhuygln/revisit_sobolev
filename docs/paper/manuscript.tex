@@ -1370,7 +1370,8 @@ budget wherever strong lines are present.
 
 Next: worldline-consistent comparison
 at realistic ejecta velocities ($0.1$--$0.3c$), which \textsc{sedona}'s
-frozen steady-state mode cannot supply; and extension to scattering
+frozen steady-state mode cannot supply---though its time-dependent mode can,
+and is the natural route; and extension to scattering
 and fluorescence, which is where the analytic equivalence exploited here
 breaks down and a per-line Sobolev \emph{transport} scheme must be built and
 tested rather than computed in closed form.
@@ -1660,6 +1661,13 @@ of $0.618$ and a worldline prediction of $1.43$. \textsc{sedona} run with
 \texttt{transport\_steady\_iterate} iterates the radiation field on a fixed
 grid at fixed epoch; its source disables hydrodynamics in that mode and reads
 no time-stepping parameters. It is a frozen-snapshot calculation.
+
+The code itself is not restricted to that. Left in its time-dependent mode it
+advances the grid homologously---diluting the density as $t^{-3}$ and expanding
+the boundary---while photons still in flight are carried across timesteps, which
+is the worldline problem discretized at timestep resolution. We did not exercise
+that mode for the measurements reported here, and the reader should read the
+comparison above as a property of the configuration rather than of the code.
 
 This matters for the harness. Cross-code comparison requires matching the
 \emph{transport treatment} as well as the thermal-emission convention (F8) and
