@@ -6,6 +6,8 @@ Thumbs.db
 *:Zone.Identifier
 *:*.Zone.Identifier
 *:PG$Secure
+*:sec.endpointdlp
+*.crdownload
 .vscode/
 .idea/
 *.swp
