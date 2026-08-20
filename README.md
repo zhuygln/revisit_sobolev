@@ -108,10 +108,14 @@ everything above. Outstanding:
    normalization artifact; the remainder is a finite-region boundary effect
    that vanishes at physical line widths. Overlap was excluded both
    analytically (optical depths add) and numerically.
-2. **Realistic velocities.** All results use 1000–3000 km/s shells. With the
-   worldline law the relativistic correction there is negligible, but at the
-   0.1–0.3c of real ejecta it reaches 0.5–4.6% and the CD/CP resonance
-   surfaces stop being planes.
+2. **Realistic velocities.** All results use 1000–3000 km/s shells. The
+   machinery now reaches 0.1–0.3c: both the solver and the analytic leg carry
+   a co-evolving medium and worldline transport. Two corrections came out of
+   building it — the dominant term is light-travel *dilution* ((1−β)² = 51% at
+   β = 0.3), not the 4.6% relativistic one, and the CD/CP resonance surfaces
+   stay irrelevant under worldline transport, where the locus is linear.
+   A pilot finds Δ_Sobolev β-independent but Δ_expansion **growing** with β;
+   it is synthetic-forest only and not yet a finding (lab notebook §9n).
 3. **Scattering and fluorescence** — also the regime where the analytic
    Sobolev leg stops being exact, so a per-line Sobolev *transport* scheme
    would have to be built rather than computed. This is now Paper II, and its

@@ -844,12 +844,31 @@ separation is universal.
    normalization artifact; what remains is a finite-region boundary effect,
    not a failure of either Sobolev assumption. Overlap was excluded
    analytically and numerically.
-2. **Frame-consistent comparison at realistic velocities** (0.1–0.3c),
-   resolving F3 properly rather than avoiding it. Required before any
-   statement about real kilonova ejecta: at 0.1–0.3c the frame systematic is
-   0.5–4.6% (F11's worldline law), while the frozen-vs-worldline difference
-   is much larger — a different statement, and SEDONA's steady mode cannot
-   supply the time-dependent side.
+2. **Frame-consistent comparison at realistic velocities** (0.1–0.3c).
+   *Tooling done, measurement in pilot — see lab notebook §9m–9n.* Three
+   things changed the shape of this item:
+
+   - The controlling term is **not** the 0.5–4.6% frame systematic. A photon
+     meets material moving at β at t_res = t₀/(1−β), so with n ∝ t⁻³ the
+     medium contributes (1−β)² against transport's 1/γ: **51% against 4.6% at
+     β = 0.3**, an order of magnitude the other way. Confirmed against direct
+     integration of the resolved opacity.
+   - The **CD/CP geometry objection is retired** for the physical treatment.
+     Under worldline transport the resonance locus is linear in z and
+     τ/τ_S(t_res) = 1/γ exactly for every impact parameter; the two-root
+     quadratic belongs to the frozen snapshot.
+   - **SEDONA can supply the time-dependent side** — its steady *mode* cannot,
+     but the code's time-dependent mode dilutes ρ as t⁻³, expands the grid and
+     carries photons across timesteps. All 165 param files here force the
+     frozen mode and silently discard their own `hydro_module`.
+
+   Pilot result (synthetic forest, converged in both grids, *not* a numbered
+   finding): Δ_Sobolev is β-independent to 0.05 points, so Sobolev proper does
+   not degrade at realistic velocity, while Δ_expansion **grows** +17.1% →
+   +21.7% from β = 0.01 to 0.3. Only ~2/3 of that growth is the τ_max shift —
+   the collapse hypothesis is refuted at ratio 1.35 — and the residual
+   mechanism is unidentified. Needs the La II forest and a τ_max range before
+   it can be quoted.
 3. **Scattering and fluorescence.** Beyond their intrinsic importance, this
    is where the analytic Sobolev leg stops being exact, so it is the regime
    in which a per-line Sobolev *transport* scheme must be built and tested

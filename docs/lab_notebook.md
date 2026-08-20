@@ -684,6 +684,102 @@ modes must not move a single ulp. 104 tests green.
 **Still open:** the Delta measurement itself (Stage 6), and running SEDONA's
 time-dependent mode (Stage 5).
 
+## 9n. A pilot at 0.1-0.3c, and two tables that meant nothing (2026-08-20)
+
+With the analytic leg relativized (9m) the Delta measurement is possible for
+the first time. Ran a pilot: synthetic 20-line forest, uniform density, one
+epoch, tau_max = 5. `experiments/highbeta/pilot.py`.
+
+**Two confounded tables came first, and both looked fine.** Kept in the script
+under `--confounded`, because the failure mode is the interesting part.
+
+The first scaled the shell but not the line list. At beta = 0.3 each line's
+resonance region covers 30x more velocity space than at 0.01, so the forest
+goes from sparse to fully blanketed -- and F7 says Delta is non-monotonic in
+forest density, maximal for sparse forests and suppressed at full blanketing.
+The table showed Delta_expansion collapsing from +51% to +1.6% and I nearly
+believed it. It is F7's axis, measured by accident.
+
+The second fixed that by scaling the wavelength window with the shell span,
+but left v_D at 100 km/s. Then v_D/delta_v_shell varies 30x across the sweep
+and the low-beta rows carry F12's finite-region boundary effect. Delta_Sobolev
+read +19% at beta = 0.01, against Paper I's <=2%, which is the tell I should
+have caught immediately.
+
+**Standing rule, extended.** A sweep in one variable has to hold fixed every
+dimensionless ratio that any earlier finding identified as controlling. Here
+that is four of them -- tau_max (F10), lines per crossing (F7),
+v_D/delta_v_shell (F12), beta_core/beta_out -- and I had a finding for each,
+already written down, and still built two sweeps that violated them. The
+findings list is not just a record; it is the checklist for designing the next
+experiment.
+
+**The reference was unconverged, again.** Third time. `emergent_luminosity`
+averages over n_impact//2 core rays while `sobolev_attenuation` averages over
+n_p = 200, so the resolved leg is the coarse one and Delta drifts as its
+p-sampling settles:
+
+    n_impact     12       24       48       96
+    D_Sobolev  -0.93%   +0.08%   +0.50%   +0.59%     <- changes SIGN
+    D_expans. +15.32%  +16.49%  +16.97%  +17.08%     (beta = 0.01)
+
+I had already reported "D_Sobolev flat at -0.9%" before running this. It is
++0.6%. Frequency resolution, by contrast, was converged at n_nu = 200 already
+(stable to +-0.12 points out to 3200) -- because the structure scale across
+the band is the shell span, not the Doppler width. I had assumed the opposite
+and printed a diagnostic saying 5000 points were needed.
+
+**What saved it: the difference converges even when the endpoints do not.**
+The ray error is beta-independent, so it cancels:
+
+    n_impact        12      24      48      96
+    d(D_expansion) +4.40   +4.57   +4.51   +4.58
+    d(D_Sobolev)   -0.04   +0.06   -0.00   +0.05
+
+An 8x refinement moves each endpoint by ~1.8 points and the difference by
+0.18. Worth remembering as a design principle rather than a lucky escape: if
+the quantity of interest is a difference, converge the difference, and say so.
+
+**The result, at n_impact = 96 (converged):**
+
+    beta      D_Sobolev    D_expansion
+    0.01        +0.59%       +17.08%
+    0.30        +0.64%       +21.66%
+
+  1. Delta_Sobolev is beta-independent to 0.05 points. The Sobolev
+     approximation proper does not degrade at realistic ejecta velocity.
+     Its value here (+0.6%) also sits where Paper I says it should for
+     tau_max = 5.
+  2. Delta_expansion GROWS, by +4.58 points, ~27% relative. Expansion opacity
+     is worse at the velocities kilonovae actually have, not better.
+
+**The collapse hypothesis is refuted.** The plan predicted Delta_expansion at
+high beta would land on Paper I's Delta(tau_max) curve evaluated at
+tau_max^corr = tau_max (1-beta)^2/gamma -- no new mechanism, just a shift
+along a curve already measured. Control at converged ray count:
+
+    beta = 0.01 at tau_max = 2.337 (= 5 R):  D_exp = +16.06%
+    beta = 0.30 at tau_max = 5.000:          D_exp = +21.66%
+    ratio 1.349, against a predicted 1.000
+
+Only about two thirds of the growth is the tau_max shift. Same ratio at 12
+rays (1.374), so this is not a convergence artifact.
+
+**Mechanism unidentified, and my first guess is already weak.** I suspected
+the R gradient: R = (1-beta)^2/gamma varies from 0.81 to 0.47 across the band
+at beta_out = 0.3, so relativity stretches the tau distribution rather than
+rescaling it. But using the band-mean R instead of the edge value only moves
+the ratio to ~1.30. A second candidate, untested: lines per crossing was held
+fixed in nu_0, while the nu <-> beta_res map is nonlinear at high beta, so the
+realized forest density may still drift across the band. Test that before
+writing anything down as an explanation.
+
+**Status.** Pilot only -- synthetic forest, uniform density, one epoch, one
+tau_max. Not the Stage 6 measurement and not a numbered finding. Before it
+becomes one it needs the La II forest and a tau_max range, and the first thing
+to fix is the p-sampling mismatch between the legs: matching them removes most
+of the cost, which is currently 10-20 minutes per converged point.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,
