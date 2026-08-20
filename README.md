@@ -26,7 +26,7 @@ variable at fixed line width and geometry.
 
 ## The paper
 
-**[docs/paper/manuscript.pdf](docs/paper/manuscript.pdf)** — 17 pp in MNRAS
+**[docs/paper/manuscript.pdf](docs/paper/manuscript.pdf)** — 19 pp in MNRAS
 format, readable directly on GitHub. Written for a reader with no
 radiative-transfer background: a primer builds every concept from scratch and
 an appendix derives every formula.
