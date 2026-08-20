@@ -35,6 +35,8 @@ def sobolev_attenuation(
     n_ref,
     damp=None,
     n_p=200,
+    relativity=None,
+    n_of_beta=None,
 ):
     """Fraction of core continuum transmitted at each observer frequency.
 
@@ -59,8 +61,55 @@ def sobolev_attenuation(
     damp : None for Sobolev proper (tau used as is), or a callable applied to
         each tau_k -- e.g. lambda t: 1 - np.exp(-t) for expansion opacity.
     n_p : number of impact-parameter rays across the core disk.
+    relativity : None (default) keeps the classical first-order plane
+        `z_res = c t (1 - nu0/nu)` and the beta-free tau_S -- the path every
+        result in Paper I was computed with, left bit-for-bit intact.
+        "worldline" and "exact" name the same two treatments as
+        `formal_transfer.emergent_luminosity`; see below.
+    n_of_beta : callable beta -> n_l/n_ref at the resonance, i.e. the shape of
+        the INITIAL (t_exp) profile as a function of the fluid element's
+        velocity. None means uniform. Ignored when relativity is None, where
+        n_ref alone sets the depth.
 
     Returns the transmitted fraction on nu_grid (1.0 = untouched continuum).
+
+    RELATIVISTIC MODES. Both make tau and the resonance locus functions of the
+    impact parameter as well as the frequency, so `tau_k` and `z_res` become
+    (n_p, n_nu) arrays. The loop structure is otherwise unchanged and `damp` is
+    still applied to tau per crossing before accumulation, so the
+    expansion-opacity leg remains the same code path with one keyword flipped.
+
+    "worldline" -- the physical law. With ct(z) = z + Z0 along the photon path
+        (Z0 = c t_exp - z0, anchored where the ray leaves the core),
+
+            D = gamma (1 - beta_z) = Z0 / sqrt(Z0^2 + 2 Z0 z - p^2)
+
+        so D = nu0/nu is LINEAR in z and the locus has a single root:
+
+            z_res(p, nu) = (Z0/2)[(nu/nu0)^2 - 1] + p^2/(2 Z0).
+
+        Since |dD/dz| = D^3/Z0 and D(z_res + Z0) = gamma Z0, the impact
+        parameter cancels identically and tau/tau_S(t_res) = 1/gamma for EVERY
+        ray. tau_S is evaluated at the resonance's own epoch t_res = (z_res +
+        Z0)/c and its own diluted density, n_of_beta(beta_res) (t_exp/t_res)^3.
+
+    "exact" -- frozen snapshot, exact SR, kept because it is what an
+        observer-frame integration at fixed t computes. Here the locus really
+        is the two-root quadratic behind Jeffery's CD/CP surfaces,
+
+            u+- = [1 +- x sqrt(x^2 (1-a^2) - a^2)] / (1 + x^2),
+
+        with u = beta_z, a = p/(c t_exp), x = nu0/nu. Both roots are carried;
+        u+ sits above beta_z = 1 - a^2 and so never falls inside a shell with
+        beta_out <~ 0.35, which is *why* the plane picture was adequate at the
+        velocities of Paper I. tau comes from `tau_sobolev_frozen` called with
+        beta_z and beta distinct -- the general-ray law
+        (1-beta_z)^2/[gamma(1 - beta_z - beta_p^2)] -- rather than letting beta
+        default to |beta_z|, which is the radial-ray special case.
+
+    Note the asymmetry: the CD/CP geometry is a property of the FROZEN problem.
+    In the mode that is physically correct the locus is linear and the geometry
+    objection does not arise.
     """
     nu_grid = np.asarray(nu_grid, dtype=float)
     lines = [
@@ -73,19 +122,101 @@ def sobolev_attenuation(
     z_lo = np.sqrt(np.maximum(r_core**2 - p**2, 0.0))
     z_hi = np.sqrt(np.maximum(r_out**2 - p**2, 0.0))
 
+    if relativity not in (None, "worldline", "exact"):
+        raise ValueError(
+            f"relativity must be None, 'worldline' or 'exact', got {relativity!r}"
+        )
+
     att = np.zeros((p.size, nu_grid.size))
     for nu0, f_osc, pop in lines:
-        tau_k = tau_sobolev(f_osc, pop * n_ref, C / nu0, t_exp)
-        if damp is not None:
-            tau_k = damp(tau_k)
-        if tau_k <= 0.0:
-            continue
-        # Resonance plane for this line at each observer frequency.
-        z_res = C * t_exp * (1.0 - nu0 / nu_grid)
-        crossed = (z_res[None, :] > z_lo[:, None]) & (z_res[None, :] < z_hi[:, None])
-        att += np.where(crossed, tau_k, 0.0)
+        if relativity is None:
+            # Untouched: the classical path every Paper I number came from.
+            tau_k = tau_sobolev(f_osc, pop * n_ref, C / nu0, t_exp)
+            if damp is not None:
+                tau_k = damp(tau_k)
+            if tau_k <= 0.0:
+                continue
+            # Resonance plane for this line at each observer frequency.
+            z_res = C * t_exp * (1.0 - nu0 / nu_grid)
+            crossed = (z_res[None, :] > z_lo[:, None]) & (z_res[None, :] < z_hi[:, None])
+            att += np.where(crossed, tau_k, 0.0)
+        else:
+            if f_osc * pop <= 0.0:
+                continue
+            crossed, tau_k = _relativistic_crossings(
+                p, z_lo, z_hi, nu_grid, nu0, f_osc, pop * n_ref, t_exp,
+                r_core, r_out, relativity, n_of_beta,
+            )
+            # Zero the non-crossing entries before damping so that a locus
+            # outside the shell cannot leak a NaN into the sum; damp(0) = 0,
+            # so this does not change what a real crossing contributes.
+            tau_k = np.where(crossed, tau_k, 0.0)
+            if damp is not None:
+                tau_k = damp(tau_k)
+            att += np.where(crossed, tau_k, 0.0)
 
     return np.sum(p[:, None] * np.exp(-att), axis=0) / np.sum(p)
+
+
+def _relativistic_crossings(
+    p, z_lo, z_hi, nu_grid, nu0, f_osc, n_line, t_exp,
+    r_core, r_out, relativity, n_of_beta,
+):
+    """Resonance locus and optical depth per (impact parameter, frequency).
+
+    Returns (crossed, tau), both (n_p, n_nu). See `sobolev_attenuation`'s
+    docstring for the two laws; the algebra is derived there and pinned
+    against a numerical root-find in tests/test_relativistic.py.
+    """
+    shape = lambda b: 1.0 if n_of_beta is None else n_of_beta(b)
+    lambda0 = C / nu0
+    ct = C * t_exp
+    b_core, b_out = r_core / ct, r_out / ct
+
+    if relativity == "worldline":
+        # Anchor the clock where the ray leaves the core, as the solver does.
+        big_z = (ct - z_lo)[:, None]
+        y2 = (nu_grid / nu0)[None, :] ** 2
+        z_res = 0.5 * big_z * (y2 - 1.0) + (p[:, None] ** 2) / (2.0 * big_z)
+        ct_res = z_res + big_z
+        beta_res = np.sqrt(p[:, None] ** 2 + z_res**2) / ct_res
+        lorentz = 1.0 / np.sqrt(np.maximum(1.0 - beta_res**2, 1e-300))
+
+        # tau_S at the resonance's OWN epoch and its own diluted density.
+        t_res = ct_res / C
+        n_res = n_line * shape(beta_res) * (t_exp / t_res) ** 3
+        tau = tau_sobolev(f_osc, n_res, lambda0, t_res) / lorentz
+
+        # Shell membership on beta, not z: homology fixes the velocity span at
+        # every epoch, so this needs no moving-boundary root.
+        crossed = (z_res > z_lo[:, None]) & (beta_res > b_core) & (beta_res < b_out)
+        return crossed, tau
+
+    # "exact": frozen snapshot, two-root quadratic, z bounds frozen too.
+    a = (p / ct)[:, None]
+    x = (nu0 / nu_grid)[None, :]
+    disc = x**2 * (1.0 - a**2) - a**2
+    root = np.sqrt(np.maximum(disc, 0.0))
+    tau = np.zeros((p.size, nu_grid.size))
+    crossed = np.zeros((p.size, nu_grid.size), dtype=bool)
+    for sign in (-1.0, +1.0):
+        u = (1.0 + sign * x * root) / (1.0 + x**2)
+        z_res = u * ct
+        hit = (
+            (disc > 0.0)
+            & (z_res > z_lo[:, None])
+            & (z_res < z_hi[:, None])
+        )
+        if not hit.any():
+            continue
+        beta = np.sqrt(a**2 + u**2)
+        tau_root = tau_sobolev_frozen(
+            f_osc, n_line * shape(beta), lambda0, t_exp, beta_z=u, beta=beta
+        )
+        # A ray can pierce a CD/CP surface twice; optical depths add.
+        tau = tau + np.where(hit, tau_root, 0.0)
+        crossed = crossed | hit
+    return crossed, tau
 
 
 def tau_sobolev_relativistic(f_osc, n_l, lambda0, t_exp, beta):

@@ -653,14 +653,36 @@ set `transport_steady_iterate = 1`, so every one of them silently discarded its
 own `hydro_module = "homologous"`. Manuscript amended in both places; running
 it is Stage 5.
 
-**Still open from this pass:** the analytic leg (`sobolev_attenuation`) has no
-relativity at all, so no Delta can be measured at high beta yet. Its resonance
-locus is a first-order plane. Worth recording that under worldline transport
-the locus is *linear* in z -- z_res = (Z0/2)(y^2-1) + p^2/(2 Z0), one root, no
-discriminant -- and tau/tau_S(t_res) = 1/gamma exactly for every impact
-parameter. The two-root quadratic that motivates Jeffery's CD/CP surfaces
-belongs to the frozen snapshot. The geometry objection dissolves in the mode
-that is physically correct anyway.
+**The analytic leg, and a geometry objection that dissolved.** Both Paper I
+legs come from `sobolev_attenuation`, which had no relativity at all -- a
+first-order plane z_res = c t (1 - nu0/nu) and a beta-free tau_S -- so no Delta
+could be measured at high beta. Relativizing it turned out to be easier than
+feared, for a reason worth recording.
+
+Under worldline transport, with ct(z) = z + Z0,
+
+    D = gamma (1 - beta_z) = Z0 / sqrt(Z0^2 + 2 Z0 z - p^2),
+
+so D = nu0/nu is LINEAR in z: z_res = (Z0/2)(y^2-1) + p^2/(2 Z0), one root, no
+discriminant, no branch to choose. And since |dD/dz| = D^3/Z0 with
+D(z_res+Z0) = gamma Z0, the impact parameter cancels identically --
+tau/tau_S(t_res) = 1/gamma for *every* ray.
+
+The two-root quadratic behind Jeffery's CD/CP surfaces belongs to the FROZEN
+problem. The manuscript flagged the non-planar locus as a limitation and
+`vc_control` dodged it with a 1e-4 core; in the mode that is physically correct
+the question does not arise. The frozen branch still carries both roots, and a
+test asserts the upper one never falls inside a shell below 0.35c -- which is
+the actual reason the plane picture was adequate for Paper I, now written down
+instead of assumed.
+
+`damp` is still applied to tau per crossing, so the expansion leg remains the
+same code path with one keyword flipped. The classical path is untouched and
+guarded by array_equal against hard-coded outputs, not allclose: adding the
+modes must not move a single ulp. 104 tests green.
+
+**Still open:** the Delta measurement itself (Stage 6), and running SEDONA's
+time-dependent mode (Stage 5).
 
 ## 10. Standing environment notes
 

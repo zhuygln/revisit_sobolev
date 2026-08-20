@@ -96,3 +96,162 @@ def test_partial_shadowing_lies_between():
         nu, [(NU0, F_OSC)], R_CORE, R_OUT, T_EXP, N0, n_p=400
     )
     assert np.exp(-tau) < att[0] < 1.0
+
+
+# --------------------------------------------------- relativistic modes
+#
+# The default (relativity=None) path carries every number in Paper I, so the
+# first test here is a bit-for-bit guard on it, not an approximate one.
+
+CT = C * T_EXP
+_Z_PROBE = np.array([0.5, 1.5, 2.5, 3.5, 4.5]) * 1e14
+NU_PROBE = NU0 / (1.0 - _Z_PROBE / CT)
+
+# Hard-coded outputs of the classical path, captured before the relativistic
+# branch was added. array_equal, not allclose: the point is that adding modes
+# did not perturb the arithmetic by a single ulp.
+_SOB_REF = np.array([
+    0.8488409252739633, 0.3996263539825767, 0.3996263539825767,
+    0.3996263539825767, 0.3996263539825767,
+])
+_EXP_REF = np.array([
+    0.886350430017603, 0.5486066131172791, 0.5486066131172791,
+    0.5486066131172791, 0.5486066131172791,
+])
+
+
+def test_default_path_is_bit_identical():
+    sob = sobolev_attenuation(NU_PROBE, [(NU0, F_OSC)], R_CORE, R_OUT, T_EXP, N0)
+    exp_ = sobolev_attenuation(
+        NU_PROBE, [(NU0, F_OSC)], R_CORE, R_OUT, T_EXP, N0, damp=expansion_damp
+    )
+    # guard against the probes silently missing the shell, which would make
+    # any comparison here pass trivially
+    assert (sob < 0.999).all() and (exp_ < 0.999).all()
+    assert np.array_equal(sob, _SOB_REF)
+    assert np.array_equal(exp_, _EXP_REF)
+
+
+def test_relativistic_modes_reduce_to_classical_as_beta_goes_to_zero():
+    """Both corrections are O(beta), so the deviation must fall like beta."""
+    deviations = []
+    for b_out in (1.0e-3, 1.0e-4, 1.0e-5):
+        r_core, r_out = 1.0e-8 * CT, b_out * CT
+        nu = np.array([NU0 / (1.0 - 0.5 * r_out / CT)])
+        kw = dict(r_core=r_core, r_out=r_out, t_exp=T_EXP, n_ref=N0)
+        base = sobolev_attenuation(nu, [(NU0, F_OSC)], **kw)[0]
+        wl = sobolev_attenuation(nu, [(NU0, F_OSC)], relativity="worldline", **kw)[0]
+        ex = sobolev_attenuation(nu, [(NU0, F_OSC)], relativity="exact", **kw)[0]
+        assert base < 0.999
+        deviations.append(max(abs(wl - base), abs(ex - base)) / base)
+
+    assert deviations[-1] < 5.0e-5
+    for coarse, fine in zip(deviations, deviations[1:]):
+        assert np.isclose(coarse / fine, 10.0, rtol=0.05)  # linear in beta
+
+
+def test_worldline_leg_gives_one_minus_beta_squared_over_gamma():
+    """The physical law, at the leg level rather than the tau level.
+
+    Core made tiny so every ray is radial; then a fully shadowing line must
+    transmit exp(-tau_S(t_exp) (1-beta)^2/gamma) at the resonance frequency.
+    """
+    r_core, r_out = 1.0e-4 * CT, 0.30 * CT
+    tau_s = tau_sobolev(F_OSC, N0, LAMBDA0, T_EXP)
+    for beta in (0.05, 0.10, 0.20, 0.25):
+        lorentz = 1.0 / np.sqrt(1.0 - beta**2)
+        nu = np.array([NU0 * np.sqrt((1.0 + beta) / (1.0 - beta))])
+        att = sobolev_attenuation(
+            nu, [(NU0, F_OSC)], r_core, r_out, T_EXP, N0, relativity="worldline"
+        )[0]
+        assert np.isclose(att, np.exp(-tau_s * (1.0 - beta) ** 2 / lorentz), rtol=2e-4)
+
+
+def test_exact_leg_gives_one_minus_beta_over_gamma():
+    """The frozen snapshot, same geometry -- and a far bigger deficit."""
+    r_core, r_out = 1.0e-4 * CT, 0.30 * CT
+    tau_s = tau_sobolev(F_OSC, N0, LAMBDA0, T_EXP)
+    for beta in (0.05, 0.10, 0.20, 0.25):
+        lorentz = 1.0 / np.sqrt(1.0 - beta**2)
+        nu = np.array([NU0 * np.sqrt((1.0 + beta) / (1.0 - beta))])
+        att = sobolev_attenuation(
+            nu, [(NU0, F_OSC)], r_core, r_out, T_EXP, N0, relativity="exact"
+        )[0]
+        assert np.isclose(att, np.exp(-tau_s * (1.0 - beta) / lorentz), rtol=2e-4)
+
+
+def test_worldline_locus_matches_a_numerical_root_find():
+    """z_res is a closed form; check the implementation against brentq.
+
+    D(z) = Z0/sqrt(Z0^2 + 2 Z0 z - p^2), so D = nu0/nu is linear in z. This
+    pins the code path, not just the algebra.
+    """
+    from scipy.optimize import brentq
+
+    for a in (0.0, 0.05, 0.2):
+        for y in (1.05, 1.2, 1.4):
+            big_z, p_ray = CT, a * CT
+            closed = 0.5 * big_z * (y**2 - 1.0) + p_ray**2 / (2.0 * big_z)
+            f = lambda z: big_z / np.sqrt(big_z**2 + 2 * big_z * z - p_ray**2) - 1.0 / y
+            assert np.isclose(brentq(f, 0.0, 20.0 * CT, xtol=1e-8), closed, rtol=1e-10)
+
+
+def test_exact_second_root_never_falls_inside_the_shell():
+    """Why the plane picture was adequate for Paper I.
+
+    The frozen locus is a two-root quadratic -- Jeffery's CD/CP surfaces. The
+    upper root sits above beta_z = 1 - a^2, so for any shell reaching only
+    0.35c it is always outside. Carried in the code, never fired in practice.
+    """
+    b_out = 0.35
+    r_core, r_out = 1.0e-3 * CT, b_out * CT
+    p_ray = np.linspace(1e-6, r_core, 40)[:, None]
+    nu = np.linspace(NU0 * 1.001, NU0 * 1.9, 60)[None, :]
+
+    a = p_ray / CT
+    x = NU0 / nu
+    disc = x**2 * (1.0 - a**2) - a**2
+    u_plus = (1.0 + x * np.sqrt(np.maximum(disc, 0.0))) / (1.0 + x**2)
+
+    real = disc > 0.0
+    assert real.any()  # the branch is genuinely exercised
+    assert (u_plus[real] > b_out).all()
+    z_hi = np.sqrt(np.maximum(r_out**2 - p_ray**2, 0.0))
+    assert (u_plus[real] * CT > np.broadcast_to(z_hi, u_plus.shape)[real]).all()
+
+
+def test_damp_is_applied_after_the_relativistic_tau():
+    """The expansion leg must stay a same-code differential at high beta too."""
+    r_core, r_out = 1.0e-4 * CT, 0.30 * CT
+    beta = 0.2
+    lorentz = 1.0 / np.sqrt(1.0 - beta**2)
+    tau_rel = tau_sobolev(F_OSC, N0, LAMBDA0, T_EXP) * (1.0 - beta) ** 2 / lorentz
+    nu = np.array([NU0 * np.sqrt((1.0 + beta) / (1.0 - beta))])
+    att = sobolev_attenuation(
+        nu, [(NU0, F_OSC)], r_core, r_out, T_EXP, N0,
+        damp=expansion_damp, relativity="worldline",
+    )[0]
+    assert np.isclose(att, np.exp(-(1.0 - np.exp(-tau_rel))), rtol=2e-4)
+
+
+def test_n_of_beta_shapes_the_initial_profile():
+    """n_of_beta is read as the profile at t_exp, then diluted."""
+    r_core, r_out = 1.0e-4 * CT, 0.30 * CT
+    beta = 0.2
+    nu = np.array([NU0 * np.sqrt((1.0 + beta) / (1.0 - beta))])
+    kw = dict(r_core=r_core, r_out=r_out, t_exp=T_EXP, n_ref=N0,
+              relativity="worldline")
+    flat = sobolev_attenuation(nu, [(NU0, F_OSC)], **kw)[0]
+    halved = sobolev_attenuation(
+        nu, [(NU0, F_OSC)], n_of_beta=lambda b: 0.5 * np.ones_like(b), **kw
+    )[0]
+    assert np.isclose(halved, np.sqrt(flat), rtol=1e-9)  # tau halves
+
+
+def test_relativity_mode_is_validated():
+    import pytest
+
+    with pytest.raises(ValueError, match="relativity must be"):
+        sobolev_attenuation(
+            NU_PROBE, [(NU0, F_OSC)], R_CORE, R_OUT, T_EXP, N0, relativity="worldine"
+        )
