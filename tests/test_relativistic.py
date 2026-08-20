@@ -310,6 +310,10 @@ def _trough(relativity, beta, n_impact=60):
     lum = emergent_luminosity(
         nu, [(NU0, F_OSC)], const(N0), const(10.0), T_EXP,
         R_CORE_W, R_OUT_W, 2.0e4, V_D, n_impact=n_impact, relativity=relativity,
+        # dilution=False on purpose: these tests isolate the TRANSPORT law by
+        # holding one medium fixed across all three modes. The physical
+        # high-beta configuration is dilution=True, tested separately.
+        dilution=False,
     )
     cont = 4.0 * np.pi**2 * R_CORE_W**2 * planck_bnu(nu, 2.0e4)
     return float(lum[0] / cont[0])

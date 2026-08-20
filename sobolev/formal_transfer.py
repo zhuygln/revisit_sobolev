@@ -54,9 +54,39 @@ beta = 7.7% is neither a frame ambiguity nor "the leading relativistic
 correction": it is an artifact of integrating a frozen snapshot, which is
 not the problem the photon solves.
 
-Caveat: only the KINEMATICS are made time-dependent here. The density field
-is still the snapshot supplied by `n_l_of_r`; a homologously expanding
-density also evolves as t^-3, which is a further effect not modelled.
+THE MEDIUM (`dilution` argument). Worldline kinematics alone are not a
+self-consistent flow, and the inconsistency is not small. With `dilution`
+False the ejecta age advances along the ray while the density and the outer
+boundary stay at their t_exp snapshot; with it True the medium co-evolves,
+homology making beta the Lagrangian label, so the element now at
+(r, t_local) is read off `n_l_of_r` at r * t_exp/t_local and diluted by
+(t_exp/t_local)^3, and the outer boundary recedes as r_out(t) = beta_out c t.
+
+This matters more than the relativity does. A photon leaving the origin at
+t0 meets the material moving at beta at t_res = t0/(1-beta) -- later than the
+frozen-geometry guess t0(1+beta), because the fluid element is itself moving
+outward while the photon chases it. Normalized against tau_S at the emission
+epoch, which is the epoch a spectrum is labelled by,
+
+    frozen medium, worldline kinematics : tau/tau_S = 1/[(1-beta) gamma]
+    self-consistent flow                : tau/tau_S = (1-beta)^2 / gamma
+
+At beta = 0.3 that is 1.363 against 0.467 -- a factor 2.9, against the 4.6%
+that 1/gamma contributes. The dilution term is roughly 11x the relativistic
+one, and it points the other way. Both laws are confirmed against direct
+integration of the resolved opacity in tests/test_relativistic.py.
+
+A frozen outer boundary also caps the line-of-sight velocity a photon can
+ever reach at beta_out/(1+beta_out) -- 0.23 for a 0.3c shell -- so high-beta
+resonances simply go missing. `dilution` defaults to None, meaning "not
+specified", and worldline mode raises above beta_out = 0.02 rather than
+silently picking one; pass False explicitly to hold the medium fixed on
+purpose, as the transport-law tests do.
+
+Still not modelled: the core is a fixed-radius emitting surface (correct as
+a starting condition, since the photon leaves it at t_exp, but it does not
+co-move), `temp_of_r` is remapped to the fluid element without any adiabatic
+cooling law, and there is no time-dependent transport of the source itself.
 """
 
 import numpy as np
@@ -91,6 +121,7 @@ def emergent_luminosity(
     n_z_per_doppler=8.0,
     cutoff_widths=None,
     relativity="worldline",
+    dilution=None,
 ):
     """Emergent line spectrum L_nu (erg s^-1 Hz^-1) of the core+shell system.
 
@@ -115,6 +146,11 @@ def emergent_luminosity(
     n_z_per_doppler : z-resolution in units of the Doppler length v_D * t_exp.
         The resonance region of every line must be resolved; unresolved grids
         underestimate tau exactly like an unconverged tau_exact.
+    dilution : None (default, "not specified"), True or False. True lets the
+        medium co-evolve with the flow -- density diluted as t^-3 off the
+        Lagrangian radius, outer boundary receding as beta_out c t. See the
+        module docstring; at beta_out > 0.02 worldline mode requires an
+        explicit choice rather than defaulting.
     cutoff_widths : if not None, each line's profile is zeroed beyond this
         many Doppler widths from its centre -- mimicking SEDONA's hard-coded
         +-5-width truncation (AtomicSpecies_opacities.cpp). None (default)
@@ -123,6 +159,35 @@ def emergent_luminosity(
     Returns L_nu on nu_grid. Luminosity from intensity: L = 8 pi^2 int I p dp.
     """
     nu_grid = np.asarray(nu_grid, dtype=float)
+
+    if relativity not in ("worldline", "exact", "first"):
+        raise ValueError(
+            f"relativity must be 'worldline', 'exact' or 'first', got {relativity!r}"
+        )
+    # dilution=None means "not specified"; the guard below fires on that but
+    # not on an explicit False, so a caller can still hold the medium frozen
+    # on purpose (to isolate the transport law) without tripping it.
+    undecided = dilution is None
+    dilution = bool(dilution)
+    if dilution and relativity != "worldline":
+        raise ValueError(
+            "dilution=True is only meaningful with relativity='worldline'; the "
+            f"frozen modes hold t fixed, so nothing dilutes (got {relativity!r})"
+        )
+    beta_out = r_out / (C * t_exp)
+    if relativity == "worldline" and undecided and beta_out > 0.02:
+        raise ValueError(
+            f"worldline transport through a frozen medium at beta_out = {beta_out:.3g}. "
+            "The ejecta age advances along the ray but the density and the outer "
+            "boundary do not, which is not a small inconsistency: at beta = 0.3 the "
+            "density is wrong by (1-beta)^3 = 0.34 and tau by (1-beta)^2 = 0.49, an "
+            "error 11x the 1/gamma term this mode exists to capture. It also caps the "
+            "reachable line-of-sight velocity at beta_out/(1+beta_out). Pass "
+            "dilution=True for the self-consistent flow, relativity='exact' to "
+            "integrate a frozen snapshot deliberately, or dilution=False to state "
+            "that you want worldline kinematics on a frozen medium anyway."
+        )
+
     # Normalize entries to (nu0, f_osc, pop_frac, gamma) and precompute widths.
     lines = [
         (
@@ -155,12 +220,19 @@ def emergent_luminosity(
         else:
             z0 = -np.sqrt(r_out**2 - p**2)
             i0 = np.zeros_like(nu_grid)
-        z1 = np.sqrt(r_out**2 - p**2)
+        if dilution:
+            # The outer boundary is a fluid surface, so it recedes with the
+            # flow: r_out(t) = beta_out c t. Exit where sqrt(p^2+z^2) =
+            # beta_out (z + Z0), with c t(z) = z + Z0 along the worldline.
+            big_z = C * t_exp - z0
+            b_out = r_out / (C * t_exp)
+            disc = b_out**2 * big_z**2 - (1.0 - b_out**2) * p**2
+            z1 = (b_out**2 * big_z + np.sqrt(max(disc, 0.0))) / (1.0 - b_out**2)
+        else:
+            z1 = np.sqrt(r_out**2 - p**2)
         n_z = max(int(np.ceil((z1 - z0) / dz)), 4)
         z = np.linspace(z0, z1, n_z)
         r = np.sqrt(p**2 + z**2)
-        n_l = n_l_of_r(r)
-        temp = temp_of_r(r)
 
         # alpha(z, nu): sum the resolved profiles of all lines.
         # Frame transformation. beta_z is the line-of-sight component of the
@@ -171,12 +243,21 @@ def emergent_luminosity(
         # frozen and physical laws, and it is O(beta), not O(beta^2).
         if relativity == "worldline":
             t_local = t_exp + (z - z[0]) / C
-        elif relativity in ("exact", "first"):
+        else:  # "exact" / "first" -- validated above
             t_local = np.full_like(z, t_exp)
+
+        if dilution:
+            # Homology makes beta the Lagrangian label: the element now at
+            # (r, t_local) sat at r * t_exp/t_local at t_exp, and its density
+            # has fallen by (t_exp/t_local)^3 since. So the caller's n_l_of_r
+            # is read as the INITIAL profile and diluted, rather than being
+            # re-read as a fresh snapshot at every epoch.
+            shrink = t_exp / t_local
+            n_l = n_l_of_r(r * shrink) * shrink**3
+            temp = temp_of_r(r * shrink)
         else:
-            raise ValueError(
-                f"relativity must be 'worldline', 'exact' or 'first', got {relativity!r}"
-            )
+            n_l = n_l_of_r(r)
+            temp = temp_of_r(r)
 
         beta_z = z / (C * t_local)
         if relativity in ("exact", "worldline"):

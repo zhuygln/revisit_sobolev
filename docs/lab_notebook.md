@@ -587,6 +587,81 @@ the geometry — require r_core < z_res < sqrt(r_out² − r_core²) and every r
 crosses, whatever its impact parameter — and then assert that the offered
 fraction is exactly 1. A denominator you assume is a denominator you get wrong.
 
+## 9m. The term I called small was the big one (2026-08-20)
+
+Started the realistic-velocity work (open item 2) by quantifying what the
+solver's worldline mode does not model, rather than by building anything.
+That ordering paid immediately.
+
+**My first estimate was wrong, and wrong in the safe direction.** I had the
+light-travel factor as t_res = t0 (1 + beta): photon flies to the resonance
+radius beta c t0, taking beta t0. That treats the resonance as sitting still.
+It does not -- the fluid element is moving outward at beta c while the photon
+chases it, so
+
+    t_res = t0 / (1 - beta),
+
+1.43 t0 at beta = 0.3, not 1.30. With n ~ t^-3 and tau_S ~ n t, the medium
+contributes (1-beta)^2 and the transport 1/gamma:
+
+    tau / tau_S(t0) = (1 - beta)^2 / gamma
+
+Confirmed to five decimals against direct integration of the resolved opacity
+with the density evolving along the path. At beta = 0.3 the 1/gamma deficit is
+4.6% and the dilution deficit is 51% -- **the effect this project has been
+calling "the relativistic correction" is 11x smaller than the one it was not
+modelling at all.** Undiluted worldline transport gives 1.363; the physical
+answer is 0.467; a factor 2.9 apart, and on opposite sides of 1.
+
+**The hole was in the ground truth, not just in the solver.** `_ground_truth_tau`
+anchors its clock at the resonance, so it measures tau/tau_S(t_res) and is by
+construction blind to how the medium got there. It validated 1/gamma perfectly
+and could never have caught this. The fix was a second integrator anchored at
+the emission epoch -- which is the epoch a spectrum is actually labelled by.
+Lesson, and it is the same one as sections 9k and 4.13 in a new costume:
+**check what your reference is normalized against, not just whether it agrees.**
+
+**The 0.26 saturation was this bug's fingerprint all along.** Section 9i
+recorded that b = z/(c t_exp + z - z0) saturates near 0.26 for a beta_out = 0.35
+shell and filed it as a test-design quirk. It is exactly beta_out/(1+beta_out),
+and it is the frozen outer boundary: the photon chases a wall left behind at
+t_exp. With r_out co-moving it goes away. I had the number, wrote it down, and
+read it as an inconvenience rather than as evidence.
+
+**What changed.** `emergent_luminosity` gains `dilution=`, which reads
+`n_l_of_r` as the initial profile and dilutes it off the Lagrangian radius
+(homology makes beta the label, so the element now at (r,t) sat at r t_exp/t),
+and lets the outer boundary recede as r_out(t) = beta_out c t. Measured against
+the frozen medium at fixed resonance velocity it reproduces (1-beta)^3 to ~2%,
+the residual being the finite core.
+
+The default is `None`, not False. Worldline mode above beta_out = 0.02 now
+raises rather than picking one, because a silent 50% error is precisely this
+project's characteristic failure and I would rather break a caller than repeat
+it. Passing False explicitly is still allowed and the transport-law tests do
+that, since holding one medium fixed across all three modes is how they isolate
+the transport treatment.
+
+**Also settled: SEDONA can do this, and we never asked it to.** The manuscript's
+future-work line read as though the worldline comparison needed a code that
+does not exist. It does not: `transport_steady_iterate` gates off hydro
+(`SedonaClass.cpp:277`), and with it unset `hydro_homologous::step` divides rho
+by e^3, expands the grid and advances t_now, while photons in flight are
+carried across timesteps -- the worldline problem at timestep resolution.
+Doppler and aberration are already exact. All 165 param files in `experiments/`
+set `transport_steady_iterate = 1`, so every one of them silently discarded its
+own `hydro_module = "homologous"`. Manuscript amended in both places; running
+it is Stage 5.
+
+**Still open from this pass:** the analytic leg (`sobolev_attenuation`) has no
+relativity at all, so no Delta can be measured at high beta yet. Its resonance
+locus is a first-order plane. Worth recording that under worldline transport
+the locus is *linear* in z -- z_res = (Z0/2)(y^2-1) + p^2/(2 Z0), one root, no
+discriminant -- and tau/tau_S(t_res) = 1/gamma exactly for every impact
+parameter. The two-root quadratic that motivates Jeffery's CD/CP surfaces
+belongs to the frozen snapshot. The geometry objection dissolves in the mode
+that is physically correct anyway.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,
