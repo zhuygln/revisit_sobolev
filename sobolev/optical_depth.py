@@ -50,6 +50,26 @@ def population_tanh(v, n0, amplitude, v_res, v_scale):
 # --------------------------------------------------------------------------
 
 
+def stimulated_emission_factor(nu0, temperature):
+    """LTE correction for stimulated emission, 1 - exp(-h nu0 / k T).
+
+    SEDONA multiplies every line optical depth -- bound-bound and expansion
+    alike -- by (1 - n_u g_l / n_l g_u) (AtomicSpecies_opacities.cpp); for
+    Boltzmann populations that is exactly this factor. `tau_sobolev` does NOT
+    apply it, so an experiment that wants like-for-like with SEDONA multiplies
+    it into each line's population fraction. The convention is stated in the
+    manuscript (Sec. 2.4, App. A.2) rather than hidden.
+
+    Magnitude at T = 3000 K: 3.4e-6 at 3800 A, 1.1e-3 at 7000 A, 5.1e-3 at
+    9100 A -- negligible in the headline window, a 2-3% effect on a tau ~ 5
+    line's transmission in the reddest breadth window.
+    """
+    from .constants import H, K_B
+
+    nu0 = np.asarray(nu0, dtype=float)
+    return 1.0 - np.exp(-H * nu0 / (K_B * temperature))
+
+
 def tau_sobolev(f_osc, n_l_at_resonance, lambda0_cm, t_seconds):
     """Sobolev optical depth (babystep_plan.md section 3).
 

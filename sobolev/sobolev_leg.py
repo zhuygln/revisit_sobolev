@@ -21,9 +21,11 @@ mismatch, not physics.
 """
 
 import numpy as np
+from scipy.special import erf
 
 from .constants import C
 from .optical_depth import tau_sobolev
+from .rays import RaySet, core_rays_midpoint
 
 
 def sobolev_attenuation(
@@ -37,6 +39,7 @@ def sobolev_attenuation(
     n_p=200,
     relativity=None,
     n_of_beta=None,
+    rays=None,
 ):
     """Fraction of core continuum transmitted at each observer frequency.
 
@@ -64,8 +67,17 @@ def sobolev_attenuation(
     relativity : None (default) keeps the classical first-order plane
         `z_res = c t (1 - nu0/nu)` and the beta-free tau_S -- the path every
         result in Paper I was computed with, left bit-for-bit intact.
-        "worldline" and "exact" name the same two treatments as
-        `formal_transfer.emergent_luminosity`; see below.
+        "first" keeps the classical plane but carries the factor nu0/nu that
+        the resolved first-order integral has and the classical leg drops
+        (a 0.3-1% effect across a 1000-3000 km/s shell), so it is the exact
+        delta-resonance limit of `emergent_luminosity(relativity="first")`
+        and of `resolved_attenuation(sweep="first")`. "worldline" and
+        "exact" name the same two treatments as `emergent_luminosity`; see
+        below.
+    rays : optional `sobolev.rays.RaySet`. Replaces the n_p midpoint rule with
+        explicit impact parameters and weights, so that this leg and the
+        resolved legs can be evaluated on IDENTICAL rays. Only the core rays
+        of the set are used (envelope rays see no continuum).
     n_of_beta : callable beta -> n_l/n_ref at the resonance, i.e. the shape of
         the INITIAL (t_exp) profile as a function of the fluid element's
         velocity. None means uniform. Ignored when relativity is None, where
@@ -117,19 +129,36 @@ def sobolev_attenuation(
         for entry in lines
     ]
 
-    # Midpoint rays across the core disk.
-    p = np.linspace(0.0, r_core, n_p, endpoint=False) + r_core / (2 * n_p)
+    # Midpoint rays across the core disk (or the caller's shared RaySet).
+    if rays is None:
+        p = core_rays_midpoint(r_core, n_p)
+        w_ray = p
+    else:
+        p = np.asarray(rays.p, dtype=float)[rays.is_core]
+        w_ray = np.asarray(rays.w, dtype=float)[rays.is_core]
     z_lo = np.sqrt(np.maximum(r_core**2 - p**2, 0.0))
     z_hi = np.sqrt(np.maximum(r_out**2 - p**2, 0.0))
 
-    if relativity not in (None, "worldline", "exact"):
+    if relativity not in (None, "first", "worldline", "exact"):
         raise ValueError(
-            f"relativity must be None, 'worldline' or 'exact', got {relativity!r}"
+            "relativity must be None, 'first', 'worldline' or 'exact', "
+            f"got {relativity!r}"
         )
 
     att = np.zeros((p.size, nu_grid.size))
     for nu0, f_osc, pop in lines:
-        if relativity is None:
+        if relativity == "first":
+            # Classical plane, but the resolved first-order integral gives
+            # tau_S * (nu0/nu) at resonance: the Doppler sweep rate is
+            # dnu'/dz = nu/(ct), not nu0/(ct). Kept separate so the None
+            # path stays untouched.
+            tau_k = tau_sobolev(f_osc, pop * n_ref, C / nu0, t_exp) * (nu0 / nu_grid)
+            if damp is not None:
+                tau_k = damp(tau_k)
+            z_res = C * t_exp * (1.0 - nu0 / nu_grid)
+            crossed = (z_res[None, :] > z_lo[:, None]) & (z_res[None, :] < z_hi[:, None])
+            att += np.where(crossed, tau_k[None, :], 0.0)
+        elif relativity is None:
             # Untouched: the classical path every Paper I number came from.
             tau_k = tau_sobolev(f_osc, pop * n_ref, C / nu0, t_exp)
             if damp is not None:
@@ -155,7 +184,128 @@ def sobolev_attenuation(
                 tau_k = damp(tau_k)
             att += np.where(crossed, tau_k, 0.0)
 
-    return np.sum(p[:, None] * np.exp(-att), axis=0) / np.sum(p)
+    return np.sum(w_ray[:, None] * np.exp(-att), axis=0) / np.sum(w_ray)
+
+
+def resolved_attenuation(
+    nu_grid,
+    lines,
+    r_core,
+    r_out,
+    t_exp,
+    n_ref,
+    v_doppler,
+    n_p=200,
+    rays=None,
+    cutoff_widths=None,
+    sweep="classical",
+):
+    """Closed-form RESOLVED attenuation: Gaussian profiles, uniform n_l,
+    pure absorption, first-order Doppler.
+
+    For a line of rest frequency nu0 on a ray crossing the shell from z_lo to
+    z_hi, the resolved optical depth at observer frequency nu is the profile
+    integrated over the part of the resonance that lies inside the shell:
+
+        tau(p, nu) = tau_S [nu0/nu] * 1/2 [erf((z_hi - z_k)/Delta)
+                                           - erf((z_lo - z_k)/Delta)],
+        z_k = c t (1 - nu0/nu),     Delta = v_D t (nu0/nu),
+
+    the formula `experiments/boundary/run.py` verified against a brute-force z
+    integration to four decimals, applied per line and per ray with no z loop
+    at all. Cost O(n_p n_nu n_lines) and INDEPENDENT of v_D, so the 1 km/s
+    frontier that costs the brute-force solver hours is free here.
+
+    This is the deterministic reference the Sobolev leg is differenced
+    against (referee Comment 5): same rays, same source convention (no
+    emission), same populations, same transport treatment. It reproduces
+    `sobolev_attenuation` as v_D -> 0 (the erf bracket -> the crossing test)
+    and the F12 boundary law (a plane at an edge is half-counted).
+
+    Assumptions to keep visible: n_l uniform in r (true in every experiment
+    of this project -- the tau_max sweeps scale a constant density); pure
+    Gaussian profile (Voigt wings beyond the cutoff are ~1e-5 of tau at these
+    damping parameters); first-order Doppler only. `sweep="first"` keeps the
+    [nu0/nu] factor that the resolved integral has; `sweep="classical"` drops
+    it, matching the classical Sobolev plane exactly (for the v_D -> 0 test).
+    `cutoff_widths` clips the erf arguments at +-cutoff, mimicking SEDONA's
+    hard-coded +-5 width truncation; numerically irrelevant (erf(5) = 1 -
+    1.5e-12) but set it for like-for-like and say so.
+    """
+    if sweep not in ("classical", "first"):
+        raise ValueError(f"sweep must be 'classical' or 'first', got {sweep!r}")
+    nu_grid = np.asarray(nu_grid, dtype=float)
+    lines = [
+        (entry[0], entry[1], entry[2] if len(entry) > 2 else 1.0)
+        for entry in lines
+    ]
+    if rays is None:
+        p = core_rays_midpoint(r_core, n_p)
+        w_ray = p
+    else:
+        p = np.asarray(rays.p, dtype=float)[rays.is_core]
+        w_ray = np.asarray(rays.w, dtype=float)[rays.is_core]
+    z_lo = np.sqrt(np.maximum(r_core**2 - p**2, 0.0))[:, None]
+    z_hi = np.sqrt(np.maximum(r_out**2 - p**2, 0.0))[:, None]
+
+    att = np.zeros((p.size, nu_grid.size))
+    for nu0, f_osc, pop in lines:
+        tau_k = tau_sobolev(f_osc, pop * n_ref, C / nu0, t_exp)
+        if tau_k <= 0.0:
+            continue
+        x = nu0 / nu_grid
+        z_k = C * t_exp * (1.0 - x)
+        delta = v_doppler * t_exp * x
+        a_hi = (z_hi - z_k[None, :]) / delta[None, :]
+        a_lo = (z_lo - z_k[None, :]) / delta[None, :]
+        if cutoff_widths is not None:
+            a_hi = np.clip(a_hi, -cutoff_widths, cutoff_widths)
+            a_lo = np.clip(a_lo, -cutoff_widths, cutoff_widths)
+        frac = 0.5 * (erf(a_hi) - erf(a_lo))
+        scale = x if sweep == "first" else 1.0
+        att += tau_k * scale * frac
+    return np.sum(w_ray[:, None] * np.exp(-att), axis=0) / np.sum(w_ray)
+
+
+def crossing_depths(nu_grid, lines, r_core, r_out, t_exp, n_ref, n_p=200, rays=None):
+    """Per-ray, per-frequency Sobolev sums S and E over the crossed resonances.
+
+        S(p, nu) = sum_k tau_k                 -- what Sobolev transfer exponentiates
+        E(p, nu) = sum_k (1 - exp(-tau_k))     -- what expansion opacity integrates to
+
+    E is the expected number of line interactions per crossing for a photon
+    that is counted but not removed (Karp's mean-free-path statistic), and
+    expansion opacity preserves it exactly. Transmission is exp(-S) (product
+    of Bernoulli survivals) against exp(-E) (Poisson with the same mean), so
+    F_exp / F_Sob = E_w[exp(S - E)] with weights w ~ e^{-S} -- an identity,
+    tested as one. Classical plane, same rays as `sobolev_attenuation(None)`.
+
+    Returns (S, E, p, w) with S, E of shape (n_p, n_nu).
+    """
+    nu_grid = np.asarray(nu_grid, dtype=float)
+    lines = [
+        (entry[0], entry[1], entry[2] if len(entry) > 2 else 1.0)
+        for entry in lines
+    ]
+    if rays is None:
+        p = core_rays_midpoint(r_core, n_p)
+        w_ray = p
+    else:
+        p = np.asarray(rays.p, dtype=float)[rays.is_core]
+        w_ray = np.asarray(rays.w, dtype=float)[rays.is_core]
+    z_lo = np.sqrt(np.maximum(r_core**2 - p**2, 0.0))
+    z_hi = np.sqrt(np.maximum(r_out**2 - p**2, 0.0))
+    S = np.zeros((p.size, nu_grid.size))
+    E = np.zeros_like(S)
+    for nu0, f_osc, pop in lines:
+        tau_k = tau_sobolev(f_osc, pop * n_ref, C / nu0, t_exp)
+        if tau_k <= 0.0:
+            continue
+        z_res = C * t_exp * (1.0 - nu0 / nu_grid)
+        crossed = (z_res[None, :] > z_lo[:, None]) & (z_res[None, :] < z_hi[:, None])
+        S += np.where(crossed, tau_k, 0.0)
+        E += np.where(crossed, 1.0 - np.exp(-tau_k), 0.0)
+    return S, E, p, w_ray
 
 
 def _relativistic_crossings(

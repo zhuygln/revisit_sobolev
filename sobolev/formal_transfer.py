@@ -122,6 +122,7 @@ def emergent_luminosity(
     cutoff_widths=None,
     relativity="worldline",
     dilution=None,
+    rays=None,
 ):
     """Emergent line spectrum L_nu (erg s^-1 Hz^-1) of the core+shell system.
 
@@ -151,6 +152,11 @@ def emergent_luminosity(
         Lagrangian radius, outer boundary receding as beta_out c t. See the
         module docstring; at beta_out > 0.02 worldline mode requires an
         explicit choice rather than defaulting.
+    rays : optional `sobolev.rays.RaySet`. Overrides n_impact with explicit
+        impact parameters and p dp weights so that this leg and
+        `sobolev_attenuation` can be evaluated on IDENTICAL rays; with
+        `n_env = 0` only core rays are integrated (exact when T_shell -> 0,
+        since envelope rays then carry no intensity), halving the cost.
     cutoff_widths : if not None, each line's profile is zeroed beyond this
         many Doppler widths from its centre -- mimicking SEDONA's hard-coded
         +-5-width truncation (AtomicSpecies_opacities.cpp). None (default)
@@ -204,13 +210,19 @@ def emergent_luminosity(
     dz = v_doppler * t_exp / n_z_per_doppler
     z_max = np.sqrt(max(r_out**2 - 0.0, 0.0))
 
-    # Impact parameters: p-midpoint rule on [0, r_out]. Concentrate half the
-    # rays on the core (p < r_core) since they carry the absorption trough.
-    p_core = np.linspace(0.0, r_core, n_impact // 2, endpoint=False)
-    p_core += 0.5 * (p_core[1] - p_core[0])
-    p_env = np.linspace(r_core, r_out, n_impact - n_impact // 2, endpoint=False)
-    p_env += 0.5 * (p_env[1] - p_env[0])
-    p_all = np.concatenate([p_core, p_env])
+    # Impact parameters. Default: p-midpoint rule on [0, r_out] with half the
+    # rays on the core (p < r_core), since they carry the absorption trough.
+    # A `RaySet` overrides this so the resolved and analytic legs can share
+    # one quadrature -- see sobolev/rays.py for why that matters.
+    if rays is not None:
+        p_all = np.asarray(rays.p, dtype=float)
+        weights = np.asarray(rays.w, dtype=float)
+    else:
+        p_core = np.linspace(0.0, r_core, n_impact // 2, endpoint=False)
+        p_core += 0.5 * (p_core[1] - p_core[0])
+        p_env = np.linspace(r_core, r_out, n_impact - n_impact // 2, endpoint=False)
+        p_env += 0.5 * (p_env[1] - p_env[0])
+        p_all = np.concatenate([p_core, p_env])
 
     intensity = np.zeros((p_all.size, nu_grid.size))
     for i, p in enumerate(p_all):
@@ -308,9 +320,10 @@ def emergent_luminosity(
         intensity[i, :] = i0 * np.exp(-tau_tot) + emis
 
     # L_nu = 8 pi^2 int I(p) p dp, midpoint rule with the two p sections.
-    dp_core = p_core[1] - p_core[0] if p_core.size > 1 else r_core
-    dp_env = p_env[1] - p_env[0] if p_env.size > 1 else r_out - r_core
-    weights = np.concatenate(
-        [p_core * dp_core, p_env * dp_env]
-    )
+    if rays is None:
+        dp_core = p_core[1] - p_core[0] if p_core.size > 1 else r_core
+        dp_env = p_env[1] - p_env[0] if p_env.size > 1 else r_out - r_core
+        weights = np.concatenate(
+            [p_core * dp_core, p_env * dp_env]
+        )
     return 8.0 * np.pi**2 * np.sum(weights[:, None] * intensity, axis=0)
