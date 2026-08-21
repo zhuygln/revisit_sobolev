@@ -48,3 +48,7 @@ experiments/**/tsweep_*/
 experiments/**/sweep_*.mod
 experiments/**/tsweep_*.mod
 experiments/**/blend_*/
+experiments/**/re_*/
+experiments/**/ladder_*/
+experiments/**/ladder_model_*.mod
+experiments/laII_forest/laII_null.mod
