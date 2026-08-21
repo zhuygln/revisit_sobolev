@@ -10,10 +10,10 @@ calculations on calibrated atomic data.
 **The result.** Against frequency-resolved transport as truth, on realistic
 La II line forests:
 
-| treatment | band-flux error |
+| treatment | band-flux error (vs a deterministic finite-profile reference on identical rays) |
 |---|---|
-| Sobolev approximation proper (`e^−τs` per line) | **≲0.5%** at τ_max = 5, ≲2% overall |
-| expansion opacity (its usual implementation) | **+38–48%** |
+| Sobolev approximation proper (`e^−τs` per line) | **≲1%** at v_D ≤ 30 km/s for τ_max ≤ 5, **≲0.3%** at v_D ≤ 10 km/s — a boundary effect ∝ v_D, vanishing at thermal widths |
+| expansion opacity (its usual implementation) | **+38%** at thermal widths (the pure Poisson-vs-Bernoulli gap), **+45%** in the Monte Carlo implementation at 100 km/s |
 
 The gap comes from a per-resonance substitution `τ → 1−e^−τ` that belongs to
 expansion opacity alone — not to Sobolev's locality or isolation assumptions —
@@ -52,6 +52,10 @@ Source is [manuscript.tex](docs/paper/manuscript.tex); rebuild with
 | F12 | Overlap is inert in pure absorption (optical depths add exactly); the Sobolev residual is a finite-region boundary effect ∝ v_D/Δv_shell, negligible at thermal widths | §4.15 |
 | F13 | The expansion-opacity error is bin-width invariant from 0.025 to 41 lines per bin — intrinsic to the formalism, not a usage artifact | §4.16 |
 | F14 | Neither candidate reference code can answer Paper II alone: SEDONA has no line branching at all, TARDIS has no expansion opacity. A ~250-line branching Sobolev MC, validated to ≤2.1σ against the analytic Sobolev leg, supplies the same-code differential both lack | §4.17 |
+| F15 | **The mechanism, made exact (referee revision).** Expansion opacity preserves the expected interaction count per crossing E = Σ(1−e^−τ) identically — Karp's mean free path — and applies Poisson survival e^−E to what is a Bernoulli product e^−S; F_exp/F_Sob = ⟨e^D⟩ weighted by transmission, D = S−E, to 1e-13. F4, F5, F7, F13 are corollaries | §4.18 |
+| F16 | Δ_Sobolev against a deterministic reference on identical rays is +3.1% at v_D = 100 km/s in all four transport modes, +0.3% at 10, +0.03% at 1 km/s; the breadth median was a stale normalization (+3.65% → +0.26%); SEDONA resolved validates the reference to ±0.3% | §4.18 |
+| F17 | Seed-matched SEDONA pairs correlate at +0.95–0.999; paired Δ_exp scatter 0.02–0.28% against 0.2–0.4% from quadrature. Headline over 10 seeds: +44.90% ± 0.04 | §4.18 |
+| F18 | With radiative equilibrium on, the emergent-band differential falls from +44% to +7.7% (redistribution alone) and +5.0% (T converged); the band fills 0.34 → 0.85 and the removed flux reappears redward. Sign preserved, magnitude not | §4.18 |
 
 Full write-up with figures and numbers:
 **[docs/results_report.md](docs/results_report.md)**.
@@ -101,8 +105,13 @@ the report §4. The original plans are preserved unmodified as
 
 ## Status and open items
 
-Phase 0 through the validity maps is complete; the manuscript covers
-everything above. Outstanding:
+Phase 0 through the validity maps is complete, and the manuscript has been
+revised for a major-revision report (August 2026): the thesis is now that
+the two approximations carried under one name preserve different properties
+of a line forest (F15), Δ_Sobolev is formed against a deterministic reference
+(F16), every Monte Carlo number is a seed-matched pair (F17), and one
+radiative-equilibrium check is included (F18). The response letter is
+`docs/paper/response_to_referee.md`. Outstanding:
 
 1. ~~The residual Sobolev error.~~ **Resolved (F12).** Most of it was a
    normalization artifact; the remainder is a finite-region boundary effect

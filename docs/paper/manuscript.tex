@@ -25,32 +25,37 @@ Kilonova Ejecta}
 \maketitle
 
 \begin{abstract}
-Kilonova radiative-transfer codes routinely describe their line treatment as
-``the Sobolev approximation'', usually meaning its binned expansion-opacity
-form. We show these are two approximations with very different error budgets,
-and measure each separately. The harness is deliberately restricted---a 1-D
-homologous shell, pure absorption with fixed LTE populations, shell velocities
-of $1000$--$3000\kms$---because that restriction is what makes the two errors
-separable. Three independent calculations of one model---analytic Sobolev
-theory, a deterministic frequency-resolved solver, and the Monte Carlo code
-\textsc{sedona}---agree to $\sim1\%$ on multi-line problems once a
-thermal-emission convention is matched. On a forest
-of 153 calibrated La\,\textsc{ii} lines from the GSI database, the
-\emph{expansion-opacity implementation} carries a strength-set error floor
-from its per-resonance substitution $\tau\to1-e^{-\tau}$, growing from
-$\sim3\%$ for weak-line forests to $+38$--$48\%$ for strong ones and surviving
-undiminished to a Doppler width of $1\kms$, so no refinement of line widths
-rehabilitates it. It is invariant under transport bin width from $0.025$ to
-$41$ lines per bin, and so is intrinsic to the formalism rather than an
-artifact of use outside its design regime. The \emph{Sobolev approximation
-itself} shows no strength floor and is accurate to $\lesssim2\%$; its only
-measured failure is geometric, where a resonance falls near a boundary of the
-finite line-forming region. Across 36 conditions spanning four wavelength
-windows, three epochs and three ion mixtures the separation is universal,
-controlled by the realized maximum line optical depth at fixed geometry and
-line width. The shortcut in common use is thus wrong by tens of percent, in
-pure absorption, for reasons largely unrelated to the approximation it is
-named after.
+Kilonova radiative-transfer codes that work from binned opacities describe
+their line treatment as ``the Sobolev approximation''; what they apply is
+Sobolev's treatment of an isolated resonance together with the expansion-opacity
+closure built on it. These are two approximations, and they preserve different
+properties of a line forest. We measure each against frequency-resolved
+transfer in a deliberately restricted harness---a 1-D homologous shell, pure
+absorption with fixed LTE populations, controlled shell velocities of
+$1000$--$3000\kms$---chosen because it makes the two errors separable. The
+expansion-opacity coefficient of Karp et al.\ and Eastman \& Pinto is exact in
+the statistic it was derived for: the expected number of line interactions per
+unit path, $\sum_k(1-e^{-\tau_k})$, is preserved identically. It departs from
+the deterministic attenuation of a resolved line realization because it
+applies Poisson statistics to what is a product of Bernoulli survivals,
+$e^{-\sum(1-e^{-\tau_k})}$ against $e^{-\sum\tau_k}$; the two coincide when every
+line is weak, and separate once individual lines saturate. On a forest of 153
+calibrated La\,\textsc{ii} lines the resulting band-flux difference is $+38\%$
+at thermal line widths and at every transport bin width tried, growing from
+$\sim3\%$ for weak-line forests to $+38$--$48\%$ for strong ones. The Sobolev
+localization itself, measured against a deterministic finite-profile reference
+on identical rays, carries no strength floor: its error is a boundary effect
+proportional to the ratio of Doppler width to the shell's velocity span,
+$\lesssim2\%$ at $v_D\le30\kms$ for the strengths relevant here and
+$\lesssim0.3\%$ at $v_D\le10\kms$. Across 36 further conditions spanning four
+wavelength windows, three epochs and three ion mixtures the separation is
+robust, and the controlling quantity is the transmission-weighted saturation
+deficit of the forest, for which the strongest line's optical depth is a
+proxy within a fixed geometry. The two approximations carried under one name
+fail for different reasons and at different levels. In one energy-conserving
+check with radiative equilibrium enabled, the band differential falls from
+$+44\%$ to between $+5\%$ and $+8\%$ as the removed flux is re-emitted
+redward.
 \end{abstract}
 
 \begin{keywords}
@@ -105,36 +110,46 @@ it in \S\ref{sec:discussion}. The approximation is standard, venerable, and
 almost never checked against a resolved calculation \emph{under kilonova
 conditions}. This work begins that check.
 
-It also draws a line the field has left blurred. Sobolev's approximation
-proper attenuates each line by $e^{-\taus}$ and rests on two assumptions:
-that the gas does not change across a resonance, and that lines do not
-overlap. Expansion opacity is a further, and separate, step---a statistical
-device that bins many lines into an effective opacity and, as we show,
-substitutes $1-e^{-\tau}$ for $\tau$ at every resonance crossing. Codes and
-papers commonly report using ``the Sobolev approximation'' when they mean the
-second. Our central result is that the two carry error budgets differing by
-roughly an order of magnitude, so the distinction is not pedantry.
+It also keeps separate two things that are often named together. Sobolev's
+approximation proper attenuates each line by $e^{-\taus}$ and rests on two
+assumptions: that the gas does not change across a resonance, and that lines
+do not overlap. Expansion opacity is a further, and separate, step---a
+statistical closure that converts each line's Sobolev interaction probability
+$1-e^{-\tau}$ into a coarse-frequency coefficient. That the closure counts each
+line at most once was noted by \citet{fontes2020}; what we add is a
+measurement, on calibrated lanthanide data and against a resolved reference,
+of what that counting does to transmission and when it matters. A code that
+works from binned opacities and reports ``the Sobolev approximation'' is
+applying both steps, and the two carry error budgets differing by roughly an
+order of magnitude.
 
-Several strands of previous work bear on this. \citet{fontes2020} introduced
-an area-preserving line-binned treatment and compared synthetic kilonova
-spectra against both expansion opacity and a continuous Monte Carlo Sobolev
-calculation, finding broad agreement but non-negligible spectral differences
-in a one-dimensional pure-Nd test. \citet{banerjee2022,banerjee2024} showed
+Several strands of previous work bear on this. \citet{fontes2020} wrote the
+expansion-opacity optical depth as $\sum_i(1-e^{-\tau_i})$ against the
+line-binned $\sum_i\tau_i$, noted explicitly that the former limits a single
+line's contribution to one, and compared both against a continuous Monte
+Carlo Sobolev calculation---which they call the more accurate treatment---in
+a one-dimensional pure-Nd test, finding broad agreement in the low-optical-depth
+regime that dominates their transport. \citet{banerjee2022,banerjee2024} showed
 that in the highly ionized early ejecta the line density can become large
 enough that intrinsic profiles overlap and the independent-interaction
 assumption underlying expansion opacity fails, particularly in the far
 ultraviolet. Separately, line-by-line Sobolev transport now follows tens of
 millions of transitions with fluorescence in multidimensional merger ejecta
-\citep{shingles2023,collins2023,collins2026}, and \citet{morag2025} has
-questioned how much of the underlying line physics the
-\citet{eastman1993} coefficient actually reproduces.
+\citep{shingles2023,collins2023,collins2026}, and \citet{morag2026} has
+shown that the \citet{eastman1993} coefficient can capture photon mean free
+paths through a line forest while substantially underestimating emissivity
+and reprocessing rates.
 
-Our question is complementary to each. We neither propose a new opacity
-prescription nor construct a realistic kilonova spectrum. We hold the atomic
-data, populations, geometry and radiation source fixed and decompose the
-approximation hierarchy itself---finite-profile transfer $\rightarrow$
-per-line Sobolev transfer $\rightarrow$ binned expansion opacity---so that a
-measured discrepancy can be assigned to one step rather than to the stack.
+Our question is complementary to each, and the novelty is specific. We
+neither propose a new opacity prescription nor construct a realistic kilonova
+spectrum. We hold the atomic data, populations, geometry and radiation source
+fixed and insert a finite-profile resolved calculation \emph{ahead of}
+per-line Sobolev transfer---finite-profile transfer $\rightarrow$ per-line
+Sobolev transfer $\rightarrow$ binned expansion opacity---so that a measured
+discrepancy can be assigned to one step rather than to the stack; we map how
+each step's error depends on intrinsic width, line strength, bin width, line
+density and calibrated lanthanide line lists; and we identify the ensemble
+statistic that controls the closure's departure from resolved transmission.
 Appendix~\ref{app:related} sets out the relation to each of these treatments
 in more detail.
 
@@ -154,32 +169,40 @@ paper reports:
   expansion-opacity modes;
   \item \textbf{verification experiments} (Section~\ref{sec:verification})
   in which the resolved-physics calculations agree at the $\sim1\%$ level on
-  the multi-line problems, and at the few-percent level on a single isolated
-  line, establishing the baseline everything else is measured against;
+  the multi-line problems and, once the transport treatment is matched, on a
+  single isolated line, establishing the baseline everything else is measured
+  against;
   \item \textbf{the separation itself} (Section~\ref{sec:separation}), the
   central result: on a forest of 153 calibrated La\,\textsc{ii} lines from
-  the GSI database \citep{gsi_atomic,gsi_zenodo}, the Sobolev approximation
-  errs by $+2.1\%$ in band flux while expansion opacity errs by $+44.8\%$,
-  and the two fail through different mechanisms;
+  the GSI database \citep{gsi_atomic,gsi_zenodo}, measured against a
+  deterministic finite-profile reference on identical rays, the Sobolev
+  localization errs by $+3\%$ at a $100\kms$ Doppler width and by
+  $\lesssim0.3\%$ at $\le10\kms$, while the expansion-opacity closure errs by
+  $+38\%$ at all widths---and the two differ through different mechanisms;
+  \item \textbf{the mechanism} (Sections~\ref{sec:primer-expop},
+  \ref{sec:separation}): the closure preserves the expected number of line
+  interactions per crossing exactly and applies Poisson statistics to what is
+  a product of Bernoulli survivals, so its departure from resolved
+  transmission is the saturation deficit $\sum_k[\tau_k-(1-e^{-\tau_k})]$ per
+  ray; that statement is exact, and it is what makes the error per-resonance,
+  width-independent, bin-width-invariant and non-monotonic in forest density;
   \item \textbf{validity maps} (Sections~\ref{sec:map}--\ref{sec:breadth}):
   both errors as functions of line strength, Doppler width, temperature,
-  epoch, wavelength and composition---36 further conditions showing the
-  separation to be universal and, at fixed Doppler width and shell geometry,
-  controlled by the realized maximum line optical depth;
+  epoch, wavelength and composition---36 further conditions across which the
+  separation is robust, with the transmission-weighted saturation deficit as
+  the controlling statistic and the strongest line's optical depth as its
+  proxy within a fixed geometry;
   \item a \textbf{bin-width control} (Section~\ref{sec:binwidth}) showing the
-  expansion-opacity error to be invariant from $0.025$ to $41$ lines per
-  transport bin, so that it is intrinsic to the formalism rather than an
-  artifact of applying it outside the many-line regime it was built for (F13);
-  \item thirteen \textbf{methodological findings} (F1--F13, collected in
-  Table~\ref{tab:findings}), among them an exact symmetry cancellation that
-  makes gradient-based validity diagnostics conservative (F1); the
-  demonstration that expansion opacity attenuates a single strong line by
-  $e^{-(1-e^{-\tau})}$ rather than $e^{-\tau}$ (F4); that this error is
-  \emph{per-resonance}, so it neither averages away with line count (F5) nor
-  vanishes as line widths shrink (F6); and two conventions---thermal emission
-  (F8) and spectral normalization (Section~\ref{sec:breadth})---whose
-  mismatch produces spurious few-percent discrepancies in exactly the
-  cross-code comparisons such a study depends on.
+  closure's departure to be invariant from $0.025$ to $41$ lines per transport
+  bin, as the count-preserving property requires;
+  \item \textbf{methodological results} (Table~\ref{tab:findings}), among them
+  an exact symmetry cancellation that makes gradient-based validity diagnostics
+  conservative; a boundary law for the Sobolev localization error; and three
+  conventions---thermal emission, spectral normalization and transport
+  treatment---whose mismatch produces spurious few-percent discrepancies in
+  exactly the cross-code comparisons such a study depends on, which is why the
+  Sobolev differential is formed against a deterministic reference and the
+  Monte Carlo code serves as its validation.
 \end{itemize}
 
 Readers with no radiative-transfer background should read
@@ -205,7 +228,7 @@ $1/\alpha_\nu$ is the average distance a photon travels before being
 absorbed. The emissivity $j_\nu$ describes how much the gas glows. In this
 work the gas is kept in conditions where its own glow at the relevant
 frequencies is negligible or exactly modeled (Section~\ref{sec:conventions}),
-so absorption is the star of the show.
+so absorption dominates.
 
 The dimensionless quantity that controls absorption is the
 \emph{optical depth}
@@ -250,7 +273,7 @@ $n_l$ the number density of ions sitting in the transition's lower energy
 level. How many ions sit in which level is set, in thermal equilibrium, by
 the Boltzmann distribution (Appendix~\ref{app:formal}).
 
-\subsection{Expanding ejecta: why geometry rescues us}
+\subsection{Expanding ejecta: resonance surfaces}
 
 Kilonova ejecta expand \emph{homologously}: after a short time every parcel
 coasts at constant speed, so its position is $r = v\,t$ and equivalently
@@ -259,7 +282,7 @@ coasts at constant speed, so its position is $r = v\,t$ and equivalently
   \label{eq:homologous}
 \end{equation}
 where $t$ is the time since the merger. Velocity increases linearly outward,
-like raisins in an expanding loaf.
+with velocity proportional to radius.
 
 Now follow a single photon of fixed frequency $\nu$ flying through this
 medium. Each gas parcel it passes sees the photon Doppler-shifted by the
@@ -289,19 +312,25 @@ collapses (Appendix~\ref{app:sobolev}) to the \emph{Sobolev optical depth}
   \label{eq:tausob}
 \end{equation}
 where $\lambda_0$ is the line's rest wavelength and $n_l$ is evaluated
-\emph{at the resonance point}. Two assumptions are buried here and both are
-testable: (i) \emph{locality} --- the gas does not change across the
+\emph{at the resonance point}. Stimulated emission multiplies this by
+$(1-n_u g_l/n_l g_u)$, which for the LTE populations used throughout equals
+$1-e^{-h\nu/kT}$: $3\times10^{-6}$ at $3800$\,\AA\ and $3000$\,K, but
+$5\times10^{-3}$ at $9100$\,\AA. \textsc{sedona} applies it to every line;
+our analytic legs fold it into the level populations so that the two agree.
+Two assumptions are buried here and both are testable: (i) \emph{locality} --- the gas does not change across the
 resonance region (width $\sim v_D$ in velocity); (ii) \emph{isolation} ---
 no other line's resonance region overlaps this one. A photon crossing $k$
 line resonances is attenuated by $e^{-\sum_k \tau_{{\rm S},k}}$.
 
-\subsection{Expansion opacity: the workhorse shortcut}
+\subsection{Expansion opacity}
 \label{sec:primer-expop}
 
-Transport codes need an opacity per frequency \emph{bin}, not per line.
-The \emph{expansion opacity} formalism \citep{karp1977,eastman1993} assigns
-to each bin an effective absorption coefficient built from the Sobolev
-depths of all the lines inside it,
+Codes that transport on a frequency grid need an opacity per frequency
+\emph{bin}, not per line (line-by-line Monte Carlo schemes do not, and are
+discussed in Appendix~\ref{app:related}). The \emph{expansion opacity}
+formalism \citep{karp1977,eastman1993} assigns to each bin an effective
+absorption coefficient built from the Sobolev interaction probabilities of
+all the lines inside it,
 \begin{equation}
   \alpha^{\rm exp}_{\rm bin}
   \;=\;
@@ -309,37 +338,50 @@ depths of all the lines inside it,
   \left(1 - e^{-\tau_{{\rm S},k}}\right).
   \label{eq:expop}
 \end{equation}
-This is enormously convenient, and it is what a code means by ``the Sobolev
-approximation'' whenever it works from binned opacities rather than from
-individual line interactions. But notice
-what it does to a single line: integrating $\alpha^{\rm exp}$ over the path
-on which that line stays inside one bin gives an effective optical depth of
-$1-e^{-\taus}$, so the transmitted fraction is
+It is important to be precise about what this coefficient represents.
+\citet{karp1977} derived it from the mean free path of a photon that
+redshifts continuously through a forest of lines: $1-e^{-\tau_k}$ is the
+probability that a photon crossing resonance $k$ interacts there, so
+integrating $\alpha^{\rm exp}$ along the path on which the lines of one bin
+are swept gives $\sum_k(1-e^{-\tau_k})$---the \emph{expected number of line
+interactions} per crossing for a photon that is counted but not removed. That
+expectation is what the closure is built to reproduce, and it reproduces it
+exactly (Appendix~\ref{app:expop}).
+
+Transmission is a different statistic. A photon crossing $k$ resonances is
+transmitted with probability $\prod_k e^{-\tau_k} = e^{-S}$, $S=\sum_k\tau_k$:
+a product of independent Bernoulli survivals. A transport code that treats
+$\alpha^{\rm exp}$ as an ordinary continuous absorption coefficient transmits
+$e^{-E}$ with $E=\sum_k(1-e^{-\tau_k})$: the survival of a Poisson process with
+the same mean. The two agree whenever every $\tau_k\ll1$, since then
+$1-e^{-\tau}\approx\tau$ and a sum of many small Bernoulli trials is Poisson;
+that is the many-weak-lines limit in which the formalism was derived and in
+which it is exact. They separate once individual lines saturate: for a single
+line with $\taus=2$ the transmission is $0.135$ against
 \begin{equation}
-  e^{-(1-e^{-\taus})}
-  \qquad\text{instead of the true}\qquad
-  e^{-\taus}.
+  e^{-(1-e^{-\taus})} = 0.421,
   \label{eq:capped}
 \end{equation}
-For a weak line ($\taus \ll 1$) these agree, since $1-e^{-\tau}\approx\tau$.
-For a strong line they do not: at $\taus=2$ the true transmission is
-$0.135$ while expansion opacity gives $0.421$; at $\taus=50$, the true
-transmission is essentially zero while expansion opacity still leaks
-$e^{-1}=0.37$ per crossing. Each resonance crossing is ``capped'' at one
-effective optical depth, no matter how black the line really is
-(derivation in Appendix~\ref{app:expop}). \textbf{This substitution,
-$\tau \to 1-e^{-\tau}$ per resonance, is the central object measured in this
-paper.}
+and for $\taus=50$ it is essentially zero against $e^{-1}=0.37$. Per ray the
+difference is exactly the \emph{saturation deficit}
+\begin{equation}
+  D \;=\; S - E \;=\; \sum_k\bigl[\tau_k - (1-e^{-\tau_k})\bigr] \;\ge\; 0,
+  \label{eq:deficit}
+\end{equation}
+and for a band average over rays with weights $w$ the identity
+$F_{\rm exp}/F_{\rm Sob} = \langle e^{-S}e^{D}\rangle_w/\langle e^{-S}\rangle_w$
+holds without approximation (Appendix~\ref{app:expop}). \textbf{That the
+closure preserves the expected interaction count and not the transmission,
+and the size of the gap on calibrated lanthanide data, is the central object
+measured in this paper.}
 
-A related distinction has recently been drawn by \citet{morag2025}, who
-argues that the \citet{eastman1993} prescription can capture photon
-mean free paths through a line forest correctly while substantially
-underestimating photon emissivity and reprocessing rates. That is a
-statement about what an effective opacity does when it is also used as an
-emissivity; ours is a statement about what it does to attenuation when
-inserted into otherwise identical transport. The two are complementary, and
-together they make the same broader point: an effective opacity calibrated
-to reproduce one property of a line ensemble need not reproduce the others.
+This is the same distinction \citet{morag2026} draws from the emissivity side:
+the \citet{eastman1993} prescription can capture photon mean free paths
+through a line forest while substantially underestimating photon emissivity
+and reprocessing rates. An effective opacity calibrated to reproduce one
+property of a line ensemble need not reproduce the others; here the preserved
+property is the interaction count and the unpreserved one is the
+transmission.
 
 %=====================================================================
 \section{Methods: the three-way harness}
@@ -381,20 +423,26 @@ error, reported as
   \qquad
   \dsobp \;=\; \frac{F_{\rm Sob} - F_{\rm resolved}}{F_{\rm resolved}},
 \end{equation}
-where $F$ is the band-averaged transmitted flux. The two differ in an
-important way. $\dexp$ is always formed from the \emph{two} \textsc{sedona}
-runs, so Monte Carlo conventions, frequency grids and normalizations cancel
-identically; the deterministic solver serves as an independent check of the
-resolved leg. $\dsobp$ cannot be formed that way, because \textsc{sedona} has
-no per-line Sobolev mode: it necessarily compares an analytic leg against a
-\textsc{sedona} run, and is therefore exposed to three conventions that must
-be matched by hand---thermal emission (\S\ref{sec:conventions-f8}), spectral
-normalization (\S\ref{sec:breadth}) and transport treatment
-(Appendix~\ref{app:frame}). Each of the three has produced a spurious
-few-percent result in the course of this work, and one of them produced a
-retracted one (\S\ref{sec:separation}). Same-code differentials are the
-robust ones; cross-code differentials are only as good as their shared
-normalization.
+where $F$ is the band-averaged transmitted flux. The two are formed
+differently, and deliberately so. $\dexp$ is formed from the \emph{two}
+\textsc{sedona} runs, so Monte Carlo conventions, frequency grids and
+normalizations cancel identically; it is also available analytically, from
+the same per-line machinery as the Sobolev leg with each crossing's $\tau$
+replaced by $1-e^{-\tau}$, and the two agree at thermal widths
+(\S\ref{sec:separation}). $\dsobp$ is the finite-profile-versus-delta-resonance
+difference, and the cleanest quantity for it is a \emph{deterministic} one:
+the Sobolev leg against the resolved formal solution of the same
+configuration on identical rays, with the same source convention, populations
+and transport treatment. We form it that way, using the closed-form resolved
+leg of Appendix~\ref{app:formal} (Gaussian profiles, uniform populations,
+pure absorption), and use the \textsc{sedona} resolved run---at its seed
+mean---as the independent validation of that reference rather than as the
+reference itself. The reason is practical: a cross-code differential is
+exposed to three conventions that must be matched by hand---thermal emission
+(\S\ref{sec:conventions-f8}), spectral normalization (\S\ref{sec:breadth})
+and transport treatment (Appendix~\ref{app:frame})---and each can produce a
+spurious few-percent result of the size being measured. Same-code
+differentials carry none of that exposure.
 
 \subsection{Geometry and physical conventions}
 \label{sec:conventions}
@@ -515,15 +563,24 @@ tests that expectation instead of assuming it, which is what licenses quoting
 the same uncertainty at the $v_D = 1\kms$ frontier point, where repeating the
 run five times would cost some sixty times more.
 
-We therefore attach $\pm0.3\%$ ($1\sigma$) to every band flux, and
-$\pm0.3\%$ to $\dsobp$, in which only the \textsc{sedona} reference
-fluctuates (the Sobolev leg being analytic). For $\dexp$, adding
-the two \textsc{sedona} legs in quadrature gives $\pm0.4\%$, which is an
-upper bound: the two runs share a model and differ only in opacity treatment,
-so their sampling errors are partially correlated. One consequence is worth
-stating plainly, because it cuts against us: the production runs quoted
-throughout are single realizations, and the headline resolved band flux
-($0.3435$) sits about $2\sigma$ above the five-seed mean ($0.3419$).
+We therefore attach $\pm0.3\%$ ($1\sigma$) to every single-realization band
+flux. For $\dexp$ the two legs are not independent when they are run with the
+same fixed seed: the core-emission stream---packet positions, directions and
+frequencies---is then identical in both, and the streams diverge only at the
+first interaction. Measured on seed-matched pairs, the resolved and expansion
+band fluxes have a correlation coefficient of $+0.97$ and the paired $\dexp$
+scatters by $0.12\%$ (standard deviation over ten seeds; $0.04\%$ on its
+mean), against $0.36\%$ from adding the legs in quadrature. Every $\dexp$
+quoted below is therefore a seed-matched pair---ten seeds for the headline
+forest, three at every point of the strength--width grid and the $3\kms$
+frontier---and every headline band flux is a seed mean with its standard
+error: for the La\,\textsc{ii} forest the resolved mean is $0.3422\pm0.0003$
+and the expansion mean $0.4958\pm0.0004$. The seed scatter of a single
+realization sits within $1.5\times$ the Poisson expectation from the packet
+count in the band at every grid point. Single realizations are quoted only
+where stated. (The solver-versus-\textsc{sedona} comparisons are
+the one place where a Monte Carlo reference still enters a cross-code
+difference; there the $\pm0.3\%$ applies.)
 
 \subsection{A convention that must be matched: thermal emission}
 \label{sec:conventions-f8}
@@ -623,10 +680,11 @@ below the $G$-based bound.
   \includegraphics[width=\columnwidth]{fig4_minimal_1line_threeway}
   \caption{Minimal one-line model (artificial Ly$\alpha$-like line,
   $\taus=2$, cold neutral shell). Top: emergent spectra. Bottom: ratio to
-  the continuum. \textsc{sedona}'s resolved mode (orange) lies on top of the
-  deterministic solver (black dashed) across the entire profile, at the
-  analytic depth $e^{-\taus}=0.135$ (red dotted). The expansion-opacity
-  mode (blue) instead sits at the predicted capped value
+  the continuum. \textsc{sedona}'s resolved mode (orange) and the
+  deterministic solver (black dashed) follow the same profile; the red dotted
+  line is the analytic $e^{-\taus}=0.135$, the $\beta\to0$ limit of the
+  frozen-snapshot law both codes solve (Appendix~\ref{app:frame}). The
+  expansion-opacity mode (blue) sits at the Poisson value
   $e^{-(1-e^{-\taus})}=0.421$ (blue dotted).}
   \label{fig:minimal}
 \end{figure}
@@ -644,35 +702,95 @@ The measured absorption-trough depths (Fig.~\ref{fig:minimal}):
 \small
 \begin{tabular}{@{}lc@{}}
 \toprule
-analytic $e^{-\taus}$ & 0.1353 \\
-deterministic solver & 0.1372 \\
-\textsc{sedona} resolved & 0.1420 \\
+analytic $e^{-\taus}$ ($\beta\to0$) & 0.1353 \\
+frozen-snapshot law, $e^{-\taus(1-\beta)/\gamma}$ over the trough & 0.1371 \\
+deterministic solver, frozen mode & 0.1372 \\
+\textsc{sedona} resolved, production grid & 0.1420 \\
+\textsc{sedona} resolved, converged (5 seeds, $3.2\times10^7$ packets) & $0.1383\pm0.0001$ \\
 \textsc{sedona} expansion opacity & \textbf{0.4285} \\
-predicted cap $e^{-(1-e^{-\taus})}$ & 0.4212 \\
+Poisson value $e^{-(1-e^{-\taus})}$ & 0.4212 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Two independent resolved implementations---deterministic rays and Monte
-Carlo---agree with each other and with theory at the few-percent level
-(\textbf{harness validated}), while the expansion-opacity mode lands within
-$2\%$ of its own predicted cap, a factor $3.2$ too much transmitted light.
-This is \textbf{Finding F4}: for a single strong line, ``Sobolev mode'' as
-implemented via expansion opacity is \emph{not} Sobolev line transfer.
+\begin{table}
+\centering
+\small
+\caption{Single-line benchmark: \textsc{sedona} resolved trough depth
+($1400$--$2600\kms$ window) along one axis at a time, fixed seeds, three
+seeds per rung (five at the anchor). The frozen-snapshot target is
+$0.1371$; the production run sat at $0.1420$ with $2\times10^6$ packets
+on a $2\times10^{-4}$ grid.}
+\label{tab:ladder}
+\begin{tabular}{@{}llcc@{}}
+\toprule
+axis & value & trough & vs frozen \\
+\midrule
+packets ($\mathrm{d}\nu/\nu=2\times10^{-4}$) & $5\times10^5$ & $0.1423\pm0.0031$ & $+3.8\%$ \\
+ & $2\times10^6$ & $0.1406\pm0.0017$ & $+2.6\%$ \\
+ & $8\times10^6$ & $0.1390\pm0.0005$ & $+1.4\%$ \\
+ & $3.2\times10^7$ & $0.1386\pm0.0001$ & $+1.1\%$ \\
+transport $\mathrm{d}\nu/\nu$ ($8\times10^6$) & $4\times10^{-4}$ & $0.1382\pm0.0003$ & $+0.8\%$ \\
+ & $2\times10^{-4}$ & $0.1390\pm0.0005$ & $+1.4\%$ \\
+ & $1\times10^{-4}$ & $0.1388\pm0.0004$ & $+1.2\%$ \\
+ & $4.2\times10^{-5}$ & $0.1385\pm0.0004$ & $+1.0\%$ \\
+ & $2\times10^{-5}$ & $0.1381\pm0.0002$ & $+0.7\%$ \\
+spectrum $\mathrm{d}\nu/\nu$ & $5\times10^{-4}$ & $0.1385\pm0.0004$ & $+1.0\%$ \\
+ & $2\times10^{-4}$ & $0.1384\pm0.0005$ & $+0.9\%$ \\
+ & $1\times10^{-4}$ & $0.1385\pm0.0004$ & $+1.0\%$ \\
+zones & 25 & $0.1383\pm0.0006$ & $+0.8\%$ \\
+ & 100 & $0.1384\pm0.0005$ & $+0.9\%$ \\
+ & 101 (half-zone shift) & $0.1387\pm0.0002$ & $+1.2\%$ \\
+ & 400 & $0.1379\pm0.0003$ & $+0.6\%$ \\
+anchor ($3.2\times10^7$, $4.2\times10^{-5}$, 5 seeds) & resolved & $0.1383\pm0.0001$ & $+0.9\%$ \\
+ & expansion & $0.4438\pm0.0002$ & (Poisson value $0.4212$) \\
+zero opacity & $\rho\times10^{-6}$ & $1.0079$ & -- \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-The same experiment surfaced \textbf{Finding F3}: the deterministic solver's
-$1.4\%$ excess over the analytic value scales with the bulk velocity at the
-resonance, and at a resonance placed at $7.7\%$ of $c$ grows to $7\%$,
-matching $e^{-\taus(1-z_{\rm res}/ct)}$ to four digits. We read this first as
-a frame ambiguity and then as the leading relativistic correction; both were
-wrong. Appendix~\ref{app:frame} shows it is an artifact of integrating a
-\emph{frozen snapshot} of the ejecta: allowing the ejecta age to advance
-along the photon path, as it physically must, gives
-$\tau_{\rm rel}/\taus = 1/\gamma$, which has no first-order term at all.
-The practical
-consequence is the opposite of what the $\mathcal{O}(v/c)$ reading implied:
-at our shell velocities the relativistic correction is $5\times10^{-5}$, so
-it cannot account for any part of the residual in \S\ref{sec:separation}.
+Two things have to be said about the resolved rows. First, the target for a
+code that iterates on a fixed snapshot of the ejecta is not $e^{-\taus}$ but
+the frozen-snapshot law of Appendix~\ref{app:frame},
+$e^{-\taus(1-\beta)/\gamma}$, which over the $1400$--$2600\kms$ trough window
+is $0.1371$; the deterministic solver in frozen mode reproduces it to
+$0.1\%$ under every variation of ray count, shell emission and profile
+truncation tried, so the $1.4\%$ between it and $0.1353$ is the transport
+treatment, not an error. Second, \textsc{sedona}'s production run sits
+$3.5\%$ above that target. Its transport grid there had $\mathrm{d}\nu/\nu =
+2\times10^{-4}$, under two bins per Doppler width, against the eight used in
+every forest run, and the bin-width study of \S\ref{sec:binwidth} shows the
+resolved leg degrading exactly once bins exceed the profile. A convergence
+ladder in packet number, transport and spectrum grids, zone count and
+line-to-cell phase, with fixed seeds (Table~\ref{tab:ladder}), closes the
+gap to $0.1383\pm0.0001$ at the converged grid---a residual $+0.9\%$ above
+the frozen target that does not move with packet count, grid or zoning. The
+zero-opacity control identifies it: with the line removed the same trough
+window reads $1.0079\pm0.002$ against the red-margin normalization, i.e.\
+\textsc{sedona}'s continuum is $0.8\%$ high there relative to the analytic
+Planck shape (its core packets are emitted in the comoving frame of the core
+surface and boosted to the lab frame). Dividing it out gives $0.1372$, the
+frozen target to $0.1\%$. The production value $0.1420$ was a $1.5\sigma$
+draw at $2\times10^6$ packets ($0.1406\pm0.0017$ over three seeds at that
+count). The expansion-opacity mode lands at $0.4438\pm0.0003$ at the converged grid
+($0.440$ after the same continuum correction), $4.5\%$ above the Poisson
+value $0.4212$---the expansion-leg bin systematic of \S\ref{sec:binwidth} on
+a single line---and a factor $3.2$ above the resolved trough: the single-line
+statement of the count-versus-transmission distinction of
+\S\ref{sec:primer-expop}, and the property \citet{fontes2020} describe as
+limiting each line's contribution to one.
+
+The same experiment surfaced the transport-treatment convention itself: the
+solver's excess over $e^{-\taus}$ scales with the bulk velocity at the
+resonance, reaching $7\%$ at $\beta=0.077$ and matching
+$e^{-\taus(1-\beta)}$ to four digits. Appendix~\ref{app:frame} shows this is
+the law of a \emph{frozen snapshot} of the ejecta, which is what a
+steady-iterate transport calculation solves; letting the ejecta age advance
+along the photon path, as it physically must, gives instead
+$\tau/\taus = 1/\gamma$, with no first-order term, and the two treatments
+must be matched in any cross-code comparison. At the shell velocities used
+here the difference is $\lesssim1\%$ in $\tau$ and is held fixed by running
+the solver in the mode that matches the code it is compared with.
 
 \subsection{From two lines to a twenty-line ladder}
 
@@ -801,18 +919,18 @@ $\dexp$ & $\mathbf{+44.8\%}$ \\
 \end{tabular}
 \end{table}
 
-The resolved pair agree to $4.4\%$ as tabulated---and to $0.1\%$, well
-inside the $0.3\%$ Monte Carlo noise of \S\ref{sec:noise}, once the
-thermal-emission convention is matched (Finding F8,
-\S\ref{sec:conventions-f8})---while the expansion-opacity run overestimates
-the transmitted band flux by $45\%$. Notably this exceeds the uniform-ladder
-error ($+33.8\%$ at $\tau=0.5$ per line): real forests are dominated by a few
-strong lines, precisely where the per-crossing cap is most wrong. That
-observation prompts the question the next subsection answers---whether the
-fault lies with the Sobolev approximation or with the way it has been
-implemented.
+The resolved pair agree to $4.4\%$ as tabulated---and to within $1\%$ once
+the thermal-emission convention is matched (Finding F8,
+\S\ref{sec:conventions-f8}) and the comparison is made at the seed mean
+rather than on a single realization---while the expansion-opacity run
+overestimates the transmitted band flux by $45\%$. Notably this exceeds the
+uniform-ladder difference ($+33.8\%$ at $\tau=0.5$ per line): real forests
+are dominated by a few strong lines, precisely where the Poisson survival
+departs most from the Bernoulli product. That observation prompts the question
+the next subsection answers---how much of the difference belongs to the
+Sobolev localization and how much to the closure built on it.
 
-\subsection{Which approximation is at fault? Separating the two errors}
+\subsection{Separating the two errors}
 \label{sec:separation}
 
 \begin{figure*}[t]
@@ -827,8 +945,28 @@ implemented.
   \label{fig:separation}
 \end{figure*}
 
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{fig_interaction_count}
+  \caption{Count versus transmission along one radial ray through the
+  La\,\textsc{ii} forest (46 resonances). Top left: cumulative Sobolev depth
+  $S$ (green stair), its resolved counterpart at $v_D=100$ and $10\kms$
+  (dotted, dashed), the expected count $E$ (blue stair) and the binned
+  $\int\alpha_{\rm exp}\,\mathrm{d}s$ (dotted), which reaches the same $E$ at
+  the far edge. Top right: survivals $e^{-S}=0.051$ and $e^{-E}=0.130$ at the
+  edge. Bottom left: the first-interaction distribution, discrete masses at
+  the resonances against the smooth $\alpha_{\rm exp}e^{-E}$ ($0.949$ against
+  $0.870$ integrated: the closure under-counts absorptions). Bottom right:
+  band-integrated $\dexp$ against $\tau_{\max}$ with
+  $1-\langle E\rangle/\langle S\rangle$ and the \textsc{sedona} seed mean. A
+  $2\times10^6$-photon Monte Carlo on the same ray reproduces every panel to
+  its sampling error.}
+  \label{fig:count}
+\end{figure}
+
 We now put both approximations to the same forest and the same truth. The
-distinction drawn in \S\ref{sec:primer-expop} becomes operational here: the
+distinction drawn in \S\ref{sec:primer-expop} becomes operational here
+(Fig.~\ref{fig:count}): the
 Sobolev approximation \emph{itself} attenuates each line by $e^{-\taus}$ with
 delta-function resonances, while expansion opacity substitutes
 $1-e^{-\taus}$ at every crossing. In this pure-absorption LTE configuration
@@ -839,83 +977,94 @@ damping each crossing. A Monte Carlo realization of per-line Sobolev
 interactions would add only sampling noise to a result available in closed
 form.
 
-For the La\,\textsc{ii} forest, against \textsc{sedona} resolved $=0.3435$:
-Sobolev proper gives $0.3508$ ($+2.1\%$) while expansion opacity gives
-$0.4973$ ($+44.8\%$). Across the sweep (Fig.~\ref{fig:separation}):
+For the La\,\textsc{ii} forest at $v_D=100\kms$, against the deterministic
+finite-profile reference on identical rays ($F_{\rm res}^{\rm det}=0.3405$):
+Sobolev proper gives $0.3511$ ($+3.1\%$) while the expansion-opacity closure
+gives $0.4848$ ($+42.4\%$). The \textsc{sedona} resolved seed mean over
+10 matched seeds, $0.3422\pm0.0003$, validates the reference to
+$0.5\%$; against it the Sobolev leg is $+2.6\%$, and
+\textsc{sedona}'s own expansion run ($0.4958\pm0.0004$) gives a paired
+$\dexp$ of $+44.9\%$. Across the sweep, every $\dsobp$ below is formed
+against the deterministic reference and every $\dexp$ is a seed-matched
+\textsc{sedona} pair (Fig.~\ref{fig:separation}):
+
+\begin{table}
+\centering
+\small
+\begin{tabular}{@{}ccccc@{}}
+\toprule
+$\tau_{\max}$ & $v_D$ [km\,s$^{-1}$] & $\dsobp$ & $\dexp$ & $\dexp^{\rm analytic}$ \\
+\midrule
+0.5 & 10  & $+0.01\%$ & $+2.9\%$  & $+2.9\%$ \\
+0.5 & 300 & $+0.35\%$ & $+3.4\%$  & $+3.2\%$ \\
+5   & 10  & $+0.30\%$ & $+38.9\%$ & $+38.4\%$ \\
+5   & 300 & $+9.6\%$  & $+53.4\%$ & $+51.3\%$ \\
+50  & 10  & $+0.82\%$ & $+45.0\%$ & $+44.1\%$ \\
+50  & 300 & $+32.7\%$ & $+93.9\%$ & $+89.6\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The last column is the closure evaluated analytically---the same per-line
+machinery as the Sobolev leg with each crossing's $\tau$ replaced by
+$1-e^{-\tau}$, i.e.\ $\langle e^{-E}\rangle$ of \S\ref{sec:primer-expop}. It
+agrees with \textsc{sedona}'s expansion run at narrow widths and sits
+$2$--$5$ points below it at $v_D=100$--$300\kms$; the difference is
+\textsc{sedona}'s own binned implementation, which \S\ref{sec:binwidth}
+shows to carry a $\sim2\%$ bin-width systematic in the expansion leg at fixed
+reference. We quote both, because the analytic value is the pure
+count-versus-transmission number and the \textsc{sedona} value is what a code
+actually delivers.
+
+Down the width axis at $\tau_{\max}=5$---free for the deterministic reference,
+whose cost does not depend on $v_D$---the Sobolev error simply switches off
+while the closure's does not:
 
 \begin{table}
 \centering
 \small
 \begin{tabular}{@{}cccc@{}}
 \toprule
-$\tau_{\max}$ & $v_D$ [km\,s$^{-1}$] & $\dsobp$ & $\dexp$ \\
+$v_D$ [km\,s$^{-1}$] & $\dsobp$ & $\dexp$ (\textsc{sedona}) & $\dexp^{\rm analytic}$ \\
 \midrule
-0.5 & 10  & $+0.2\%$ & $+3.2\%$ \\
-0.5 & 300 & $+0.0\%$ & $+2.8\%$ \\
-5   & 10  & $-0.2\%$ & $+38.5\%$ \\
-5   & 300 & $+9.2\%$ & $+53.0\%$ \\
-50  & 10  & $+1.1\%$ & $+45.3\%$ \\
-50  & 300 & $+32.9\%$ & $+93.8\%$ \\
+1   & $+0.03\%$ & $+39.1\%$ & $+38.1\%$ \\
+3   & $+0.09\%$ & $+38.6\%$ & $+38.1\%$ \\
+10  & $+0.30\%$ & $+38.9\%$ & $+38.4\%$ \\
+30  & $+0.91\%$ & $+40.4\%$ & $+39.3\%$ \\
+100 & $+3.09\%$ & $+44.9\%$ & $+42.3\%$ \\
+300 & $+9.64\%$ & $+53.4\%$ & $+51.3\%$ \\
 \bottomrule
 \end{tabular}
 \end{table}
-
-Down the width axis at $\tau_{\max}=5$, where \textsc{sedona} resolved runs
-already existed at the thermal end, the Sobolev error simply switches off
-while the expansion error does not:
-
-\begin{table}
-\centering
-\small
-\begin{tabular}{@{}ccc@{}}
-\toprule
-$v_D$ [km\,s$^{-1}$] & $\dsobp$ & $\dexp$ \\
-\midrule
-1   & $-0.3\%$ & $+39.1\%$ \\
-3   & $-0.3\%$ & $+39.2\%$ \\
-10  & $-0.2\%$ & $+38.5\%$ \\
-30  & $+0.5\%$ & $+41.3\%$ \\
-100 & $+2.5\%$ & $+45.0\%$ \\
-300 & $+9.2\%$ & $+53.0\%$ \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\textbf{An earlier version of this table reported a $v_D$-independent Sobolev
-error of $5$--$8\%$.} That was a normalization artifact: the sweep normalized
-\textsc{sedona} band fluxes by raw luminosity in a red margin rather than by
-the continuum ratio, leaving the Planck slope across the band in the answer,
-and the analytic leg---correctly normalized---was compared against it. The
-expansion column is essentially unchanged, because it is a same-code
-differential in which the bias cancels. All comparisons now go through a
-single shared routine, and a line-free control window is required to return
-unity.
 
 \textbf{Finding F9}: the two components of F6 have different owners. (F6, from
 \S\ref{sec:map} below, decomposes $\Delta$ into a strength-set floor plus a
 term that grows with $v_D$.)
-\emph{The strength-set floor belongs to expansion opacity alone.} Sobolev
-proper exhibits no strength floor at all---at $v_D = 10\kms$ it is $+0.2\%$,
-$-0.2\%$ and $+1.1\%$ at $\tau_{\max}=0.5$, $5$ and $50$ respectively, with no
-trend in strength---while expansion climbs
-$+3.2\% \to +38.5\% \to +45.3\%$ across the same three. That floor is the
-per-crossing cap, not a failure of locality or isolation.
+\emph{The strength-set floor belongs to the expansion-opacity closure alone.}
+The Sobolev localization exhibits no strength floor---at $v_D = 10\kms$ it is
+$+0.01\%$, $+0.30\%$ and $+0.82\%$ at $\tau_{\max}=0.5$, $5$ and $50$,
+following the boundary law of Appendix~\ref{app:boundary} rather than any
+saturation---while the closure climbs $+3\% \to +38\% \to +45\%$ across the
+same three. That floor is the Poisson-versus-Bernoulli gap of
+\S\ref{sec:primer-expop}, not a failure of locality or isolation.
 \emph{The width-growing term, by contrast, is not a strength effect at all}: a
 delta-function resonance has no width by construction, so the Sobolev leg is
 exactly $v_D$-independent, and the resolved calculation's width dependence
 appears as clipping of line profiles against the boundaries of the finite
-line-forming region (Appendix~\ref{app:boundary}). It reaches $+32.9\%$ at
-$(\tau_{\max}, v_D) = (50, 300\kms)$---where $v_D$ is $15\%$ of the shell's
-velocity span, a configuration with no counterpart in real ejecta, for which
-$v_D/\Delta v_{\rm shell} \sim 10^{-4}$.
+line-forming region (Appendix~\ref{app:boundary}), proportional to
+$v_D/\Delta v_{\rm shell}$ and to the strength of the lines near the edges.
+It reaches $+32.7\%$ at $(\tau_{\max}, v_D) = (50, 300\kms)$---where $v_D$ is
+$15\%$ of the shell's velocity span, a configuration with no counterpart in
+real ejecta, for which $v_D/\Delta v_{\rm shell} \sim 10^{-4}$.
 
 The headline is therefore sharper than either treatment alone suggests: at
-kilonova-relevant line widths ($v_D \le 30\kms$) \textbf{the Sobolev
-approximation is accurate to $\lesssim 2\%$ across the full strength range
-tested---and to $\lesssim0.5\%$ at $\tau_{\max}=5$, the case followed down to
-$1\kms$---while its standard expansion-opacity implementation errs by
-$+38$--$48\%$}. The literature conflates the two under one name; they are
-different approximations and they fail for different reasons.
+kilonova-relevant line widths \textbf{the Sobolev localization is accurate to
+$\lesssim1\%$ at $v_D\le30\kms$ for $\tau_{\max}\le5$ ($2.5\%$ at
+$\tau_{\max}=50$), and to $\lesssim0.3\%$ at $v_D\le10\kms$ across the full
+strength range, while the expansion-opacity closure differs from resolved
+transmission by $+38$--$45\%$ at every width}. Two approximations are carried
+under one name; they differ through different mechanisms and at different
+levels.
 
 \paragraph{Overlap is not the residual, and cannot be.} It is tempting to
 attribute the remaining Sobolev error at broad $v_D$ to the isolation
@@ -987,9 +1136,9 @@ $\tau_{\max}$ & \multicolumn{6}{c}{$v_D$ [km\,s$^{-1}$]} \\
 \cmidrule(l){2-7}
  & 1 & 3 & 10 & 30 & 100 & 300 \\
 \midrule
-0.5 & -- & -- & $+3.2$ & $+2.4$ & $+3.2$ & $+2.8$ \\
-5   & $+39.1$ & $+39.2$ & $+38.5$ & $+41.3$ & $+45.0$ & $+53.0$ \\
-50  & -- & -- & $+45.3$ & $+48.1$ & $+60.9$ & $+93.8$ \\
+0.5 & -- & -- & $+2.9$ & $+3.0$ & $+3.3$ & $+3.4$ \\
+5   & $+39.1$ & $+38.6$ & $+38.9$ & $+40.4$ & $+44.9$ & $+53.4$ \\
+50  & -- & -- & $+45.0$ & $+47.5$ & $+60.3$ & $+93.9$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1042,10 +1191,11 @@ synthetic spectra, it varies the transport bin width at fixed underlying
 physics, and asks whether the attenuation offset survives on entering the
 many-lines-per-bin regime.
 
-Appendix~\ref{app:expop} answers this analytically: the bin width cancels, and
-each resonance crossing contributes $1-e^{-\taus}$ at any resolution. The
-numerical test confirms it. Sweeping the transport resolution over two decades
-at fixed physics (Fig.~\ref{fig:binwidth}):
+Appendix~\ref{app:expop} answers this analytically: the bin width cancels, so
+the expected interaction count $\sum_k(1-e^{-\tau_k})$ is preserved at any
+resolution, and with it the Poisson survival that differs from the Bernoulli
+product. The numerical test confirms it. Sweeping the transport resolution
+over two decades at fixed physics (Fig.~\ref{fig:binwidth}):
 
 \begin{table}
 \centering
@@ -1060,22 +1210,25 @@ $+$ Ce\,\textsc{ii} (2529)   & $4.1$--$41$    & $0.5\%$  & $+15.3\% \pm 0.7$ \\
 \end{tabular}
 \end{table}
 
-The two line lists give different errors---the blend is denser and partly
-blanketed, which is F7---but neither error depends on the bin width, including
-at $41$ lines per bin, which is squarely inside the many-line regime the
-construction targets. The error is intrinsic to the formalism.
+The two line lists give different values---the blend is denser and partly
+blanketed, which is F7---but neither depends on the bin width, including at
+$41$ lines per bin, which is squarely inside the many-line regime the
+construction targets. The departure is a property of the count-preserving
+closure, not of how finely it is binned. Within the converged range the
+expansion leg itself does move by $\sim2\%$ with bin width at fixed reference
+($0.487$, $0.498$, $0.487$ at $1.25$, $12.5$ and $125\kms$ bins), a
+systematic of \textsc{sedona}'s binned implementation that the analytic
+closure does not have; it is the reason the \textsc{sedona} and analytic
+$\dexp$ columns of \S\ref{sec:separation} differ by a few points at
+$v_D\ge100\kms$.
 
-One methodological point deserves stating because it nearly produced the
-opposite conclusion. Extending the sweep to bins several times wider than the
-line profile appears to make $\Delta_{\rm expansion}$ collapse and change sign.
-It does not: past that point the \emph{resolved} calculation is no longer
-resolving anything, its band flux climbing from $0.342$ to $0.679$, and the
-comparison is measuring the reference rather than the approximation. A
-verdict computed over all resolutions without that check reports
-``not invariant''. The reference's own convergence has to be established
-before its disagreement with anything else can be interpreted.
+The sweep is restricted to bins narrower than $1.5\,v_D$ because the
+\emph{resolved} reference must itself be converged: past that point it is no
+longer resolving anything, its band flux climbs from $0.342$ to $0.679$, and
+the comparison measures the reference rather than the approximation. Any
+verdict on the closure's bin-width dependence is conditional on that check.
 
-\subsection{Is the separation universal? A breadth sweep}
+\subsection{A breadth sweep: windows, epochs and ion mixtures}
 \label{sec:breadth}
 
 \begin{figure*}[t]
@@ -1083,9 +1236,11 @@ before its disagreement with anything else can be interpreted.
   \includegraphics[width=\textwidth]{fig11_breadth}
   \caption{Thirty-six conditions---four wavelength windows (none of them the
   window of \S\ref{sec:separation}), three epochs, three ion mixtures---with
-  both panels on the same vertical scale. Every condition collapses onto a
-  single trend in the realized $\tau_{\max}$; expansion opacity reaches
-  $+61\%$ while the Sobolev approximation never exceeds $+12\%$.}
+  both panels on the same vertical scale. $\dexp$ is a seed-matched
+  \textsc{sedona} pair; $\dsobp$ is formed against the deterministic
+  finite-profile reference on identical rays. Every condition follows one
+  trend in the realized $\tau_{\max}$ within this fixed-geometry,
+  fixed-width slice.}
   \label{fig:breadth}
 \end{figure*}
 
@@ -1106,38 +1261,54 @@ to $34$.
 \toprule
  & median & max & $\tau_{\max}>3$ & $\tau_{\max}<0.5$ \\
 \midrule
-$\dexp$ & $+5.1\%$ & $\mathbf{+61.3\%}$ & $+20.0\%$ & $+0.3\%$ \\
-$\dsobp$   & $+3.6\%$ & $\mathbf{+11.3\%}$ & $+6.6\%$  & $+0.5\%$ \\
+$\dexp$ (\textsc{sedona} pair) & $+5.1\%$ & $\mathbf{+62.1\%}$ & $+20.1\%$ & $+0.3\%$ \\
+$\dsobp$ (deterministic ref.) & $+0.26\%$ & $\mathbf{+7.6\%}$ & $+2.57\%$ & $+0.01\%$ \\
+$\dsobp$ (\textsc{sedona} ref.) & $+0.34\%$ & $+7.8\%$ & $+2.69\%$ & $-0.12\%$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\textbf{Finding F10}: the separation is universal, and the realized
-$\tau_{\max}$ is the controlling variable \emph{among the axes swept}. All 36
-conditions fall on one trend (Fig.~\ref{fig:breadth}) regardless of window,
-epoch or composition;
-those enter only through the optical depths they produce. The sweep holds
-the shell geometry and the Doppler width fixed, and \S\ref{sec:map} shows
-$\Delta$ does depend on $v_D$; the collapse is therefore onto
-$\tau_{\max}$ within a fixed $(v_D,\ \Delta v_{\rm shell})$ slice, not a
-claim that $\tau_{\max}$ alone determines the error everywhere. Both errors
-vanish together as $\tau_{\max}\to0$---the weak-line limit both approximations
-share---and both grow with $\tau_{\max}$, but expansion opacity errs by a
-median factor $3.5$ more than the Sobolev approximation wherever
-$\tau_{\max}>1$. This has a practical corollary: the error can be estimated
-from the strongest line in a band without knowing which ion or epoch produced
-it.
+\textbf{Finding F10}: the separation is robust across the axes tested, and
+within this slice the realized $\tau_{\max}$ is a good empirical proxy for the
+controlling statistic. All 36 conditions follow one trend
+(Fig.~\ref{fig:breadth}) regardless of window, epoch or composition; those
+enter only through the optical depths they produce. The sweep holds the shell
+geometry and the Doppler width fixed, and \S\ref{sec:map} shows $\Delta$ does
+depend on $v_D$, so the collapse is onto $\tau_{\max}$ within a fixed
+$(v_D,\ \Delta v_{\rm shell})$ slice---not a claim that $\tau_{\max}$ alone
+determines the error everywhere. Nor is $\tau_{\max}$ the fundamental
+variable: \S\ref{sec:multiion} shows two forests of equal $\tau_{\max}$ can
+differ in $\dexp$ when one is blanketed and the other sparse. The quantity
+that controls $\dexp$ exactly is the transmission-weighted mean of $e^{D}$
+over rays, $D$ the saturation deficit of Eq.~(\ref{eq:deficit})
+(Fig.~\ref{fig:predictor}); $\tau_{\max}$ tracks it because, at fixed
+geometry and width, the strongest few lines dominate $D$ on the rays that
+still transmit. Both errors vanish together as $\tau_{\max}\to0$---the
+weak-line limit both approximations share---and both grow with $\tau_{\max}$,
+but the closure departs by a median factor $8$ more than
+the Sobolev localization wherever $\tau_{\max}>1$.
 
-We note one methodological point that the sweep itself exposed. The
-9100\,\AA{} window contains no strong La\,\textsc{ii} lines
-($\tau_{\max}\simeq0$) and therefore acts as a free null control: its band
-flux must be unity. An early pass returned $1.075$ instead, tracing to a
-normalization reference that straddled the final (partial, and unreliable)
-bin of the transport grid. The bias cancelled exactly in $\dexp$,
-a same-code differential, but contaminated $\dsobp$, which compares
-a Monte Carlo result against an analytic one---the same asymmetry as the
-emission convention of \S\ref{sec:conventions-f8}. Null controls of this kind
-cost nothing and are worth including by default.
+The 9100\,\AA{} window contains no strong La\,\textsc{ii} lines
+($\tau_{\max}\simeq0$) and is kept as a null control: its band flux must be
+unity in every leg, and is. Every band flux in the sweep goes through the one
+normalization routine of \S\ref{sec:conventions}, with the reference margin
+held clear of the final, partial bin of the transport grid.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{fig_predictor}
+  \caption{The controlling statistic. The closure's departure from the
+  Sobolev leg, $\ln(F_{\rm exp}/F_{\rm Sob})$, for the 36 breadth conditions
+  and the 12-point strength--width grid (filled: \textsc{sedona} pair; open:
+  analytic closure) against (left) the exact predictor
+  $\ln\langle e^{D}\rangle_{\tilde w}$, $\tilde w\propto e^{-S}$, with the
+  $1{:}1$ line---the analytic pair lies on it by identity, the \textsc{sedona}
+  pair sits above it by the expansion-leg bin systematic of
+  \S\ref{sec:binwidth}; (centre) the transmission-weighted mean deficit
+  $\langle D\rangle_{\tilde w}$, a Jensen lower bound that fails once rays
+  saturate; (right) $\tau_{\max}$, the empirical proxy.}
+  \label{fig:predictor}
+\end{figure}
 
 \subsection{Multi-ion blending and the density dependence}
 \label{sec:multiion}
@@ -1188,23 +1359,13 @@ statement that expansion opacity can generate tens-of-percent attenuation
 errors in strong, incompletely blanketed bands, and that such bands are not
 a contrived configuration.
 
-\subsection{Computational cost: what the shortcut buys}
+\subsection{Computational cost}
 \label{sec:cost}
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\columnwidth]{fig3_sedona_typeIa_exp_vs_bb}
-  \caption{Motivating cost anecdote from a standard \textsc{sedona}
-  Type~Ia supernova example: the same model runs in 14\,s with expansion
-  opacity and 88\,min resolved ($378\times$), while redistributing flux
-  from the UV to the near-IR.}
-  \label{fig:cost}
-\end{figure}
-
-Why does everyone use the shortcut? Cost. On a standard \textsc{sedona}
+The shortcut is used because of cost. On a standard \textsc{sedona}
 Type~Ia example, switching from expansion opacity to the resolved treatment
-multiplied the run time by $378$ (Fig.~\ref{fig:cost}). Our sweep adds a
-cleaner measurement: in the controlled forest, resolved-run wall time scales
+multiplied the run time by $378$ ($14$\,s against $88$\,min). Our sweep adds
+a cleaner measurement: in the controlled forest, resolved-run wall time scales
 as $1/v_D$ ($33\,$s at $100\kms$, $719\,$s at $3\kms$, $2109\,$s at $1\kms$),
 driven entirely by the transport frequency grid---and the expansion run on
 the same fine grid costs the same (2305\,s at $1\kms$). The expense is the
@@ -1217,78 +1378,77 @@ affordable, which is the strategy this program uses.
 
 \begin{table*}[t]
 \centering
-\caption{Findings register.}
+\caption{The four results, and the subsidiary findings each collects.}
 \label{tab:findings}
 \begin{tabular}{@{}clc@{}}
 \toprule
-\# & Finding & Where \\
+\# & Result & Where \\
 \midrule
-F1 & Symmetric gradients cancel the Sobolev error at leading order; & \S\ref{sec:verification} \\
-   & gradient-based diagnostics are conservative & \\
-F2 & Resolved vs expansion cost: $378\times$ on a standard example & \S\ref{sec:results} \\
-F3 & The $\mathcal{O}(v_{\rm bulk}/c)$ offset from comoving Sobolev $\tau$ is & \S\ref{sec:verification}, \\
-   & an artifact of frozen-snapshot integration, not of relativity & App.~\ref{app:frame} \\
-F4 & Expansion opacity transmits $e^{-(1-e^{-\tau})}$ per crossing, not $e^{-\tau}$ & \S\ref{sec:verification} \\
-F5 & That error is per-resonance: it does not average away with line count & \S\ref{sec:verification} \\
-F6 & $\dexp$ = strength-set floor + $v_D$-growing wing term; & \S\ref{sec:results} \\
-   & the floor survives to thermal widths & \\
-F7 & $\dexp$ is non-monotonic in forest density: maximal for strong & \S\ref{sec:multiion} \\
-   & sparse forests, suppressed at full line blanketing & \\
-F8 & Solver-vs-MC offsets trace to the thermal-emission convention, & \S\ref{sec:conventions-f8} \\
-   & not to profiles or resolution; matched, the codes agree to $\sim1\%$ & \\
-F9 & The strength floor is expansion opacity's alone; the width term is & \S\ref{sec:separation} \\
-   & the boundary effect of F12. At $v_D\le30\kms$: Sobolev $\lesssim2\%$ & \\
-   & vs expansion $+38$--$48\%$ & \\
-F10 & The separation is universal across windows, epochs and ion mixes; & \S\ref{sec:breadth} \\
-    & realized $\tau_{\max}$ controls it at fixed $v_D$ and geometry & \\
-F11 & Neglect of light-travel-time evolution is a distinct approximation: & App.~\ref{app:frame} \\
-    & frozen $\tau/\taus = (1-\beta)/\gamma$ vs worldline $1/\gamma$ & \\
-F12 & Overlap is inert in pure absorption (optical depths add exactly); & App.~\ref{app:boundary} \\
-    & the Sobolev residual is a finite-region boundary effect & \\
-    & $\propto v_D/\Delta v_{\rm shell}$, negligible at thermal widths & \\
-F13 & The expansion-opacity error is bin-width invariant from $0.025$ to & \S\ref{sec:binwidth} \\
-    & $41$ lines per bin, so it is intrinsic and not a usage artifact & \\
+R1 & \textbf{The separation.} Against a deterministic finite-profile reference on identical rays, the & \S\ref{sec:separation} \\
+   & Sobolev localization errs by $\lesssim1\%$ at $v_D\le30\kms$ ($\tau_{\max}\le5$) and $\lesssim0.3\%$ at $\le10\kms$, & \S\ref{sec:map} \\
+   & while the expansion-opacity closure differs by $+38$--$45\%$ at every width; robust across 36 & \S\ref{sec:breadth} \\
+   & further windows, epochs and mixtures (formerly F6, F9, F10). & \\[3pt]
+R2 & \textbf{The mechanism.} The closure preserves the expected interaction count $\sum(1-e^{-\tau_k})$ & \S\ref{sec:primer-expop} \\
+   & exactly and applies Poisson survival to a Bernoulli product; the departure is the saturation & App.~\ref{app:expop} \\
+   & deficit $\sum[\tau_k-(1-e^{-\tau_k})]$ per ray, so it is per-resonance, width-independent, bin-width & \S\ref{sec:binwidth} \\
+   & invariant, and maximal for strong sparse forests (formerly F4, F5, F7, F13). & \S\ref{sec:multiion} \\[3pt]
+R3 & \textbf{The Sobolev error is geometric.} Overlap is inert in pure absorption (optical depths add); & App.~\ref{app:boundary} \\
+   & the residual is profile clipping at the edges of the finite line-forming region, $\propto v_D/\Delta v_{\rm shell}$, & \S\ref{sec:verification} \\
+   & and symmetric gradients cancel the locality error at leading order (formerly F1, F12). & \\[3pt]
+R4 & \textbf{Three conventions must be matched} in any cross-code comparison: thermal emission, spectral & \S\ref{sec:conventions-f8} \\
+   & normalization, and transport treatment (frozen snapshot $\tau/\taus=(1-\beta)/\gamma$ vs worldline $1/\gamma$); & App.~\ref{app:frame} \\
+   & each produces few-percent offsets of the size under study, which is why the Sobolev differential & \S\ref{sec:methods} \\
+   & is formed against a deterministic reference (formerly F3, F8, F11). & \\
 \bottomrule
 \end{tabular}
 \end{table*}
 
-\paragraph{What the floor means for kilonova modeling.}
+\paragraph{What the departure means for kilonova modeling.}
 Lanthanide-rich ejecta are the definition of the strong-line regime: the
 opacity calculations that motivate this work find bound--bound optical depths
 in the line-forming region far above unity across the optical and
 near-infrared \citep{tanaka2020,kato2024}, and our sweep spans
-$\tau_{\max}$ up to $50$, where the floor is already $\sim45\%$ and the
-analytic cap argument (Appendix~\ref{app:expop}) shows it does not turn over
-at larger $\tau$. Our measurements say that in that regime the
-expansion-opacity treatment overestimates band-integrated transmitted flux by
-tens of percent \emph{as a floor}, independent of how finely line profiles
-are treated.
+$\tau_{\max}$ up to $50$, where the Poisson-versus-Bernoulli gap is already
+$\sim45\%$ in band transmission and does not turn over at larger $\tau$
+(Appendix~\ref{app:expop}). The expansion-opacity closure is exact in the
+statistic it was derived for---the expected number of line interactions per
+unit path, Karp's mean free path---and that is the statistic that governs
+diffusion and the random walk deep in the ejecta. What it does not reproduce
+is the deterministic attenuation of a resolved realization once individual
+lines saturate, and that is the statistic that governs how much continuum
+escapes through a strong-line band near the photosphere. Which of the two a
+calculation needs depends on the regime, and the difference between them is
+tens of percent wherever strong lines are sparse enough not to blanket.
 
-\paragraph{What the floor does \emph{not} yet mean.}
-One step separates that statement from a claim about kilonova spectra, and it
-is worth making explicit because it bounds every astrophysical reading of
-this paper. Radiative equilibrium is disabled throughout
-(\S\ref{sec:conventions}): \textsc{sedona} deposits absorbed packet energy
-without re-emitting it, so what we measure is the \emph{attenuation of an
-externally supplied continuum}, not an emergent spectrum. In an
-energy-conserving calculation the photons that expansion opacity wrongly
-lets through a strong line would, under resolved transport, have been
-absorbed and re-emitted at some other frequency. Total luminosity is
-conserved; only its spectral distribution differs. A $+45\%$ error in
-attenuated band flux is therefore an upper bound on the corresponding error
-in an emergent spectrum, not a measurement of it.
-
-What survives that step is the \emph{sign}, which is fixed by the
-per-crossing cap: the substitution can only ever under-attenuate
-(Appendix~\ref{app:expop}), so expansion opacity leaks flux out of
-strong-line bands in one direction, and thermal re-emission returns it
-redward of where it was lost rather than restoring the band. The
-\emph{magnitude} in an emergent spectrum does not follow from anything
-measured here and must be obtained with energy-conserving transport;
-redistribution is nonlinear, and we decline to predict its outcome. Repeating these measurements
-with radiative equilibrium enabled is the natural next experiment, and it is
-a well-posed one: the configuration here differs from an energy-conserving
-run by a single \textsc{sedona} switch.
+\paragraph{One energy-conserving check.}
+Everything above is the \emph{attenuation of an externally supplied
+continuum}: radiative equilibrium is disabled (\S\ref{sec:conventions}) and
+absorbed packet energy is not re-emitted. Nothing in a pure-absorption
+measurement bounds what happens once it is, because redistribution couples
+frequencies nonlinearly. We therefore ran the forest pair once more with
+\textsc{sedona}'s radiative-equilibrium switch on, resolved against
+expansion, seed-matched, in two variants: a single iteration, which re-emits
+at the input temperature and isolates redistribution from population
+feedback, and an iterated run in which the gas temperature converges---to
+different values in the two modes, so that differential includes feedback.
+Three seed-matched pairs per variant, normalized on a blue margin because
+re-emission redshifted by up to $3000\kms$ contaminates the red one (on the
+pure-absorption runs the two margins agree to $0.2$--$0.5\%$). In the emergent
+$3800$--$3955$\,\AA\ band the resolved-versus-expansion differential is
+$+7.7\pm0.02\%$ after one iteration and $+5.0\pm0.7\%$ at convergence
+($|\delta T/T|<0.7\%$ over the last three iterations; median $T_{\rm gas}$
+rises from $3000$ to $\sim7700$\,K in both modes), against $+44\%$ in pure
+absorption on the same normalization. The band itself fills from $0.34$ to
+$0.84$--$0.86$ in both treatments, and the flux pure absorption removed
+reappears immediately redward, where the $3955$--$3995$\,\AA\ band rises to
+$1.08$--$1.10$ of the continuum; a $\tau_{\max}=0.05$ control returns both
+modes to the continuum within $0.6\%$. So most of the closure's departure in
+attenuation does not survive into the emergent band once absorbed energy is
+re-emitted: the differential shrinks by a factor of six to nine, and its sign
+is preserved. We report this as one check on one configuration, not as the
+emergent-spectrum error budget, and we make no claim about the sign or size of
+the error in a fully mixed, multidimensional kilonova spectrum; the companion
+study addresses that.
 
 \paragraph{What exactly was measured on the Sobolev side.}
 Our Sobolev leg is the approximation in its pure form---$e^{-\taus}$ per
@@ -1315,58 +1475,68 @@ of the finite line-forming region rather than of the approximation.
 
 \paragraph{Limitations.}
 Pure absorption with LTE populations (no scattering, fluorescence, or
-NLTE); fixed temperatures; controlled shell velocities
-($1000$--$3000\kms$) rather than realistic $0.1$--$0.3c$ (which needs a
-worldline-consistent time-dependent treatment, F11); Doppler widths down to $1\kms$ but not the
+NLTE); fixed temperatures; a controlled homologous test flow at
+$1000$--$3000\kms$ using kilonova line lists and thermodynamic conditions,
+not the $0.1$--$0.3c$ of real ejecta (Appendix~\ref{app:frame} sets out what
+changes there, and the machinery now reaches it, but no measurement in this
+paper is made at those velocities); Doppler widths down to $1\kms$ in the
+deterministic reference and $1\kms$ in \textsc{sedona}, against the
 $0.6\kms$ thermal value; two elements and three ionization stages across four
 windows and three epochs, but no full lanthanide mixture; Monte Carlo noise
-measured at $0.26$--$0.30\%$ per band flux (Section~\ref{sec:conventions}); and
-radiative equilibrium disabled, so the reported fluxes are attenuation of an
-externally supplied continuum rather than an emergent spectrum.
-
-Within that pure-absorption configuration these caveats do not touch the sign
-or order of magnitude of the central result, whose mechanism is reproduced
-independently by analytic theory (Appendix~\ref{app:expop}). We stress what
-that sentence does \emph{not} say. Whether the per-crossing cap survives
-radiative redistribution---where a photon absorbed in one line may re-emerge
-in another, or at another frequency---is not tested here, and no result in
-this paper bounds it. That is the subject of a companion study.
+of $0.26$--$0.30\%$ per single-realization band flux, reduced by seed
+averaging where quoted (\S\ref{sec:noise}); and, apart from the single check
+above, radiative equilibrium disabled, so the reported fluxes are the
+attenuation of an externally supplied continuum rather than an emergent
+spectrum. The Sobolev localization is tested with its two assumptions
+deliberately protected---locality by constant populations, isolation by pure
+absorption, in which optical depths add regardless of overlap---so the
+statement licensed is the narrow one: for fixed populations, pure absorption,
+homologous expansion and narrow intrinsic profiles, replacing each finite
+profile by a localized resonance introduces only the boundary error of
+Appendix~\ref{app:boundary}. Whether that holds once populations respond to
+the radiation field, and whether the closure's departure survives radiative
+redistribution, are the subjects of the companion study.
 
 %=====================================================================
 \section{Conclusions and next steps}
 
 We built and validated a harness that isolates the line-transfer treatment in
-expanding ejecta---three independent calculations agreeing to $\sim1\%$ once
-conventions are matched---and used it to measure, on calibrated lanthanide
-data, two errors that the literature carries under a single name.
+expanding ejecta---a deterministic finite-profile reference, a per-line
+Sobolev leg and the expansion-opacity closure evaluated on identical rays,
+with a Monte Carlo code as the independent validation---and used it to
+measure, on calibrated lanthanide data, two approximations that the literature
+carries under a single name.
 
-The Sobolev approximation itself is accurate to $\lesssim2\%$ at
-kilonova-relevant line widths ($v_D\le30\kms$), and to $\lesssim0.5\%$ at
-$\tau_{\max}=5$ down to $1\kms$, showing no dependence on line strength; its
-only measured departure is the neglect of finite line width, and that is a
-property of imposing a finite line-forming region rather than of the
-approximation (Appendix~\ref{app:boundary}). Its standard expansion-opacity
-implementation \citep{karp1977,eastman1993} is a different matter: a
-per-resonance substitution
-$\tau\to1-e^{-\tau}$ gives it a strength-set error floor of $+38$--$48\%$ in
-band flux that no refinement of line widths removes, because the substitution
-is not a discretization but part of the formalism. Across 36 conditions
-spanning four windows, three epochs and three ion mixtures at fixed Doppler
-width and shell geometry, the separation is universal and the realized
-$\tau_{\max}$ is the controlling variable among those axes; the error retains
-a separate, measured dependence on $v_D$ (\S\ref{sec:map}). The error is
-largest not in fully blanketed bands, where both treatments agree that little
-escapes, but in the intermediate regime where strong lines have not yet
-merged---the regime in which realistic calculations still show identifiable
-spectral features \citep{domoto2022,tanaka2020}. We do not claim this value
-as the error of a fully mixed kilonova spectrum: F7 shows the error is
-suppressed as a band goes black, and measuring the mixed case is future
-work.
+They preserve different properties of a line forest. The expansion-opacity
+closure of \citet{karp1977} and \citet{eastman1993} is exact in the statistic
+it was built for: the expected number of line interactions per unit path,
+$\sum_k(1-e^{-\tau_k})$, is reproduced identically at every bin width. What
+it does not reproduce is the deterministic transmission of a resolved line
+realization, because it applies the survival of a Poisson process to what is
+a product of Bernoulli survivals; the two agree while every line is weak and
+separate, per resonance and by the saturation deficit
+$\sum_k[\tau_k-(1-e^{-\tau_k})]$, once lines saturate. On the La\,\textsc{ii}
+forest that separation is $+38\%$ in band transmission at thermal line widths
+and at every bin width from $0.025$ to $41$ lines per bin, rising to $+45\%$
+in the Monte Carlo implementation at $100\kms$; across 36 further conditions
+it is robust, with the transmission-weighted saturation deficit as the
+controlling statistic and the strongest line's optical depth as its proxy
+within a fixed geometry. It is largest not in fully blanketed bands, where
+both treatments agree that little escapes, but in the intermediate regime
+where strong lines have not yet merged---the regime in which realistic
+calculations still show identifiable spectral features
+\citep{domoto2022,tanaka2020}. The Sobolev localization itself, measured
+against the deterministic reference, carries no strength floor: its error is
+the clipping of profiles at the edges of the finite line-forming region,
+$\lesssim1\%$ at $v_D\le30\kms$ for $\tau_{\max}\le5$ and $\lesssim0.3\%$ at
+$v_D\le10\kms$, vanishing at thermal widths (Appendix~\ref{app:boundary}).
 
 The practical implication for kilonova modelling is that ``we use the Sobolev
-approximation'' and ``we use expansion opacity'' should not be treated as
-interchangeable statements, and that the second deserves a quantified error
-budget wherever strong lines are present.
+approximation'' and ``we use expansion opacity'' are not interchangeable
+statements: the second is exact for the mean free path and carries a
+quantified, strength-set departure from resolved transmission wherever strong
+lines are sparse. Which statistic a calculation needs is a question about its
+regime, and it deserves to be asked explicitly.
 
 Next: worldline-consistent comparison
 at realistic ejecta velocities ($0.1$--$0.3c$), which \textsc{sedona}'s
@@ -1459,29 +1629,51 @@ term survive, giving
 $E_{\rm Sob} \simeq \tfrac12 |n_l''/n_l|\, \sigma_v^2 \propto \epsilon^2$,
 the law measured in Fig.~\ref{fig:grad}.
 
-\subsection{The expansion-opacity cap (F4)}
+\subsection{What expansion opacity preserves, and what it does not (R2)}
 \label{app:expop}
 
 Integrate the binned opacity of Eq.~(\ref{eq:expop}) along the stretch of
 path over which the moving gas keeps one line inside one frequency bin.
 The Doppler sweep rate ties path length to bin width,
-$\Delta z = ct\,\Delta\nu_{\rm bin}/\nu$, so the effective optical depth
-contributed by line $k$ is
+$\Delta z = ct\,\Delta\nu_{\rm bin}/\nu$, so the contribution of line $k$ is
 \begin{multline}
-  \tau^{\rm eff}_k
-  = \alpha^{\rm exp}\,\Delta z \\
+  \alpha^{\rm exp}\,\Delta z
   = \frac{1}{ct}\,\frac{\nu_k}{\Delta\nu_{\rm bin}}
     \left(1-e^{-\tau_{{\rm S},k}}\right)
-    \times \frac{ct\,\Delta\nu_{\rm bin}}{\nu_k}
+    \times \frac{ct\,\Delta\nu_{\rm bin}}{\nu_k} \\
   = 1-e^{-\tau_{{\rm S},k}} .
 \end{multline}
-The bin width cancels: independent of resolution, each resonance crossing
-contributes at most $\tau^{\rm eff}=1$ \emph{per line}, and the
-transmitted fraction is
-$e^{-(1-e^{-\taus})}$ per line---Eq.~(\ref{eq:capped}), the measured
-0.421 at $\taus=2$. Note this is \emph{not} a discretization error: it is
-built into the formalism and no bin refinement removes it. It disappears
-only when $\taus\ll1$.
+The bin width cancels. Summed over the resonances a ray crosses,
+$\int\alpha^{\rm exp}\,\mathrm{d}s = \sum_k(1-e^{-\tau_k}) \equiv E$: the
+expected number of line interactions for a photon that is counted but not
+removed, which is the mean-free-path statistic \citet{karp1977} built the
+coefficient from. The closure reproduces $E$ exactly, at any resolution.
+
+Transmission is $e^{-S}$, $S=\sum_k\tau_k$ (a product of Bernoulli
+survivals); a code that exponentiates $\int\alpha^{\rm exp}\mathrm{d}s$ returns
+$e^{-E}$ (Poisson survival with the same mean). They agree when every
+$\tau_k\ll1$ and separate by the saturation deficit $D=S-E\ge0$ per ray
+(Eq.~\ref{eq:deficit})---a property of $E$ and $S$, not of the grid, which is
+why the departure is per-resonance, width-independent and bin-width
+invariant.
+
+For a band average over core rays with weights $w$ (the $p\,\mathrm{d}p$
+measure of Appendix~\ref{app:pavg}) the statement is an identity,
+\begin{equation}
+  \frac{F_{\rm exp}}{F_{\rm Sob}}
+  = \frac{\langle e^{-E}\rangle_w}{\langle e^{-S}\rangle_w}
+  = \frac{\langle e^{-S}\,e^{D}\rangle_w}{\langle e^{-S}\rangle_w}
+  = \bigl\langle e^{D}\bigr\rangle_{\tilde w},\qquad \tilde w \propto w\,e^{-S},
+  \label{eq:identity}
+\end{equation}
+the transmission-weighted mean of $e^{D}$, pinned in the test suite to
+$10^{-13}$. Its content is physical rather than algebraic: the rays that
+still transmit are weighted most, and on those the strongest crossed lines
+dominate $D$. That is why the realized $\tau_{\max}$ is a good proxy within a
+fixed geometry (\S\ref{sec:breadth}), and why the naive unweighted deficit
+$\langle D\rangle$ is not---by Jensen's inequality
+$\ln\langle e^{D}\rangle_{\tilde w}\ge\langle D\rangle_{\tilde w}$, and once rays
+saturate the two separate widely (Fig.~\ref{fig:predictor}).
 
 \subsection{Averaging over the source disk (F5's technical companion)}
 \label{app:pavg}
@@ -1577,20 +1769,18 @@ using artificially broad lines to keep the frequency grids affordable.
 \subsection{Frozen snapshot versus photon worldline: what F3 really was}
 \label{app:frame}
 
-\emph{This appendix was wrong in the previous draft, in an instructive way.
-We keep the faulty step visible because it is easy to make and hard to see.}
-
 Appendix~\ref{app:sobolev} derived $\taus$ to first order in $v/c$. Kilonova
-ejecta move at $0.1$--$0.3c$, and we measured (Finding F3) that a resonance at
-$z_{\rm res}/ct = 7.7\%$ gave a trough matching
+ejecta move at $0.1$--$0.3c$, and the solver measures that a resonance at
+$z_{\rm res}/ct = 7.7\%$ gives a trough matching
 $\exp[-\taus(1-z_{\rm res}/ct)]$ to four digits rather than $\exp(-\taus)$.
-The natural conclusion---which we drew, and which an earlier draft of this
-appendix argued---was that this is the leading relativistic correction and
-that it is $\mathcal{O}(v/c)$. It is not.
+The natural reading is that this is the leading relativistic correction and
+that it is $\mathcal{O}(v/c)$. It is not; it is the law of a frozen snapshot,
+and the distinction between the two is a transport treatment that must be
+matched across codes.
 
-\paragraph{The faulty step.} That derivation differentiated the Doppler factor
-$D = \gamma(1-b)$ \emph{at fixed $t$}, i.e.\ it pushed a photon through a
-frozen snapshot of the ejecta. But a photon takes time to cross a resonance,
+\paragraph{Two treatments.} The $\mathcal{O}(v/c)$ law follows from
+differentiating the Doppler factor $D = \gamma(1-b)$ \emph{at fixed $t$},
+i.e.\ from pushing a photon through a frozen snapshot of the ejecta. But a photon takes time to cross a resonance,
 and in homologous flow $\boldsymbol\beta = \mathbf r/(ct)$ depends on the age
 as well as the position. Along the photon worldline
 $\mathbf r(t) = \mathbf r_0 + c\hat{\mathbf n}(t-t_0)$,
@@ -1646,12 +1836,11 @@ $\beta$ & frozen $\tau/\taus$ & worldline $\tau/\taus$ & $1/\gamma$ \\
 \end{table}
 
 So the relativistic correction at $\beta = 0.1$, $0.2$, $0.3$ is $0.5\%$,
-$2.0\%$, $4.6\%$---not the $10\%$, $22\%$, $33\%$ that the frozen law implies
-and that the previous draft of this appendix claimed.
+$2.0\%$, $4.6\%$---not the $10\%$, $22\%$, $33\%$ that the frozen law implies.
 
 \paragraph{Which problem does the Monte Carlo code solve?} It is natural to
-assume a Monte Carlo transport code supplies the time-dependent answer, and we
-briefly did. It does not, in the configuration used here. Sweeping a single
+assume a Monte Carlo transport code supplies the time-dependent answer. It does
+not, in the configuration used here. Sweeping a single
 line's resonance velocity from $\beta = 0.001$ to $0.34$ and comparing the
 measured $\tau_{\rm eff} = -\ln(F/F_{\rm cont})$ against both laws gives an
 RMS deviation over $\beta_{\rm res} \gtrsim 0.1$ of $0.024$ from the frozen law
@@ -1682,10 +1871,10 @@ solver-versus-\textsc{sedona} comparison in this paper is quoted with the
 solver in frozen mode, matching \textsc{sedona}s transport treatment. At
 kilonova velocities the choice would dominate.
 
-\paragraph{What F3 is, finally.} Not a frame ambiguity (our first reading), not
-the leading relativistic correction (our second reading), but an
-artifact of integrating a frozen snapshot---a problem the photon does not
-solve. The distinction earns its own entry in Table~\ref{tab:findings} as F11,
+\paragraph{What the $\mathcal{O}(v/c)$ offset is.} Not a frame ambiguity and
+not the leading relativistic correction, but the law of a frozen
+snapshot---a problem the photon does not solve, and the one a steady-iterate
+transport calculation does. The distinction earns its own entry in Table~\ref{tab:findings} as F11,
 because ``neglect of light-travel-time evolution'' is a separate approximation
 from the Sobolev localization, from the independent-line assumption, and from
 expansion-opacity binning. Its practical consequence for the measurements
@@ -1698,6 +1887,32 @@ $r$, not $z$---and one needs the common-direction and common-point frequency
 surfaces of \citet{jeffery1993}. Our controlled experiments keep the emitting
 core small compared with the resonance radii, so all core rays are nearly
 radial and the plane picture holds.
+
+\paragraph{What changes at realistic velocities.} The machinery now reaches
+$0.1$--$0.3c$, and two things learned in building it bear on any future
+measurement there, though none is made in this paper. First, the worldline
+correction $1/\gamma$ is not the controlling term. A photon leaving the
+source at $t_0$ meets the material moving at $\beta$ at
+$t_{\rm res}=t_0/(1-\beta)$---later than the frozen-geometry estimate
+$t_0(1+\beta)$, because the fluid element is itself moving outward while the
+photon chases it---and with $n\propto t^{-3}$ and $\taus\propto n\,t$ the medium
+contributes $(1-\beta)^2$ against transport's $1/\gamma$:
+$\tau/\taus(t_0) = (1-\beta)^2/\gamma$, confirmed against direct integration of
+the resolved opacity with the density evolving along the path. At
+$\beta=0.3$ the $1/\gamma$ deficit is $4.6\%$ and the light-travel dilution is
+$51\%$; a calculation that advances the kinematics but not the medium is
+wrong by an order of magnitude more than the term it keeps. Second, under
+worldline transport the resonance locus is linear in $z$---with $ct(z)=z+Z_0$,
+$D=Z_0/\sqrt{Z_0^2+2Z_0z-p^2}$, so $D=\nu_0/\nu$ has one root,
+$z_{\rm res}=\tfrac12 Z_0[(\nu/\nu_0)^2-1]+p^2/2Z_0$---and
+$\tau/\taus(t_{\rm res})=1/\gamma$ exactly for every impact parameter. The
+two-root quadratic behind the common-direction and common-point surfaces of
+\citet{jeffery1993} belongs to the frozen snapshot; in the physical treatment
+the geometry objection does not arise. (For the special-relativistic form of
+the expansion opacity itself see \citealt{li2019}.) A pilot on a synthetic
+forest with every controlling ratio held fixed finds the Sobolev
+localization error independent of $\beta$ and the closure's departure growing
+with it; it is a pilot, on a synthetic forest, and is not quoted as a result.
 
 %=====================================================================
 \section{Relation to previous line-opacity treatments}
@@ -1716,19 +1931,26 @@ its wide adoption rests.
 \citet{fontes2020} approached the same computational problem differently.
 Their line-binned opacity preserves the frequency-integrated area of the
 underlying fine-structure opacity and can be tabulated independently of the
-velocity field. They compared line-binned calculations against both
-traditional expansion opacity and a continuous Monte Carlo Sobolev treatment
-for kilonova models, finding broadly similar light curves and spectra while
-retaining identifiable differences between the representations.
+velocity field. They wrote the expansion-opacity optical depth per bin as
+$\sum_i(1-e^{-\tau_i})$ against the line-binned $\sum_i\tau_i$, noted that the
+former limits the contribution of a single line to one while using the full
+opacity at low optical depth, and compared both against a continuous Monte
+Carlo Sobolev treatment---which they describe as the more accurate
+one---finding broadly similar light curves and spectra, with the agreement
+explained by the similarity of the opacities in the low-optical-depth limit
+where transport matters in their ejecta. The unit cap of a single line in the
+expansion-opacity form is therefore theirs to state, and we do not claim it.
 
-The present work is not another prescription; its purpose is diagnostic. We
-use frequency-resolved transfer as a controlled reference, insert per-line
-Sobolev transfer as an intermediate leg, and apply expansion opacity to the
-identical configuration. The hierarchy resolved $\rightarrow$ Sobolev proper
-$\rightarrow$ expansion opacity lets an error in the final calculation be
-assigned either to Sobolev localization or to the opacity closure built on
-top of it. That assignment, rather than any individual band flux, is the
-contribution.
+The present work is not another prescription; its purpose is diagnostic. What
+it adds is a finite-profile resolved calculation inserted \emph{ahead of}
+per-line Sobolev transfer, so that the hierarchy resolved $\rightarrow$
+Sobolev proper $\rightarrow$ expansion opacity lets an error in the final
+calculation be assigned either to Sobolev localization or to the closure built
+on top of it; a controlled map of each step's error against intrinsic width,
+line strength, bin width, line density and calibrated lanthanide line lists;
+and the identification of the ensemble statistic---the transmission-weighted
+saturation deficit---that controls the closure's departure. That assignment
+and that map, rather than any individual band flux, are the contribution.
 
 \subsection{Line overlap as a distinct failure mechanism}
 
@@ -1775,18 +1997,23 @@ Sobolev transport as the reference treatment in exactly such calculations.
 
 \subsection{Recent scrutiny of the Eastman--Pinto prescription}
 
-\citet{morag2025} revisits the physical interpretation of the
-\citet{eastman1993} prescription in supernova transfer, arguing that it can
+\citet{morag2026} revisits the physical interpretation of the
+\citet{eastman1993} prescription in supernova transfer, showing that it can
 capture the photon mean free path through a line forest while substantially
 underestimating photon emissivity and reprocessing rates when used as a
 coarse-frequency emissivity. The broader point is that an effective opacity
 need not reproduce every property of the ensemble it replaces.
 
-Our result is complementary rather than contradictory. We do not test an
-emissivity closure, and radiative equilibrium is deliberately disabled: we
-measure the attenuation obtained when the expansion-opacity coefficient is
-inserted into otherwise identical transport, against resolved and per-line
-Sobolev calculations of the same configuration. The bin-width experiment of
+Our result is the same point from the absorption side, made exact. The
+coefficient preserves the expected interaction count per unit path---the
+mean free path Morag finds it captures---identically; what it does not
+preserve is the transmission of a deterministic line realization, because
+Poisson survival and a Bernoulli product differ once lines saturate
+(Appendix~\ref{app:expop}). We do not test an emissivity closure; apart from
+the single radiative-equilibrium check of \S\ref{sec:discussion}, we measure
+the attenuation obtained when the expansion-opacity coefficient is inserted
+into otherwise identical transport, against resolved and per-line Sobolev
+calculations of the same configuration. The bin-width experiment of
 \S\ref{sec:binwidth} matters in this context, because it shows the
 discrepancy persisting from well under one line per bin to tens of lines per
 bin while the resolved reference stays converged. The result therefore does

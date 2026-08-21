@@ -106,27 +106,43 @@ def check_headline_numbers(text):
             )
     # Anchor on the headline sentence and search only inside it -- a loose
     # regex over the whole document happily matches a similar-looking number
-    # from an unrelated section.
+    # from an unrelated section. Since the referee revision the headline is
+    # formed against the DETERMINISTIC reference (forest_table.json,
+    # "deterministic"), with SEDONA's seed mean as validation; the checker
+    # reads that file rather than a hand-copied value.
     anchor = re.search(
-        r"For the La\\,\\textsc\{ii\} forest, against .{0,400}?"
+        r"For the La\\,\\textsc\{ii\} forest at .{0,900}?"
         r"Across the sweep",
         text, re.S,
     )
     if not anchor:
         return ["headline sentence not found -- has it been reworded?"]
     span = anchor.group(0)
+    det_path = HERE.parents[1] / "experiments/laII_forest/forest_table.json"
+    if not det_path.exists():
+        return [f"missing {det_path.name} -- cannot verify the headline"]
+    det = json.loads(det_path.read_text()).get("deterministic")
+    if not det:
+        return ["forest_table.json has no 'deterministic' block -- rerun "
+                "recompute_forest.py"]
 
-    nums = [float(x) for x in re.findall(r"\$=?([\d.]+)\$", span)]
+    nums = [float(x) for x in re.findall(r"(?<![\d.])(0\.\d{4})(?![\d])", span)]
     pcts = [float(x) for x in re.findall(r"\$([+-][\d.]+)\\%\$", span)]
-    for label, value in (("resolved", h["res"]), ("Sobolev", h["sob"]),
-                         ("expansion", h["exp"])):
-        if not any(abs(n - value) < 5e-5 for n in nums):
+    for label, value in (("resolved (det.)", det["f_res_det_first"]),
+                         ("Sobolev", det["f_sob_first"]),
+                         ("expansion (analytic)", det["f_exp_ana"]),
+                         ("SEDONA resolved seed mean", det["sedona_res_seedmean"]),
+                         ("SEDONA expansion seed mean", det["sedona_exp_seedmean"])):
+        if not any(abs(n - value) < 5e-4 for n in nums):
             out.append(
-                f"headline {label} = {value:.4f} (from "
-                f"{SEPARATION_JSON.name}) not quoted; sentence has {nums}"
+                f"headline {label} = {value:.4f} (from forest_table.json) "
+                f"not quoted; sentence has {nums}"
             )
-    for label, value in (("Sobolev", 100 * d_sob), ("expansion", 100 * d_exp)):
-        if not any(abs(p - value) < 0.05 for p in pcts):
+    for label, value in (("Sobolev vs det.", 100 * det["d_sob_det_first"]),
+                         ("expansion vs det.", 100 * det["d_exp_det_first"]),
+                         ("Sobolev vs SEDONA", 100 * det["d_sob_sedona_seedmean"]),
+                         ("expansion (SEDONA pair)", 100 * det["d_exp_sedona_seedmean"])):
+        if not any(abs(p - value) < 0.06 for p in pcts):
             out.append(
                 f"headline Delta {label} = {value:+.1f}% not quoted; "
                 f"sentence has {pcts}"

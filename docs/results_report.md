@@ -729,6 +729,100 @@ questions.**
 The instrument is calibrated; it has measured nothing new. Phase 1 is where
 branching gets switched on against an expansion-opacity leg in the same code.
 
+### 4.18 The referee revision: the mechanism made exact, and a deterministic reference (F15–F18)
+
+A major-revision report (August 2026) held that the paper had labelled the
+difference between a deterministic finite-profile attenuation and a
+statistical closure as proof the closure was "wrong". It was right, and the
+tools to test the reframing were already here.
+
+**The mechanism (F15).** Per ray, Sobolev transfer exponentiates S = Σ τ_k and
+expansion opacity exponentiates E = Σ(1−e^−τ_k). E is what α_exp integrates
+to — the expected number of line interactions per crossing for a photon that
+is counted but not removed, Karp's mean-free-path statistic — and the closure
+preserves it identically at any bin width. Transmission is e^−S (a Bernoulli
+product) against e^−E (Poisson with the same mean); they agree while every
+line is weak and separate by the saturation deficit D = S−E per ray once
+lines saturate. F_exp/F_Sob = ⟨e^D⟩_w with w ∝ e^−S, exactly (pinned to 1e-13
+in `tests/test_rays.py`). On the La II forest:
+
+| τ_max | F_Sob | F_exp (analytic) | Δ_exp | ⟨E⟩/⟨S⟩ |
+|---|---|---|---|---|
+| 0.1 | 0.950 | 0.952 | +0.2% | 0.97 |
+| 1 | 0.665 | 0.720 | +8.3% | 0.74 |
+| 5 | 0.350 | 0.484 | **+38.2%** | 0.37 |
+| 25 | 0.253 | 0.374 | +47.5% | 0.12 |
+
+`experiments/r1_interaction_count/ray_diagnostic.py` draws it along one ray
+(46 resonances: same count to 1e-15, survivals 0.051 vs 0.130, first-interaction
+masses 0.949 vs 0.870) and `mc_check.py` confirms every panel by Monte Carlo.
+`experiments/r8_saturation/plot.py` shows all 54 conditions on the 1:1 line
+against ln⟨e^D⟩_w; the unweighted deficit is a Jensen bound that fails once
+rays saturate; τ_max is a proxy with real scatter (the blanketed blends below
+the sparse forests — F7).
+
+**A deterministic reference (F16).** Both legs on one `RaySet`
+(`sobolev/rays.py`; midpoint, because attenuation is a step function of p and
+matched nodes make the O(1/n) error common — unmatched rays had made Δ_Sob
+change sign between 12 and 96 solver rays). The resolved leg for uniform n_l,
+Gaussian profile, pure absorption is closed-form (`resolved_attenuation`, the
+boundary erf bracket per line per ray, cost independent of v_D; agrees with the
+brute-force solver to 8e-5). Results, La II forest:
+
+| v_D (km/s) | Δ_Sob^det (τ=5) | Δ_Sob^det (τ=50) | Δ_exp^det (τ=5) | Δ_exp SEDONA pair |
+|---|---|---|---|---|
+| 300 | +9.6% | +32.7% | +51.3% | +53.4% |
+| 100 | +3.1% | +8.9% | +42.3% | +44.9% |
+| 30 | +0.9% | +2.5% | +39.3% | +40.4% |
+| 10 | +0.30% | +0.82% | +38.4% | +38.9% |
+| 3 | +0.09% | — | +38.1% | +38.6% |
+| 1 | +0.03% | — | +38.1% | +39.1% |
+
+Δ_Sob^det at v_D = 100 is +3.09% in all four transport modes (first, classical,
+exact, worldline+dilution): the mode dependence cancels in the matched pair.
+SEDONA resolved (seed mean) validates the reference to −0.5% on the headline,
+±0.3% over the grid (max 0.7%), −0.04% median / 0.31% spread over the 36
+breadth conditions. **The breadth Δ_Sob row was stale**: `breadth/recompute.py`
+still normalized by raw luminosity (the bug 1e2ba21 fixed elsewhere); through
+`band_ratio` it is median +0.34% / max +7.8% (SEDONA ref) and +0.26% / +7.6%
+(deterministic ref), down from +3.65% / +11.3%, while Δ_exp is unchanged
+(+5.09% median, +62% max). The line-free window returns 0.997 ± 0.004.
+
+**Seed-matched pairs (F17).** `mc_noise/seeds.py`, 90 runs: headline over 10
+matched seeds F_res 0.3422 ± 0.0003, F_exp 0.4958 ± 0.0004, paired Δ_exp
++44.90% ± 0.04 (sem), corr +0.95; every grid point 3 pairs, correlations
++0.92–0.999, paired scatter 0.02–0.28% vs 0.2–0.4% quadrature. The
+single-seed scatter sits within 1.5× the Poisson expectation.
+
+**Radiative equilibrium (F18).** `laII_forest/re_run.py`, 3 matched pairs per
+variant, blue-margin normalization (re-emission contaminates the red margin):
+
+| variant | F_res | F_exp | Δ_exp |
+|---|---|---|---|
+| pure absorption (same normalization) | 0.343 | 0.495 | +44.3% |
+| RE, one iteration (re-emit at input T) | 0.836 | 0.900 | **+7.7% ± 0.02** |
+| RE, T converged (median 3000 → ~7700 K) | 0.855 | 0.898 | **+5.0% ± 0.7** |
+| τ_max = 0.05 control | 0.993 | 0.999 | +0.6% |
+
+The removed flux reappears at 3955–3995 Å (1.08–1.10 of continuum). Most of
+the closure's departure in attenuation does not survive re-emission into the
+emergent band; its sign does.
+
+**Single-line benchmark.** The published 0.1372 (solver) is the frozen-snapshot
+law e^−τ_S(1−β)/γ over the trough window (0.1371) — the problem a steady-iterate
+code solves — reproduced to 0.1% under every variation; 0.1353 is the β→0
+limit, not the target. SEDONA's 0.1420 sat on a grid with <2 bins per Doppler
+width and 2×10⁶ packets; 3.2×10⁷ packets on the same grid give 0.1386 ± 0.0002.
+The convergence ladder (`minimal_1line/ladder.py`, 59 runs, fixed seeds)
+gives 0.1383 ± 0.0001 at the anchor (3.2×10⁷ packets, 8 bins/width, 5 seeds),
+flat to ±0.3% across packets 5×10⁵–3.2×10⁷, grids 4×10⁻⁴–2×10⁻⁵, spectrum
+grids and 25–400 zones; the zero-opacity control reads 1.0079, so the +0.9%
+residual is a continuum offset (comoving-frame core emission), and corrected
+the trough is 0.1372 — the frozen target to 0.1%. The expansion mode sits at
+0.4438 (0.440 corrected) vs Poisson 0.4212: +4.5%, the exp-leg bin systematic
+on one line. Figure: `docs/figures/fig_ladder.png`; table generator
+`minimal_1line/ladder_table.py`.
+
 ## 5. Findings register
 
 | # | Finding | Where |
@@ -747,6 +841,10 @@ branching gets switched on against an expansion-opacity leg in the same code.
 | F12 | Overlap is inert in pure absorption (optical depths add exactly); the Sobolev residual is a finite-region boundary effect ∝ v_D/Δv_shell, negligible at thermal widths | §4.15 |
 | F13 | The expansion-opacity error is bin-width invariant from 0.025 to 41 lines per bin — intrinsic to the formalism, not a usage artifact | §4.16 |
 | F14 | Neither candidate reference code can answer Paper II alone: SEDONA has no line branching whatsoever, TARDIS has no expansion opacity. A ~250-line branching Sobolev MC, validated to ≤2.1σ against the analytic Sobolev leg, supplies the same-code differential both lack | §4.17 |
+| F15 | The closure preserves the expected interaction count exactly and applies Poisson survival to a Bernoulli product; F_exp/F_Sob = ⟨e^D⟩_w exactly | §4.18 |
+| F16 | Δ_Sob against a deterministic reference on identical rays: +3.1% at 100 km/s (all transport modes), +0.3% at 10, +0.03% at 1 km/s; the breadth median was stale (+3.65% → +0.26%) | §4.18 |
+| F17 | Seed-matched pairs correlate at +0.95–0.999; paired Δ_exp scatter 0.02–0.28%; headline +44.90% ± 0.04 over 10 seeds | §4.18 |
+| F18 | With radiative equilibrium the emergent-band differential is +7.7% (redistribution) and +5.0% (T converged), from +44%; sign preserved | §4.18 |
 
 ## 6. Caveats and limitations
 

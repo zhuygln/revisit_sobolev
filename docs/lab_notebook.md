@@ -780,6 +780,95 @@ becomes one it needs the La II forest and a tau_max range, and the first thing
 to fix is the p-sampling mismatch between the legs: matching them removes most
 of the cost, which is currently 10-20 minutes per converged point.
 
+## 9o. The referee was right, and the numbers already knew (2026-08-21)
+
+Major revision. The referee's central objection -- that the paper labelled
+the difference between a deterministic attenuation and a statistical closure
+as proof the closure is "wrong" -- is correct, and testing it on the La II
+forest took an afternoon because every tool needed was already in the repo.
+
+**The reframe, verified.** Per ray the Sobolev leg exponentiates S = sum tau_k
+and the expansion leg exponentiates E = sum (1 - e^-tau_k). E is exactly what
+alpha_exp integrates to -- the expected number of line interactions per
+crossing for a photon counted but not removed, Karp's mean-free-path
+statistic -- and the closure preserves it identically. Transmission is e^-S
+(Bernoulli product) against e^-E (Poisson with the same mean). The gap closes
+as tau -> 0 (+0.2% at tau_max = 0.1) and is +38.2% at tau_max = 5, the paper's
+number. F_exp/F_Sob = <e^D>_w with w ~ e^-S, D = S - E, holds to 1e-13. F5,
+F6, F7, F13 are all corollaries. The referee handed over a better thesis, not
+a weaker one, and it is what the numbers had been saying.
+
+**Three things the audit found that the referee did not know.**
+
+1. The breadth Delta_Sob row (+3.6% median, +11.3% max) was STALE:
+   `breadth/recompute.py:52` still normalized by raw luminosity -- the bug
+   1e2ba21 fixed everywhere else and which retracted a "5-8% Sobolev floor"
+   of the same sign and size. The breadth directory never migrated to
+   `band_ratio`. Delta_exp is a same-code differential and unaffected.
+   Pending: the v2 recompute.
+2. The single-line "discrepancy" was the frame convention, exactly. The
+   solver in frozen mode gives 0.1372 under every variation; the frozen law
+   (1-beta)/gamma over the trough window is 0.1371. So the published 0.1372
+   was always the frozen-mode number and 0.1353 is the beta -> 0 limit, not
+   the target. SEDONA's 0.1420 was on a grid with < 2 bins per Doppler width
+   and 2e6 packets; 3.2e7 packets on the SAME grid give 0.1386 +- 0.0002, so
+   most of the 3.5% was sampling. The ladder is running.
+3. "Partially correlated" was unjustified as written -- production runs were
+   seeded from time(NULL) minutes apart -- but seed-matched pairs correlate
+   at +0.97 and the paired Delta_exp scatter is 0.11% against 0.40% from
+   quadrature. Matched seeds turn the claim into a measurement.
+
+**The p-sampling mismatch, and why Delta_Sob could change sign.** Attenuation
+is a step function of impact parameter; the analytic leg sampled it on 200
+midpoint rays and the solver on n_impact//2, and the two O(1/n) step errors
+did not cancel. With a shared RaySet (midpoint, not Gauss -- matched nodes
+make the step error common) Delta_Sob on the forest is flat to 0.014 points
+from 100 to 1600 rays. And it is +3.09% in ALL FOUR transport modes (first,
+classical, exact, worldline+dilution): the mode dependence cancels in the
+matched pair, which is the whole argument for matching.
+
+**The erf leg.** The resolved calculation for uniform n_l, Gaussian profile,
+pure absorption, first-order Doppler is closed-form: the boundary/run.py erf
+bracket per line per ray, no z loop, cost independent of v_D. It agrees with
+the brute-force solver on identical rays to 8e-5 and makes the 1 km/s
+frontier free. Against it: Delta_Sob = +3.1% at 100 km/s, +0.9% at 30,
++0.30% at 10, +0.03% at 1 -- the F12 law -- and Delta_exp converges to +38.1%
+at thermal widths, the pure Poisson number. SEDONA resolved validates the
+reference to +-0.3% across the 18-point grid (max 0.7%); the "0.1%
+agreement" was a single-seed coincidence.
+
+**SEDONA's expansion leg is +2.3% above the analytic Poisson prediction**
+(0.4955 vs 0.4845) and carries a ~2% bin-width systematic at fixed reference.
+So +38% is the pure count-vs-transmission number and +45% is what the code
+delivers. Both are quoted; the referee should not have to find that.
+
+**Stimulated emission** is not negligible in the red breadth windows: 5e-3 at
+9100 A and 3000 K, 2.5% on a tau ~ 5 line. SEDONA applies it; the repo did
+not. Now folded into pop everywhere.
+
+**RE, first look.** With radiative equilibrium on and T converged (N = 15),
+the resolved band fills from 0.343 to 0.856 and expansion to 0.896: a +4.5%
+differential against +45% in pure absorption. N = 1 and the other seeds
+pending.
+
+**Final numbers (same day, later).** Breadth v2: Delta_Sob median +0.26%
+(det ref) / +0.34% (SEDONA ref), max +7.6 / +7.8%, from +3.65 / +11.3%;
+Delta_exp unchanged. Seeds: 90 runs, headline 10 pairs +44.90% +- 0.04,
+corr +0.95. RE: +7.7% (one iteration) and +5.0% (T converged) from +44%;
+band fills 0.34 -> 0.85; flux reappears at 3955-3995 A. Predictor figure: 54
+conditions on the 1:1 line. Ladder: 59/59, every rung within +0.5-1.4% of
+the frozen target; anchor 0.1383 +- 0.0001; the zero-opacity control reads
+1.0079 -- so the +0.9% residual is SEDONA's continuum, not the line, and
+corrected the trough is 0.1372 = the frozen law to 0.1%. I had written a
+speculative sentence attributing the residual to the comoving core emission
+before the control came in; the control said the same thing with a number.
+Run the null before writing the explanation.
+
+**Process.** A thing worth keeping: I read the referee's Comment 1 as an
+attack on the headline, spent ten minutes deciding whether to rebut it, and
+then ran the test. The test took less time than the deciding. Run the test
+first.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,
