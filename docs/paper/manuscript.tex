@@ -52,10 +52,10 @@ wavelength windows, three epochs and three ion mixtures the separation is
 robust, and the controlling quantity is the transmission-weighted saturation
 deficit of the forest, for which the strongest line's optical depth is a
 proxy within a fixed geometry. The two approximations carried under one name
-fail for different reasons and at different levels. In one energy-conserving
-check with radiative equilibrium enabled, the band differential falls from
-$+44\%$ to between $+5\%$ and $+8\%$ as the removed flux is re-emitted
-redward.
+fail for different reasons and at different levels. An energy-conserving
+check with radiative equilibrium is also reported; because its re-emission is
+confined to the transport window it does not measure the emergent-band error,
+which is left to a companion study.
 \end{abstract}
 
 \begin{keywords}
@@ -1420,44 +1420,29 @@ escapes through a strong-line band near the photosphere. Which of the two a
 calculation needs depends on the regime, and the difference between them is
 tens of percent wherever strong lines are sparse enough not to blanket.
 
-\paragraph{One energy-conserving check.}
-Everything above is the \emph{attenuation of an externally supplied
-continuum}: radiative equilibrium is disabled (\S\ref{sec:conventions}) and
-absorbed packet energy is not re-emitted. Nothing in a pure-absorption
-measurement bounds what happens once it is, because redistribution couples
-frequencies nonlinearly. We therefore ran the forest pair once more with
-\textsc{sedona}'s radiative-equilibrium switch on, resolved against
-expansion, seed-matched, in two variants: a single iteration, which re-emits
-at the input temperature and isolates redistribution from population
-feedback, and an iterated run in which the gas temperature converges---to
-different values in the two modes, so that differential includes feedback.
-Three seed-matched pairs per variant, normalized on a blue margin because
-re-emission redshifted by up to $3000\kms$ contaminates the red one (on the
-pure-absorption runs the two margins agree to $0.2$--$0.5\%$). In the emergent
-$3800$--$3955$\,\AA\ band the resolved-versus-expansion differential is
-$+7.7\pm0.02\%$ after one iteration and $+5.0\pm0.7\%$ at convergence
-($|\delta T/T|<0.7\%$ over the last three iterations; median $T_{\rm gas}$
-rises from $3000$ to $\sim7700$\,K in both modes), against $+44\%$ in pure
-absorption on the same normalization. The band itself fills from $0.34$ to
-$0.84$--$0.86$ in both treatments, and the flux pure absorption removed
-reappears immediately redward, where the $3955$--$3995$\,\AA\ band rises to
-$1.08$--$1.10$ of the continuum; a $\tau_{\max}=0.05$ control returns both
-modes to the continuum within $0.6\%$. So most of the closure's departure in
-attenuation does not survive into the emergent band once absorbed energy is
-re-emitted: the differential shrinks by a factor of six to nine, and its sign
-is preserved. Two limits of this check must be stated. \textsc{sedona} draws
-re-emission from the emissivity on its transport grid, so it is confined to
-the $3770$--$3997$\,\AA\ window; with the whole ion's LTE emissivity at
-$3000$\,K most re-emission is infrared, and the companion study's same-code
-Monte Carlo finds the band refilling only from $0.35$ to $0.36$, so the
-fill-in here is an upper limit and the differential with physically
-distributed thermal re-emission is again $\sim+38\%$. And thermal re-emission
-is not line fluorescence: with A-branching on the same ion the band refills
-through other lines and an expansion-opacity treatment falls \emph{below} the
-physics. We report this as one check on one configuration, not as the
-emergent-spectrum error budget, and we make no claim about the sign or size of
-the error in a fully mixed, multidimensional kilonova spectrum; the companion
-study addresses that.
+\paragraph{One energy-conserving check, and why it is not an emergent-spectrum
+measurement.} Everything above is the \emph{attenuation of an externally
+supplied continuum}: radiative equilibrium is disabled
+(\S\ref{sec:conventions}) and absorbed packet energy is not re-emitted. We
+ran the forest pair once more with \textsc{sedona}'s radiative-equilibrium
+switch on, resolved against expansion, seed-matched, in two variants---a
+single iteration re-emitting at the input temperature, and an iterated run in
+which the gas temperature converges---three pairs per variant, normalized on a
+blue margin because re-emission redshifted by up to $3000\kms$ contaminates
+the red one. In the $3800$--$3955$\,\AA\ band the resolved-versus-expansion
+differential is $+7.7\pm0.02\%$ after one iteration and $+5.0\pm0.7\%$ at
+convergence, against $+44\%$ in pure absorption on the same normalization,
+and the band fills from $0.34$ to $0.84$--$0.86$ in both treatments. We report
+this as bookkeeping, not as a result, for a reason we did not appreciate when
+the check was designed: \textsc{sedona} draws re-emission from the emissivity
+on its transport grid, so every absorbed packet is re-emitted inside the
+$3770$--$3997$\,\AA\ window, and with ten lines of opacity in that window
+the band is refilled by construction. The check measures redistribution
+confined to one $230$\,\AA\ window of one ion, not the emergent
+redistribution of a whole ion whose emissivity and fluorescence channels lie
+largely outside it. It neither bounds nor estimates the emergent-band error,
+in sign or in size; that question is the subject of the companion study, and
+no number from it is used here.
 
 \paragraph{What exactly was measured on the Sobolev side.}
 Our Sobolev leg is the approximation in its pure form---$e^{-\taus}$ per

@@ -927,7 +927,7 @@ self-consistent photosphere.
 | F15 | The closure preserves the expected interaction count exactly and applies Poisson survival to a Bernoulli product; F_exp/F_Sob = ⟨e^D⟩_w exactly | §4.18 |
 | F16 | Δ_Sob against a deterministic reference on identical rays: +3.1% at 100 km/s (all transport modes), +0.3% at 10, +0.03% at 1 km/s; the breadth median was stale (+3.65% → +0.26%) | §4.18 |
 | F17 | Seed-matched pairs correlate at +0.95–0.999; paired Δ_exp scatter 0.02–0.28%; headline +44.90% ± 0.04 over 10 seeds | §4.18 |
-| F18 | With radiative equilibrium the emergent-band differential is +7.7% (redistribution) and +5.0% (T converged), from +44%; sign preserved | §4.18 |
+| F18 | The radiative-equilibrium check is window-confined (re-emission drawn from the emissivity on SEDONA's transport grid); its +7.7%/+5.0% are bookkeeping within one 230 Å window, not an emergent-band result — retracted as such | §4.18 |
 | F19 | A photon re-emitted in a resonance zone escapes it only with β = (1−e^−τ)/τ and is otherwise re-absorbed and re-drawn; invisible for resonant scattering, decisive for redistribution; caught by the SEDONA comparison | §4.19 |
 | F20 | Paper I's RE fill-in (0.34 → 0.85) is confined to the transport window; with the whole ion's emissivity the band refills to 0.355 and the closure differential is back to +38% | §4.19 |
 | F21 | Fluorescence refills the La II band by +260% under a 6000 K continuum; an expansion-opacity code with thermal redistribution lands 37.5% BELOW the physics — the sign of the closure's error flips once redistribution is on | §4.19 |

@@ -125,32 +125,20 @@ spread, across all 36 conditions.
 > the sign … is guaranteed.
 
 We agree and have withdrawn both the "upper bound" and the "sign survives"
-arguments. Rather than leave the point untested we ran the one
-energy-conserving experiment the referee allows for: the La II forest pair
-with SEDONA's radiative-equilibrium switch on, resolved against expansion,
-seed-matched, in two variants — a single iteration that re-emits at the input
-temperature (isolating redistribution from population feedback) and an
-iterated run in which the gas temperature converges (to different values in
-the two modes, so that differential includes feedback). Three seed-matched
+arguments. We also ran the one energy-conserving experiment available to us
+— the La II forest pair with SEDONA's radiative-equilibrium switch on,
+resolved against expansion, seed-matched, one iteration and iterated, three
 pairs per variant, normalized on a blue margin because re-emission redshifted
-by up to 3000 km/s contaminates the red one. In the emergent 3800–3955 Å band
-the differential is +7.7 ± 0.02% after one iteration and +5.0 ± 0.7% at
-convergence (|δT/T| < 0.7% over the last three iterations; the median gas
-temperature rises from 3000 to ~7700 K in both modes), against +44% in pure
-absorption on the same normalization. The band fills from 0.34 to 0.84–0.86 in
-both treatments; the removed flux reappears immediately redward (3955–3995 Å
-at 1.08–1.10 of the continuum); a τ_max = 0.05 control returns both modes to
-the continuum within 0.6%. So most of the closure's departure in attenuation
-does not survive into the emergent band once absorbed energy is re-emitted —
-the differential shrinks by a factor of six to nine — while its sign is
-preserved. Two limits are stated with it: SEDONA's re-emission is confined to
-its transport window (with the whole ion's LTE emissivity at 3000 K most
-re-emission is infrared, and the companion study's same-code Monte Carlo
-finds the band refilling only to 0.36, so the fill-in is an upper limit), and
-thermal re-emission is not line fluorescence, which refills the band through
-other lines. It is reported in Section 5 as one check on one configuration, explicitly not as the emergent-spectrum error budget, and we
-make no claim about the sign or size of the error in a mixed,
-multidimensional kilonova spectrum.
+by up to 3000 km/s contaminates the red one — and obtained +7.7 ± 0.02% and
++5.0 ± 0.7% in the 3800–3955 Å band against +44% in pure absorption. We
+report it in Section 5, but explicitly not as an emergent-spectrum
+measurement: SEDONA re-emits from the emissivity on its transport grid, so
+all absorbed energy returns inside the 3770–3997 Å window and the band is
+refilled by construction. That is redistribution within one 230 Å window of
+one ion, not the emergent redistribution of the whole ion, and we draw no
+conclusion from it about the sign or size of the emergent-band error. The
+abstract no longer quotes it. The emergent question is the subject of a
+companion study, none of whose results are used in this paper.
 
 ## Major Comment 5 — Δ_Sob against the deterministic reference
 

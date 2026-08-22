@@ -63,6 +63,18 @@ def check_retracted_numbers(text):
         (r"40\$--\$90\\%|40--90\\%",
          "the 40-90% expansion range, whose upper end is only reached at "
          "the unphysical v_D = 300 km/s"),
+        # The radiative-equilibrium check is window-confined (SEDONA re-emits
+        # from the emissivity on its transport grid), so its +5-8% differential
+        # is not an emergent-band result and may not be quoted as one.
+        (r"between \$\+5\\%\$ and \$\+8\\%\$|\+5\$--\$8\\%|falls from \$\+44\\%\$ to"
+         r"|factor of six to nine|sign is preserved",
+         "the withdrawn '+5-8% with radiative equilibrium' emergent-band claim "
+         "(the check is confined to the transport window)"),
+        # Paper I stops at attenuation and transport-formalism isolation;
+        # Paper II's fluorescence numbers may not appear here.
+        (r"companion study's same-code|refilling only|0\.35\$ to \$0\.36"
+         r"|falls \\emph\{below\} the physics|37\.5\\%|\+260\\%",
+         "a Paper II (Phase 1 fluorescence) number -- Paper I's stopping rule"),
     ]
     # A retraction has to name the number it retracts, so a mention inside the
     # retracting sentence is exactly right. Allow it, and only there.
