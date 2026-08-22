@@ -6,7 +6,7 @@ Phase 0 built and calibrated `paper2/phase0/three_level_atom/branching_mc.py`
 reproduces known branching ratios, interaction probabilities and Paper I's
 analytic Sobolev leg. It has measured nothing, because O(lines x packets)
 Python cannot carry a real atom: La II at 3000 K has ~950 lines with
-tau_S > 1e-3 from 1148 to 23,000 A, and a pumped upper level may decay through
+tau_S > 1e-3 from 1148 to 17,600 A, and a pumped upper level may decay through
 any of its 17,743 transitions. This module is the successor: same physics,
 same conventions, packets advanced in lockstep with numpy, and three
 interaction treatments in ONE code so that every comparison is same-code.
@@ -53,6 +53,26 @@ where cross-code comparisons go wrong):
   redistribution it decides which line the photon finally leaves through --
   trapped in strong lines until a draw lands on a weak one -- and it is what
   the SEDONA comparison in run_forest.py exposed.
+  It applies to the SOBOLEV legs. The expansion closure is a continuous
+  absorber whose E_bin already contains the emitting line's (1 - e^-tau): the
+  next interaction in the same bin IS the re-absorption, with a fresh outcome
+  draw -- SEDONA's expansion-mode semantics, which carry no beta. Imposing
+  beta there as well counts the self-absorption twice; `beta_on_expansion`
+  (default False) exists so the double count can be measured, not used. The
+  expansion legs re-emit from the closure's OWN Kirchhoff emissivity,
+  kappa_exp B_nu per bin -- which saturates at (1 - e^-tau) per strong line,
+  unlike the Sobolev line emissivity A n_u -- placed uniformly within the bin
+  (`exp_emit="bin"`); with that, and no beta, the leg reproduces SEDONA's
+  expansion-mode radiative-equilibrium spectrum sub-band by sub-band (E0).
+* ENERGY BOOKKEEPING. Packets are photons; each carries h nu, which changes at
+  every re-emission. `accounting` reports E_inj = E_esc + E_core + E_abs +
+  E_dep_lab (an identity, asserted to roundoff), with E_dep split into the
+  comoving exchange with the gas, sum h(nu_cm,abs - nu_rest,emit), and the
+  O(v/c) Doppler work term W = E_dep_lab - E_dep_cm. The branch leg's
+  comoving exchange equals the level-energy difference hc(E_l,exit - E_l,pump)
+  per chain (one emission per absorption event; the final lower level's
+  excitation returns to the pool, a modelling choice). Per-packet weights `w`
+  make photon- and energy-weighted spectra available from one run.
 * Expansion opacity as a continuous absorber. Along a ray the comoving
   frequency falls linearly with path length, so the optical depth accumulated
   between two comoving frequencies is the sum over bins of (fraction of bin
@@ -133,7 +153,8 @@ class ForestAtom:
 
         # branching tables: for every upper level that any opacity line feeds,
         # the downward lines (ALL of them) and cumulative A
-        self.nu0_all = nu0; self.A_all = A; self.upper_all = upper
+        self.nu0_all = nu0; self.A_all = A; self.upper_all = upper; self.lower_all = lower
+        self.level_energy_cm = None   # set by from_gsi (or by hand) for the level-energy identity
         self.branch_lines = {}
         self.branch_cum = {}
         for u in np.unique(self.op_upper):
@@ -156,6 +177,13 @@ class ForestAtom:
         # opacity window) are treated as freely escaping
         free = np.ones(nu0.size, bool); free[order] = False
         self.beta_all = np.where(free, 1.0, beta)
+        # Exit kernel (E8): the chain of A-branching draws with re-absorption
+        # by the emitting line exits through j with probability
+        # A_uj beta_uj / sum_m A_um beta_um -- the closed form of the loop.
+        self.exit_cum = {}
+        for u, idx in self.branch_lines.items():
+            w_exit = A[idx] * self.beta_all[idx]
+            self.exit_cum[u] = np.cumsum(w_exit / w_exit.sum())
 
     @classmethod
     def from_gsi(cls, levels_path, transitions_path, temperature, n_ion, t_exp,
@@ -170,6 +198,7 @@ class ForestAtom:
                    low, up, t_exp, tau_min=tau_min, stim=stim, temperature=temperature,
                    opacity_window=opacity_window)
         atom.levels, atom.transitions, atom.temperature, atom.n_ion = lev, tr, temperature, n_ion
+        atom.level_energy_cm = lev["Energy"].to_numpy(dtype=float)
         return atom
 
     # ---- samplers ------------------------------------------------------
@@ -245,7 +274,15 @@ def sample_launch(rng, nu_min, nu_max, n, t_core=None):
 
 def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
            seed=0, emit_window=None, dnu_over_nu=4.17e-5, max_steps=100000,
-           t_core=None):
+           t_core=None, beta_on_expansion=False, exp_emit="bin",
+           launch_weight="photon"):
+    """exp_emit : how the expansion legs place a thermally re-emitted packet
+    in frequency. "bin" (default) -- uniformly within the sampled line's
+    comoving bin, which is what an emissivity kappa_exp B_nu per bin means and
+    what SEDONA does; the packet then sweeps the rest of the bin at the bin's
+    opacity, and an escape probability (1 - e^-E_b)/E_b emerges from the
+    geometry. "line" -- at the line's exact rest frequency (Phase-1 behaviour,
+    kept for the E0 record)."""
     """Propagate packets from the core through the shell, in lockstep.
 
     mode : one of MODES.
@@ -261,7 +298,7 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
     sobolev = mode.startswith("sobolev")
     outcome = mode.split("_")[1]
 
-    thermal = atom.thermal_sampler(emit_window) if outcome == "thermal" else None
+    thermal = atom.thermal_sampler(emit_window) if (outcome == "thermal" and (sobolev or exp_emit == "line")) else None
     if not sobolev:
         edges, E = atom.expansion_bins(dnu_over_nu, nu_lo=min(nu_min, atom.op_nu.min()) * 0.5,
                                        nu_hi=max(nu_max, atom.op_nu.max()) * 1.01)
@@ -270,6 +307,27 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
         # G is piecewise linear in nu inside each bin.
         G_edges = np.concatenate([[0.0], np.cumsum(E[::-1])])[::-1]   # G at each edge, top = 0
         width = np.diff(edges)
+        if outcome == "thermal" and exp_emit == "bin":
+            # Kirchhoff for the closure's OWN opacity: emissivity per bin is
+            # kappa_exp(b) B_nu(T) -- photon-number weight E_b * B_nu/(h nu) --
+            # which saturates at (1 - e^-tau) per strong line, unlike the
+            # Sobolev line emissivity A n_u (~ tau). This is what SEDONA's
+            # expansion mode re-emits from; frequency uniform within the bin.
+            nu_b = np.sqrt(edges[1:] * edges[:-1])
+            T_em = getattr(atom, "temperature", None)
+            if T_em is None:
+                # toy atoms without a temperature: flat B_nu (weights E_b only)
+                w_b = E * width
+            else:
+                xb = H * nu_b / (K_B * T_em)
+                w_b = E * nu_b**2 / np.expm1(np.minimum(xb, 700.0)) * width
+            if emit_window is not None:
+                w_b[(nu_b < emit_window[0]) | (nu_b > emit_window[1])] = 0.0
+            if w_b.sum() <= 0:
+                raise ValueError("expansion thermal emissivity is empty in the window")
+            cum_b = np.cumsum(w_b / w_b.sum())
+            def thermal_bin(u):
+                return np.searchsorted(cum_b, u)
         def G_of(nu):
             b = np.clip(np.searchsorted(edges, nu, side="right") - 1, 0, E.size - 1)
             frac = (edges[b + 1] - nu) / width[b]
@@ -282,7 +340,20 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
             frac = np.where(E[b] > 0, (g - G_edges[b + 1]) / np.where(E[b] > 0, E[b], 1.0), 0.0)
             return edges[b + 1] - frac * width[b]
 
-    nu_launch = sample_launch(rng, nu_min, nu_max, n_packets, t_core)
+    if launch_weight == "photon" or t_core is None:
+        nu_launch = sample_launch(rng, nu_min, nu_max, n_packets, t_core)
+        w = np.ones(n_packets)
+    elif launch_weight == "energy":
+        # launch in proportion to B_nu (energy); each packet then stands for
+        # w ~ 1/nu photons, normalized to n_packets photons in total
+        grid = np.geomspace(nu_min, nu_max, 20001)
+        x = H * grid / (K_B * t_core)
+        wgt = grid**3 / np.expm1(np.minimum(x, 700.0))
+        cdf = np.concatenate([[0.0], np.cumsum(0.5 * (wgt[1:] + wgt[:-1]) * np.diff(grid))]); cdf /= cdf[-1]
+        nu_launch = np.interp(rng.uniform(0.0, 1.0, n_packets), cdf, grid)
+        w = 1.0 / nu_launch; w *= n_packets / w.sum()
+    else:
+        raise ValueError("launch_weight must be 'photon' or 'energy'")
     r = np.full(n_packets, float(r_core))
     mu = np.sqrt(rng.uniform(0.0, 1.0, n_packets))
     nu = nu_launch.copy()
@@ -297,6 +368,15 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
     # line through which each packet's FIRST interaction chain finally
     # escaped (after any re-absorptions in the emitting lines)
     chain_exit = np.zeros(atom.n_lines_total, np.int64)
+    # energy bookkeeping (per packet, in erg per photon; weights applied at the end)
+    e_dep_lab = np.zeros(n_packets)   # sum h (nu_lab before - nu_lab after) over re-emissions
+    e_dep_cm = np.zeros(n_packets)    # sum h (nu_cm at absorption - nu_rest emitted)
+    e_lev = np.zeros(n_packets)       # branch mode: sum hc (E_l,exit - E_l,pump) per chain
+    n_events = np.zeros(n_packets, np.int32)   # interaction events (chains)
+    n_reabs = np.zeros(n_packets, np.int32)    # re-absorptions inside emitting lines
+    nu_final = np.full(n_packets, np.nan)      # lab frequency at death (escape/core/absorb)
+    first_line = np.full(n_packets, -1, np.int64)   # E7: first absorbing line (-1 expansion)
+    last_line = np.full(n_packets, -1, np.int64)    # E7: last emitting line
     # expansion mode: optical depth still to travel before the next interaction
     tau_r = rng.exponential(1.0, n_packets) if not sobolev else None
 
@@ -334,6 +414,7 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
         nu_out[e_idx[~core_first[esc]]] = ni[esc][~core_first[esc]]
         fate[e_idx[~core_first[esc]]] = 1
         fate[e_idx[core_first[esc]]] = 2
+        nu_final[e_idx] = ni[esc]
         alive[e_idx] = False
 
         # --- packets that reach a resonance / interaction point
@@ -356,8 +437,16 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
             continue
         first = n_inter[hi] == 0
         n_inter[hi] += 1
+        n_events[hi] += 1
+        # comoving frequency at absorption: the line's rest frequency in the
+        # Sobolev legs, the interaction point's comoving frequency otherwise
+        nu_abs_cm = (atom.op_nu[kc] if sobolev else nu_target[c])[hit]
+        nu_lab_before = nu[hi].copy()
+        if sobolev:
+            first_line[hi[first]] = atom.op_idx[kc[hit][first]]
         if outcome == "absorb":
             fate[hi] = 3; alive[hi] = False
+            nu_final[hi] = nu_lab_before
             continue
         # re-emit isotropically, then apply the emitting line's escape
         # probability: re-absorbed packets draw again (same place, new line,
@@ -377,53 +466,102 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
                     sel = todo[cur_up[todo] == uval]
                     lines_u = atom.branch_lines[uval]; cum_u = atom.branch_cum[uval]
                     new_line[sel] = lines_u[np.searchsorted(cum_u, u[cur_up[todo] == uval])]
-            else:  # thermal
+            elif thermal is not None:  # thermal, line-based (Sobolev legs, or exp_emit="line")
                 new_line[todo] = thermal(rng.uniform(size=todo.size))
-            if n_chain == 1:
+            else:  # expansion + thermal, bin-based: line index stands in for the bin
+                new_line[todo] = thermal_bin(rng.uniform(size=todo.size))
+            if n_chain == 1 and not (not sobolev and exp_emit == "bin" and outcome == "thermal"):
                 np.add.at(first_branch, new_line[first], 1)
-            # escape the emitting line?
-            esc = rng.uniform(size=todo.size) < atom.beta_all[new_line[todo]]
+            # escape the emitting line? (Sobolev legs; the continuous
+            # absorber re-absorbs through its own bins unless asked otherwise)
+            if sobolev or (beta_on_expansion and exp_emit == "line"):
+                esc = rng.uniform(size=todo.size) < atom.beta_all[new_line[todo]]
+            else:
+                esc = np.ones(todo.size, bool)
             stay = todo[~esc]
             if stay.size:
                 n_inter[hi[stay]] += 1
+                n_reabs[hi[stay]] += 1
                 if outcome == "branch":
                     cur_up[stay] = atom.upper_all[new_line[stay]]
             todo = stay
             if n_chain > 10000:
                 raise RuntimeError("re-absorption chain did not terminate")
-        np.add.at(chain_exit, new_line[first], 1)
-        nu_rest = atom.nu0_all[new_line]
+        if not sobolev and exp_emit == "bin" and outcome == "thermal":
+            # new_line holds BIN indices here: uniform placement within the bin
+            nu_rest = edges[new_line] + rng.uniform(size=hi.size) * width[new_line]
+        else:
+            np.add.at(chain_exit, new_line[first], 1)
+            nu_rest = atom.nu0_all[new_line]
         mu_new = rng.uniform(-1.0, 1.0, hi.size)
         zn = r[hi] * mu_new
         mu[hi] = mu_new
         nu[hi] = nu_rest / (1.0 - zn / ct)
+        e_dep_lab[hi] += H * (nu_lab_before - nu[hi])
+        e_dep_cm[hi] += H * (nu_abs_cm - nu_rest)
+        if sobolev or not (exp_emit == "bin" and outcome == "thermal"):
+            last_line[hi] = new_line
+            if outcome == "branch" and atom.level_energy_cm is not None:
+                E_cm = atom.level_energy_cm
+                e_lev[hi] += H * C * (E_cm[atom.lower_all[new_line]] - E_cm[atom.lower_all[atom.op_idx[kc[hit]]]])
         if not sobolev:
             tau_r[hi] = rng.exponential(1.0, hi.size)
     else:
         raise RuntimeError(f"packets still alive after {max_steps} steps")
 
-    return dict(nu_launch=nu_launch, nu_out=nu_out[fate == 1], nu_out_all=nu_out, fate=fate,
+    E_inj = float(np.sum(w * H * nu_launch))
+    E_esc = float(np.sum(w[fate == 1] * H * nu_final[fate == 1]))
+    E_core = float(np.sum(w[fate == 2] * H * nu_final[fate == 2]))
+    E_abs = float(np.sum(w[fate == 3] * H * nu_final[fate == 3]))
+    E_dep_lab = float(np.sum(w * e_dep_lab)); E_dep_cm = float(np.sum(w * e_dep_cm))
+    accounting = dict(E_inj=E_inj, E_esc=E_esc, E_core=E_core, E_abs=E_abs,
+                      E_dep_lab=E_dep_lab, E_dep_cm=E_dep_cm, W=E_dep_lab - E_dep_cm,
+                      E_interacting=float(np.sum(w[n_events > 0] * H * nu_launch[n_events > 0])),
+                      identity_residual=(E_esc + E_core + E_abs + E_dep_lab - E_inj) / E_inj,
+                      N_inj=float(w.sum()), N_esc=float(w[fate == 1].sum()),
+                      N_core=float(w[fate == 2].sum()), N_abs=float(w[fate == 3].sum()))
+    return dict(nu_launch=nu_launch, nu_out=nu_out[fate == 1], nu_out_all=nu_out, fate=fate, w=w,
                 n_packets=n_packets, n_escaped=int((fate == 1).sum()),
                 n_core=int((fate == 2).sum()), n_absorbed=int((fate == 3).sum()),
                 n_interactions=int(n_inter.sum()),
                 n_interacted=int((n_inter > 0).sum()), first_branch=first_branch,
-                chain_exit=chain_exit, steps=step + 1)
+                chain_exit=chain_exit, steps=step + 1, accounting=accounting,
+                e_dep_lab=e_dep_lab, e_dep_cm=e_dep_cm, e_lev=e_lev, n_events=n_events,
+                n_reabs=n_reabs, nu_final=nu_final, first_line=first_line, last_line=last_line)
 
 
-def band_ratio(res, nu_lo, nu_hi, n_bins=1):
-    """Escaped/launched per unit frequency in [nu_lo, nu_hi]; with a flat
-    launch continuum this is the transmitted (or emergent) fraction. Returns
-    (value, poisson_error)."""
-    n_out = np.count_nonzero((res["nu_out"] >= nu_lo) & (res["nu_out"] < nu_hi))
-    n_in = np.count_nonzero((res["nu_launch"] >= nu_lo) & (res["nu_launch"] < nu_hi))
-    if n_in == 0:
+def _weights(res, weight):
+    """Per-packet weights for launched and escaped packets: photon number, or
+    energy (h nu) on top of the photon weight."""
+    w = res.get("w", np.ones(res["nu_launch"].size))
+    esc = res["fate"] == 1
+    if weight == "photon":
+        return w, w[esc]
+    if weight == "energy":
+        return w * res["nu_launch"], (w * res["nu_out_all"])[esc]
+    raise ValueError("weight must be 'photon' or 'energy'")
+
+
+def band_ratio(res, nu_lo, nu_hi, weight="photon"):
+    """Escaped/launched in [nu_lo, nu_hi], photon- or energy-weighted; with a
+    flat launch this is the transmitted (or emergent) fraction, with a Planck
+    launch the emergent-to-incident ratio. Returns (value, poisson_error)."""
+    w_in, w_out = _weights(res, weight)
+    sel_in = (res["nu_launch"] >= nu_lo) & (res["nu_launch"] < nu_hi)
+    sel_out = (res["nu_out"] >= nu_lo) & (res["nu_out"] < nu_hi)
+    s_in, s_out = w_in[sel_in].sum(), w_out[sel_out].sum()
+    if s_in <= 0:
         return np.nan, np.nan
-    return n_out / n_in, np.sqrt(max(n_out, 1)) / n_in
+    n_out = max(np.count_nonzero(sel_out), 1)
+    return s_out / s_in, (s_out / s_in) / np.sqrt(n_out)
 
 
-def spectrum(res, edges):
-    """Emergent / launched per frequency bin."""
-    out, _ = np.histogram(res["nu_out"], edges)
-    inn, _ = np.histogram(res["nu_launch"], edges)
+def spectrum(res, edges, weight="photon"):
+    """Emergent / launched per frequency bin (photon- or energy-weighted)."""
+    w_in, w_out = _weights(res, weight)
+    out, _ = np.histogram(res["nu_out"], edges, weights=w_out)
+    inn, _ = np.histogram(res["nu_launch"], edges, weights=w_in)
+    cnt, _ = np.histogram(res["nu_out"], edges)
     with np.errstate(invalid="ignore", divide="ignore"):
-        return np.where(inn > 0, out / inn, np.nan), np.where(inn > 0, np.sqrt(np.maximum(out, 1)) / inn, np.nan)
+        return (np.where(inn > 0, out / inn, np.nan),
+                np.where(inn > 0, (out / inn) / np.sqrt(np.maximum(cnt, 1)), np.nan))

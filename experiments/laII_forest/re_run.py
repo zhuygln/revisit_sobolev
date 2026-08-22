@@ -60,7 +60,7 @@ data_atomic_file   = "{here}/atom_laII.hdf5"
 grid_type    = "grid_1D_sphere"
 model_file   = "{model}"
 hydro_module = "homologous"
-transport_nu_grid  = {{7.50e14, 7.95e14, 4.17e-5, 1}}
+transport_nu_grid  = {{7.50e14, 7.95e14, {dnu:.4e}, 1}}
 spectrum_nu_grid   = {{7.50e14, 7.95e14, 1.0e-4, 1}}
 transport_radiative_equilibrium = 1
 transport_steady_iterate        = {n_iter}
@@ -77,7 +77,7 @@ opacity_electron_scattering = 0
 opacity_bound_bound         = {bb}
 opacity_line_expansion      = {exp}
 opacity_epsilon             = 1
-line_velocity_width         = 1.0e7
+line_velocity_width         = {vd:.3e}
 output_write_radiation = 0
 """
 # plt_0000N.dat is written each iteration (default output_write_plt_file_time
@@ -104,14 +104,18 @@ def null_model():
     return dst
 
 
-def run_one(tag, model, n_iter, mode, seed):
-    run = HERE / f"re_{tag}_N{n_iter}_{mode}_s{seed}"
+def run_one(tag, model, n_iter, mode, seed, vd_kms=100.0):
+    # v_D = 100 km/s keeps the production directory names; other widths are
+    # tagged, with 8 transport bins per Doppler width as in mc_noise/seeds.py
+    vtag = "" if vd_kms == 100.0 else f"_vd{vd_kms:g}"
+    run = HERE / f"re_{tag}_N{n_iter}_{mode}{vtag}_s{seed}"
     run.mkdir(parents=True, exist_ok=True)
     last = run / f"spectrum_{n_iter}.dat"
     if not last.exists():
         (run / "param.lua").write_text(PARAM.format(
             here=HERE, model=model, n_iter=n_iter, seed=seed,
             bb=1 if mode == "bb" else 0, exp=0 if mode == "bb" else 1,
+            vd=vd_kms * 1e5, dnu=vd_kms * 1e5 / 2.99792458e10 / 8,
         ))
         r = subprocess.run([SEDONA, "param.lua"], cwd=run, capture_output=True,
                            text=True,
@@ -128,16 +132,25 @@ def run_one(tag, model, n_iter, mode, seed):
     return tag, n_iter, mode, seed, per_iter
 
 
-def main(workers):
+def main(workers, vd_kms=100.0):
     prod = HERE / "laII.mod"
     jobs = []
-    for n_iter in (1, 15):
-        for seed in (1, 2, 3):
-            for mode in ("bb", "exp"):
-                jobs.append(("prod", prod, n_iter, mode, seed))
-    nm = null_model()
-    for mode in ("bb", "exp"):
-        jobs.append(("null", nm, 15, mode, 1))
+    if vd_kms == 100.0:
+        for n_iter in (1, 15):
+            for seed in (1, 2, 3):
+                for mode in ("bb", "exp"):
+                    jobs.append(("prod", prod, n_iter, mode, seed, vd_kms))
+        nm = null_model()
+        for mode in ("bb", "exp"):
+            jobs.append(("null", nm, 15, mode, 1, vd_kms))
+    else:
+        # E2: thermal-width convergence -- N=1 only; bb+exp, seeds 1-3 at 10
+        # km/s; bb, seed 1 at 1 km/s (a 1 km/s run costs ~40-60 min)
+        seeds = (1, 2, 3) if vd_kms >= 10 else (1,)
+        modes = ("bb", "exp") if vd_kms >= 10 else ("bb",)
+        for seed in seeds:
+            for mode in modes:
+                jobs.append(("prod", prod, 1, mode, seed, vd_kms))
     jobs.sort(key=lambda j: -j[2])
     print(f"{len(jobs)} runs, {workers} workers", flush=True)
 
@@ -153,13 +166,13 @@ def main(workers):
             print(f"RE-off {mode}: blue-margin {ctrl[mode]['blue_margin']:.5f}  "
                   f"red-margin {ctrl[mode]['red_margin']:.5f}", flush=True)
 
-    out_path = HERE / "re_results.json"
-    results = {"margin_control": ctrl, "runs": {}}
+    out_path = HERE / ("re_results.json" if vd_kms == 100.0 else f"re_results_vd{vd_kms:g}.json")
+    results = {"margin_control": ctrl, "runs": {}, "vd_kms": vd_kms}
     with ThreadPoolExecutor(max_workers=workers) as pool:
         futs = [pool.submit(run_one, *j) for j in jobs]
         for f in as_completed(futs):
             tag, n_iter, mode, seed, vals = f.result()
-            key = f"{tag}_N{n_iter}_{mode}_s{seed}"
+            key = f"{tag}_N{n_iter}_{mode}{'' if vd_kms == 100.0 else f'_vd{vd_kms:g}'}_s{seed}"
             results["runs"][key] = vals
             shown = "FAILED" if vals is None else f"{vals[-1]:.5f} (per-iter {len(vals)})"
             print(f"{key:22s}: {shown}", flush=True)
@@ -170,4 +183,5 @@ def main(workers):
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--workers", type=int, default=3)
-    main(ap.parse_args().workers)
+    ap.add_argument("--vd", type=float, default=100.0, help="Doppler width in km/s (E2: 10, 1)")
+    a = ap.parse_args(); main(a.workers, a.vd)

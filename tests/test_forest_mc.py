@@ -190,3 +190,160 @@ def test_pure_resonant_scattering_is_unaffected_by_the_escape_loop():
     # the chain_exit must be entirely in line 0 and interactions > first draws
     assert res["chain_exit"][1] == 0 and res["first_branch"][1] == 0
     assert res["n_interactions"] > res["n_interacted"]
+
+
+# ------------------------------------------------------- E1: energy accounting
+
+@pytest.mark.parametrize("mode", MODES)
+def test_energy_identity_holds_to_roundoff_in_every_mode(mode):
+    """E_inj = E_esc + E_core + E_abs + E_dep_lab is bookkeeping, not physics:
+    it must close to roundoff, with the comoving exchange and the O(v/c) work
+    term reported separately."""
+    fa, _ = three_level(1.5)
+    fa.temperature = 3000.0
+    if mode.endswith("thermal"):
+        fa.emis_w = np.array([1.0, 1.0])   # the toy atom's upper level is unpopulated
+    lo, hi = pump_band()
+    res = run_mc(fa, R_CORE, R_OUT, T_EXP, lo, hi, 30000, mode, seed=2)
+    a = res["accounting"]
+    assert abs(a["identity_residual"]) < 1e-12
+    assert a["N_inj"] == res["n_packets"]
+    if mode.endswith("absorb"):
+        assert a["E_abs"] > 0 and a["E_dep_lab"] == 0.0
+
+
+def test_uv_to_optical_shift_equals_the_level_energy_difference():
+    """Three-level atom, fluorescent exits 3->2 at 6000 A from pumps at 4000 A:
+    the comoving exchange is exactly N_fluor h (nu13 - nu32); the lab-frame
+    deposit differs by the Doppler work term, which is O(v/c) of the
+    interacting energy."""
+    from sobolev.constants import H
+    fa, _ = three_level(2.0, 1.0, 1.0)
+    lo, hi = pump_band()
+    res = run_mc(fa, R_CORE, R_OUT, T_EXP, lo, hi, 60000, "sobolev_branch", seed=4)
+    n_fluor = res["chain_exit"][1]
+    # first-chain exits are tallied in chain_exit; later chains also exit 3->2,
+    # so use the per-packet comoving deposit directly: every fluorescent exit
+    # deposits h(nu13 - nu32), every resonant exit deposits 0
+    per_event = H * (NU_13 - NU_32)
+    n_fl_events = np.rint(res["e_dep_cm"].sum() / per_event)
+    assert np.isclose(res["e_dep_cm"].sum(), n_fl_events * per_event, rtol=1e-12)
+    assert n_fl_events >= n_fluor
+    a = res["accounting"]
+    beta_out = R_OUT / (C * T_EXP)
+    assert abs(a["W"]) / a["E_interacting"] < 3 * beta_out
+    assert a["W"] != 0.0
+
+
+def test_pure_resonant_scattering_deposits_nothing_comoving():
+    fa, _ = three_level(3.0, 1.0, 0.0)
+    lo, hi = pump_band()
+    res = run_mc(fa, R_CORE, R_OUT, T_EXP, lo, hi, 30000, "sobolev_branch", seed=6)
+    assert res["e_dep_cm"].sum() == 0.0
+    assert res["accounting"]["W"] != 0.0
+    assert abs(res["accounting"]["identity_residual"]) < 1e-12
+
+
+def test_photon_and_energy_band_ratios_agree_in_a_narrow_band():
+    fa, _ = three_level(2.0, 1.0, 1.0)
+    lo, hi = pump_band()
+    res = run_mc(fa, R_CORE, R_OUT, T_EXP, lo, hi, 60000, "sobolev_branch", seed=8)
+    p, _ = band_ratio(res, lo, hi, weight="photon"); e, _ = band_ratio(res, lo, hi, weight="energy")
+    assert abs(p / e - 1.0) < 5e-3
+
+
+def test_energy_spectrum_sums_to_the_escaped_energy():
+    from sobolev.constants import H
+    fa, _ = three_level(2.0, 1.0, 1.0)
+    lo, hi = pump_band()
+    res = run_mc(fa, R_CORE, R_OUT, T_EXP, lo, hi, 40000, "sobolev_branch", seed=9)
+    edges = np.geomspace(NU_32 * 0.9, hi * 1.01, 300)
+    w_in, w_out = __import__("forest_mc")._weights(res, "energy")
+    out, _ = np.histogram(res["nu_out"], edges, weights=w_out)
+    assert np.isclose(H * out.sum(), res["accounting"]["E_esc"], rtol=1e-12)
+
+
+def test_energy_launch_weights_reproduce_photon_launch_band_ratio():
+    """Launching in proportion to B_nu with w ~ 1/nu is the same estimator."""
+    fa, _ = three_level(2.0, 1.0, 1.0)
+    fa.temperature = 3000.0
+    lo, hi = pump_band()
+    a = run_mc(fa, R_CORE, R_OUT, T_EXP, lo * 0.9, hi * 1.1, 120000, "sobolev_absorb", seed=3, t_core=6000.0)
+    b = run_mc(fa, R_CORE, R_OUT, T_EXP, lo * 0.9, hi * 1.1, 120000, "sobolev_absorb", seed=3, t_core=6000.0,
+               launch_weight="energy")
+    ra, ea = band_ratio(a, lo, hi); rb, eb = band_ratio(b, lo, hi)
+    assert abs(ra - rb) < 4 * np.hypot(ea, eb) + 2e-3
+
+
+def test_la_ii_comoving_exchange_equals_level_energies():
+    data = ROOT / "data"
+    if not (data / "57LaII_transitions_calib.txt").exists():
+        pytest.skip("GSI La II data not present")
+    from sobolev.constants import H
+    d = np.load(ROOT / "experiments/laII_forest/forest_lines.npz")
+    atom = ForestAtom.from_gsi(data / "57LaII_levels_calib.txt", data / "57LaII_transitions_calib.txt",
+                               3000.0, float(d["n_ion"]), T_EXP, tau_min=1e-3)
+    lo, hi = atom.op_nu.min() * 0.995, atom.op_nu.max() * 1.005
+    res = run_mc(atom, R_CORE, 3.0 * R_CORE, T_EXP, lo, hi, 40000, "sobolev_branch", seed=5, t_core=6000.0)
+    inter = res["n_events"] > 0
+    diff = np.abs(res["e_dep_cm"][inter] - res["e_lev"][inter]) / (H * res["nu_launch"][inter])
+    # GSI WV_Transition vs Ritz from the level table: 1.5e-5 max; allow the
+    # chain length times that
+    assert np.max(diff / np.maximum(res["n_events"][inter], 1)) < 2e-5
+
+
+# ------------------------------------------------- E3: escape-probability suite
+
+def test_beta_limits():
+    tau = np.array([1e-6, 1e-3, 1.0, 10.0, 1e3])
+    beta = -np.expm1(-tau) / tau
+    assert np.allclose(beta[:2], 1.0, atol=1e-3)
+    assert np.allclose(beta[3:], 1.0 / tau[3:], rtol=1e-4)
+
+
+def test_exit_kernel_matches_the_chain_on_the_three_level_atom():
+    """P(exit via j) = A_j beta_j / sum A beta, sampled by the chain loop."""
+    fa, _ = three_level(4.0, 2.0, 1.0)
+    lo, hi = pump_band()
+    res = run_mc(fa, R_CORE, R_OUT, T_EXP, lo, hi, 80000, "sobolev_branch", seed=10)
+    u = 3
+    cum = fa.exit_cum[u]; p_kernel = np.diff(np.concatenate([[0.0], cum]))
+    n = res["chain_exit"][fa.branch_lines[u]]; p_mc = n / n.sum()
+    se = np.sqrt(p_kernel * (1 - p_kernel) / n.sum())
+    assert np.all(np.abs(p_mc - p_kernel) < 4 * se + 1e-3), (p_mc, p_kernel)
+
+
+def test_reabsorption_count_is_geometric_in_one_minus_beta():
+    """Pure resonant scattering: re-absorptions per chain ~ Geometric(beta),
+    mean (1-beta)/beta."""
+    tau = 3.0
+    fa, _ = three_level(tau, 1.0, 0.0)
+    lo, hi = pump_band()
+    res = run_mc(fa, R_CORE, R_OUT, T_EXP, lo, hi, 60000, "sobolev_branch", seed=12)
+    beta = -np.expm1(-tau) / tau
+    chains = res["n_events"] > 0
+    mean_reabs = res["n_reabs"][chains].sum() / res["n_events"][chains].sum()
+    expect = (1 - beta) / beta
+    assert abs(mean_reabs - expect) < 0.05 * expect + 0.02, (mean_reabs, expect)
+
+
+def test_exit_kernel_matches_the_chain_on_la_ii():
+    data = ROOT / "data"
+    if not (data / "57LaII_transitions_calib.txt").exists():
+        pytest.skip("GSI La II data not present")
+    d = np.load(ROOT / "experiments/laII_forest/forest_lines.npz")
+    atom = ForestAtom.from_gsi(data / "57LaII_levels_calib.txt", data / "57LaII_transitions_calib.txt",
+                               3000.0, float(d["n_ion"]), T_EXP, tau_min=1e-3)
+    lo, hi = atom.op_nu.min() * 0.995, atom.op_nu.max() * 1.005
+    res = run_mc(atom, R_CORE, 3.0 * R_CORE, T_EXP, lo, hi, 300000, "sobolev_branch", seed=7, t_core=6000.0)
+    # chi^2 over the exits of the most-pumped upper levels
+    worst = 0.0
+    for u, idx in atom.branch_lines.items():
+        n = res["chain_exit"][idx]
+        if n.sum() < 2000:
+            continue
+        p = np.diff(np.concatenate([[0.0], atom.exit_cum[u]]))
+        keep = p * n.sum() > 5
+        chi2 = np.sum((n[keep] - p[keep] * n.sum())**2 / (p[keep] * n.sum()))
+        worst = max(worst, chi2 / max(keep.sum() - 1, 1))
+    assert worst < 3.0, worst
