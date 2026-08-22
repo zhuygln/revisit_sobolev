@@ -9,7 +9,7 @@ from pathlib import Path
 import numpy as np
 
 HERE = Path(__file__).resolve().parent
-files = sorted(HERE.glob("forest_results_s*.json"))
+files = sorted(HERE.glob("forest_results_s[0-9]*.json"))
 runs = [json.loads(f.read_text()) for f in files]
 if not runs:
     sys.exit("no forest_results_s*.json yet")

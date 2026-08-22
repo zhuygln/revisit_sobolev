@@ -1,0 +1,327 @@
+{
+ "n_packets": 2000000,
+ "seed": 1,
+ "geometry": {
+  "r_core": 8640000000000.0,
+  "r_out": 25920000000000.0,
+  "t_exp": 86400.0,
+  "T": 3000.0,
+  "n_ion": 2146.147194827721,
+  "T_core": 6000.0
+ },
+ "part_A": {
+  "atom": {
+   "n_opacity": 10
+  },
+  "legs": {
+   "sobolev_absorb": {
+    "mode": "sobolev_absorb",
+    "emit_window": null,
+    "band": 0.3477352847932515,
+    "band_err": 0.0005039985864745102,
+    "red": 1.0,
+    "red_err": 0.0022707342175536755,
+    "bluewing": 0.1777536056131686,
+    "forest": 0.36142415009676676,
+    "destination_of_band_launches": {
+     "escaped": 0.3477352847932515,
+     "in_band": 1.0,
+     "redward": 0.0,
+     "blueward": 0.0,
+     "beyond_1um": 0.0
+    },
+    "n_escaped": 1107077,
+    "n_core": 0,
+    "n_absorbed": 892923,
+    "n_interactions": 892923,
+    "steps": 6,
+    "seconds": 0.5661020278930664
+   },
+   "expansion_absorb": {
+    "mode": "expansion_absorb",
+    "emit_window": null,
+    "band": 0.4835882474115349,
+    "band_err": 0.0005943507387104592,
+    "red": 1.0,
+    "red_err": 0.0022707342175536755,
+    "bluewing": 0.42686981084464565,
+    "forest": 0.4580098703245153,
+    "destination_of_band_launches": {
+     "escaped": 0.4835882474115349,
+     "in_band": 1.0,
+     "redward": 0.0,
+     "blueward": 0.0,
+     "beyond_1um": 0.0
+    },
+    "n_escaped": 1293054,
+    "n_core": 0,
+    "n_absorbed": 706946,
+    "n_interactions": 706946,
+    "steps": 2,
+    "seconds": 0.545856237411499
+   },
+   "sobolev_thermal_window": {
+    "mode": "sobolev_thermal",
+    "emit_window": [
+     3850.0,
+     3950.0
+    ],
+    "band": 0.8660265691131503,
+    "band_err": 0.0007953724539011424,
+    "red": 1.1127462101680932,
+    "red_err": 0.0023953245534254052,
+    "bluewing": 0.4547519127450188,
+    "forest": 1.024837375689943,
+    "destination_of_band_launches": {
+     "escaped": 0.8819993016586338,
+     "in_band": 0.9818903115734375,
+     "redward": 0.018109688426562423,
+     "blueward": 0.0,
+     "beyond_1um": 0.0
+    },
+    "n_escaped": 1838462,
+    "n_core": 161538,
+    "n_absorbed": 0,
+    "n_interactions": 4631816,
+    "steps": 34,
+    "seconds": 1.1565120220184326
+   },
+   "expansion_thermal_window": {
+    "mode": "expansion_thermal",
+    "emit_window": [
+     3850.0,
+     3950.0
+    ],
+    "band": 0.9050957005255091,
+    "band_err": 0.0008131154045665182,
+    "red": 1.08809425595545,
+    "red_err": 0.00236864274945723,
+    "bluewing": 0.612558582792522,
+    "forest": 1.015921541576479,
+    "destination_of_band_launches": {
+     "escaped": 0.917575995757357,
+     "in_band": 0.9863986249754204,
+     "redward": 0.0136013750245796,
+     "blueward": 0.0,
+     "beyond_1um": 0.0
+    },
+    "n_escaped": 1887165,
+    "n_core": 112835,
+    "n_absorbed": 0,
+    "n_interactions": 3884476,
+    "steps": 22,
+    "seconds": 1.114168643951416
+   },
+   "sobolev_thermal_fullemis": {
+    "mode": "sobolev_thermal",
+    "emit_window": null,
+    "band": 0.3558377977994942,
+    "band_err": 0.0005098365619890191,
+    "red": 1.0215891512839022,
+    "red_err": 0.002295114942700201,
+    "bluewing": 0.18123243741165115,
+    "forest": 0.36994008366973485,
+    "destination_of_band_launches": {
+     "escaped": 0.9118402463771715,
+     "in_band": 0.3902413818794156,
+     "redward": 0.5989084101128681,
+     "blueward": 0.010850208007716274,
+     "beyond_1um": 0.03440038260922508
+    },
+    "n_escaped": 1879313,
+    "n_core": 120687,
+    "n_absorbed": 0,
+    "n_interactions": 904402,
+    "steps": 10,
+    "seconds": 0.6424095630645752
+   },
+   "expansion_thermal_fullemis": {
+    "mode": "expansion_thermal",
+    "emit_window": null,
+    "band": 0.48971991836126455,
+    "band_err": 0.0005981069131411748,
+    "red": 1.017861194183768,
+    "red_err": 0.0022909234778747223,
+    "bluewing": 0.43032904359074237,
+    "forest": 0.46406796246664156,
+    "destination_of_band_launches": {
+     "escaped": 0.9342543744950539,
+     "in_band": 0.524182633478113,
+     "redward": 0.4671509161776607,
+     "blueward": 0.008666450344226341,
+     "beyond_1um": 0.02675700083271108
+    },
+    "n_escaped": 1909997,
+    "n_core": 90003,
+    "n_absorbed": 0,
+    "n_interactions": 716620,
+    "steps": 5,
+    "seconds": 0.7378332614898682
+   },
+   "sobolev_branch": {
+    "mode": "sobolev_branch",
+    "emit_window": null,
+    "band": 0.39233782190542005,
+    "band_err": 0.0005353465722995874,
+    "red": 1.0340259874187894,
+    "red_err": 0.0023090430563609344,
+    "bluewing": 0.2241274134395602,
+    "forest": 0.4006991957301164,
+    "destination_of_band_launches": {
+     "escaped": 0.9082506548776514,
+     "in_band": 0.4319708659701116,
+     "redward": 0.5074254618745863,
+     "blueward": 0.060603672155302137,
+     "beyond_1um": 0.0
+    },
+    "n_escaped": 1874399,
+    "n_core": 125601,
+    "n_absorbed": 0,
+    "n_interactions": 1200546,
+    "steps": 12,
+    "seconds": 0.7441432476043701
+   }
+  },
+  "differentials": {
+   "exp_vs_sob_absorb  [Paper I analytic: +38.1%]": 0.39067925677733784,
+   "exp_vs_sob_thermal_window  [SEDONA RE N=1: 0.900/0.835 = +7.8%]": 0.04511308637143463,
+   "exp_vs_sob_thermal_fullemis": 0.37624479858435267,
+   "branch_vs_sob_thermal_window": -0.5469679154218197,
+   "branch_vs_sob_absorb": 0.1282657787767707,
+   "exp_thermal_window_vs_branch": 1.3069295132695578
+  }
+ },
+ "part_B": {
+  "atom": {
+   "n_opacity": 949,
+   "launch_A": [
+    1142.3980099502487,
+    17697.497487437187
+   ]
+  },
+  "legs": {
+   "sobolev_absorb": {
+    "mode": "sobolev_absorb",
+    "emit_window": null,
+    "band": 0.18248622167789344,
+    "band_err": 0.0029319075452626945,
+    "red": 0.006855439642324888,
+    "red_err": 0.001429457980123016,
+    "bluewing": 0.1402974983096687,
+    "forest": 0.17438692098092642,
+    "destination_of_band_launches": {
+     "escaped": 0.18248622167789344,
+     "in_band": 1.0,
+     "redward": 0.0,
+     "blueward": 0.0,
+     "beyond_1um": 0.0
+    },
+    "n_escaped": 1738458,
+    "n_core": 0,
+    "n_absorbed": 261542,
+    "n_interactions": 261542,
+    "steps": 20,
+    "seconds": 0.7381453514099121
+   },
+   "expansion_absorb": {
+    "mode": "expansion_absorb",
+    "emit_window": null,
+    "band": 0.3441518677281078,
+    "band_err": 0.004026338621010523,
+    "red": 0.17615499254843517,
+    "red_err": 0.00724604815567405,
+    "bluewing": 0.37001352265043946,
+    "forest": 0.3083321382475262,
+    "destination_of_band_launches": {
+     "escaped": 0.3441518677281078,
+     "in_band": 1.0,
+     "redward": 0.0,
+     "blueward": 0.0,
+     "beyond_1um": 0.0
+    },
+    "n_escaped": 1786873,
+    "n_core": 0,
+    "n_absorbed": 213127,
+    "n_interactions": 213127,
+    "steps": 2,
+    "seconds": 0.7958171367645264
+   },
+   "sobolev_thermal": {
+    "mode": "sobolev_thermal",
+    "emit_window": null,
+    "band": 0.25432191813085875,
+    "band_err": 0.003461203440118959,
+    "red": 0.07451564828614009,
+    "red_err": 0.0047127833981644995,
+    "bluewing": 0.19810682893847195,
+    "forest": 0.24896027534776996,
+    "destination_of_band_launches": {
+     "escaped": 0.8799755052051439,
+     "in_band": 0.21016005567153792,
+     "redward": 0.7850757454097747,
+     "blueward": 0.004764198918687437,
+     "beyond_1um": 0.09303570472672769
+    },
+    "n_escaped": 1965368,
+    "n_core": 34632,
+    "n_absorbed": 0,
+    "n_interactions": 567922,
+    "steps": 24,
+    "seconds": 0.8945438861846924
+   },
+   "expansion_thermal": {
+    "mode": "expansion_thermal",
+    "emit_window": null,
+    "band": 0.4132554524471242,
+    "band_err": 0.004412091674472603,
+    "red": 0.2503725782414307,
+    "red_err": 0.008638674662408011,
+    "bluewing": 0.414131169709263,
+    "forest": 0.3852000573641187,
+    "destination_of_band_launches": {
+     "escaped": 0.9096518912807952,
+     "in_band": 0.3833048521568018,
+     "redward": 0.6119828077261664,
+     "blueward": 0.004712340117031743,
+     "beyond_1um": 0.07363678732328724
+    },
+    "n_escaped": 1973029,
+    "n_core": 26971,
+    "n_absorbed": 0,
+    "n_interactions": 542792,
+    "steps": 15,
+    "seconds": 0.9470500946044922
+   },
+   "sobolev_branch": {
+    "mode": "sobolev_branch",
+    "emit_window": null,
+    "band": 0.6614065664892365,
+    "band_err": 0.00558173845310738,
+    "red": 0.4399403874813711,
+    "red_err": 0.011451190886616123,
+    "bluewing": 0.4983096686950642,
+    "forest": 0.683063243940915,
+    "destination_of_band_launches": {
+     "escaped": 0.8580244005841067,
+     "in_band": 0.35207246774636286,
+     "redward": 0.540488608289871,
+     "blueward": 0.10743892396376613,
+     "beyond_1um": 0.00038429865495470764
+    },
+    "n_escaped": 1962228,
+    "n_core": 37772,
+    "n_absorbed": 0,
+    "n_interactions": 947352,
+    "steps": 35,
+    "seconds": 1.1199989318847656
+   }
+  },
+  "differentials": {
+   "exp_vs_sob_absorb": 0.8859060402684567,
+   "exp_vs_sob_thermal": 0.6249305426930911,
+   "branch_vs_sob_thermal  [what fluorescence does]": 1.6006667901463234,
+   "branch_vs_sob_absorb  [fill-in by fluorescence]": 2.624419204956118,
+   "exp_thermal_vs_branch  [closure code vs physics]": -0.375186952496261
+  }
+ }
+}
