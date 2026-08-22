@@ -869,6 +869,64 @@ attack on the headline, spent ten minutes deciding whether to rebut it, and
 then ran the test. The test took less time than the deciding. Run the test
 first.
 
+## 9p. Paper II Phase 1: the atom has to be the whole atom (2026-08-21)
+
+Built the vectorized successor to the Phase 0 instrument and pointed it at
+La II. Three things happened on the way to the first number, each the kind
+this notebook exists to record.
+
+**The atom decides the experiment.** Sizing the ion first: at 3000 K only 19
+of 472 levels are populated, so opacity is sparse (949 lines with tau > 1e-3,
+1148-23,363 A) but fluorescence channels are not -- the 9 upper levels that
+carry the 3850-3950 A forest decay through 71 lines, 16% of them back into the
+window by A. So the window atom cannot be the instrument: fluorescence leaves
+through lines the window doesn't have. And Paper I's "red margin is line-free"
+was true of Paper I's atom only: the full ion has strong lines at 3949, 3988
+and 3995 A, and with them the 3955-3978 A band is absorbed to 0.01. Internally
+consistent then; worth knowing now.
+
+**Window-confined re-emission is an artifact, and so was Paper I's RE
+fill-in.** First smoke test: thermal re-emission confined to the SEDONA window
+on a full-atom launch gave a band of 9.9 -- the whole ion's absorption dumped
+into 230 A. SEDONA's RE only made sense because launch, opacity and
+re-emission were all confined to its transport grid. Reproducing it requires
+the window atom, the window launch and the window emissivity together; the
+physical version (whole-ion LTE emissivity at 3000 K) is mostly infrared, and
+the band refills from 0.348 to 0.355 rather than to 0.87. So Paper I's RE
+"+5-8%" is an upper limit on fill-in, now scoped as such in the manuscript.
+
+**The escape probability.** With the window atom the MC's thermal legs gave
+the right totals but the wrong shape: too blue, too spread (blue wing 0.71 vs
+SEDONA 0.42). A photon re-emitted inside a resonance zone has still to cross
+the rest of its own line's profile and escapes only with Sobolev's
+beta = (1 - e^-tau)/tau; otherwise it is re-absorbed by the same line and
+re-drawn. For pure resonant scattering that changes nothing observable --
+same place, same frequency, isotropic either way -- which is exactly why
+Phase 0's calibration could not see it. For thermal and branching
+redistribution it decides which line the photon finally leaves through:
+trapped in strong lines until a draw lands on a weak one. With it in, the MC
+tracks SEDONA's RE spectrum sub-band by sub-band; the expansion leg to <1%,
+the Sobolev leg 3.7% high -- the known Sobolev-vs-resolved offset at 100 km/s
+carried through. A calibration leg against a code that does the resolved
+physics found the missing term in one comparison. The trapped fluorescence
+yield b/(1-(1-b)(1-beta)) is now a test.
+
+**The numbers.** Paper I's atom: fluorescence refills the band by only
++12.8% (0.348 -> 0.392); 51% of absorbed photons leave redward. Full ion,
+Planck 6000 K launch: Sobolev absorb 0.183, closure absorb 0.344 (+88%),
+Sobolev + thermal 0.257, closure + thermal 0.412, Sobolev + fluorescence
+0.660. So fluorescence from UV pumps refills the optical band by +260%, and
+an expansion-opacity code -- whose only redistribution is thermal -- lands
+37.5% BELOW the physics. Too bright in pure absorption, too faint with
+fluorescence. That sign flip is the result, and it was not the one I was
+expecting: I had assumed redistribution would shrink the closure's error.
+It changes its sign instead.
+
+**Caveats I want visible:** frozen LTE at 3000 K, one ion, first-order
+Doppler, photon packets not energy packets, an opaque core that eats ~12% of
+re-emission (SEDONA loses the same), and a Planck incident continuum standing
+in for a photosphere. NLTE and T feedback are Phase 2.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

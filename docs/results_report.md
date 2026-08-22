@@ -823,6 +823,89 @@ the trough is 0.1372 — the frozen target to 0.1%. The expansion mode sits at
 on one line. Figure: `docs/figures/fig_ladder.png`; table generator
 `minimal_1line/ladder_table.py`.
 
+### 4.19 Paper II Phase 1 — the whole ion, five treatments, one code (F19–F21)
+
+`paper2/phase1/forest_mc.py` is Phase 0's successor: packets in lockstep with
+numpy, the next resonance by one `searchsorted`, the expansion closure as a
+continuous absorber whose interaction point is found by inverting the F13
+cumulative, and five treatments in one code — Sobolev/expansion × absorb,
+Sobolev/expansion × thermal re-emission (LTE line emissivity A n_u, optionally
+window-confined as SEDONA's RE is by its transport grid), Sobolev × A-branching
+fluorescence. `ForestAtom.from_gsi` carries all of La II: 17,743 lines in the
+branching tables, 949 with τ_S > 1e-3 as opacity (1148–23,363 Å at 3000 K).
+Twenty acceptance tests (`tests/test_forest_mc.py`): conservation in every
+mode, agreement with Phase 0, both pure-absorption legs reproduce Paper I's
+analytic Sobolev leg and Poisson closure bin by bin, and the trapped yield law.
+
+**F19 — the Sobolev escape probability on re-emission.** A photon re-emitted
+inside a resonance zone escapes the emitting line only with β = (1−e^−τ)/τ and
+is otherwise re-absorbed by that line and re-drawn — trapped in strong lines
+until a draw lands on a weak one. Phase 0 lacked it and could not have caught
+it: for pure resonant scattering it is invisible. The SEDONA comparison caught
+it in one look: without it the MC's re-emitted flux was too blue and too
+spread (blue wing 0.71 vs SEDONA 0.42); with it, sub-band by sub-band
+(bb/exp): blue wing 0.45/0.61 vs 0.42/0.63, forest 1.03/1.02 vs 0.99/1.00,
+red 1.11/1.09 vs 1.11/1.08. The trapped fluorescence yield follows
+b/(1−(1−b)(1−β)) (tested); the first draw still gives b (Phase 0's quantity).
+
+**Part A — Paper I's atom (3850–3950 Å lines), flat launch 3770–3997 Å,
+3 seeds × 2×10⁶ packets, band 3800–3955 Å:**
+
+| leg | band | vs SEDONA / Paper I |
+|---|---|---|
+| Sobolev, absorb | 0.3475 ± 0.0005 | Paper I analytic 0.351 |
+| expansion, absorb | 0.4839 ± 0.0003 | 0.485; Δ = +39.3% (+38.1%) |
+| Sobolev + thermal, window-confined | 0.866 | SEDONA RE N=1 resolved 0.835 |
+| expansion + thermal, window-confined | 0.905 | SEDONA 0.900; Δ = +4.5% (+7.8%) |
+| Sobolev + thermal, whole-atom emissivity | 0.355 | — |
+| expansion + thermal, whole-atom emissivity | 0.490 | — |
+| **Sobolev + fluorescence** | **0.392** | — |
+
+The expansion leg matches SEDONA to <1%; the Sobolev leg sits 3.7% high,
+the Sobolev-vs-resolved offset at v_D = 100 km/s (Paper I's +3.1%) carried
+through re-emission, so the +4.5 vs +7.8 residual is F12, not the instrument.
+
+**F20 — Paper I's RE fill-in was a window artifact.** SEDONA's re-emission is
+confined to its transport grid; with the whole ion's LTE emissivity at 3000 K
+most re-emission is infrared and the band refills only from 0.348 to 0.355
+(closure 0.484 → 0.490): the window-confined 0.87/0.91 is an upper limit, and
+with physically distributed thermal re-emission the band differential is back
+to +38% — the pure-absorption number. Paper I's "+5–8% with RE" statement is
+scoped accordingly in the revised manuscript.
+
+**F21 — fluorescence, not thermal re-emission, is what refills the band, and
+it flips the sign of the closure's error.** On Paper I's atom, A-branching
+refills the band by only +12.8% (0.348 → 0.392): 51% of the band's absorbed
+photons leave redward through other lines (the 9 pumped upper levels have 71
+channels, 16% back in-window by A). On the **full atom with a Planck 6000 K
+launch** (the physics), 3 seeds:
+
+| leg | band 3800–3955 Å |
+|---|---|
+| Sobolev, absorb | 0.183 ± 0.002 |
+| expansion, absorb | 0.344 (+88%) |
+| Sobolev + thermal (whole atom) | 0.257 |
+| expansion + thermal | 0.412 |
+| **Sobolev + fluorescence** | **0.660 ± 0.003** |
+
+Fluorescence from UV/blue pumps refills the optical band by +260% over pure
+absorption and +157% over thermal re-emission, while an expansion-opacity
+code — whose only redistribution is thermal, having discarded line identity —
+lands at 0.412: **−37.5% ± 0.4 relative to the physics.** In pure absorption
+the closure transmits too much (+88% here); with redistribution it transmits
+too little, because its re-emission goes to the infrared where the LTE
+emissivity is while the real cascade lands in the optical. Whether the band
+is too bright or too faint in an expansion-opacity calculation therefore
+depends on whether fluorescence matters in it, and for La II under a 6000 K
+continuum it does. Figure: `docs/figures/fig_p2_phase1.png`; results
+`paper2/phase1/forest_results.json`.
+
+Caveats, all stated: frozen LTE populations at 3000 K (no NLTE, no T
+iteration), one ion, first-order Doppler, photon-number (not energy) packets,
+an opaque core that absorbs inward re-emission (~12% of interacting packets,
+matching SEDONA's loss), and a flat or Planck incident continuum rather than a
+self-consistent photosphere.
+
 ## 5. Findings register
 
 | # | Finding | Where |
@@ -845,6 +928,9 @@ on one line. Figure: `docs/figures/fig_ladder.png`; table generator
 | F16 | Δ_Sob against a deterministic reference on identical rays: +3.1% at 100 km/s (all transport modes), +0.3% at 10, +0.03% at 1 km/s; the breadth median was stale (+3.65% → +0.26%) | §4.18 |
 | F17 | Seed-matched pairs correlate at +0.95–0.999; paired Δ_exp scatter 0.02–0.28%; headline +44.90% ± 0.04 over 10 seeds | §4.18 |
 | F18 | With radiative equilibrium the emergent-band differential is +7.7% (redistribution) and +5.0% (T converged), from +44%; sign preserved | §4.18 |
+| F19 | A photon re-emitted in a resonance zone escapes it only with β = (1−e^−τ)/τ and is otherwise re-absorbed and re-drawn; invisible for resonant scattering, decisive for redistribution; caught by the SEDONA comparison | §4.19 |
+| F20 | Paper I's RE fill-in (0.34 → 0.85) is confined to the transport window; with the whole ion's emissivity the band refills to 0.355 and the closure differential is back to +38% | §4.19 |
+| F21 | Fluorescence refills the La II band by +260% under a 6000 K continuum; an expansion-opacity code with thermal redistribution lands 37.5% BELOW the physics — the sign of the closure's error flips once redistribution is on | §4.19 |
 
 ## 6. Caveats and limitations
 

@@ -56,6 +56,9 @@ Source is [manuscript.tex](docs/paper/manuscript.tex); rebuild with
 | F16 | Δ_Sobolev against a deterministic reference on identical rays is +3.1% at v_D = 100 km/s in all four transport modes, +0.3% at 10, +0.03% at 1 km/s; the breadth median was a stale normalization (+3.65% → +0.26%); SEDONA resolved validates the reference to ±0.3% | §4.18 |
 | F17 | Seed-matched SEDONA pairs correlate at +0.95–0.999; paired Δ_exp scatter 0.02–0.28% against 0.2–0.4% from quadrature. Headline over 10 seeds: +44.90% ± 0.04 | §4.18 |
 | F18 | With radiative equilibrium on, the emergent-band differential falls from +44% to +7.7% (redistribution alone) and +5.0% (T converged); the band fills 0.34 → 0.85 and the removed flux reappears redward. Sign preserved, magnitude not | §4.18 |
+| F19 | **Paper II Phase 1.** The Sobolev escape probability on re-emission, β = (1−e^−τ)/τ, is decisive for redistribution (invisible for resonant scattering); the SEDONA RE comparison caught its absence in one look | §4.19 |
+| F20 | Paper I's RE fill-in is a transport-window artifact: with the whole ion's LTE emissivity the band refills only 0.348 → 0.355 and the closure differential is back to +38% | §4.19 |
+| F21 | Fluorescence refills the La II band by +260% under a 6000 K continuum (Sobolev + A-branching, whole ion); an expansion-opacity code with thermal redistribution lands **−37.5%** below it — the closure is too bright in pure absorption and too faint with fluorescence | §4.19 |
 
 Full write-up with figures and numbers:
 **[docs/results_report.md](docs/results_report.md)**.
@@ -69,8 +72,9 @@ sobolev/       the package: constants, line profiles, optical depths,
 experiments/   one directory per experiment; generators and comparison
                scripts committed, SEDONA run outputs gitignored
 notebooks/     Phase 0: single-line toy model, GSI line spacing
-paper2/        Paper II Phase 0: the SEDONA fluorescence source audit, the
-               TARDIS install record, and the branching Monte Carlo
+paper2/        Paper II: Phase 0 (SEDONA audit, TARDIS record, three-level
+               branching MC) and Phase 1 (whole-ion Sobolev/expansion MC
+               with fluorescence, the La II measurement)
 tests/         68 tests pinning the physics of every module
 docs/          results report, lab notebook, planning inputs, paper/
 data/          raw atomic data (gitignored; provenance in data/README.md)
@@ -125,8 +129,10 @@ radiative-equilibrium check is included (F18). The response letter is
    stay irrelevant under worldline transport, where the locus is linear.
    A pilot finds Δ_Sobolev β-independent but Δ_expansion **growing** with β;
    it is synthetic-forest only and not yet a finding (lab notebook §9n).
-3. **Scattering and fluorescence** — also the regime where the analytic
-   Sobolev leg stops being exact, so a per-line Sobolev *transport* scheme
-   would have to be built rather than computed. This is now Paper II, and its
-   Phase 0 is done: the instrument exists and is calibrated (F14, `paper2/`).
-   What it has not yet done is measure anything.
+3. **Scattering and fluorescence** — Paper II. Phase 0 built and calibrated
+   the instrument (F14); Phase 1 (`paper2/phase1/`) carries the whole La II
+   ion through five treatments in one vectorized code and has measured:
+   fluorescence, not thermal re-emission, refills the optical band, and an
+   expansion-opacity code lands 37.5% below the physics once it does
+   (F19–F21). Next: NLTE/T feedback, more ions, and a self-consistent
+   incident spectrum.

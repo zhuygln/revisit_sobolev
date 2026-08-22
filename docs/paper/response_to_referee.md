@@ -143,7 +143,12 @@ at 1.08–1.10 of the continuum); a τ_max = 0.05 control returns both modes to
 the continuum within 0.6%. So most of the closure's departure in attenuation
 does not survive into the emergent band once absorbed energy is re-emitted —
 the differential shrinks by a factor of six to nine — while its sign is
-preserved. It is reported in Section 5 as one check on one configuration, explicitly not as the emergent-spectrum error budget, and we
+preserved. Two limits are stated with it: SEDONA's re-emission is confined to
+its transport window (with the whole ion's LTE emissivity at 3000 K most
+re-emission is infrared, and the companion study's same-code Monte Carlo
+finds the band refilling only to 0.36, so the fill-in is an upper limit), and
+thermal re-emission is not line fluorescence, which refills the band through
+other lines. It is reported in Section 5 as one check on one configuration, explicitly not as the emergent-spectrum error budget, and we
 make no claim about the sign or size of the error in a mixed,
 multidimensional kilonova spectrum.
 
