@@ -101,7 +101,15 @@ from sobolev.constants import C, SIGMA_CLASSICAL, H, K_B
 from sobolev.populations import boltzmann_fractions_from_levels, statistical_weight
 
 MODES = ("sobolev_absorb", "expansion_absorb", "sobolev_thermal",
-         "expansion_thermal", "sobolev_branch")
+         "expansion_thermal", "sobolev_branch",
+         # E4: two-level-atom thermalisation parameter eps -- with probability
+         # eps a thermal re-emission, otherwise coherent (resonant) scattering;
+         # every event, including re-absorptions, draws again (SEDONA's
+         # do_scatter semantics)
+         "sobolev_tla", "expansion_tla",
+         # E8: the closure with line identity restored at the interaction --
+         # sample the absorbing line within the bin, exit by the A*beta kernel
+         "expansion_branch")
 
 
 # --------------------------------------------------------------------------
@@ -228,7 +236,28 @@ class ForestAtom:
         E = np.zeros(n)
         b = np.clip(np.searchsorted(edges, self.op_nu, side="right") - 1, 0, n - 1)
         np.add.at(E, b, self.op_p)
+        # CSR by bin for sampling the absorbing line within a bin (E8): lines
+        # are already sorted by frequency, so each bin's lines are contiguous
+        self._bin_of_line = b
+        self._bin_start = np.searchsorted(b, np.arange(n + 1), side="left")
+        self._cum_in_bin = np.cumsum(self.op_p) - np.repeat(np.concatenate([[0.0], np.cumsum(self.op_p)])[self._bin_start[:-1]], np.diff(self._bin_start))
         return edges, E
+
+    def sample_line_in_bin(self, b, u):
+        """Absorbing line index (into op_*) within bin b, with probability
+        op_p[k]/E_b; u uniform. Vectorized over packets."""
+        b = np.array(b, copy=True)
+        out = np.empty(b.size, int)
+        for i in range(b.size):   # small loops only over interacting packets per step
+            # an interaction point can land exactly on a bin edge and be
+            # assigned to the (empty) bin above; the optical depth was
+            # accumulated in the populated bin just below -- step down to it
+            while self._bin_start[b[i]] == self._bin_start[b[i] + 1] and b[i] > 0:
+                b[i] -= 1
+            start, stop = self._bin_start[b[i]], self._bin_start[b[i] + 1]
+            c = self._cum_in_bin[start:stop]
+            out[i] = min(start + np.searchsorted(c, u[i] * c[-1], side="right"), stop - 1)
+        return out
 
 
 # --------------------------------------------------------------------------
@@ -275,7 +304,7 @@ def sample_launch(rng, nu_min, nu_max, n, t_core=None):
 def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
            seed=0, emit_window=None, dnu_over_nu=4.17e-5, max_steps=100000,
            t_core=None, beta_on_expansion=False, exp_emit="bin",
-           launch_weight="photon"):
+           launch_weight="photon", eps=1.0):
     """exp_emit : how the expansion legs place a thermally re-emitted packet
     in frequency. "bin" (default) -- uniformly within the sampled line's
     comoving bin, which is what an emissivity kappa_exp B_nu per bin means and
@@ -297,8 +326,8 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
     ct = C * t_exp
     sobolev = mode.startswith("sobolev")
     outcome = mode.split("_")[1]
-
-    thermal = atom.thermal_sampler(emit_window) if (outcome == "thermal" and (sobolev or exp_emit == "line")) else None
+    needs_thermal = outcome in ("thermal", "tla")
+    thermal = atom.thermal_sampler(emit_window) if (needs_thermal and (sobolev or exp_emit == "line")) else None
     if not sobolev:
         edges, E = atom.expansion_bins(dnu_over_nu, nu_lo=min(nu_min, atom.op_nu.min()) * 0.5,
                                        nu_hi=max(nu_max, atom.op_nu.max()) * 1.01)
@@ -307,7 +336,7 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
         # G is piecewise linear in nu inside each bin.
         G_edges = np.concatenate([[0.0], np.cumsum(E[::-1])])[::-1]   # G at each edge, top = 0
         width = np.diff(edges)
-        if outcome == "thermal" and exp_emit == "bin":
+        if needs_thermal and exp_emit == "bin":
             # Kirchhoff for the closure's OWN opacity: emissivity per bin is
             # kappa_exp(b) B_nu(T) -- photon-number weight E_b * B_nu/(h nu) --
             # which saturates at (1 - e^-tau) per strong line, unlike the
@@ -454,27 +483,62 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
         # the packet currently sits in (branch mode); a re-absorption in the
         # line just emitted returns it to that line's upper level.
         todo = np.arange(hi.size)
-        if outcome == "branch":
+        bin_emit = not sobolev and exp_emit == "bin"   # expansion legs: thermal draws are bins
+        is_bin = np.zeros(hi.size, bool)               # which entries of new_line are bin ids
+        coherent = np.zeros(hi.size, bool)             # expansion tla: coherent scatter
+        if outcome == "branch" and sobolev:
             cur_up = atom.op_upper[kc[hit]].copy()
+        if outcome == "tla" and sobolev:
+            cur_line = atom.op_idx[kc[hit]].copy()     # the line just interacted with
+        if outcome == "branch" and not sobolev:
+            # E8: restore line identity at the interaction point -- the
+            # absorbing line within the bin, with probability op_p[k]/E_b
+            b_hit = np.clip(np.searchsorted(edges, nu_abs_cm, side="right") - 1, 0, E.size - 1)
+            k_abs = atom.sample_line_in_bin(b_hit, rng.uniform(size=hi.size))
+            first_line[hi[first]] = atom.op_idx[k_abs[first]]
+            cur_up = atom.op_upper[k_abs].copy()
         new_line = np.empty(hi.size, int)
         n_chain = 0
         while todo.size:
             n_chain += 1
             if outcome == "branch":
-                u = rng.uniform(size=todo.size)
-                for uval in np.unique(cur_up[todo]):
-                    sel = todo[cur_up[todo] == uval]
-                    lines_u = atom.branch_lines[uval]; cum_u = atom.branch_cum[uval]
-                    new_line[sel] = lines_u[np.searchsorted(cum_u, u[cur_up[todo] == uval])]
+                if sobolev:
+                    u = rng.uniform(size=todo.size)
+                    for uval in np.unique(cur_up[todo]):
+                        m = cur_up[todo] == uval; sel = todo[m]
+                        lines_u = atom.branch_lines[uval]; cum_u = atom.branch_cum[uval]
+                        new_line[sel] = lines_u[np.searchsorted(cum_u, u[m])]
+                else:
+                    # exit by the A*beta kernel: the chain in closed form
+                    u = rng.uniform(size=todo.size)
+                    for uval in np.unique(cur_up[todo]):
+                        m = cur_up[todo] == uval; sel = todo[m]
+                        lines_u = atom.branch_lines[uval]; cum_u = atom.exit_cum[uval]
+                        new_line[sel] = lines_u[np.searchsorted(cum_u, u[m])]
+            elif outcome == "tla":
+                th = rng.uniform(size=todo.size) < eps
+                if sobolev:
+                    new_line[todo[~th]] = cur_line[todo[~th]]          # resonant: same line
+                    if th.any():
+                        new_line[todo[th]] = thermal(rng.uniform(size=th.sum()))
+                else:
+                    coherent[todo[~th]] = True
+                    if th.any():
+                        if bin_emit:
+                            new_line[todo[th]] = thermal_bin(rng.uniform(size=th.sum())); is_bin[todo[th]] = True
+                        else:
+                            new_line[todo[th]] = thermal(rng.uniform(size=th.sum()))
             elif thermal is not None:  # thermal, line-based (Sobolev legs, or exp_emit="line")
                 new_line[todo] = thermal(rng.uniform(size=todo.size))
-            else:  # expansion + thermal, bin-based: line index stands in for the bin
-                new_line[todo] = thermal_bin(rng.uniform(size=todo.size))
-            if n_chain == 1 and not (not sobolev and exp_emit == "bin" and outcome == "thermal"):
-                np.add.at(first_branch, new_line[first], 1)
-            # escape the emitting line? (Sobolev legs; the continuous
-            # absorber re-absorbs through its own bins unless asked otherwise)
-            if sobolev or (beta_on_expansion and exp_emit == "line"):
+            else:  # expansion + thermal, bin-based
+                new_line[todo] = thermal_bin(rng.uniform(size=todo.size)); is_bin[todo] = True
+            if n_chain == 1:
+                ok = first & ~is_bin & ~coherent
+                np.add.at(first_branch, new_line[ok], 1)
+            # escape the emitting line? (Sobolev legs only; the continuous
+            # absorber re-absorbs through its own bins; the E8 kernel already
+            # contains its beta)
+            if sobolev or (beta_on_expansion and exp_emit == "line" and outcome == "thermal"):
                 esc = rng.uniform(size=todo.size) < atom.beta_all[new_line[todo]]
             else:
                 esc = np.ones(todo.size, bool)
@@ -482,28 +546,33 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
             if stay.size:
                 n_inter[hi[stay]] += 1
                 n_reabs[hi[stay]] += 1
-                if outcome == "branch":
+                if outcome == "branch" and sobolev:
                     cur_up[stay] = atom.upper_all[new_line[stay]]
+                if outcome == "tla" and sobolev:
+                    cur_line[stay] = new_line[stay]
             todo = stay
             if n_chain > 10000:
                 raise RuntimeError("re-absorption chain did not terminate")
-        if not sobolev and exp_emit == "bin" and outcome == "thermal":
-            # new_line holds BIN indices here: uniform placement within the bin
-            nu_rest = edges[new_line] + rng.uniform(size=hi.size) * width[new_line]
-        else:
-            np.add.at(chain_exit, new_line[first], 1)
-            nu_rest = atom.nu0_all[new_line]
+        nu_rest = np.empty(hi.size)
+        nu_rest[~is_bin & ~coherent] = atom.nu0_all[new_line[~is_bin & ~coherent]]
+        if is_bin.any():
+            nu_rest[is_bin] = edges[new_line[is_bin]] + rng.uniform(size=is_bin.sum()) * width[new_line[is_bin]]
+        if coherent.any():
+            nu_rest[coherent] = nu_abs_cm[coherent]
+        ok = first & ~is_bin & ~coherent
+        np.add.at(chain_exit, new_line[ok], 1)
         mu_new = rng.uniform(-1.0, 1.0, hi.size)
         zn = r[hi] * mu_new
         mu[hi] = mu_new
         nu[hi] = nu_rest / (1.0 - zn / ct)
         e_dep_lab[hi] += H * (nu_lab_before - nu[hi])
         e_dep_cm[hi] += H * (nu_abs_cm - nu_rest)
-        if sobolev or not (exp_emit == "bin" and outcome == "thermal"):
-            last_line[hi] = new_line
-            if outcome == "branch" and atom.level_energy_cm is not None:
-                E_cm = atom.level_energy_cm
-                e_lev[hi] += H * C * (E_cm[atom.lower_all[new_line]] - E_cm[atom.lower_all[atom.op_idx[kc[hit]]]])
+        lined = ~is_bin & ~coherent
+        last_line[hi[lined]] = new_line[lined]
+        if outcome == "branch" and atom.level_energy_cm is not None:
+            E_cm = atom.level_energy_cm
+            pump = atom.op_idx[kc[hit]] if sobolev else atom.op_idx[k_abs]
+            e_lev[hi] += H * C * (E_cm[atom.lower_all[new_line]] - E_cm[atom.lower_all[pump]])
         if not sobolev:
             tau_r[hi] = rng.exponential(1.0, hi.size)
     else:

@@ -18,10 +18,12 @@ out = {"n_seeds": len(runs), "seeds": [r["seed"] for r in runs], "n_packets": ru
 for part in ("part_A", "part_B"):
     legs = {}
     for tag in runs[0][part]["legs"]:
-        vals = {k: np.array([r[part]["legs"][tag][k] for r in runs]) for k in ("band", "red", "bluewing", "forest")}
+        vals = {k: np.array([r[part]["legs"][tag].get(k, np.nan) for r in runs]) for k in ("band", "red", "bluewing", "forest", "band_energy_weighted")}
         dest = {k: np.array([r[part]["legs"][tag]["destination_of_band_launches"].get(k, np.nan) for r in runs])
                 for k in ("escaped", "in_band", "redward", "blueward", "beyond_1um")}
-        legs[tag] = {**{k: float(v.mean()) for k, v in vals.items()},
+        acc = {k: float(np.mean([r[part]["legs"][tag].get("accounting", {}).get(k, np.nan) for r in runs]))
+               for k in ("identity_residual", "E_dep_cm_over_E_inj", "W_over_E_interacting", "E_esc_over_E_inj", "E_core_over_E_inj")}
+        legs[tag] = {**{k: float(v.mean()) for k, v in vals.items()}, "accounting": acc,
                      **{k + "_std": float(v.std(ddof=1)) if len(v) > 1 else None for k, v in vals.items()},
                      "destination": {k: float(np.nanmean(v)) for k, v in dest.items()},
                      "n_interactions": int(np.mean([r[part]["legs"][tag]["n_interactions"] for r in runs]))}

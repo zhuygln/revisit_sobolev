@@ -53,10 +53,10 @@ def pump_band():
 def test_photon_number_is_conserved_in_every_mode(mode):
     fa, _ = three_level(1.0)
     lo, hi = pump_band()
-    if mode.endswith("thermal"):
+    if "thermal" in mode or "tla" in mode:
         # give the upper level a population so the thermal sampler has weight
-        fa.emis_w = np.array([1.0, 1.0])
-    res = run_mc(fa, R_CORE, R_OUT, T_EXP, lo, hi, 20000, mode, seed=1)
+        fa.emis_w = np.array([1.0, 1.0]); fa.temperature = 3000.0
+    res = run_mc(fa, R_CORE, R_OUT, T_EXP, lo, hi, 20000, mode, seed=1, eps=0.5)
     assert res["n_escaped"] + res["n_core"] + res["n_absorbed"] == res["n_packets"]
     if mode.endswith("absorb"):
         assert res["n_absorbed"] == res["n_interacted"]
@@ -201,10 +201,10 @@ def test_energy_identity_holds_to_roundoff_in_every_mode(mode):
     term reported separately."""
     fa, _ = three_level(1.5)
     fa.temperature = 3000.0
-    if mode.endswith("thermal"):
+    if "thermal" in mode or "tla" in mode:
         fa.emis_w = np.array([1.0, 1.0])   # the toy atom's upper level is unpopulated
     lo, hi = pump_band()
-    res = run_mc(fa, R_CORE, R_OUT, T_EXP, lo, hi, 30000, mode, seed=2)
+    res = run_mc(fa, R_CORE, R_OUT, T_EXP, lo, hi, 30000, mode, seed=2, eps=0.5)
     a = res["accounting"]
     assert abs(a["identity_residual"]) < 1e-12
     assert a["N_inj"] == res["n_packets"]
@@ -347,3 +347,53 @@ def test_exit_kernel_matches_the_chain_on_la_ii():
         chi2 = np.sum((n[keep] - p[keep] * n.sum())**2 / (p[keep] * n.sum()))
         worst = max(worst, chi2 / max(keep.sum() - 1, 1))
     assert worst < 3.0, worst
+
+
+# ------------------------------------------------------------ E4 / E8 modes
+
+@pytest.mark.parametrize("eps", [0.2, 0.5, 0.8])
+def test_tla_trapped_thermalisation_follows_the_escape_law(eps):
+    """Sobolev + TLA: a line event ends thermal with probability
+    eps / (1 - (1-eps)(1-beta)) -- the trapped-yield law with b -> eps --
+    because each re-absorption in the resonant line draws eps again."""
+    tau = 3.0
+    fa, _ = three_level(tau, 1.0, 0.0)
+    fa.emis_w = np.array([0.0, 1.0]); fa.temperature = 3000.0   # thermal pool: the 6000 A line only
+    lo, hi = pump_band()
+    res = run_mc(fa, R_CORE, R_OUT, T_EXP, lo, hi, 80000, "sobolev_tla", seed=21, eps=eps)
+    beta = -np.expm1(-tau) / tau
+    p_th = eps / (1.0 - (1.0 - eps) * (1.0 - beta))
+    p_mc = res["chain_exit"][1] / res["n_interacted"]
+    se = np.sqrt(p_th * (1 - p_th) / res["n_interacted"])
+    assert abs(p_mc - p_th) < 4 * se + 1e-3, (p_mc, p_th)
+
+
+def test_tla_eps_one_matches_thermal_and_eps_zero_scatters_coherently():
+    fa, _ = three_level(2.0, 1.0, 1.0)
+    fa.emis_w = np.array([1.0, 1.0]); fa.temperature = 3000.0
+    lo, hi = pump_band()
+    th = run_mc(fa, R_CORE, R_OUT, T_EXP, lo, hi, 60000, "sobolev_thermal", seed=5)
+    t1 = run_mc(fa, R_CORE, R_OUT, T_EXP, lo, hi, 60000, "sobolev_tla", seed=5, eps=1.0)
+    a, ea = band_ratio(th, lo, hi); b, eb = band_ratio(t1, lo, hi)
+    assert abs(a - b) < 4 * np.hypot(ea, eb) + 2e-3
+    t0 = run_mc(fa, R_CORE, R_OUT, T_EXP, lo, hi, 60000, "sobolev_tla", seed=5, eps=0.0)
+    assert t0["e_dep_cm"].sum() == 0.0          # coherent: nothing exchanged in the comoving frame
+    assert t0["chain_exit"][1] == 0             # never thermalises into the 6000 A line
+    e0 = run_mc(fa, R_CORE, R_OUT, T_EXP, lo, hi, 60000, "expansion_tla", seed=5, eps=0.0)
+    assert e0["e_dep_cm"].sum() == 0.0
+
+
+def test_expansion_branch_exits_by_the_kernel_and_matches_sobolev_branch_on_one_line():
+    """With one opacity line the closure samples it with certainty, so
+    expansion_branch and sobolev_branch must share the exit distribution (the
+    A*beta kernel) and, for a line far from bin edges, nearly the same band."""
+    fa, _ = three_level(3.0, 2.0, 1.0)
+    lo, hi = pump_band()
+    sb = run_mc(fa, R_CORE, R_OUT, T_EXP, lo, hi, 80000, "sobolev_branch", seed=31)
+    eb = run_mc(fa, R_CORE, R_OUT, T_EXP, lo, hi, 80000, "expansion_branch", seed=31)
+    u = 3; p_kernel = np.diff(np.concatenate([[0.0], fa.exit_cum[u]]))
+    for res in (sb, eb):
+        n = res["chain_exit"][fa.branch_lines[u]]; p = n / n.sum()
+        se = np.sqrt(p_kernel * (1 - p_kernel) / n.sum())
+        assert np.all(np.abs(p - p_kernel) < 4 * se + 1e-3), (p, p_kernel)
+    assert abs(eb["accounting"]["identity_residual"]) < 1e-12

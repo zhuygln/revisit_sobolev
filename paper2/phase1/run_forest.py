@@ -70,15 +70,23 @@ def run_part(name, atom, legs, nu_min, nu_max, n, seed, t_core, edges):
                      emit_window=nu_of(*win) if win else None, t_core=t_core)
         b, be = band_ratio(res, *nu_of(*BAND)); r, re_ = band_ratio(res, *nu_of(*RED))
         bw, _ = band_ratio(res, *nu_of(*BLUEWING)); fo, _ = band_ratio(res, *nu_of(*FOREST))
+        b_e, _ = band_ratio(res, *nu_of(*BAND), weight="energy")
+        acc = res["accounting"]
         dest = destination(res, BAND)
         out[tag] = dict(mode=mode, emit_window=win, band=b, band_err=be, red=r, red_err=re_,
-                        bluewing=bw, forest=fo,
+                        bluewing=bw, forest=fo, band_energy_weighted=b_e,
+                        accounting=dict(identity_residual=acc["identity_residual"],
+                                        E_dep_cm_over_E_inj=acc["E_dep_cm"] / acc["E_inj"],
+                                        W_over_E_interacting=acc["W"] / max(acc["E_interacting"], 1e-300),
+                                        E_esc_over_E_inj=acc["E_esc"] / acc["E_inj"],
+                                        E_core_over_E_inj=acc["E_core"] / acc["E_inj"]),
                         destination_of_band_launches=dest, n_escaped=res["n_escaped"], n_core=res["n_core"],
                         n_absorbed=res["n_absorbed"], n_interactions=res["n_interactions"],
                         steps=res["steps"], seconds=time.time() - t0)
         sp, _ = spectrum(res, edges); spectra[tag] = sp
         d = dest
-        print(f"  {tag:28s} bluewing {bw:.3f} forest {fo:.3f} BAND {b:.4f}+-{be:.4f} red {r:.3f} | band launches: esc {d.get('escaped',0):.3f} "
+        print(f"  {tag:28s} bluewing {bw:.3f} forest {fo:.3f} BAND {b:.4f}+-{be:.4f} (E-wt {b_e:.4f}) red {r:.3f} | "
+              f"E: dep_cm {acc['E_dep_cm']/acc['E_inj']:+.4f} W {acc['W']/max(acc['E_interacting'],1e-300):+.2e} id {acc['identity_residual']:.1e} | band launches: esc {d.get('escaped',0):.3f} "
               f"in-band {d.get('in_band',0):.2f} red {d.get('redward',0):.2f} blue {d.get('blueward',0):.2f} >1um {d.get('beyond_1um',0):.2f}"
               f"  [{res['steps']} steps, {time.time()-t0:.0f}s]", flush=True)
     return out, spectra
@@ -94,7 +102,7 @@ def main(n, seed, tag):
     edges_w = np.geomspace(lo, hi, 400)
     legs_a = [("sobolev_absorb", "sobolev_absorb", None), ("expansion_absorb", "expansion_absorb", None),
               ("sobolev_thermal_window", "sobolev_thermal", FOREST), ("expansion_thermal_window", "expansion_thermal", FOREST),
-              ("sobolev_thermal_fullemis", "sobolev_thermal", None), ("expansion_thermal_fullemis", "expansion_thermal", None),
+              ("sobolev_thermal_fullemis", "sobolev_thermal", None),
               ("sobolev_branch", "sobolev_branch", None)]
     A, spA = run_part("PART A  window atom (Paper I's)", atom_w, legs_a, lo, hi, n, seed, None, edges_w)
     print("  SEDONA for comparison (raw L/L_cont, RE-off margin scale):")
@@ -104,7 +112,6 @@ def main(n, seed, tag):
     results["part_A"] = dict(atom=dict(n_opacity=atom_w.n_opacity), legs=A, differentials={
         "exp_vs_sob_absorb  [Paper I analytic: +38.1%]": g("expansion_absorb") / g("sobolev_absorb") - 1,
         "exp_vs_sob_thermal_window  [SEDONA RE N=1: 0.900/0.835 = +7.8%]": g("expansion_thermal_window") / g("sobolev_thermal_window") - 1,
-        "exp_vs_sob_thermal_fullemis": g("expansion_thermal_fullemis") / g("sobolev_thermal_fullemis") - 1,
         "branch_vs_sob_thermal_window": g("sobolev_branch") / g("sobolev_thermal_window") - 1,
         "branch_vs_sob_absorb": g("sobolev_branch") / g("sobolev_absorb") - 1,
         "exp_thermal_window_vs_branch": g("expansion_thermal_window") / g("sobolev_branch") - 1,
