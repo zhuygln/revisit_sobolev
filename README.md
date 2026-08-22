@@ -56,9 +56,10 @@ Source is [manuscript.tex](docs/paper/manuscript.tex); rebuild with
 | F16 | Δ_Sobolev against a deterministic reference on identical rays is +3.1% at v_D = 100 km/s in all four transport modes, +0.3% at 10, +0.03% at 1 km/s; the breadth median was a stale normalization (+3.65% → +0.26%); SEDONA resolved validates the reference to ±0.3% | §4.18 |
 | F17 | Seed-matched SEDONA pairs correlate at +0.95–0.999; paired Δ_exp scatter 0.02–0.28% against 0.2–0.4% from quadrature. Headline over 10 seeds: +44.90% ± 0.04 | §4.18 |
 | F18 | Paper I's radiative-equilibrium check is confined to SEDONA's transport window (re-emission is drawn from the emissivity on the grid), so its +7.7%/+5.0% differentials are bookkeeping within one 230 Å window, not an emergent-band result; retracted as such | §4.18 |
-| F19 | **Paper II Phase 1.** The Sobolev escape probability on re-emission, β = (1−e^−τ)/τ, is decisive for redistribution (invisible for resonant scattering); the SEDONA RE comparison caught its absence in one look | §4.19 |
-| F20 | Paper I's RE fill-in is a transport-window artifact: with the whole ion's LTE emissivity the band refills only 0.348 → 0.355 and the closure differential is back to +38% | §4.19 |
-| F21 | Fluorescence refills the La II band by +260% under a 6000 K continuum (Sobolev + A-branching, whole ion); an expansion-opacity code with thermal redistribution lands **−37.5%** below it — the closure is too bright in pure absorption and too faint with fluorescence | §4.19 |
+| F19 | **Escape-probability branching (Paper II).** A photon re-emitted in a resonance zone escapes it only with β = (1−e^−τ)/τ and is otherwise re-absorbed and re-drawn, so radiative branches compete as A·β, not A; the chain's exit distribution is A_uj β_uj/Σ A β exactly (tested). Phase 0 lacked it; the SEDONA RE comparison caught its absence in one look | §4.19 |
+| F20 | **Fluorescent optical refill.** Full La II, 6000 K continuum: direct A-branching raises the 3800–3955 Å emergent flux from 0.183 to 0.660 ± 0.003; the pumps are 3300–4500 Å (the far-UV contributes nothing), through 5d6p upper levels exiting the strong ground-connected lines, 971 pathways with the top 10 carrying 25% | §4.19 |
+| F21 | **Closure sign reversal.** Expansion opacity is too transparent in pure absorption (+88%) but, with complete thermal redistribution (ε = 1, re-emitting from its own κ_exp B_ν), underproduces the same band by 38% relative to direct branching; at ε = 0 it overproduces it by 34%. With line identity carried through the bin (`expansion_branch`, Poisson absorption + exact A·β exit kernel) the opacity-representation error under fluorescence is +21% | §4.19, §4.20 |
+| F22 | **No scalar ε reproduces La II fluorescence (outcome B).** Sweeping the two-level-atom thermalisation parameter on the same opacity as the physics leg, ε_best is 0.02–0.06 in the red and blue, 0.36 in the UV, and the optical 4500–6000 Å band is outside the TLA's reach at any ε; the redistribution matrices show why — branching is a blue → optical channel, thermalisation a blue → red one, and ε interpolates between them. The expansion leg's ε_best ≈ 0.3 in the 3800–3955 Å band is a compensation with its +21% opacity error and does not carry to other bands | §4.20 |
 
 Full write-up with figures and numbers:
 **[docs/results_report.md](docs/results_report.md)**.
@@ -131,8 +132,12 @@ radiative-equilibrium check is included (F18). The response letter is
    it is synthetic-forest only and not yet a finding (lab notebook §9n).
 3. **Scattering and fluorescence** — Paper II. Phase 0 built and calibrated
    the instrument (F14); Phase 1 (`paper2/phase1/`) carries the whole La II
-   ion through five treatments in one vectorized code and has measured:
-   fluorescence, not thermal re-emission, refills the optical band, and an
-   expansion-opacity code lands 37.5% below the physics once it does
-   (F19–F21). Next: NLTE/T feedback, more ions, and a self-consistent
-   incident spectrum.
+   ion through eight treatments in one vectorized code: fluorescence, not
+   thermal re-emission, refills the optical band, and an expansion-opacity
+   code with complete thermalisation lands 38% below the physics once it
+   does (F19–F21). Phase 2 answered the decisive question: **no scalar
+   thermalisation parameter ε reproduces direct La II fluorescence** across
+   the spectrum (F22) — ε_best differs by band and one band is unreachable —
+   whereas a closure that keeps line identity through the bin gets within
+   21%. Paper II's identity is that result; the Ce II / mixture check and
+   NLTE come afterwards.

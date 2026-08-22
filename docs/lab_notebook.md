@@ -927,6 +927,87 @@ Doppler, photon packets not energy packets, an opaque core that eats ~12% of
 re-emission (SEDONA loses the same), and a Planck incident continuum standing
 in for a photosphere. NLTE and T feedback are Phase 2.
 
+**Next day (2026-08-22), three corrections before any new physics.**
+
+*E0 -- the closure's own emissivity.* Review caught that the expansion legs
+applied the emitting line's beta after a thermal re-emission drawn from the
+Sobolev line emissivity A n_u. The continuous absorber re-absorbs through its
+own bins and SEDONA's expansion mode has no beta, so that was a double count
+-- but switching beta OFF made the agreement with SEDONA worse (blue wing
+0.77 vs 0.63), and bin-uniform placement alone worse still (0.82). The real
+difference was the emissivity: Kirchhoff for the closure's OWN opacity is
+kappa_exp B_nu per bin, which saturates at (1 - e^-tau) per strong line; the
+A n_u weighting gave the strongest lines ~3x too much re-emission. With
+kappa_exp B_nu, bin-uniform, no beta: 0.632 / 1.007 / 0.905 / 1.085 against
+SEDONA's 0.632 / 0.998 / 0.900 / 1.083. The "beta on" agreement had been a
+coincidence. Headline moved 0.412 -> 0.408, -37.5% -> -38.2%.
+
+*E1 -- energy.* Packets stay photons; every packet now carries h nu, and the
+identity E_inj = E_esc + E_core + E_abs + E_dep_lab closes to roundoff in
+every mode. The deposit splits into the comoving exchange (which for branching
+equals the level-energy difference per chain, 1e-12 on the toy atom, 2e-5 on
+La II -- the GSI wavelength-vs-Ritz consistency) and an O(v/c) Doppler work
+term. The thermal legs at fixed T are bookkept, not conserved; that is why
+SEDONA iterates T.
+
+*E7 -- I had the pumps wrong.* "Fluorescence from UV pumps" is withdrawn: the
+6000 K Planck photon budget in 1142-2500 A (0.32% of launches) is smaller than
+the band's refill, and the census says 0.00% of the band's escaped energy
+came from there. It is pumped from 3300-4500 A -- 28% from 3300-3800, 24%
+in-band, 37% from 3955-4500 through deeper lower levels -- by 5d6p upper
+levels exiting the strong ground-connected lines after 2-8 re-absorptions.
+971 pathways, top 10 = 25%, top 100 = 52%: broad statistics with identifiable
+families on top. The opacity extent was also overstated: 17,609 A at
+tau > 1e-3, not 23,363 (that was tau > 1e-4).
+
+*E2 prediction, written before the SEDONA 10 km/s runs finished:* resolved RE
+N=1 band 0.835 -> ~0.866, Delta_SEDONA +7.8% -> ~+4.5%, expansion side stays
+~0.90. First two seeds at 10 km/s: 0.856, 0.853 (resolved), 0.900 (expansion).
+
+## 9q. The ε sweep: the answer is "which band?" (2026-08-22)
+
+*Configuration.* `paper2/phase1/e4_eps_sweep.py` at `de908e3`+ (TLA modes
+from `cb07b1f`), full La II from `data/57LaII_levels_calib.txt`
+(sha256 870fd713b9b5b822…) and `data/57LaII_transitions_calib.txt`
+(4867afa0a3ecf676…), T = 3000 K, n_ion from `forest_lines.npz` (τ_max = 5 in
+3850–3950 Å), 949 opacity lines, Planck 6000 K photon launch over
+1142–17,697 Å, 2×10⁶ packets × seeds 1–3 per leg, dν/ν = 4.17e-5 for the
+expansion legs, ε ∈ {0, .1, .2, .3, .5, .7, .9, 1} on `sobolev_tla` and
+`expansion_tla` against `sobolev_branch` and `expansion_branch`; ~8 s per
+leg, whole sweep 18 legs × 3 seeds in ~8 min. Output `e4_eps_sweep.json`,
+`e4_spectra.npz`, figures via `e4_fig.py`. Band edges printed against strong
+lines: 3304 Å (τ 1.2) is 4 Å inside the blue band — noted, not moved.
+
+*What came out* (report §4.20). Monotone F_b(ε) everywhere; the physics
+value is outside the TLA's whole range in the optical 4500–6000 Å
+(0.9705 ± 0.0005 against a TLA maximum of 0.952 at ε = 0 on the same opacity),
+and inside it elsewhere at ε_best that differ by a factor of twenty across
+bands (0.016 red, 0.055 blue, 0.36 UV on the Sobolev leg). χ²/dof minima 44
+(ε = 0) and 53 (ε = 0.2, expansion leg). I had expected outcome B and half
+expected the expansion leg to land near the iron-peak ε ≈ 0.3 in the
+3800–3955 Å band; it does (0.32), and that is the trap — the same leg wants
+0.68 in the UV and 0.03 in the red, and its band value is the product of an
+opacity 21% too transparent (E8) and a closure that over-thermalises.
+
+*E6 said why in one table.* Blue-launched energy: branching sends 8.8% to
+the optical and 0.5% to the red; thermalisation sends 7–8% to the optical
+and 11–14% to the red. A scalar ε mixes the two kernels; it cannot have the
+first channel without the second, and the optical band therefore can never
+be refilled to the physics' level. That is the sentence Paper II is about.
+
+*E8.* `expansion_branch` at +21% in the band, +0.2–4% in the wide bands:
+line identity through the bin is most of the fix. Bin-width dependence not
+yet run.
+
+*Bookkeeping.* The first E4 waiter died on its own timeout (exit 1) a few
+minutes before the sweep finished; nothing was lost, the log has the
+verdict. E2 came in while I wrote this: SEDONA 10 km/s resolved 0.8546
+(3 seeds; predicted ~0.866 — half the predicted move, same direction),
+expansion 0.8992 (unchanged, as predicted), Δ_SEDONA +5.2% (predicted ~+4.5%);
+MC Sobolev+thermal vs SEDONA resolved now +0.9% in the band, forest sub-band
++2.1%. Gate A passed on its own terms. The 1 km/s run (~1 h) is the check
+that the residual keeps falling; `e2_thermal_width.py` picks it up on rerun.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

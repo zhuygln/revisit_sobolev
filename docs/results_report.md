@@ -825,86 +825,224 @@ on one line. Figure: `docs/figures/fig_ladder.png`; table generator
 
 ### 4.19 Paper II Phase 1 — the whole ion, five treatments, one code (F19–F21)
 
-`paper2/phase1/forest_mc.py` is Phase 0's successor: packets in lockstep with
-numpy, the next resonance by one `searchsorted`, the expansion closure as a
-continuous absorber whose interaction point is found by inverting the F13
-cumulative, and five treatments in one code — Sobolev/expansion × absorb,
-Sobolev/expansion × thermal re-emission (LTE line emissivity A n_u, optionally
-window-confined as SEDONA's RE is by its transport grid), Sobolev × A-branching
-fluorescence. `ForestAtom.from_gsi` carries all of La II: 17,743 lines in the
-branching tables, 949 with τ_S > 1e-3 as opacity (1148–23,363 Å at 3000 K).
-Twenty acceptance tests (`tests/test_forest_mc.py`): conservation in every
-mode, agreement with Phase 0, both pure-absorption legs reproduce Paper I's
-analytic Sobolev leg and Poisson closure bin by bin, and the trapped yield law.
+#### 4.19.1 Instrument
 
-**F19 — the Sobolev escape probability on re-emission.** A photon re-emitted
-inside a resonance zone escapes the emitting line only with β = (1−e^−τ)/τ and
-is otherwise re-absorbed by that line and re-drawn — trapped in strong lines
-until a draw lands on a weak one. Phase 0 lacked it and could not have caught
-it: for pure resonant scattering it is invisible. The SEDONA comparison caught
-it in one look: without it the MC's re-emitted flux was too blue and too
-spread (blue wing 0.71 vs SEDONA 0.42); with it, sub-band by sub-band
-(bb/exp): blue wing 0.45/0.61 vs 0.42/0.63, forest 1.03/1.02 vs 0.99/1.00,
-red 1.11/1.09 vs 1.11/1.08. The trapped fluorescence yield follows
-b/(1−(1−b)(1−β)) (tested); the first draw still gives b (Phase 0's quantity).
+`paper2/phase1/forest_mc.py` — Phase 0's successor: packets advanced in
+lockstep with numpy, the next resonance by one `searchsorted` on the sorted
+line frequencies, the expansion closure as a continuous absorber whose
+interaction point is found by inverting the F13 cumulative, and the
+treatments in one code:
 
-**Part A — Paper I's atom (3850–3950 Å lines), flat launch 3770–3997 Å,
-3 seeds × 2×10⁶ packets, band 3800–3955 Å:**
-
-| leg | band | vs SEDONA / Paper I |
+| leg | absorption | re-emission |
 |---|---|---|
-| Sobolev, absorb | 0.3475 ± 0.0005 | Paper I analytic 0.351 |
-| expansion, absorb | 0.4839 ± 0.0003 | 0.485; Δ = +39.3% (+38.1%) |
-| Sobolev + thermal, window-confined | 0.866 | SEDONA RE N=1 resolved 0.835 |
-| expansion + thermal, window-confined | 0.905 | SEDONA 0.900; Δ = +4.5% (+7.8%) |
-| Sobolev + thermal, whole-atom emissivity | 0.355 | — |
-| expansion + thermal, whole-atom emissivity | 0.490 | — |
-| **Sobolev + fluorescence** | **0.392** | — |
+| sobolev_absorb / expansion_absorb | Sobolev point / Poisson closure | none (Paper I's controls) |
+| sobolev_thermal | Sobolev | LTE line emissivity A n_u, photon-number weighted, optionally window-confined; Sobolev escape probability β on the emitting line |
+| expansion_thermal | Poisson closure | the closure's own Kirchhoff emissivity κ_exp B_ν per bin (saturating at 1−e^−τ per strong line), uniform within the bin, no β (E0) |
+| sobolev_branch | Sobolev | A-weighted downward channel of the upper level, re-drawn on re-absorption with probability 1−β (F19) |
+| sobolev_tla / expansion_tla | as above | thermalisation parameter ε: thermal with probability ε, coherent scattering otherwise, every event (E4) |
+| expansion_branch | Poisson closure | absorbing line sampled within the bin ∝ (1−e^−τ_k)/E_b, exit by the A·β kernel (E8) |
 
-The expansion leg matches SEDONA to <1%; the Sobolev leg sits 3.7% high,
-the Sobolev-vs-resolved offset at v_D = 100 km/s (Paper I's +3.1%) carried
-through re-emission, so the +4.5 vs +7.8 residual is F12, not the instrument.
+Atom: all of La II from the GSI files — 17,743 lines in the branching tables
+and emissivity, **949 with τ_S > 10⁻³ as opacity, 1148–17,609 Å** at 3000 K
+(19 of 472 levels populated); stimulated emission as SEDONA applies it.
+Geometry, epoch, density: Paper I's headline forest (v = 1000–3000 km/s,
+day 1, n_ion for τ_max = 5 in 3850–3950 Å). Packets are photons carrying
+h ν; launch flat (calibration) or photon-number Planck at 6000 K (physics)
+over 1142–17,697 Å; 3 seeds × 2×10⁶ packets per leg; ~10 s per leg.
+Band quantity: escaped/launched, photon- or energy-weighted (both reported;
+<0.5% apart in the 3800–3955 Å band).
 
-**F20 — Paper I's RE fill-in was a window artifact.** SEDONA's re-emission is
-confined to its transport grid; with the whole ion's LTE emissivity at 3000 K
-most re-emission is infrared and the band refills only from 0.348 to 0.355
-(closure 0.484 → 0.490): the window-confined 0.87/0.91 is an upper limit, and
-with physically distributed thermal re-emission the band differential is back
-to +38% — the pure-absorption number. Paper I's "+5–8% with RE" statement is
-scoped accordingly in the revised manuscript.
+#### 4.19.2 Validation
 
-**F21 — fluorescence, not thermal re-emission, is what refills the band, and
-it flips the sign of the closure's error.** On Paper I's atom, A-branching
-refills the band by only +12.8% (0.348 → 0.392): 51% of the band's absorbed
-photons leave redward through other lines (the 9 pumped upper levels have 71
-channels, 16% back in-window by A). On the **full atom with a Planck 6000 K
-launch** (the physics), 3 seeds:
+- **Paper I's legs** (Part A, window atom, flat launch): sobolev_absorb 0.3475
+  ± 0.0005 vs analytic 0.351; expansion_absorb 0.4839 vs 0.485; Δ = +39.3% vs
+  +38.1% (46 acceptance tests in `tests/test_forest_mc.py`, including both
+  pure-absorption legs against the analytic Sobolev leg and the Poisson
+  closure bin by bin).
+- **SEDONA's radiative equilibrium** (Part A, window-confined thermal legs vs
+  RE N=1, sub-bands bluewing / forest / band / red): resolved+thermal MC
+  0.454 / 1.025 / 0.866 / 1.113 vs SEDONA 0.418 / 0.990 / 0.835 / 1.108;
+  expansion+thermal MC 0.632 / 1.007 / 0.905 / 1.085 vs 0.632 / 0.998 /
+  0.900 / 1.083. The expansion leg matches to <1%; the Sobolev leg sits 3.7%
+  high at v_D = 100 km/s — the Sobolev-vs-resolved offset (Paper I's +3.1%)
+  carried through re-emission.
+- **E2 — thermal-width convergence** (`e2_thermal_width.py`, SEDONA RE N=1
+  at 10 km/s, 3 seeds × 2 modes; prediction written before the runs: bb band
+  0.835 → ~0.866, Δ_SEDONA +7.8% → ~+4.5%, expansion ~0.90):
 
-| leg | band 3800–3955 Å |
-|---|---|
-| Sobolev, absorb | 0.183 ± 0.002 |
-| expansion, absorb | 0.344 (+88%) |
-| Sobolev + thermal (whole atom) | 0.257 |
-| expansion + thermal | 0.412 |
-| **Sobolev + fluorescence** | **0.660 ± 0.003** |
+  | | bluewing | forest | band | red | Δ_exp (band) |
+  |---|---|---|---|---|---|
+  | SEDONA resolved, v_D = 100 | 0.418 | 0.990 | 0.8349 | 1.108 | +7.83% |
+  | SEDONA resolved, v_D = 10 | 0.459 | 1.002 | 0.8546 | 1.108 | +5.22% |
+  | SEDONA expansion, 100 / 10 | 0.630 / 0.617 | 0.999 / 1.003 | 0.9002 / 0.8992 | 1.082 / 1.084 | |
+  | MC Sobolev + thermal (v_D-free) | 0.454 | 1.023 | 0.8622 | 1.113 | +4.62% |
+  | MC expansion + thermal, bins 1.25 / 12.5 / 125 km/s | 0.630 / 0.632 / 0.497 | 1.005 / 1.005 / 1.071 | 0.9013 / 0.9021 / 0.9044 | 1.085 / 1.086 / 1.103 | |
 
-Fluorescence from UV/blue pumps refills the optical band by +260% over pure
-absorption and +157% over thermal re-emission, while an expansion-opacity
-code — whose only redistribution is thermal, having discarded line identity —
-lands at 0.412: **−37.5% ± 0.4 relative to the physics.** In pure absorption
-the closure transmits too much (+88% here); with redistribution it transmits
-too little, because its re-emission goes to the infrared where the LTE
-emissivity is while the real cascade lands in the optical. Whether the band
-is too bright or too faint in an expansion-opacity calculation therefore
-depends on whether fluorescence matters in it, and for La II under a 6000 K
-continuum it does. Figure: `docs/figures/fig_p2_phase1.png`; results
-`paper2/phase1/forest_results.json`.
+  The resolved side moved toward the MC as predicted (band offset +3.3% →
+  +0.9%, sub-bands ≤ 2.1%), the expansion side did not move, and the MC row
+  is constant because its Sobolev legs are delta resonances and its closure
+  depends on bin width, not v_D — the bin-width leg shows the closure's
+  re-emission placement is stable at 1.25–12.5 km/s bins and degrades only at
+  125 km/s (blue wing 0.63 → 0.50). Gate A passed; the 1 km/s resolved run
+  (in progress) checks that the residual keeps shrinking.
+- **The escape probability (F19).** Without β on re-emission the MC's thermal
+  flux came out too blue and too spread (blue wing 0.71 vs SEDONA 0.42); with
+  it, the agreement above. The trapped fluorescence yield b/(1−(1−b)(1−β)),
+  the geometric re-absorption count (1−β)/β, and the A·β exit kernel are all
+  tests.
+- **E0 — the closure's own emissivity.** The expansion legs had re-emitted from
+  the Sobolev line emissivity A n_u and then applied β: switching β off made
+  the SEDONA agreement worse, bin-uniform placement alone worse still; the
+  difference was the emissivity. κ_exp B_ν per bin (saturating), bin-uniform,
+  no β, reproduces SEDONA's expansion RE to <1% in every sub-band. The
+  "β on" agreement had been coincidental.
+- **E1 — energy.** E_inj = E_esc + E_core + E_abs + E_dep closes to roundoff
+  in every mode; the comoving exchange equals the level-energy difference per
+  branching chain (10⁻¹² on the toy atom, 2×10⁻⁵ on La II); the O(v/c)
+  Doppler work term is reported separately. Thermal legs at fixed T are
+  bookkept, not conserved — why SEDONA iterates T.
 
-Caveats, all stated: frozen LTE populations at 3000 K (no NLTE, no T
-iteration), one ion, first-order Doppler, photon-number (not energy) packets,
-an opaque core that absorbs inward re-emission (~12% of interacting packets,
-matching SEDONA's loss), and a flat or Planck incident continuum rather than a
-self-consistent photosphere.
+#### 4.19.3 Phase-1 result
+
+Full atom, Planck 6000 K launch, band 3800–3955 Å, 3 seeds × 2×10⁶:
+
+| leg | band | re-emission goes |
+|---|---|---|
+| Sobolev, absorb | 0.183 ± 0.002 | — |
+| expansion, absorb | 0.344 (+88% vs Sobolev) | — |
+| Sobolev + thermal | 0.257 | 78% redward, 9% beyond 1 μm |
+| expansion + thermal (κ_exp B_ν) | 0.408 | 61% redward |
+| **Sobolev + fluorescence** | **0.660 ± 0.003** | 54% redward, 11% blueward, 35% in-band |
+
+Paper I's atom (window, flat launch): fluorescence refills the band by only
++12.8% (0.348 → 0.392); 51% of the band's absorbed photons leave redward
+through lines the window never had; window-confined thermal re-emission
+refills it to 0.866 — which is why Paper I's RE check is window-bound.
+
+#### 4.19.4 Current interpretation
+
+- ε = 1 (complete thermalisation, re-emitting from the closure's own κ_exp
+  B_ν) fails: −38.2% ± 0.3 below direct branching in the optical band, after
+  +88% above it in pure absorption. The closure's error changes sign once
+  fluorescence matters.
+- This is **provisional**: it establishes only that ε = 1 fails, not that no
+  scalar ε can work. The ε sweep (§4.20) decides.
+- The pumps are 3300–4500 Å, not the far-UV (E7): 0.00% of the band's escaped
+  energy was launched in 1142–2500 Å; 971 pathways, top 10 = 25%, dominated by
+  5d6p upper levels exiting the strong ground-connected lines after 2–8
+  re-absorptions.
+- Limits: frozen LTE populations at 3000 K, one ion, first-order Doppler,
+  photon packets, an opaque core absorbing ~12% of inward re-emission (as
+  SEDONA's does), a Planck continuum for a photosphere, one emission per
+  absorption event (the exit lower level's excitation returns to the pool).
+
+#### 4.19.5 Literature connection
+
+Kasen et al. (2006) and the SN Ia work around SEDONA compared direct
+iron-peak fluorescence with a scalar two-level-atom thermalisation parameter
+and found complete thermalisation (ε = 1) redistributes too much redward while
+an intermediate ε ≈ 0.3 approximates the fluorescence reasonably; Fontes et
+al. (2020) and Morag (2026) bound what the expansion-opacity closure can and
+cannot represent; TARDIS (macroatom), ARTIS (line-by-line fluorescence) and
+SUMO (NLTE) are the codes that carry line identity. The lanthanide question is
+new: open-4f-shell networks are far richer than iron-peak ones, and whether
+one scalar ε transfers is exactly what E4 tests.
+
+### 4.20 Paper II Phase 2 — does any scalar ε reproduce La II fluorescence? (F22)
+
+`paper2/phase1/e4_eps_sweep.py` (E4/E5), `e6_redistribution.py` (E6),
+`e4_fig.py`; full La II atom, Planck 6000 K photon launch over 1142–17,697 Å,
+3 seeds × 2×10⁶ packets per leg, energy-weighted band fractions F_b =
+escaped/launched energy. Four legs: Sobolev + direct A·β branching (the
+physics), expansion + branching (E8), Sobolev + TLA(ε), expansion + TLA(ε),
+ε ∈ {0, 0.1, 0.2, 0.3, 0.5, 0.7, 0.9, 1}. On the Sobolev leg the opacity is
+identical to the physics leg, so only the redistribution closure differs; on
+the expansion leg both the opacity representation and the closure differ.
+Band edges checked against strong lines (3304 Å τ = 1.2 sits 4 Å inside the
+blue band; the 3800–3955 Å edges are the Paper I ones). Figure
+`docs/figures/fig_p2_eps_sweep.png`; χ² in `fig_p2_eps_chi2.png`.
+
+#### 4.20.1 The sweep (E4)
+
+| band [Å] | Sobolev+branch | expansion+branch | Sob+TLA ε=0 → 1 | exp+TLA ε=0 → 1 |
+|---|---|---|---|---|
+| UV 1142–3300 | 0.9373 ± 0.0025 | 0.9493 (+1.3%) | 0.972 → 0.901 | 0.979 → 0.920 |
+| blue 3300–4500 | 0.8284 ± 0.0013 | 0.8629 (+4.2%) | 0.902 → 0.532 | 0.928 → 0.628 |
+| optical 4500–6000 | 0.9705 ± 0.0005 | 0.9796 (+0.9%) | 0.952 → 0.838 | 0.964 → 0.869 |
+| red 6000–9000 | 0.9936 ± 0.0002 | 0.9954 (+0.2%) | 0.988 → 1.119 | 0.990 → 1.092 |
+| NIR 9000–17,697 | 1.0055 ± 0.0001 | 1.0049 (−0.1%) | 1.000 → 1.028 | 1.000 → 1.025 |
+| 3800–3955 | 0.6590 ± 0.0032 | 0.7995 (+21.3%) | 0.824 → 0.257 | 0.884 → 0.410 |
+
+F_b(ε) is monotonic in every band (falling below 4500 Å, rising above
+6000 Å: thermalisation moves energy toward the 3000 K emissivity peak), so
+ε_best per band is a single interpolated root, with the 3-seed scatter
+propagated through the interpolation:
+
+| band | Sobolev+TLA ε_best | expansion+TLA ε_best |
+|---|---|---|
+| UV | 0.36 [0.32, 0.41] | 0.68 [0.63, 0.73] |
+| blue | 0.055 [0.054, 0.057] | 0.24 [0.23, 0.25] |
+| optical | **not reachable** (target 0.9705 > F(0) = 0.952) | **not reachable** (> 0.964) |
+| red | 0.016 [0.014, 0.018] | 0.026 [0.021, 0.031] |
+| NIR (null control) | 0.13 | 0.22 |
+| 3800–3955 | 0.065 [0.063, 0.068] | 0.32 [0.31, 0.33] |
+
+**Verdict (Gate B): outcome B.** No scalar ε reproduces direct La II
+fluorescence. With the opacity held fixed (Sobolev leg) the best ε is
+near-zero in the blue and red (0.02–0.06), 0.36 in the UV, and the optical
+4500–6000 Å band lies outside the TLA's whole range: direct branching
+delivers more optical energy than even pure coherent scattering (ε = 0),
+because the cascade feeds the optical from the blue (E6 below), which no
+local two-level redistribution can do. The expansion leg's ε_best ≈ 0.3 in
+the 3800–3955 Å band — the iron-peak-looking number — is a compensation
+between an opacity that is 21% too transparent under fluorescence (E8) and a
+closure that thermalises too much; it does not carry to the other bands
+(0.03 red, 0.68 UV).
+
+#### 4.20.2 Spectral χ² (E5)
+
+200 log bins over the launch range, σ² = σ_TLA² + σ_branch², against
+Sobolev+branch. χ²/dof: Sobolev+TLA 44 (ε=0), 47, 110, 178, 303, 406, 505,
+545 (ε=1); expansion+TLA 80, 60, 53 (ε=0.2), 58, 94, 152, 229, 273. Minima
+at ε = 0 and ε ≈ 0.2, neither a fit; the residual sits in the blue (3300–4500
+Å, χ²/dof 15–23 at the minimum) and the optical (15–21), not the UV or NIR.
+The ranking, not the absolute value, is the result.
+
+#### 4.20.3 Redistribution matrices (E6)
+
+P(λ_out | λ_in), 60 log bins, rows normalised by launched energy
+(`e6_redistribution.npz`, `fig_p2_redistribution.png`). Block sums for
+launches in 3300–4500 Å (the pump band):
+
+| leg | stays blue | → optical 4500–6000 | → red 6000–9000 | → NIR | escaped |
+|---|---|---|---|---|---|
+| Sobolev + branch | 0.786 | **0.088** | 0.005 | 0.000 | 0.886 |
+| expansion + thermal (ε=1) | 0.604 | 0.070 | **0.110** | 0.016 | 0.800 |
+| Sobolev + thermal (ε=1) | 0.501 | 0.085 | 0.141 | 0.018 | 0.746 |
+| expansion + TLA ε=0.3 | 0.795 | 0.039 | 0.042 | 0.006 | 0.882 |
+| Sobolev + TLA ε=0.3 | 0.639 | 0.076 | 0.085 | 0.009 | 0.809 |
+
+Branching is a blue → optical channel (8.8% of blue launched energy, 0.5% to
+the red); the thermal closure is a blue → red channel (11–14% to the red);
+intermediate ε interpolates between the two and so never reproduces the
+first without the second. The optical rows of the physics are fed by the
+blue and lose 3% back to the blue — the diagonal-plus-cascade structure in
+the left panel of the figure against the diagonal-plus-Planck-smear of the
+closure. Mean own-bin energy share: branch 0.867, expansion+thermal 0.864,
+Sobolev+thermal 0.815, expansion+TLA(0.3) 0.925.
+
+#### 4.20.4 The branching-aware closure (E8)
+
+`expansion_branch` — Poisson absorption in the bin, absorbing line sampled
+∝ (1−e^−τ_k)/E_b, exit by the exact A·β kernel — lands +21.3% ± 0.7 above
+Sobolev+branch in 3800–3955 Å and within +0.2–4.2% in the wide bands, at
+dν/ν = 4.17×10⁻⁵ (12.5 km/s bins). That is the opacity-representation error
+under fluorescence, to be read against +88% in pure absorption and against
+the −38% (ε=1) / +34% (ε=0) redistribution-closure error: carrying line
+identity through the bin recovers most of the physics with an O(lines)
+table (line identity per bin + per-level A·β CDF). The bin-width dependence
+and the self-absorption-overlap caveat remain to be run (E8 at 4.17×10⁻⁶ and
+4.17×10⁻⁴).
 
 ## 5. Findings register
 
@@ -928,9 +1066,10 @@ self-consistent photosphere.
 | F16 | Δ_Sob against a deterministic reference on identical rays: +3.1% at 100 km/s (all transport modes), +0.3% at 10, +0.03% at 1 km/s; the breadth median was stale (+3.65% → +0.26%) | §4.18 |
 | F17 | Seed-matched pairs correlate at +0.95–0.999; paired Δ_exp scatter 0.02–0.28%; headline +44.90% ± 0.04 over 10 seeds | §4.18 |
 | F18 | The radiative-equilibrium check is window-confined (re-emission drawn from the emissivity on SEDONA's transport grid); its +7.7%/+5.0% are bookkeeping within one 230 Å window, not an emergent-band result — retracted as such | §4.18 |
-| F19 | A photon re-emitted in a resonance zone escapes it only with β = (1−e^−τ)/τ and is otherwise re-absorbed and re-drawn; invisible for resonant scattering, decisive for redistribution; caught by the SEDONA comparison | §4.19 |
-| F20 | Paper I's RE fill-in (0.34 → 0.85) is confined to the transport window; with the whole ion's emissivity the band refills to 0.355 and the closure differential is back to +38% | §4.19 |
-| F21 | Fluorescence refills the La II band by +260% under a 6000 K continuum; an expansion-opacity code with thermal redistribution lands 37.5% BELOW the physics — the sign of the closure's error flips once redistribution is on | §4.19 |
+| F19 | Escape-probability branching: radiative branches compete as A·β, β = (1−e^−τ)/τ; the chain's exit distribution is A_uj β_uj/Σ A β (tested); Phase 0 lacked it, the SEDONA RE comparison caught it | §4.19 |
+| F20 | Fluorescent optical refill: full La II under a 6000 K continuum, 0.183 → 0.660 ± 0.003; pumped from 3300–4500 Å (the far-UV contributes nothing), 971 pathways, top 10 = 25% | §4.19 |
+| F21 | Closure sign reversal: +88% in pure absorption, −38% with complete thermalisation (ε = 1) and +34% with pure scattering (ε = 0), relative to direct branching; +21% once line identity is carried through the bin (`expansion_branch`) | §4.19, §4.20 |
+| F22 | No scalar ε reproduces La II fluorescence (outcome B): ε_best 0.02–0.06 (red, blue), 0.36 (UV) on the same opacity, the optical 4500–6000 Å band unreachable at any ε; branching is a blue → optical channel, thermalisation a blue → red one | §4.20 |
 
 ## 6. Caveats and limitations
 

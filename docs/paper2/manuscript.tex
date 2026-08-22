@@ -1,0 +1,61 @@
+% Paper II skeleton -- structure only; text is written once Gate B numbers are
+% frozen (report section 4.20). Build: pdflatex + bibtex with ../paper/references.bib.
+\documentclass[fleqn,usenatbib]{mnras}
+\usepackage{graphicx,amsmath,booktabs}
+\title[No scalar thermalisation reproduces lanthanide fluorescence]{Line identity is the closure: direct fluorescence against the two-level atom in a lanthanide line forest}
+\author[Y. Zhu]{Yonglin Zhu}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+%% [to write] Same-code comparison of five+ treatments of the La II forest at
+%% day 1, 1000-3000 km/s, 6000 K continuum: pure absorption (Sobolev,
+%% expansion), complete thermalisation, scalar TLA(eps), direct A-beta
+%% branching, and a branching-aware Poisson closure. Headline numbers from
+%% report 4.19.3 / 4.20.1: refill 0.183 -> 0.660; eps=1 -38%, eps=0 +34%;
+%% eps_best 0.02-0.36 by band, optical band unreachable; expansion_branch +21%.
+\end{abstract}
+
+\section{Introduction}
+%% Narrative 1-7 (research plan): (1) Paper I: two approximations, not one,
+%% attenuation only; (2) what re-emission changes; (3) the TLA and SN Ia
+%% iron-peak experience (Kasen et al. 2006, eps ~ 0.3); (4) lanthanide
+%% networks are not iron-peak networks; (5) the question: does any scalar eps
+%% reproduce direct fluorescence; (6) the design: one code, same atom, same
+%% rays, treatments differ by one choice each; (7) answer in one sentence.
+
+\section{Methods}
+\subsection{Same-code design}            %% forest_mc.py; lockstep packets; what is shared
+\subsection{Sobolev resonances}           %% delta resonances, tau_S, beta
+\subsection{Expansion opacity}            %% continuous absorber, inverted cumulative E_b, bins
+\subsection{Direct $A\beta$ branching}    %% re-absorption (1-beta), exit kernel A beta / sum A beta
+\subsection{Two-level atom: $\epsilon$}   %% thermal vs coherent per event; kappa_exp B_nu emissivity (E0)
+\subsection{Packet bookkeeping}           %% photons carrying h nu; E_inj = E_esc + E_core + E_abs + E_dep (E1)
+\subsection{The La II atom}               %% GSI 472 levels / 17,743 lines; 949 opacity lines 1148-17,609 A at 3000 K
+\subsection{Validation against Paper I and SEDONA}   %% 0.3475/0.4839; RE sub-bands; escape probability (F19)
+
+\section{Validation}
+%% Table: Paper I legs; SEDONA RE sub-bands at 100 and 10 km/s (E2); energy identity; A-beta kernel test.
+
+\section{Results}
+\subsection{The sign reversal}                    %% 4.19.3 table; eps=1 -38%, eps=0 +34%
+\subsection{Thermal-width convergence}            %% E2 table, SEDONA rows + one MC row
+\subsection{The $\epsilon$ sweep}                 %% 4.20.1 tables; Fig fig_p2_eps_sweep
+\subsection{Spectral $\chi^2(\epsilon)$}          %% 4.20.2; Fig fig_p2_eps_chi2
+\subsection{Redistribution matrices}              %% 4.20.3; Fig fig_p2_redistribution
+\subsection{Cascade pathways}                     %% E7: 3300-4500 A pumps, 5d6p, 971 pathways
+\subsection{A line-dependent closure}             %% E8: expansion_branch +21%; bin-width
+\subsection{Ce II and mixtures}                   %% placeholder (E9+)
+
+\section{Discussion}
+%% Opacity-representation error vs redistribution-closure error, separated by
+%% the 2x2 {Sobolev, expansion} x {branch, TLA}; why eps ~ 0.3 "works" for
+%% iron-peak and appears here only as a compensation; what a closure must
+%% supply (the event kernel); TARDIS macroatom, ARTIS, SUMO; limits (LTE
+%% populations, one ion, first-order Doppler, frozen T).
+
+\section{Conclusions}
+
+\bibliographystyle{mnras}
+\bibliography{../paper/references}
+\end{document}
