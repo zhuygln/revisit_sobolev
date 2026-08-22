@@ -24,10 +24,19 @@
     "red": 1.0,
     "bluewing": 0.17747633958376208,
     "forest": 0.36101061884120167,
+    "band_energy_weighted": 0.3458640042428014,
+    "accounting": {
+     "identity_residual": -2.7575268723302324e-16,
+     "E_dep_cm_over_E_inj": 0.0,
+     "W_over_E_interacting": 0.0,
+     "E_esc_over_E_inj": 0.5517259648268548,
+     "E_core_over_E_inj": 0.0
+    },
     "band_std": 0.00046224239234546707,
     "red_std": 0.0,
     "bluewing_std": 0.00030698425630168756,
     "forest_std": 0.0008371187325020823,
+    "band_energy_weighted_std": 0.00045819731835223626,
     "destination": {
      "escaped": 0.34749264903923666,
      "in_band": 1.0,
@@ -42,10 +51,19 @@
     "red": 1.0,
     "bluewing": 0.42687173114635163,
     "forest": 0.4584325337984123,
+    "band_energy_weighted": 0.48305013098109617,
+    "accounting": {
+     "identity_residual": -3.860528855928949e-16,
+     "E_dep_cm_over_E_inj": 0.0,
+     "W_over_E_interacting": 0.0,
+     "E_esc_over_E_inj": 0.6457385263088766,
+     "E_core_over_E_inj": 0.0
+    },
     "band_std": 0.00031243601748620706,
     "red_std": 0.0,
     "bluewing_std": 0.0004835601843963009,
     "forest_std": 0.0003692264327323552,
+    "band_energy_weighted_std": 0.00031162176469727066,
     "destination": {
      "escaped": 0.48393727673983156,
      "in_band": 1.0,
@@ -60,10 +78,19 @@
     "red": 1.1126207429292247,
     "bluewing": 0.4540520502145397,
     "forest": 1.0249908648044797,
+    "band_energy_weighted": 0.8622106550645595,
+    "accounting": {
+     "identity_residual": 2.757570947343919e-16,
+     "E_dep_cm_over_E_inj": -0.00014115424720043907,
+     "W_over_E_interacting": 0.008307222526769449,
+     "E_esc_over_E_inj": 0.9162820339992551,
+     "E_core_over_E_inj": 0.08013489757445767
+    },
     "band_std": 7.297329397104943e-05,
     "red_std": 0.0004892526790657389,
     "bluewing_std": 0.0007055331696758285,
     "forest_std": 0.00016034112879833863,
+    "band_energy_weighted_std": 7.523802836383107e-05,
     "destination": {
      "escaped": 0.8820449444350325,
      "in_band": 0.9818985397681921,
@@ -74,32 +101,50 @@
     "n_interactions": 4632278
    },
    "expansion_thermal_window": {
-    "band": 0.9053883705874269,
-    "red": 1.088230486666473,
-    "bluewing": 0.6130709617652527,
-    "forest": 1.0162338001132245,
-    "band_std": 0.0002564390997537536,
-    "red_std": 0.0009601480360337111,
-    "bluewing_std": 0.0006006834713968119,
-    "forest_std": 0.0003947858208114177,
+    "band": 0.9048868358937528,
+    "red": 1.085392310714257,
+    "bluewing": 0.6318225442315425,
+    "forest": 1.0073335196728597,
+    "band_energy_weighted": 0.902067819009314,
+    "accounting": {
+     "identity_residual": 1.6545572853258893e-16,
+     "E_dep_cm_over_E_inj": -7.587743241718357e-05,
+     "W_over_E_interacting": 0.007672628488175684,
+     "E_esc_over_E_inj": 0.9410069105885687,
+     "E_core_over_E_inj": 0.0563508499026996
+    },
+    "band_std": 0.00023462900156914022,
+    "red_std": 0.0004445355443477614,
+    "bluewing_std": 0.00030523361858833065,
+    "forest_std": 0.00029255514494772066,
+    "band_energy_weighted_std": 0.00023844016853119817,
     "destination": {
-     "escaped": 0.9178968872452957,
-     "in_band": 0.9863726624503818,
-     "redward": 0.01362733754961816,
+     "escaped": 0.9169929034641657,
+     "in_band": 0.9867980837036918,
+     "redward": 0.013201916296308172,
      "blueward": 0.0,
      "beyond_1um": 0.0
     },
-    "n_interactions": 3877800
+    "n_interactions": 1636440
    },
    "sobolev_thermal_fullemis": {
     "band": 0.35523813742767557,
     "red": 1.0213246362212798,
     "bluewing": 0.18104469760209727,
     "forest": 0.3689838843377882,
+    "band_energy_weighted": 0.35355267090949544,
+    "accounting": {
+     "identity_residual": -5.515082248448399e-16,
+     "E_dep_cm_over_E_inj": 0.14106953173650302,
+     "W_over_E_interacting": 0.005258816720442642,
+     "E_esc_over_E_inj": 0.8154404252920487,
+     "E_core_over_E_inj": 0.04113283470121629
+    },
     "band_std": 0.000530487157800532,
     "red_std": 0.00023787382557883006,
     "bluewing_std": 0.00021321481819348265,
     "forest_std": 0.0008300681728982784,
+    "band_energy_weighted_std": 0.000527826999283057,
     "destination": {
      "escaped": 0.9117278951682151,
      "in_band": 0.38963174346800394,
@@ -109,33 +154,24 @@
     },
     "n_interactions": 905477
    },
-   "expansion_thermal_fullemis": {
-    "band": 0.49006177651790844,
-    "red": 1.0176998955872565,
-    "bluewing": 0.4301509424205017,
-    "forest": 0.46457893744882717,
-    "band_std": 0.0003132179604036361,
-    "red_std": 0.0005052482073823845,
-    "bluewing_std": 0.00046635000482795345,
-    "forest_std": 0.00045121539873435,
-    "destination": {
-     "escaped": 0.934188263122251,
-     "in_band": 0.5245856821156395,
-     "redward": 0.4668299340100861,
-     "blueward": 0.00858438387427438,
-     "beyond_1um": 0.026646814513482168
-    },
-    "n_interactions": 716132
-   },
    "sobolev_branch": {
     "band": 0.39192475459800574,
     "red": 1.034448820628434,
     "bluewing": 0.22393017127750384,
     "forest": 0.39997830607510365,
+    "band_energy_weighted": 0.3904731068076215,
+    "accounting": {
+     "identity_residual": -3.309030313430842e-16,
+     "E_dep_cm_over_E_inj": 0.02647929504606711,
+     "W_over_E_interacting": 0.005603523373379625,
+     "E_esc_over_E_inj": 0.91187786389466,
+     "E_core_over_E_inj": 0.059131670686327076
+    },
     "band_std": 0.00038234369462784444,
     "red_std": 0.000408958164497636,
     "bluewing_std": 0.00027636428518807056,
     "forest_std": 0.0006726374845520141,
+    "band_energy_weighted_std": 0.00037851021166053576,
     "destination": {
      "escaped": 0.9083161173734146,
      "in_band": 0.4314849890057611,
@@ -152,12 +188,8 @@
     "std": 0.002227246640171069
    },
    "exp_vs_sob_thermal_window  [SEDONA RE N=1: 0.900/0.835 = +7.8%]": {
-    "mean": 0.045388173496279695,
-    "std": 0.0002642156992064743
-   },
-   "exp_vs_sob_thermal_fullemis": {
-    "mean": 0.37953322590772526,
-    "std": 0.002934885025551879
+    "mean": 0.044809081804631536,
+    "std": 0.00020038374670540895
    },
    "branch_vs_sob_thermal_window": {
     "mean": -0.5474720831199374,
@@ -168,8 +200,8 @@
     "std": 0.0010093955138823617
    },
    "exp_thermal_window_vs_branch": {
-    "mean": 1.3101095232541815,
-    "std": 0.0028960749293320065
+    "mean": 1.3088297256447443,
+    "std": 0.002727223059047698
    }
   }
  },
@@ -187,10 +219,19 @@
     "red": 0.007510752014228887,
     "bluewing": 0.1488075323761475,
     "forest": 0.1715188252614008,
+    "band_energy_weighted": 0.18371577972319963,
+    "accounting": {
+     "identity_residual": -5.186004722575315e-17,
+     "E_dep_cm_over_E_inj": 0.0,
+     "W_over_E_interacting": 0.0,
+     "E_esc_over_E_inj": 0.8030591298131745,
+     "E_core_over_E_inj": 0.0
+    },
     "band_std": 0.0019334427477883372,
     "red_std": 0.0018958013186784841,
     "bluewing_std": 0.0076773113477270494,
     "forest_std": 0.002487543813480027,
+    "band_energy_weighted_std": 0.001960989695305943,
     "destination": {
      "escaped": 0.18340828365577574,
      "in_band": 1.0,
@@ -205,10 +246,19 @@
     "red": 0.17388263594444373,
     "bluewing": 0.37346774908080604,
     "forest": 0.3072301077899109,
+    "band_energy_weighted": 0.3446290242342451,
+    "accounting": {
+     "identity_residual": -1.0376308267893597e-16,
+     "E_dep_cm_over_E_inj": 0.0,
+     "W_over_E_interacting": 0.0,
+     "E_esc_over_E_inj": 0.8401900057284871,
+     "E_core_over_E_inj": 0.0
+    },
     "band_std": 0.00031290923413046013,
     "red_std": 0.005209622431838294,
     "bluewing_std": 0.004075080781125508,
     "forest_std": 0.0032815635209610264,
+    "band_energy_weighted_std": 0.0002864406328918124,
     "destination": {
      "escaped": 0.34424031782219605,
      "in_band": 1.0,
@@ -223,10 +273,19 @@
     "red": 0.07518524825295214,
     "bluewing": 0.20498652005511345,
     "forest": 0.24922521853367674,
+    "band_energy_weighted": 0.25683209723593164,
+    "accounting": {
+     "identity_residual": -2.5954892430418824e-16,
+     "E_dep_cm_over_E_inj": 0.049133978742841845,
+     "W_over_E_interacting": 0.006114790029929273,
+     "E_esc_over_E_inj": 0.9295741863124632,
+     "E_core_over_E_inj": 0.020087379836188222
+    },
     "band_std": 0.0032063917288036093,
     "red_std": 0.0005991620965937909,
     "bluewing_std": 0.006329165239877424,
     "forest_std": 0.0025015160190939778,
+    "band_energy_weighted_std": 0.0032035024890707717,
     "destination": {
      "escaped": 0.8793711452669833,
      "in_band": 0.21350848833667038,
@@ -237,32 +296,50 @@
     "n_interactions": 567658
    },
    "expansion_thermal": {
-    "band": 0.412383849624199,
-    "red": 0.24685818933040152,
-    "bluewing": 0.4173449881809139,
-    "forest": 0.383142557434029,
-    "band_std": 0.0008752243603909616,
-    "red_std": 0.003396381927336568,
-    "bluewing_std": 0.00449219797606316,
-    "forest_std": 0.0029910821405177007,
-    "destination": {
-     "escaped": 0.9094426101169537,
-     "in_band": 0.3830203512150287,
-     "redward": 0.6121673179219153,
-     "blueward": 0.004812330863056118,
-     "beyond_1um": 0.07499620070210668
+    "band": 0.40814643253324673,
+    "red": 0.23423484462839597,
+    "bluewing": 0.4230582579813398,
+    "forest": 0.3751118065100043,
+    "band_energy_weighted": 0.4084246456061547,
+    "accounting": {
+     "identity_residual": 8.561893059841443e-20,
+     "E_dep_cm_over_E_inj": 0.04004458503117126,
+     "W_over_E_interacting": 0.0061056732125654945,
+     "E_esc_over_E_inj": 0.9436388485473115,
+     "E_core_over_E_inj": 0.015340819415336923
     },
-    "n_interactions": 541365
+    "band_std": 0.0010838082126433059,
+    "red_std": 0.005234120066044201,
+    "bluewing_std": 0.004077496713121862,
+    "forest_std": 0.002266129583098021,
+    "band_energy_weighted_std": 0.0010955684832912762,
+    "destination": {
+     "escaped": 0.911022980100073,
+     "in_band": 0.3824613461788264,
+     "redward": 0.6128541478034213,
+     "blueward": 0.004684506017752303,
+     "beyond_1um": 0.08035426229526536
+    },
+    "n_interactions": 306656
    },
    "sobolev_branch": {
     "band": 0.6600077833383557,
     "red": 0.43526100545429686,
     "bluewing": 0.5046421160835343,
     "forest": 0.6799491175389178,
+    "band_energy_weighted": 0.6590460270349197,
+    "accounting": {
+     "identity_residual": 1.558804336018106e-16,
+     "E_dep_cm_over_E_inj": 0.007897061499490926,
+     "W_over_E_interacting": 0.007090060710199656,
+     "E_esc_over_E_inj": 0.9626444853005353,
+     "E_core_over_E_inj": 0.028061368225694966
+    },
     "band_std": 0.0031980531380694103,
     "red_std": 0.0058512061216589115,
     "bluewing_std": 0.007017578137039113,
     "forest_std": 0.008912551189974482,
+    "band_energy_weighted_std": 0.0031962609500403097,
     "destination": {
      "escaped": 0.8573948447609423,
      "in_band": 0.3535424983159865,
@@ -279,8 +356,8 @@
     "std": 0.021030184580135787
    },
    "exp_vs_sob_thermal": {
-    "mean": 0.6069727829060023,
-    "std": 0.020752408283168332
+    "mean": 0.5904518699741115,
+    "std": 0.019663885596130467
    },
    "branch_vs_sob_thermal  [what fluorescence does]": {
     "mean": 1.5720028151070495,
@@ -291,8 +368,8 @@
     "std": 0.0550497339016417
    },
    "exp_thermal_vs_branch  [closure code vs physics]": {
-    "mean": -0.3751729444263457,
-    "std": 0.0034769227209581013
+    "mean": -0.3815947928808809,
+    "std": 0.003171970465427583
    }
   }
  }

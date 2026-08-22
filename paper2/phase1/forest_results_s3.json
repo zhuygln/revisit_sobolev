@@ -23,6 +23,14 @@
     "red_err": 0.002267293917159665,
     "bluewing": 0.17714644236613533,
     "forest": 0.36004720818580777,
+    "band_energy_weighted": 0.3453356092254761,
+    "accounting": {
+     "identity_residual": -3.3090477658708997e-16,
+     "E_dep_cm_over_E_inj": 0.0,
+     "W_over_E_interacting": 0.0,
+     "E_esc_over_E_inj": 0.5512756299168616,
+     "E_core_over_E_inj": 0.0
+    },
     "destination_of_band_launches": {
      "escaped": 0.3469596104468936,
      "in_band": 1.0,
@@ -35,17 +43,25 @@
     "n_absorbed": 894250,
     "n_interactions": 894250,
     "steps": 6,
-    "seconds": 0.5612351894378662
+    "seconds": 1.738271713256836
    },
    "expansion_absorb": {
     "mode": "expansion_absorb",
     "emit_window": null,
     "band": 0.48403273344413905,
-    "band_err": 0.0005945356662423508,
+    "band_err": 0.0005945356662423509,
     "red": 1.0,
     "red_err": 0.002267293917159665,
     "bluewing": 0.42638913397251144,
     "forest": 0.4585954418892441,
+    "band_energy_weighted": 0.4831460304225622,
+    "accounting": {
+     "identity_residual": -9.9271432976127e-16,
+     "E_dep_cm_over_E_inj": 0.0,
+     "W_over_E_interacting": 0.0,
+     "E_esc_over_E_inj": 0.6457345546941714,
+     "E_core_over_E_inj": 0.0
+    },
     "destination_of_band_launches": {
      "escaped": 0.48403273344413905,
      "in_band": 1.0,
@@ -58,7 +74,7 @@
     "n_absorbed": 706547,
     "n_interactions": 706547,
     "steps": 2,
-    "seconds": 0.5512430667877197
+    "seconds": 1.7200801372528076
    },
    "sobolev_thermal_window": {
     "mode": "sobolev_thermal",
@@ -72,6 +88,14 @@
     "red_err": 0.0023909804683786584,
     "bluewing": 0.45334097994235634,
     "forest": 1.024977942777262,
+    "band_energy_weighted": 0.8621770796979249,
+    "accounting": {
+     "identity_residual": -4.96357164880635e-16,
+     "E_dep_cm_over_E_inj": -0.0001434210599490726,
+     "W_over_E_interacting": 0.008311218319500753,
+     "E_esc_over_E_inj": 0.916212771118594,
+     "E_core_over_E_inj": 0.08020271986843337
+    },
     "destination_of_band_launches": {
      "escaped": 0.8819692937743361,
      "in_band": 0.9819472285770826,
@@ -84,7 +108,7 @@
     "n_absorbed": 0,
     "n_interactions": 4639589,
     "steps": 31,
-    "seconds": 1.133436918258667
+    "seconds": 3.1368210315704346
    },
    "expansion_thermal_window": {
     "mode": "expansion_thermal",
@@ -92,35 +116,51 @@
      3850.0,
      3950.0
     ],
-    "band": 0.9055736823810178,
-    "band_err": 0.0008132094994723241,
-    "red": 1.0892514740732744,
-    "red_err": 0.0023663114274696025,
-    "bluewing": 0.6129222790816227,
-    "forest": 1.0166775520493165,
+    "band": 0.9049288574842044,
+    "band_err": 0.0008129199199922417,
+    "red": 1.085894648098741,
+    "red_err": 0.0023626623963873103,
+    "bluewing": 0.6317397996196302,
+    "forest": 1.0073653936498115,
+    "band_energy_weighted": 0.9021134482558504,
+    "accounting": {
+     "identity_residual": -6.618095531741799e-16,
+     "E_dep_cm_over_E_inj": -7.985532445404698e-05,
+     "W_over_E_interacting": 0.007681295101774501,
+     "E_esc_over_E_inj": 0.941090895814154,
+     "E_core_over_E_inj": 0.056267742080543935
+    },
     "destination_of_band_launches": {
-     "escaped": 0.9182525610429367,
-     "in_band": 0.9861923841001669,
-     "redward": 0.013807615899833151,
+     "escaped": 0.9171308724342103,
+     "in_band": 0.9866954484722339,
+     "redward": 0.013304551527766054,
      "blueward": 0.0,
      "beyond_1um": 0.0
     },
-    "n_escaped": 1888058,
-    "n_core": 111942,
+    "n_escaped": 1886522,
+    "n_core": 113478,
     "n_absorbed": 0,
-    "n_interactions": 3879262,
-    "steps": 24,
-    "seconds": 1.1178219318389893
+    "n_interactions": 1637392,
+    "steps": 32,
+    "seconds": 2.619929790496826
    },
    "sobolev_thermal_fullemis": {
     "mode": "sobolev_thermal",
     "emit_window": null,
     "band": 0.3550465763668389,
-    "band_err": 0.0005091939224910428,
+    "band_err": 0.0005091939224910427,
     "red": 1.0212564707575735,
-    "red_err": 0.002291264537711726,
+    "red_err": 0.0022912645377117266,
     "bluewing": 0.18081289335921416,
     "forest": 0.3685630149072451,
+    "band_energy_weighted": 0.3533644936483029,
+    "accounting": {
+     "identity_residual": -4.96357164880635e-16,
+     "E_dep_cm_over_E_inj": 0.14115505600540892,
+     "W_over_E_interacting": 0.005258089249816115,
+     "E_esc_over_E_inj": 0.8152371556813174,
+     "E_core_over_E_inj": 0.041249868422042466
+    },
     "destination_of_band_launches": {
      "escaped": 0.9114771528972574,
      "in_band": 0.3895287723211424,
@@ -133,30 +173,7 @@
     "n_absorbed": 0,
     "n_interactions": 905929,
     "steps": 10,
-    "seconds": 0.650658130645752
-   },
-   "expansion_thermal_fullemis": {
-    "mode": "expansion_thermal",
-    "emit_window": null,
-    "band": 0.49013045472204614,
-    "band_err": 0.0005982688501759787,
-    "red": 1.0171336921487284,
-    "red_err": 0.0022866349810510677,
-    "bluewing": 0.4296217869537086,
-    "forest": 0.46474625600128333,
-    "destination_of_band_launches": {
-     "escaped": 0.9341080968975378,
-     "in_band": 0.524704213944747,
-     "redward": 0.4667939402752175,
-     "blueward": 0.008501845780035554,
-     "beyond_1um": 0.02660940917839726
-    },
-    "n_escaped": 1909770,
-    "n_core": 90230,
-    "n_absorbed": 0,
-    "n_interactions": 715989,
-    "steps": 5,
-    "seconds": 0.7288520336151123
+    "seconds": 1.7207741737365723
    },
    "sobolev_branch": {
     "mode": "sobolev_branch",
@@ -164,9 +181,17 @@
     "band": 0.3915832459448328,
     "band_err": 0.0005347522220863756,
     "red": 1.0344781497874354,
-    "red_err": 0.0023060487488334755,
+    "red_err": 0.002306048748833476,
     "bluewing": 0.22361429719820403,
     "forest": 0.39936750197655635,
+    "band_energy_weighted": 0.3901344743719688,
+    "accounting": {
+     "identity_residual": -1.6545238829354498e-16,
+     "E_dep_cm_over_E_inj": 0.02646126363134387,
+     "W_over_E_interacting": 0.005602550379079344,
+     "E_esc_over_E_inj": 0.9119033061126272,
+     "E_core_over_E_inj": 0.059123001153670904
+    },
     "destination_of_band_launches": {
      "escaped": 0.9083428511338111,
      "in_band": 0.43109630406189803,
@@ -179,16 +204,15 @@
     "n_absorbed": 0,
     "n_interactions": 1202019,
     "steps": 14,
-    "seconds": 0.7328248023986816
+    "seconds": 2.0737240314483643
    }
   },
   "differentials": {
    "exp_vs_sob_absorb  [Paper I analytic: +38.1%]": 0.39506939387178663,
-   "exp_vs_sob_thermal_window  [SEDONA RE N=1: 0.900/0.835 = +7.8%]": 0.045639976592289244,
-   "exp_vs_sob_thermal_fullemis": 0.3804680493965298,
+   "exp_vs_sob_thermal_window  [SEDONA RE N=1: 0.900/0.835 = +7.8%]": 0.0448954157651269,
    "branch_vs_sob_thermal_window": -0.5478500489909219,
    "branch_vs_sob_absorb": 0.12861334332391805,
-   "exp_thermal_window_vs_branch": 1.3125955764425048
+   "exp_thermal_window_vs_branch": 1.310948864272127
   }
  },
  "part_B": {
@@ -206,9 +230,17 @@
     "band": 0.1856301531213192,
     "band_err": 0.002957334242916413,
     "red": 0.00964727163099186,
-    "red_err": 0.0017054127975557373,
+    "red_err": 0.001705412797555737,
     "bluewing": 0.1552132701421801,
     "forest": 0.1702204034747649,
+    "band_energy_weighted": 0.1859738787581336,
+    "accounting": {
+     "identity_residual": -1.5578584162525226e-16,
+     "E_dep_cm_over_E_inj": 0.0,
+     "W_over_E_interacting": 0.0,
+     "E_esc_over_E_inj": 0.8032228566433733,
+     "E_core_over_E_inj": 0.0
+    },
     "destination_of_band_launches": {
      "escaped": 0.1856301531213192,
      "in_band": 1.0,
@@ -221,17 +253,25 @@
     "n_absorbed": 261060,
     "n_interactions": 261060,
     "steps": 18,
-    "seconds": 0.7161431312561035
+    "seconds": 1.878152847290039
    },
    "expansion_absorb": {
     "mode": "expansion_absorb",
     "emit_window": null,
     "band": 0.3439811542991755,
-    "band_err": 0.004025719166555285,
+    "band_err": 0.004025719166555284,
     "red": 0.16792282182695206,
     "red_err": 0.007115118312454595,
     "bluewing": 0.37796208530805686,
     "forest": 0.30353937827554023,
+    "band_energy_weighted": 0.34440173968368115,
+    "accounting": {
+     "identity_residual": 1.5578584162525226e-16,
+     "E_dep_cm_over_E_inj": 0.0,
+     "W_over_E_interacting": 0.0,
+     "E_esc_over_E_inj": 0.8404314216744084,
+     "E_core_over_E_inj": 0.0
+    },
     "destination_of_band_launches": {
      "escaped": 0.3439811542991755,
      "in_band": 1.0,
@@ -244,17 +284,25 @@
     "n_absorbed": 212530,
     "n_interactions": 212530,
     "steps": 2,
-    "seconds": 0.776787281036377
+    "seconds": 1.907377004623413
    },
    "sobolev_thermal": {
     "mode": "sobolev_thermal",
     "emit_window": null,
     "band": 0.26030624263839813,
-    "band_err": 0.003502018550605066,
+    "band_err": 0.0035020185506050663,
     "red": 0.0756707868555924,
-    "red_err": 0.004776297714125673,
+    "red_err": 0.004776297714125674,
     "bluewing": 0.2105619498984428,
     "forest": 0.25184866106683895,
+    "band_energy_weighted": 0.26047965353589875,
+    "accounting": {
+     "identity_residual": -3.115716832505045e-16,
+     "E_dep_cm_over_E_inj": 0.04902117854903535,
+     "W_over_E_interacting": 0.006118140311080578,
+     "E_esc_over_E_inj": 0.9295995234570222,
+     "E_core_over_E_inj": 0.020174638390900307
+    },
     "destination_of_band_launches": {
      "escaped": 0.87924617196702,
      "in_band": 0.21701854034937307,
@@ -267,40 +315,56 @@
     "n_absorbed": 0,
     "n_interactions": 567581,
     "steps": 21,
-    "seconds": 0.8869075775146484
+    "seconds": 2.145482301712036
    },
    "expansion_thermal": {
     "mode": "expansion_thermal",
     "emit_window": null,
-    "band": 0.4123910482921084,
-    "band_err": 0.004407890175246759,
-    "red": 0.24359360868254445,
-    "red_err": 0.00856959324905149,
-    "bluewing": 0.42247799593771157,
-    "forest": 0.37971139349558475,
-    "destination_of_band_launches": {
-     "escaped": 0.9100588928150766,
-     "in_band": 0.382325533236695,
-     "redward": 0.6127562642369021,
-     "blueward": 0.004918202526402982,
-     "beyond_1um": 0.07594740111824394
+    "band": 0.40810365135453475,
+    "band_err": 0.004384917136849161,
+    "red": 0.23183599638227315,
+    "red_err": 0.00836021985159002,
+    "bluewing": 0.42518618821936355,
+    "forest": 0.37253212721659845,
+    "band_energy_weighted": 0.40838236723398036,
+    "accounting": {
+     "identity_residual": 3.115716832505045e-16,
+     "E_dep_cm_over_E_inj": 0.03988906480511382,
+     "W_over_E_interacting": 0.006107083879229495,
+     "E_esc_over_E_inj": 0.9437314698688107,
+     "E_core_over_E_inj": 0.015404966633752099
     },
-    "n_escaped": 1973096,
-    "n_core": 26904,
+    "destination_of_band_launches": {
+     "escaped": 0.9098704358068316,
+     "in_band": 0.3825082850041425,
+     "redward": 0.6131938690969345,
+     "blueward": 0.00429784589892295,
+     "beyond_1um": 0.08067522783761392
+    },
+    "n_escaped": 1973148,
+    "n_core": 26852,
     "n_absorbed": 0,
-    "n_interactions": 540724,
-    "steps": 14,
-    "seconds": 0.906958818435669
+    "n_interactions": 306848,
+    "steps": 12,
+    "seconds": 2.128108263015747
    },
    "sobolev_branch": {
     "mode": "sobolev_branch",
     "emit_window": null,
     "band": 0.6563486454652533,
-    "band_err": 0.005560879024264867,
+    "band_err": 0.005560879024264868,
     "red": 0.43714199577931867,
     "red_err": 0.011479911223792445,
     "bluewing": 0.512186865267434,
     "forest": 0.6698973364922105,
+    "band_energy_weighted": 0.6553912747426116,
+    "accounting": {
+     "identity_residual": -6.23143366501009e-16,
+     "E_dep_cm_over_E_inj": 0.007974554549235346,
+     "W_over_E_interacting": 0.007089204198828063,
+     "E_esc_over_E_inj": 0.9625358189312121,
+     "E_core_over_E_inj": 0.028093291394275084
+    },
     "destination_of_band_launches": {
      "escaped": 0.8577149587750295,
      "in_band": 0.35232079099148583,
@@ -313,15 +377,15 @@
     "n_absorbed": 0,
     "n_interactions": 946108,
     "steps": 48,
-    "seconds": 1.1854407787322998
+    "seconds": 2.682276964187622
    }
   },
   "differentials": {
    "exp_vs_sob_absorb": 0.8530456852791877,
-   "exp_vs_sob_thermal": 0.5842533936651584,
+   "exp_vs_sob_thermal": 0.5677828054298641,
    "branch_vs_sob_thermal  [what fluorescence does]": 1.521447963800905,
    "branch_vs_sob_absorb  [fill-in by fluorescence]": 2.535786802030457,
-   "exp_thermal_vs_branch  [closure code vs physics]": -0.3716890388342545
+   "exp_thermal_vs_branch  [closure code vs physics]": -0.3782212332208743
   }
  }
 }
