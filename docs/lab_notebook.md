@@ -996,8 +996,10 @@ first channel without the second, and the optical band therefore can never
 be refilled to the physics' level. That is the sentence Paper II is about.
 
 *E8.* `expansion_branch` at +21% in the band, +0.2–4% in the wide bands:
-line identity through the bin is most of the fix. Bin-width dependence not
-yet run.
+line identity through the bin is most of the fix. Bin width: +25% / +21% /
++17% at 1.25 / 12.5 / 125 km/s bins — it does not converge to the physics
+with finer bins, it drifts the other way; the floor is the Poisson opacity
+error Paper I measured, now under fluorescence.
 
 *Bookkeeping.* The first E4 waiter died on its own timeout (exit 1) a few
 minutes before the sweep finished; nothing was lost, the log has the
@@ -1005,8 +1007,11 @@ verdict. E2 came in while I wrote this: SEDONA 10 km/s resolved 0.8546
 (3 seeds; predicted ~0.866 — half the predicted move, same direction),
 expansion 0.8992 (unchanged, as predicted), Δ_SEDONA +5.2% (predicted ~+4.5%);
 MC Sobolev+thermal vs SEDONA resolved now +0.9% in the band, forest sub-band
-+2.1%. Gate A passed on its own terms. The 1 km/s run (~1 h) is the check
-that the residual keeps falling; `e2_thermal_width.py` picks it up on rerun.
++2.1%. Gate A passed on its own terms. The 1 km/s run (1 seed, 1 h 47 min
+— twice the estimate) came in at 0.8563: +0.69% from the MC, 0.2% from the
+10 km/s value, so the resolved side is converged in width by 10 km/s and the
+MC's delta-resonance Sobolev leg is the v_D → 0 limit SEDONA approaches, as
+Paper I said it would.
 
 ## 10. Standing environment notes
 

@@ -874,17 +874,20 @@ Band quantity: escaped/launched, photon- or energy-weighted (both reported;
   |---|---|---|---|---|---|
   | SEDONA resolved, v_D = 100 | 0.418 | 0.990 | 0.8349 | 1.108 | +7.83% |
   | SEDONA resolved, v_D = 10 | 0.459 | 1.002 | 0.8546 | 1.108 | +5.22% |
+  | SEDONA resolved, v_D = 1 (1 seed) | 0.463 | 1.003 | 0.8563 | 1.109 | |
   | SEDONA expansion, 100 / 10 | 0.630 / 0.617 | 0.999 / 1.003 | 0.9002 / 0.8992 | 1.082 / 1.084 | |
   | MC Sobolev + thermal (v_D-free) | 0.454 | 1.023 | 0.8622 | 1.113 | +4.62% |
   | MC expansion + thermal, bins 1.25 / 12.5 / 125 km/s | 0.630 / 0.632 / 0.497 | 1.005 / 1.005 / 1.071 | 0.9013 / 0.9021 / 0.9044 | 1.085 / 1.086 / 1.103 | |
 
   The resolved side moved toward the MC as predicted (band offset +3.3% →
-  +0.9%, sub-bands ≤ 2.1%), the expansion side did not move, and the MC row
+  +0.9% → +0.7% at 100 / 10 / 1 km/s, sub-bands ≤ 2.1%; 10 → 1 km/s moves
+  the band by 0.2%, so the width dependence is converged at 10 km/s), the expansion side did not move, and the MC row
   is constant because its Sobolev legs are delta resonances and its closure
   depends on bin width, not v_D — the bin-width leg shows the closure's
   re-emission placement is stable at 1.25–12.5 km/s bins and degrades only at
-  125 km/s (blue wing 0.63 → 0.50). Gate A passed; the 1 km/s resolved run
-  (in progress) checks that the residual keeps shrinking.
+  125 km/s (blue wing 0.63 → 0.50). Gate A passed. The remaining +0.7% is
+  the Sobolev-vs-resolved offset under re-emission at the level Paper I's
+  F16 measured in attenuation (+3.1% at 100 km/s → sub-percent below 10).
 - **The escape probability (F19).** Without β on re-emission the MC's thermal
   flux came out too blue and too spread (blue wing 0.71 vs SEDONA 0.42); with
   it, the agreement above. The trapped fluorescence yield b/(1−(1−b)(1−β)),
@@ -1040,9 +1043,15 @@ dν/ν = 4.17×10⁻⁵ (12.5 km/s bins). That is the opacity-representation err
 under fluorescence, to be read against +88% in pure absorption and against
 the −38% (ε=1) / +34% (ε=0) redistribution-closure error: carrying line
 identity through the bin recovers most of the physics with an O(lines)
-table (line identity per bin + per-level A·β CDF). The bin-width dependence
-and the self-absorption-overlap caveat remain to be run (E8 at 4.17×10⁻⁶ and
-4.17×10⁻⁴).
+table (line identity per bin + per-level A·β CDF). It is bin-width
+dependent and does not converge to the physics as the bins shrink
+(`e8_binwidth.json`, 3 seeds): 3800–3955 Å 0.821 ± 0.003 / 0.800 ± 0.005 /
+0.769 ± 0.004 at 1.25 / 12.5 / 125 km/s bins, i.e. +25% / +21% / +17% above
+Sobolev+branch, the wide bands within 0.1–1% of each other except the blue
+(0.860 / 0.863 / 0.892). What remains at the finest bins is the Poisson-vs-
+Bernoulli opacity error itself, which Paper I showed is bin-independent in
+the saturated regime; the self-absorption overlap (a re-emitted photon
+sweeping the rest of its own bin) is the caveat that goes with it.
 
 ## 5. Findings register
 
