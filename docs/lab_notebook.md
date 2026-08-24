@@ -1013,6 +1013,52 @@ MC Sobolev+thermal vs SEDONA resolved now +0.9% in the band, forest sub-band
 MC's delta-resonance Sobolev leg is the v_D → 0 limit SEDONA approaches, as
 Paper I said it would.
 
+## 9r. E13: the verdict survives 0.1c; the frozen shortcut does not (2026-08-24)
+
+*Build.* `relativity="worldline"` in `forest_mc.run_mc` at `e3b5e04`: per-
+packet clock, exact Doppler, the addendum's linear locus, moving boundaries,
+epoch-diluted tau in both the interaction and the escape probability,
+comoving-isotropic re-emission with aberration. Classical path untouched
+(46 prior tests bit-for-bit).
+
+*Two bugs the controls caught before any science.* (1) The moving-core
+quadratic took the s = 0 root on the launch surface, so the expanding core
+never swallowed a packet; fixed, and the caught fraction now equals
+beta_core^2 to 4 decimals. (2) The one that mattered: at a just-used
+resonance the worldline nu_cm (recomputed from gamma(1 - z/ct), not from the
+locus inversion) could round a hair above the line, searchsorted re-selected
+it, and the <= 1 cm guard sent the packet TO THE BOUNDARY past the whole
+remaining forest -- 16% of interactions gone, transmission up 22% in the
+band. The single-line control was blind to it (nothing left to skip); it
+surfaced only because the slow-shell worldline branch leg refused to
+reproduce 0.659. Fix: a 1e-12 relative searchsorted nudge; the classical
+expressions are algebraically aligned and need none. Full-forest
+worldline-minus-classical differential now matches `sobolev_attenuation`
+to 0.1% absolute (new regression test, 80-point grid -- 40 points
+under-resolve the troughs and fail honestly).
+
+*Controls* (report 4.21.1): MC = analytic to <= 0.003 rms in both
+conventions at beta_out = 0.01-0.20; the frozen-vs-worldline gap is -0.026
+mean / 0.78 max at 0.1c. tau distribution identical across shells by
+construction (tau_S carries no shell velocity).
+
+*Result* (4.21.3-5). Fast shell 0.05-0.15c, worldline, 3 seeds x 2e6,
+~10-45 s/leg: branch blue 0.043, band3800 0.044, optical 0.355, NIR 1.085.
+Frozen-first-order control on the same shell: blue 0.163 -- 3.8x the
+worldline value, bigger than any closure-vs-physics difference. eps_best on
+the expansion leg: 0.20-0.49 by band, red unreachable from above -> outcome
+B holds at 0.1c; but d_eps vs slow = 0.15-0.27, and blue-launched energy
+that stayed blue at 2000 km/s (0.785) almost never does at 0.1c (0.015,
+with 73% deposited in-shell). So: qualitative closure verdict robust,
+calibrated eps not transferable, v_bulk a validity-map axis, and no frozen
+high-beta result is usable for closure work.
+
+*Caveats.* eps grids are coarse on the fast shell ({0, .2, .3, .5, 1}
+expansion; {0, .065, .3, 1} Sobolev) -- eps_best interpolation carries ~0.05
+grid systematic, small against the 0.15-0.27 shifts. Thermal-bin emissivity
+weights and the E8 exit kernel stay at t_exp under worldline transport
+(stated in the docstring); expansion_branch was not run at high beta.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

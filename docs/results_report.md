@@ -1053,6 +1053,93 @@ Bernoulli opacity error itself, which Paper I showed is bin-independent in
 the saturated regime; the self-absorption overlap (a re-emitted photon
 sweeping the rest of its own bin) is the caveat that goes with it.
 
+### 4.21 Paper II Phase 2.75 — the closure verdict at 0.1c (E13, F23)
+
+`paper2/phase1/e13_worldline.py`; `forest_mc.run_mc(relativity="worldline")`
+carries each packet's own clock — exact Doppler D = γ(1−β_z), the linear
+resonance locus z_res = Z0(y²−1)/2 + p²/2Z0 from Paper I's addendum,
+homologously expanding boundaries (the core overtakes launches with
+μ < β_core; the caught fraction equals β_core² exactly), every optical depth
+diluted to its resonance's own epoch τ_S(t_exp)(t_exp/t_res)²/γ in the
+interaction and escape probabilities alike, and comoving-isotropic
+re-emission aberrated to the lab. `relativity=None` is the classical
+first-order transport on a time-frozen shell — the E13 frozen control, i.e.
+what a naive code does at high β. The three velocity scales stay separate:
+v_D never enters (delta resonances, §4.20's E2), Δv_shell sets the forest
+sweep, v_bulk the transport convention.
+
+#### 4.21.1 Single-line control (E13.3)
+
+MC vs `sobolev_attenuation`, both conventions, τ_S = 5, band-mean
+transmission (rms per frequency bin ≤ 0.003 everywhere):
+
+| β_out | worldline MC / analytic | frozen-first-order MC / analytic | convention gap mean / max |
+|---|---|---|---|
+| 0.01 | 0.7919 / 0.7919 | 0.7907 / 0.7907 | −0.001 / 0.085 |
+| 0.05 | 0.6158 / 0.6158 | 0.6048 / 0.6045 | −0.011 / 0.417 |
+| 0.10 | 0.5580 / 0.5581 | 0.5318 / 0.5319 | −0.026 / 0.783 |
+| 0.20 | 0.4963 / 0.4959 | 0.4320 / 0.4320 | −0.064 / 0.993 |
+
+The frozen snapshot manufactures an O(β) artifact where the physical
+worldline correction is ~β²/2 — the trap the control was built to catch. Two
+instrument bugs were caught before any science ran (the moving-core root
+selection, and a roundoff re-selection of the just-used resonance that let
+16% of packets skip the remaining forest under worldline transport; the
+full-forest worldline−classical differential now matches the analytic leg to
+0.1% absolute; `tests/test_forest_mc.py`, 4 new tests).
+
+#### 4.21.2 Matched line strength (E13.2)
+
+τ_S = σ f n λ t has no shell-velocity dependence, so keeping n_ion, T, t_exp
+from the slow reference makes the fast shell's τ distribution identical by
+construction (τ_max 8.4, N(τ>1) = 42, N(τ>0.1) = 206). What changes is the
+sweep: Δv_shell = 0.1c crosses ~15× more resonances per unit ln ν.
+
+#### 4.21.3 Full La II, slow (0.0033–0.01c) vs fast (0.05–0.15c) shells
+
+Worldline transport on both; energy-weighted; 3 seeds × 2×10⁶. The slow
+shell reproduces §4.20's classical values shifted by the +1% dilution term
+(branch band 0.6528 vs 0.6590). Selected legs:
+
+| leg | blue (slow → fast) | optical (slow → fast) | NIR (slow → fast) | 3800–3955 (slow → fast) |
+|---|---|---|---|---|
+| Sobolev + branch | 0.828 → 0.043 | 0.971 → 0.355 | 1.005 → 1.085 | 0.653 → 0.044 |
+| Sobolev + TLA ε=0 | 0.901 → 0.088 | 0.952 → 0.436 | 1.000 → 0.995 | 0.817 → 0.089 |
+| Sobolev + TLA ε=1 | 0.533 → 0.030 | 0.838 → 0.219 | 1.028 → 1.151 | 0.258 → 0.027 |
+| expansion + TLA ε=0.3 | 0.809 → 0.046 | 0.938 → 0.341 | 1.007 → 1.057 | 0.675 → 0.040 |
+| expansion + TLA ε=1 | 0.629 → 0.040 | 0.871 → 0.256 | 1.025 → 1.155 | 0.411 → 0.037 |
+| **Sobolev + branch, frozen-first-order** | **0.163** | **0.396** | 1.064 | **0.168** |
+
+#### 4.21.4 The three verdicts (E13.6)
+
+- **Transport convention dominates the observable.** On the fast shell the
+  frozen control transmits 3.8× more blue-band energy than worldline
+  transport (0.163 vs 0.043) — larger than any branch-vs-TLA difference.
+  Frozen high-β results must not be used to assess the closure; every
+  comparison below is worldline-vs-worldline.
+- **The qualitative verdict survives: outcome B holds at 0.1c.** On the fast
+  shell ε_best still differs irreconcilably by band — expansion leg: 0.20
+  (3800–3955), 0.24 (optical), 0.46 (blue), 0.47 (UV), 0.49 (NIR), red
+  unreachable (every TLA overfills it; branching does not). No scalar ε
+  reproduces the branching spectrum at realistic bulk velocity either.
+- **But calibrated ε values do not transfer.** |ε_best(0.1c) − ε_best(slow)|
+  reaches 0.15–0.27 on the expansion leg (grid systematic ~0.05), and two
+  bands change reachability status (optical becomes reachable, red becomes
+  unreachable). Per the decision rule (|Δε_best| ≳ 0.2), v_bulk is a
+  validity-map axis, not a nuisance parameter.
+
+#### 4.21.5 Redistribution at 0.1c (E13.5)
+
+Row-block sums of P(λ_out | λ_in) for Sobolev+branch (launches in
+3300–4500 Å): slow shell — stays blue 0.785, → optical 0.088, → red 0.005,
+escaped 0.886; fast shell — stays blue 0.015, → optical 0.121, → red 0.106,
+escaped 0.273. The 0.1c sweep pushes every interacting packet through the
+whole forest: the blue → optical fluorescence channel survives (and grows),
+but it now competes with a comparable blue → red channel and 73% in-shell
+deposition. The redistribution structure changes substantially — the same
+conclusion as the ε shifts, seen mechanistically
+(`e13_matrix_{slow,fast}.npz`).
+
 ## 5. Findings register
 
 | # | Finding | Where |
@@ -1079,6 +1166,7 @@ sweeping the rest of its own bin) is the caveat that goes with it.
 | F20 | Fluorescent optical refill: full La II under a 6000 K continuum, 0.183 → 0.660 ± 0.003; pumped from 3300–4500 Å (the far-UV contributes nothing), 971 pathways, top 10 = 25% | §4.19 |
 | F21 | Closure sign reversal: +88% in pure absorption, −38% with complete thermalisation (ε = 1) and +34% with pure scattering (ε = 0), relative to direct branching; +21% once line identity is carried through the bin (`expansion_branch`) | §4.19, §4.20 |
 | F22 | No scalar ε reproduces La II fluorescence (outcome B): ε_best 0.02–0.06 (red, blue), 0.36 (UV) on the same opacity, the optical 4500–6000 Å band unreachable at any ε; branching is a blue → optical channel, thermalisation a blue → red one | §4.20 |
+| F23 | At v_bulk ~ 0.1c with worldline-consistent transport, outcome B survives (ε_best 0.20–0.49 by band, red unreachable) but calibrated ε values shift by 0.15–0.27 and the redistribution structure changes; the frozen-snapshot convention overstates blue transmission 3.8× and must not be used at high β | §4.21 |
 
 ## 6. Caveats and limitations
 

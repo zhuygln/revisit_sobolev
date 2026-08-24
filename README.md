@@ -60,6 +60,7 @@ Source is [manuscript.tex](docs/paper/manuscript.tex); rebuild with
 | F20 | **Fluorescent optical refill.** Full La II, 6000 K continuum: direct A-branching raises the 3800–3955 Å emergent flux from 0.183 to 0.660 ± 0.003; the pumps are 3300–4500 Å (the far-UV contributes nothing), through 5d6p upper levels exiting the strong ground-connected lines, 971 pathways with the top 10 carrying 25% | §4.19 |
 | F21 | **Closure sign reversal.** Expansion opacity is too transparent in pure absorption (+88%) but, with complete thermal redistribution (ε = 1, re-emitting from its own κ_exp B_ν), underproduces the same band by 38% relative to direct branching; at ε = 0 it overproduces it by 34%. With line identity carried through the bin (`expansion_branch`, Poisson absorption + exact A·β exit kernel) the opacity-representation error under fluorescence is +21% | §4.19, §4.20 |
 | F22 | **No scalar ε reproduces La II fluorescence (outcome B).** Sweeping the two-level-atom thermalisation parameter on the same opacity as the physics leg, ε_best is 0.02–0.06 in the red and blue, 0.36 in the UV, and the optical 4500–6000 Å band is outside the TLA's reach at any ε; the redistribution matrices show why — branching is a blue → optical channel, thermalisation a blue → red one, and ε interpolates between them. The expansion leg's ε_best ≈ 0.3 in the 3800–3955 Å band is a compensation with its +21% opacity error and does not carry to other bands | §4.20 |
+| F23 | **The closure verdict survives 0.1c; the frozen shortcut does not.** With worldline-consistent transport (per-packet clock, exact Doppler, epoch-diluted τ, aberrated re-emission) on a 0.05–0.15c shell, no scalar ε reproduces branching either (ε_best 0.20–0.49 by band, red unreachable) — but calibrated ε values shift by 0.15–0.27 vs the slow shell and the redistribution structure changes, so v_bulk is a validity-map axis; a frozen first-order snapshot overstates blue transmission 3.8× at 0.1c and is unusable for closure work | §4.21 |
 
 Full write-up with figures and numbers:
 **[docs/results_report.md](docs/results_report.md)**.
@@ -139,5 +140,8 @@ radiative-equilibrium check is included (F18). The response letter is
    thermalisation parameter ε reproduces direct La II fluorescence** across
    the spectrum (F22) — ε_best differs by band and one band is unreachable —
    whereas a closure that keeps line identity through the bin gets within
-   21%. Paper II's identity is that result; the Ce II / mixture check and
-   NLTE come afterwards.
+   21%. The verdict survives realistic bulk velocity: at 0.05–0.15c with
+   worldline-consistent transport no scalar ε works either, while the
+   calibrated ε values shift by 0.15–0.27 — and a frozen-snapshot code at
+   0.1c overstates blue transmission 3.8× (F23). Paper II's identity is that
+   result; the Ce II / mixture check and NLTE come afterwards.
