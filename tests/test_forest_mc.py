@@ -397,3 +397,108 @@ def test_expansion_branch_exits_by_the_kernel_and_matches_sobolev_branch_on_one_
         se = np.sqrt(p_kernel * (1 - p_kernel) / n.sum())
         assert np.all(np.abs(p - p_kernel) < 4 * se + 1e-3), (p, p_kernel)
     assert abs(eb["accounting"]["identity_residual"]) < 1e-12
+
+
+# ---------------------------------------------------------------------------
+# E13: worldline transport at high beta
+# ---------------------------------------------------------------------------
+
+def _one_line_atom(tau=5.0, nu0=7.6e14, f=0.01, t_exp=86400.0):
+    from sobolev.optical_depth import tau_sobolev
+    n_ion = tau / tau_sobolev(f, 1.0, C / nu0, t_exp)
+    return ForestAtom(nu0=np.array([nu0]), f_osc=np.array([f]), n_lower=np.array([n_ion]),
+                      n_upper=np.array([0.0]), A=np.array([1e8]), lower=np.array([0]),
+                      upper=np.array([1]), t_exp=t_exp, stim=False), n_ion
+
+
+def test_worldline_single_line_matches_analytic():
+    """MC worldline transmission == sobolev_attenuation(relativity='worldline')
+    at beta_out = 0.1 (E13.3): the frozen-vs-worldline gap there is ~0.03 mean
+    and up to 0.78 per frequency, so this pins the convention, not just the
+    noise floor."""
+    from sobolev.sobolev_leg import sobolev_attenuation
+    t_exp = 86400.0; ct = C * t_exp
+    atom, n_ion = _one_line_atom()
+    nu0 = atom.op_nu[0]
+    r_core, r_out = ct / 30.0, ct / 10.0
+    nu_lo, nu_hi = nu0 * 0.98, nu0 * 1.16
+    edges = np.linspace(nu_lo, nu_hi, 61); mid = 0.5 * (edges[1:] + edges[:-1])
+    ana = sobolev_attenuation(mid, [(nu0, 0.01, 1.0)], r_core, r_out, t_exp, n_ion,
+                              relativity="worldline", n_p=400)
+    res = run_mc(atom, r_core, r_out, t_exp, nu_lo, nu_hi, 400_000, "sobolev_absorb",
+                 seed=3, relativity="worldline")
+    Nl, _ = np.histogram(res["nu_launch"], edges)
+    Ne, _ = np.histogram(res["nu_launch"][res["fate"] == 1], edges)
+    Nc, _ = np.histogram(res["nu_launch"][res["fate"] == 2], edges)
+    tr = Ne / np.maximum(Nl - Nc, 1)
+    m = Nl > 2000
+    assert np.sqrt(np.mean((tr[m] - ana[m]) ** 2)) < 6e-3
+    assert abs(tr[m].mean() - ana[m].mean()) < 2e-3
+    # the expanding core overtakes launches with mu < beta_core
+    assert abs(Nc.sum() / Nl.sum() - (r_core / ct) ** 2) < 5e-4
+
+
+def test_worldline_reduces_to_classical_at_low_beta():
+    """At the production shell (beta_out = 0.01) worldline and classical
+    transport agree to well under a percent, in absorb and branch modes."""
+    t_exp = 86400.0; ct = C * t_exp
+    atom, _ = _one_line_atom(tau=3.0)
+    nu0 = atom.op_nu[0]
+    r_core, r_out = ct / 300.0, ct / 100.0
+    nu_lo, nu_hi = nu0 * 0.995, nu0 * 1.015
+    for mode in ("sobolev_absorb", "sobolev_branch"):
+        f = {}
+        for rel in (None, "worldline"):
+            res = run_mc(atom, r_core, r_out, t_exp, nu_lo, nu_hi, 300_000, mode,
+                         seed=4, relativity=rel)
+            f[rel] = (res["fate"] == 1).mean()
+        assert abs(f[None] - f["worldline"]) < 5e-3, (mode, f)
+
+
+def test_worldline_energy_identity_and_beaming():
+    """The lab-frame energy identity closes under worldline transport, and
+    comoving-isotropic re-emission is forward-beamed in the lab: the escaped
+    packets that interacted carry a net redshift (E_dep_lab > 0) and the
+    identity residual stays at roundoff."""
+    t_exp = 86400.0; ct = C * t_exp
+    atom, _ = _one_line_atom(tau=8.0)
+    nu0 = atom.op_nu[0]
+    res = run_mc(atom, ct / 30.0, ct / 10.0, t_exp, nu0 * 0.98, nu0 * 1.16,
+                 200_000, "sobolev_branch", seed=5, relativity="worldline")
+    acc = res["accounting"]
+    assert abs(acc["identity_residual"]) < 1e-12
+    inter = res["n_events"] > 0
+    assert res["e_dep_lab"][inter].sum() > 0.0
+
+
+def test_worldline_forest_differential_matches_analytic():
+    """On the slow La II shell the worldline-minus-classical transmission
+    shift in 3800-3955 A (the light-travel dilution term) matches
+    `sobolev_attenuation` in both conventions. This is the regression for the
+    roundoff bug where a just-used resonance re-selected itself under
+    worldline transport and the packet skipped the rest of the forest."""
+    from pathlib import Path
+    from sobolev.optical_depth import tau_sobolev
+    from sobolev.sobolev_leg import sobolev_attenuation
+    root = Path(__file__).resolve().parents[1]
+    d = np.load(root / "experiments/laII_forest/forest_lines.npz")
+    sys.path.insert(0, str(root / "paper2/phase1"))
+    from run_forest import LEV, TR, R_CORE, R_OUT, T_EXP, T_SHELL, nu_of
+    atom = ForestAtom.from_gsi(LEV, TR, T_SHELL, float(d["n_ion"]), T_EXP, tau_min=1e-3)
+    lines = [(nu, 1.0, atom.op_tau[i] / tau_sobolev(1.0, 1.0, C / nu, T_EXP))
+             for i, nu in enumerate(atom.op_nu)]
+    blo, bhi = nu_of(3800, 3955)
+    grid = np.linspace(blo, bhi, 80)   # coarser grids under-resolve the troughs
+    ana = {rel: sobolev_attenuation(grid, lines, R_CORE, R_OUT, T_EXP, 1.0,
+                                    relativity=rel, n_p=200).mean()
+           for rel in (None, "worldline")}
+    mc = {}
+    for rel in (None, "worldline"):
+        res = run_mc(atom, R_CORE, R_OUT, T_EXP, blo, bhi, 300_000,
+                     "sobolev_absorb", seed=2, relativity=rel)
+        mc[rel] = (res["fate"] == 1).mean()
+    # each convention within 0.5% absolute of its analytic value, and the
+    # worldline-minus-classical differential within 0.15% absolute
+    for rel in (None, "worldline"):
+        assert abs(mc[rel] - ana[rel]) < 5e-3, (rel, mc, ana)
+    assert abs((mc["worldline"] - mc[None]) - (ana["worldline"] - ana[None])) < 1.5e-3

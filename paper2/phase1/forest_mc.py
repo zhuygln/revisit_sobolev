@@ -281,6 +281,35 @@ def advance(r, mu, s):
     return r_new, mu_new
 
 
+def _moving_boundary(r, mu, ctm, b_core, b_out):
+    """Distances to the homologous boundaries r_b(t) = b_b c t, with the
+    light-time advancing along the path: solve |r + s n| = b (ctm + s).
+    A packet on the core surface with mu < b_core is overtaken by the surface
+    (the core expands at b_core c) -- that is physical, not an artifact.
+    Returns (s, hits_core_first) like `distance_to_boundary`."""
+    A = 1.0 - b_out * b_out
+    B = r * mu - b_out * b_out * ctm
+    Cq = r * r - (b_out * ctm) ** 2
+    s_out = (-B + np.sqrt(np.maximum(B * B - A * Cq, 0.0))) / A
+    Ac = 1.0 - b_core * b_core
+    Bc = r * mu - b_core * b_core * ctm
+    Cc = r * r - (b_core * ctm) ** 2
+    dc = Bc * Bc - Ac * Cc
+    # Bc < 0 is "the core gains on the photon"; on the launch surface Cc = 0
+    # and the smaller root is 0, so clamp rather than demand s > 0 -- a packet
+    # leaving the core with mu < b_core is swallowed immediately.
+    caught = (dc > 0.0) & (Bc < 0.0)
+    s_core = np.where(caught, np.maximum((-Bc - np.sqrt(np.maximum(dc, 0.0))) / Ac, 0.0), np.inf)
+    core_first = caught & (s_core < s_out)
+    return np.where(core_first, s_core, s_out), core_first
+
+
+def _beta_of_tau(tau):
+    """(1 - e^-tau)/tau, safe at 0."""
+    t = np.maximum(tau, 1e-12)
+    return np.where(tau > 1e-6, (1.0 - np.exp(-t)) / t, 1.0 - 0.5 * tau)
+
+
 # --------------------------------------------------------------------------
 # Transport
 # --------------------------------------------------------------------------
@@ -304,7 +333,7 @@ def sample_launch(rng, nu_min, nu_max, n, t_core=None):
 def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
            seed=0, emit_window=None, dnu_over_nu=4.17e-5, max_steps=100000,
            t_core=None, beta_on_expansion=False, exp_emit="bin",
-           launch_weight="photon", eps=1.0):
+           launch_weight="photon", eps=1.0, relativity=None):
     """exp_emit : how the expansion legs place a thermally re-emitted packet
     in frequency. "bin" (default) -- uniformly within the sampled line's
     comoving bin, which is what an emissivity kappa_exp B_nu per bin means and
@@ -320,8 +349,23 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
     Returns dict with nu_launch, nu_out, counts, and n_interactions (total
     interaction events, a diagnostic).
     """
+    """relativity : None (default) is the classical first-order transport on a
+    time-frozen shell -- exactly what a naive code does, and the E13 frozen
+    control at high beta. "worldline" carries each packet's own clock: exact
+    Doppler D = gamma (1 - beta_z), the resonance locus z_res = Z0 (y^2-1)/2
+    + p^2/(2 Z0) with Z0 = c t - z constant along the path (Paper I,
+    tests/test_relativistic.py), boundaries that expand homologously, and
+    every optical depth diluted to the resonance's own epoch,
+    tau = tau_S(t_exp) (t_exp/t_res)^2 / gamma -- entering the interaction
+    probability 1 - e^-tau and the escape probability beta alike.
+    Re-emission is isotropic in the comoving frame and aberrated to the lab.
+    Approximations kept at t_exp under worldline transport: the thermal-bin
+    emissivity weights w_b and the E8 exit kernel (`expansion_branch`)."""
     if mode not in MODES:
         raise ValueError(f"mode must be one of {MODES}, got {mode!r}")
+    if relativity not in (None, "worldline"):
+        raise ValueError(f"relativity must be None or 'worldline', got {relativity!r}")
+    wl = relativity == "worldline"
     rng = np.random.default_rng(seed)
     ct = C * t_exp
     sobolev = mode.startswith("sobolev")
@@ -408,32 +452,69 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
     last_line = np.full(n_packets, -1, np.int64)    # E7: last emitting line
     # expansion mode: optical depth still to travel before the next interaction
     tau_r = rng.exponential(1.0, n_packets) if not sobolev else None
+    # worldline transport: per-packet light-time clock and velocity boundaries
+    if wl:
+        ctime = np.full(n_packets, ct)
+        b_core_v, b_out_v = r_core / ct, r_out / ct
 
     for step in range(max_steps):
         idx = np.flatnonzero(alive)
         if idx.size == 0:
             break
         ri, mi, ni = r[idx], mu[idx], nu[idx]
-        s_b, core_first = distance_to_boundary(ri, mi, r_core, r_out)
         z = ri * mi
-        nu_cm = ni * (1.0 - z / ct)
+        if wl:
+            cti = ctime[idx]
+            s_b, core_first = _moving_boundary(ri, mi, cti, b_core_v, b_out_v)
+            beta_i = ri / cti
+            gam_i = 1.0 / np.sqrt(1.0 - beta_i * beta_i)
+            nu_cm = ni * gam_i * (1.0 - z / cti)
+            Z0 = cti - z
+            p2 = ri * ri * (1.0 - mi * mi)
+            dsc_now = (ct / cti) ** 2 / gam_i
+        else:
+            s_b, core_first = distance_to_boundary(ri, mi, r_core, r_out)
+            nu_cm = ni * (1.0 - z / ct)
 
         if sobolev:
-            # next opacity line strictly below the current comoving frequency
-            k = np.searchsorted(atom.op_nu, nu_cm, side="left") - 1
+            # next opacity line strictly below the current comoving frequency.
+            # Worldline: nu_cm is recomputed from gamma (1 - z/ct) rather than
+            # from the resonance inversion, so at a just-used resonance its
+            # roundoff can land a hair ABOVE the line and re-select it; the
+            # <= _S_MIN guard would then send the packet to the boundary,
+            # skipping the rest of the forest. A 1e-12 relative nudge makes
+            # the at-resonance case step down deterministically; between
+            # resonances it is far below the line spacing. The classical
+            # expressions are algebraically aligned and need no nudge (they
+            # are pinned to 8e-5 against the deterministic reference).
+            key = nu_cm * (1.0 - 1e-12) if wl else nu_cm
+            k = np.searchsorted(atom.op_nu, key, side="left") - 1
             has = k >= 0
             kk = np.where(has, k, 0)
-            s_res = np.where(has, ct * (1.0 - atom.op_nu[kk] / ni) - z, np.inf)
+            if wl:
+                y = ni / atom.op_nu[kk]
+                z_res = 0.5 * Z0 * (y * y - 1.0) + p2 / (2.0 * Z0)
+                s_res = np.where(has, z_res - z, np.inf)
+            else:
+                s_res = np.where(has, ct * (1.0 - atom.op_nu[kk] / ni) - z, np.inf)
             # a resonance at (numerically) zero distance is the one just used
             s_res = np.where(s_res > _S_MIN, s_res, np.inf)
             interact_candidate = s_res < s_b
         else:
             g_now = G_of(nu_cm)
-            g_target = g_now + tau_r[idx]
+            # worldline: the grid optical depth is diluted by the local epoch
+            # factor, so the same tau_r reaches further in G (first order in
+            # the step; the factor is re-evaluated at every event)
+            g_target = g_now + (tau_r[idx] / dsc_now if wl else tau_r[idx])
             nu_target = nu_of_G(g_target)
             # can't go below the bottom edge
             reachable = g_target <= G_edges[0]
-            s_res = np.where(reachable, ct * (1.0 - nu_target / ni) - z, np.inf)
+            if wl:
+                y = ni / nu_target
+                z_res = 0.5 * Z0 * (y * y - 1.0) + p2 / (2.0 * Z0)
+                s_res = np.where(reachable, z_res - z, np.inf)
+            else:
+                s_res = np.where(reachable, ct * (1.0 - nu_target / ni) - z, np.inf)
             s_res = np.where(s_res > _S_MIN, s_res, np.inf)
             interact_candidate = s_res < s_b
 
@@ -453,9 +534,16 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
         ci = idx[c]
         rn, mn = advance(ri[c], mi[c], s_res[c])
         r[ci], mu[ci] = rn, mn
+        if wl:
+            ctime[ci] += s_res[c]
+            beta_c = rn / ctime[ci]
+            dsc = (ct / ctime[ci]) ** 2 * np.sqrt(1.0 - beta_c * beta_c)
         if sobolev:
             kc = kk[c]
-            hit = rng.uniform(size=ci.size) < atom.op_p[kc]
+            if wl:
+                hit = rng.uniform(size=ci.size) < 1.0 - np.exp(-atom.op_tau[kc] * dsc)
+            else:
+                hit = rng.uniform(size=ci.size) < atom.op_p[kc]
         else:
             hit = np.ones(ci.size, bool)
             # expansion mode: those that don't interact don't exist; every
@@ -539,7 +627,11 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
             # absorber re-absorbs through its own bins; the E8 kernel already
             # contains its beta)
             if sobolev or (beta_on_expansion and exp_emit == "line" and outcome == "thermal"):
-                esc = rng.uniform(size=todo.size) < atom.beta_all[new_line[todo]]
+                if wl:
+                    esc = rng.uniform(size=todo.size) < _beta_of_tau(
+                        atom.tau_all[new_line[todo]] * dsc[hit][todo])
+                else:
+                    esc = rng.uniform(size=todo.size) < atom.beta_all[new_line[todo]]
             else:
                 esc = np.ones(todo.size, bool)
             stay = todo[~esc]
@@ -561,10 +653,19 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
             nu_rest[coherent] = nu_abs_cm[coherent]
         ok = first & ~is_bin & ~coherent
         np.add.at(chain_exit, new_line[ok], 1)
-        mu_new = rng.uniform(-1.0, 1.0, hi.size)
-        zn = r[hi] * mu_new
-        mu[hi] = mu_new
-        nu[hi] = nu_rest / (1.0 - zn / ct)
+        if wl:
+            # isotropic in the comoving frame, aberrated to the lab
+            mu_c = rng.uniform(-1.0, 1.0, hi.size)
+            bl = r[hi] / ctime[hi]
+            gl = 1.0 / np.sqrt(1.0 - bl * bl)
+            den = 1.0 + bl * mu_c
+            mu[hi] = (mu_c + bl) / den
+            nu[hi] = nu_rest * gl * den
+        else:
+            mu_new = rng.uniform(-1.0, 1.0, hi.size)
+            zn = r[hi] * mu_new
+            mu[hi] = mu_new
+            nu[hi] = nu_rest / (1.0 - zn / ct)
         e_dep_lab[hi] += H * (nu_lab_before - nu[hi])
         e_dep_cm[hi] += H * (nu_abs_cm - nu_rest)
         lined = ~is_bin & ~coherent
