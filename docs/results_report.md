@@ -1140,6 +1140,74 @@ deposition. The redistribution structure changes substantially — the same
 conclusion as the ε shifts, seen mechanistically
 (`e13_matrix_{slow,fast}.npz`).
 
+### 4.22 Paper II Phase 4 — Ce II and the mixture: outcome C, and the closure's density limit (E9–E10, F24)
+
+`paper2/phase1/e9_ceII.py`, `e10_blend.py`; `ForestAtom.from_gsi_blend`
+(level-offset concatenation, branching kept ion-internal — ions share only
+the radiation field). Ce II normalized by the identical recipe as the La II
+reference (n_ion for a strongest classical τ of 5 in 3850–3950 Å at
+3000 K → n_ion = 11,641 cm⁻³, 2,376 window lines): **22,960 opacity lines**
+(La II: 949), τ_max 6.7, N(τ>1) = 149, opacity reaching the far-IR. The
+blend carries each ion at its own reference density (23,909 opacity lines,
+N(τ>1) = 191). Slow shell, classical transport, Planck 6000 K photon
+launch, energy-weighted, 3 seeds × 2×10⁶.
+
+#### 4.22.1 Ce II key legs (3800–3955 Å band, energy-weighted)
+
+| leg | UV | blue | optical | 3800–3955 |
+|---|---|---|---|---|
+| Sobolev, absorb | 0.349 | 0.005 | 0.350 | **0.0001** |
+| expansion, absorb | 0.380 | 0.112 | 0.412 | **0.224** |
+| Sobolev + branch (physics) | 0.500 | 0.495 | 0.785 | 0.556 |
+| expansion + branch (E8) | 0.496 | 0.592 | 0.810 | **1.183 (+113%)** |
+| Sobolev + TLA ε=0 → 1 | 0.815 → 0.353 | 0.588 → 0.069 | 0.886 → 0.446 | 0.531 → 0.072 |
+| expansion + TLA ε=0 → 1 | 0.810 → 0.382 | 0.662 → 0.161 | 0.899 → 0.496 | 0.746 → 0.316 |
+
+#### 4.22.2 Outcome C: ε_best is ion-dependent
+
+| band | La II (Sob leg) | Ce II | blend | La II (exp leg) | Ce II | blend |
+|---|---|---|---|---|---|---|
+| UV | 0.36 | 0.48 | 0.48 | 0.68 | 0.43 | 0.45 |
+| blue | 0.06 | 0.04 | 0.04 | 0.24 | 0.09 | 0.09 |
+| optical | unreach | 0.11 | 0.09 | unreach | 0.16 | 0.16 |
+| red | 0.02 | 0.12 | 0.13 | 0.03 | 0.22 | 0.21 |
+| NIR | 0.13 | 0.11 | 0.10 | 0.22 | 0.13 | 0.12 |
+| 3800–3955 | 0.07 | **unreach** | **unreach** | 0.32 | 0.17 | 0.15 |
+
+ε_best shifts by 0.11–0.24 per band between the ions, and reachability
+flips in opposite directions: La II's optical band is unreachable while
+Ce II's is reachable; La II's 3800–3955 Å band is reachable while Ce II's is
+not (branching delivers 0.556, pure scattering on the same opacity tops out
+at 0.531 — the cascade feeds the band from outside the TLA's reach). Ce II's
+χ²/dof minima are 108 (expansion, ε≈0.1) and 167 (Sobolev) — worse than
+La II's 44–53. The blend tracks Ce (the dominant forest) in every band:
+ε_best is set by composition, so a universal scalar ε does not exist even
+per band (outcome C on top of outcome B).
+
+#### 4.22.3 The branching-aware closure hits a density limit
+
+On La II, `expansion_branch` (Poisson absorption + exact A·β exit kernel)
+came within +21% of the physics. On Ce II it **overfills the band by +113%**
+(1.183 vs 0.556; blend +107%). The cause is in the absorption controls: with
+2,376 lines in the 100 Å window the true (Bernoulli) transmission is black
+(10⁻⁴) while the Poisson closure's per-bin saturation clipping transmits
+0.224 — an opacity error of three orders of magnitude that no exit-kernel
+correction can repair, and re-emission on top of an opacity that black
+should occur deep enough that little escapes; the closure instead re-emits
+where its too-transparent opacity puts the interactions. The line-identity
+recommendation (§4.20.4) is therefore **density-limited**: it holds where
+the Poisson and Bernoulli counts stay close (La II's 949-line forest), and
+fails where saturation clipping dominates (Ce II's 22,960). Paper I's F15
+mechanism, now measured under fluorescence.
+
+#### 4.22.4 The mixture's answers to E10's three questions
+
+1. Blanketing does not suppress the redistribution error: expansion+TLA
+   ε=1 sits −44.6% below the blend's branching (La-only: −38%).
+2. It does not move it either: the blend's band pattern is Ce II's.
+3. ε_best does change with forest density/composition — by tracking the
+   dominant ion (table above), which is the outcome-C statement itself.
+
 ## 5. Findings register
 
 | # | Finding | Where |
@@ -1167,6 +1235,7 @@ conclusion as the ε shifts, seen mechanistically
 | F21 | Closure sign reversal: +88% in pure absorption, −38% with complete thermalisation (ε = 1) and +34% with pure scattering (ε = 0), relative to direct branching; +21% once line identity is carried through the bin (`expansion_branch`) | §4.19, §4.20 |
 | F22 | No scalar ε reproduces La II fluorescence (outcome B): ε_best 0.02–0.06 (red, blue), 0.36 (UV) on the same opacity, the optical 4500–6000 Å band unreachable at any ε; branching is a blue → optical channel, thermalisation a blue → red one | §4.20 |
 | F23 | At v_bulk ~ 0.1c with worldline-consistent transport, outcome B survives (ε_best 0.20–0.49 by band, red unreachable) but calibrated ε values shift by 0.15–0.27 and the redistribution structure changes; the frozen-snapshot convention overstates blue transmission 3.8× and must not be used at high β | §4.21 |
+| F24 | Outcome C: ε_best is ion-dependent (La vs Ce shifts 0.11–0.24, reachability flips in opposite directions; the La+Ce blend tracks Ce) — and the branching-aware Poisson closure is density-limited: +21% on La II's 949-line forest but +113% on Ce II's 22,960-line forest, where saturation clipping leaves the closure 3 orders of magnitude too transparent in the band | §4.22 |
 
 ## 6. Caveats and limitations
 

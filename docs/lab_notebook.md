@@ -1059,6 +1059,44 @@ grid systematic, small against the 0.15-0.27 shifts. Thermal-bin emissivity
 weights and the E8 exit kernel stay at t_exp under worldline transport
 (stated in the docstring); expansion_branch was not run at high beta.
 
+## 9s. E9/E10: Ce II breaks the closure twice (2026-08-24)
+
+*Setup.* Ce II normalized by setup.py's recipe verbatim (`e9_ceII.ce_n_ion`):
+n_ion = 11,641 cm^-3 for tau_max = 5 in 3850-3950 A at 3000 K -- 2,376
+window lines against La II's handful, and 22,960 opacity lines overall
+(tau > 1e-3), reaching the far-IR. One data quirk: the Ce II GSI files carry
+J as '7/2'-style strings, so 2J+1 must go through
+`sobolev.populations.statistical_weight` (the first smoke test died on it,
+silently, because I had backgrounded the whole launch chain -- lesson
+re-learned: smoke in the foreground, launch in the background). The blend
+(`ForestAtom.from_gsi_blend`) concatenates ions with level offsets;
+branching stays ion-internal by construction and the structural test checks
+every upper level's downward lines belong to its own ion.
+
+*E9.* eps_best^La != eps_best^Ce in every band (0.11-0.24 shifts), and the
+reachability flips run OPPOSITE ways: La optical unreachable / Ce optical
+reachable; La band3800 reachable (0.07) / Ce band3800 unreachable -- direct
+branching 0.556 vs 0.531 for pure scattering at eps = 0 on the same
+opacity. Outcome C on top of outcome B. chi2/dof minima 108-167, worse than
+La's 44-53.
+
+*The one I did not expect: E8's closure is density-limited.* On La II,
+expansion_branch had looked like "most of the fix" (+21%). On Ce II it
+overfills the band +113% -- because the band is BLACK under Sobolev pure
+absorption (1e-4) while the Poisson closure transmits 0.224. Three orders
+of magnitude of opacity error from saturation clipping at 24 lines per
+angstrom; no exit kernel repairs that. F15's mechanism, now with
+fluorescence on top. The Paper II recommendation must carry this limit.
+
+*E10.* The blend answers the plan's three questions cleanly: blanketing
+neither suppresses (-44.6% vs La-only -38%) nor relocates the
+redistribution error, and eps_best tracks the dominant forest (blend ==
+Ce to 0.02 in every band). Composition sets the calibration -- the
+outcome-C statement, measured a second way.
+
+*Costs.* Ce legs 5-25 s each (3 seeds x 2e6); whole E9 ~10 min, E10 ~9 min.
+Results in e9_ceII.json, e10_blend.json.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,
