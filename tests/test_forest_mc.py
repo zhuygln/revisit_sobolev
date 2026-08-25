@@ -502,3 +502,27 @@ def test_worldline_forest_differential_matches_analytic():
     for rel in (None, "worldline"):
         assert abs(mc[rel] - ana[rel]) < 5e-3, (rel, mc, ana)
     assert abs((mc["worldline"] - mc[None]) - (ana["worldline"] - ana[None])) < 1.5e-3
+
+
+def test_blend_atom_structure_and_identity():
+    """E10: a La II + Ce II blend keeps branching ion-internal (every
+    downward line of an upper level belongs to that level's ion), keeps each
+    ion's opacity-line count, and the energy identity closes in branch mode."""
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[1]
+    la = (root / "data/57LaII_levels_calib.txt", root / "data/57LaII_transitions_calib.txt")
+    ce = (root / "data/58CeII_levels_calib.txt", root / "data/58CeII_transitions_calib.txt")
+    t_exp = 86400.0
+    single = {}
+    for name, (lp, tp) in (("la", la), ("ce", ce)):
+        single[name] = ForestAtom.from_gsi(lp, tp, 3000.0, 100.0, t_exp, tau_min=1e-3)
+    blend = ForestAtom.from_gsi_blend([(*la, 100.0), (*ce, 100.0)], 3000.0, t_exp, tau_min=1e-3)
+    assert blend.n_opacity == single["la"].n_opacity + single["ce"].n_opacity
+    for u, idx in blend.branch_lines.items():
+        ions = np.unique(blend.ion_of_line[idx])
+        assert ions.size == 1 and ions[0] == blend.ion_of_level[u]
+    ct = C * t_exp
+    lo, hi = blend.op_nu.min() * 0.999, blend.op_nu.max() * 1.001
+    res = run_mc(blend, ct / 300.0, ct / 100.0, t_exp, lo, hi, 100_000,
+                 "sobolev_branch", seed=6)
+    assert abs(res["accounting"]["identity_residual"]) < 1e-12

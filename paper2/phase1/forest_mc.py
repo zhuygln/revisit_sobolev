@@ -209,6 +209,42 @@ class ForestAtom:
         atom.level_energy_cm = lev["Energy"].to_numpy(dtype=float)
         return atom
 
+    @classmethod
+    def from_gsi_blend(cls, specs, temperature, t_exp, tau_min=1e-3, stim=True):
+        """A mixture: specs is a sequence of (levels_path, transitions_path,
+        n_ion). Level indices are offset per ion so the branching tables stay
+        ion-internal (no radiative coupling between ions -- physical: they
+        share only the radiation field). `ion_of_line` / `ion_of_level` and
+        `level_energy_cm` are concatenated; `levels` is None (E7's
+        configuration lookup is per-ion and not supported on a blend)."""
+        arrays = {k: [] for k in ("nu0", "f", "nl", "nu_", "A", "low", "up", "E")}
+        ion_line, ion_lev = [], []
+        offset = 0
+        for i, (lev_p, tr_p, n_ion) in enumerate(specs):
+            lev = load_gsi(lev_p); tr = load_gsi(tr_p)
+            frac = boltzmann_fractions_from_levels(lev, temperature)
+            low = tr["Lower"].to_numpy(); up = tr["Upper"].to_numpy()
+            g_l = statistical_weight(tr["J_Lower"].to_numpy())
+            arrays["nu0"].append(C / (tr["WV_Transition"].to_numpy() * 1e-8))
+            arrays["f"].append(10 ** tr["Log(gf)"].to_numpy() / g_l)
+            arrays["nl"].append(frac[low] * n_ion)
+            arrays["nu_"].append(frac[up] * n_ion)
+            arrays["A"].append(tr["A"].to_numpy())
+            arrays["low"].append(low + offset); arrays["up"].append(up + offset)
+            arrays["E"].append(lev["Energy"].to_numpy(dtype=float))
+            ion_line.append(np.full(len(tr), i)); ion_lev.append(np.full(len(lev), i))
+            offset += len(lev)
+        cat = {k: np.concatenate(v) for k, v in arrays.items()}
+        atom = cls(cat["nu0"], cat["f"], cat["nl"], cat["nu_"], cat["A"],
+                   cat["low"], cat["up"], t_exp, tau_min=tau_min, stim=stim,
+                   temperature=temperature)
+        atom.levels, atom.transitions, atom.temperature = None, None, temperature
+        atom.n_ion = [sp[2] for sp in specs]
+        atom.level_energy_cm = cat["E"]
+        atom.ion_of_line = np.concatenate(ion_line)
+        atom.ion_of_level = np.concatenate(ion_lev)
+        return atom
+
     # ---- samplers ------------------------------------------------------
     def thermal_sampler(self, emit_window=None):
         """Return a function u -> line index drawing from A n_u, optionally
