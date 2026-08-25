@@ -1,3 +1,33 @@
+> **Execution status — updated 2026-08-25.** Every experiment this plan
+> defines through Phase 4 has now been run; the gates are all decided.
+> Numbers and provenance live in `docs/results_report.md` §4.19–§4.22 and
+> the lab notebook §9p–§9s; this block maps the plan to what happened.
+>
+> | item | status | result |
+> |---|---|---|
+> | Paper I finalization (§1) | done, pushed | RE claim retracted, regression-guarded; stopping rule enforced (no Phase-1 numbers in Paper I) |
+> | E1 energy accounting | done | identity closes to roundoff in every mode; level-energy check 2×10⁻⁵ (GSI wavelength consistency) |
+> | E2 thermal width | done | SEDONA resolved RE 0.835 → 0.855 → 0.856 at v_D = 100/10/1 km/s (prediction stated in advance); MC within +0.7%; the MC's Δ_closure is v_D-free by construction |
+> | E3 β regression suite | done | incl. the A·β exit-kernel identity |
+> | E4/E5 ε sweep + χ² | done | **Outcome B**: ε_best 0.02–0.36 by band on the same opacity; optical 4500–6000 Å unreachable at any ε; χ²/dof ≥ 44 |
+> | E6 redistribution matrix | done | branching = blue→optical channel, thermalisation = blue→red; ε interpolates and can never have one without the other |
+> | E7 cascade pathways | done | pumps are 3300–4500 Å, not the far-UV (0.00% from 1142–2500 Å); 971 pathways, top 10 = 25% |
+> | E13 bulk velocity 0.1c (§8) | done | outcome B survives worldline transport at 0.05–0.15c; ε_best shifts 0.15–0.27 (v_bulk = validity-map axis); frozen-first-order transport overstates blue transmission 3.8× — unusable at high β |
+> | E8 line-dependent closure | done | +21% on La II — but **density-limited**: +113% on Ce II (see E9) |
+> | E9 Ce II | done | **Outcome C**: ε_best ion-dependent (shifts 0.11–0.24; reachability flips in opposite directions); the Poisson opacity is 3 orders of magnitude too transparent in Ce II's blacked-out band |
+> | E10 La+Ce mixture | done | blanketing neither suppresses (−44.6%) nor relocates the redistribution error; ε_best tracks the dominant forest |
+> | E11 source-T sweep | open | — |
+> | E12 shell-T sweep | open | — |
+> | NLTE (§13) | deferred by design | — |
+>
+> **Gate A** passed; **Gate B** = "no scalar ε works" (outcome B), and E9
+> adds outcome C; **Gate C** = qualitative verdict robust at 0.1c, calibration
+> not transferable, frozen convention excluded. Paper II's identity per §14:
+> *the SN-Ia scalar-closure result does not carry over to lanthanide
+> networks — and the fix must carry line identity, within its density limit.*
+> Next: E11/E12 if wanted, and the manuscript text
+> (`docs/paper2/manuscript.tex` skeleton is structured and waiting).
+
 # Updated Two-Paper Research Plan
 
 ## Current scientific split
