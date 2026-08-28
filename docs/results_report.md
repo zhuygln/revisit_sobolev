@@ -823,7 +823,7 @@ the trough is 0.1372 — the frozen target to 0.1%. The expansion mode sits at
 on one line. Figure: `docs/figures/fig_ladder.png`; table generator
 `minimal_1line/ladder_table.py`.
 
-### 4.19 Paper II Phase 1 — the whole ion, five treatments, one code (F19–F21)
+### 4.19 Paper II Phase 1 — the whole ion, one code (F19–F21)
 
 #### 4.19.1 Instrument
 
@@ -928,8 +928,11 @@ refills it to 0.866 — which is why Paper I's RE check is window-bound.
   B_ν) fails: −38.2% ± 0.3 below direct branching in the optical band, after
   +88% above it in pure absorption. The closure's error changes sign once
   fluorescence matters.
-- This is **provisional**: it establishes only that ε = 1 fails, not that no
-  scalar ε can work. The ε sweep (§4.20) decides.
+- At the time of this measurement the result was provisional — it
+  established only that ε = 1 fails. The ε sweep has since decided the
+  general question: no scalar ε works (§4.20, outcome B), no calibration
+  transfers across ions (§4.22, outcome C), and the verdict survives 0.1c
+  (§4.21).
 - The pumps are 3300–4500 Å, not the far-UV (E7): 0.00% of the band's escaped
   energy was launched in 1142–2500 Å; 971 pathways, top 10 = 25%, dominated by
   5d6p upper levels exiting the strong ground-connected lines after 2–8
