@@ -1270,6 +1270,28 @@ better than 1% at a table cost of tens to hundreds of kB. R5 (Nd II) is
 blocked pending GSI Nd II data; phases 5+ (temperature, epoch, low-rank,
 mixtures) are open.
 
+### 4.24 Paper III P5–P6 — the kernel's state space is (T_gas, τ_scale, ion) (F26)
+
+`paper3/phase3_temperature/tsweep.py`, `phase4_epoch/epoch.py`; La II,
+N_g = 32, every closure run scored against the same-configuration branch
+reference (3 seeds × 2×10⁶); predictions stated in advance (notebook §9u).
+
+| axis | fixed reference kernel | recomputed kernel | verdict |
+|---|---|---|---|
+| T_src 4000–8000 K | worst 0.75–1.41% | 0.79–0.98% | **transfers freely** — the radiation field enters only through the within-group absorbing-line mix |
+| T_gas 2500–5000 K | 3.9% (2500), 7.6% (4000), **9.6%** (5000) | ≤1.5% everywhere | **genuine axis** — Boltzmann factors reshuffle the τ set non-uniformly; the representation compresses at every LTE state, the state transfer fails |
+| epoch 0.5–4 d (τ_max 34→0.5) | 13.1% (0.5 d), 5.8% (2 d) | 0.08–1.7% | **collapses onto τ_scale**: a 1 d kernel trained at the target epoch's τ set matches the epoch's own kernel at every epoch (1.69/1.69, 0.99/0.63, 0.29/0.08%) |
+
+The τ-collapse is by construction — β and the branch chains depend only on
+{τ_j}, and geometry never enters the kernel — and it is now measured: the
+epoch axis disappears into a single scalar. T_gas cannot collapse the same
+way (it moves each line's τ by its own Boltzmann factor), so the plan's
+Phase-7 "smallest state space" question is answered ahead of schedule:
+
+**R_ij ≈ R_ij(T_gas, τ_scale, ion)** — three axes, one of them (per P5.1)
+never needing the incident spectrum, at ~4 LTE temperatures × a few
+τ_scales × ions, tens of kB per entry.
+
 ## 5. Findings register
 
 | # | Finding | Where |
@@ -1299,6 +1321,7 @@ mixtures) are open.
 | F23 | At v_bulk ~ 0.1c with worldline-consistent transport, outcome B survives (ε_best 0.20–0.49 by band, red unreachable) but calibrated ε values shift by 0.15–0.27 and the redistribution structure changes; the frozen-snapshot convention overstates blue transmission 3.8× and must not be used at high β | §4.21 |
 | F24 | Outcome C: ε_best is ion-dependent (La vs Ce shifts 0.11–0.24, reachability flips in opposite directions; the La+Ce blend tracks Ce) — and the branching-aware Poisson closure is density-limited: +21% on La II's 949-line forest but +113% on Ce II's 22,960-line forest, where saturation clipping leaves the closure 3 orders of magnitude too transparent in the band | §4.22 |
 | F25 | A discrete-table group redistribution operator reproduces explicit lanthanide branching: La II at 4–8 groups (≤1.6% every band), Ce II at 32–64 (≤2.9%/0.7%), bolometric ≤0.5‰–0.5%; within-group re-emission must be discrete (a continuous PDF double-counts self-absorption, error growing with refinement) | §4.23 |
+| F26 | The redistribution kernel's state space is (T_gas, τ_scale, ion): the source spectrum transfers freely (≤1.4% across 4000–8000 K), the epoch axis collapses exactly onto τ_scale (τ-matched kernel = own kernel at every epoch, fixed kernel fails at 13%), and T_gas is the one genuine axis (9.6% error transferring 3000 → 5000 K; ≤1.5% recomputed) | §4.24 |
 
 ## 6. Caveats and limitations
 

@@ -63,6 +63,7 @@ Source is [manuscript.tex](docs/paper/manuscript.tex); rebuild with
 | F23 | **The closure verdict survives 0.1c; the frozen shortcut does not.** With worldline-consistent transport (per-packet clock, exact Doppler, epoch-diluted τ, aberrated re-emission) on a 0.05–0.15c shell, no scalar ε reproduces branching either (ε_best 0.20–0.49 by band, red unreachable) — but calibrated ε values shift by 0.15–0.27 vs the slow shell and the redistribution structure changes, so v_bulk is a validity-map axis; a frozen first-order snapshot overstates blue transmission 3.8× at 0.1c and is unusable for closure work | §4.21 |
 | F24 | **Outcome C, and the closure's density limit.** ε_best is ion-dependent: La → Ce shifts of 0.11–0.24 per band with reachability flipping in opposite directions, and the La+Ce blend tracks the dominant (Ce) forest — composition sets the calibration. The branching-aware Poisson closure is density-limited: +21% on La II's 949-line forest, +113% on Ce II's 22,960-line one, where per-bin saturation clipping leaves the closure three orders of magnitude too transparent in a band the true opacity blacks out | §4.22 |
 | F25 | **The middle method works (Paper III).** A group-to-group redistribution operator with discrete exit-frequency tables reproduces explicit A·β branching on the same opacity: La II to ≤1.6% in every band with a 4×4 matrix, Ce II to 2.9%/0.7% at 32/64 groups, bolometric to ≤0.5%, tables of tens–hundreds of kB. Within-group re-emission must be discrete: a continuous PDF double-counts self-absorption with an error that grows under refinement | §4.23 |
+| F26 | **The kernel's state space is (T_gas, τ_scale, ion).** Source spectrum transfers freely (≤1.4%, 4000–8000 K); the epoch axis collapses exactly onto τ_scale (a τ-matched 1 d kernel equals each epoch's own kernel, while the fixed kernel fails at 13% where τ_max = 34); T_gas is the one genuine axis (3000→5000 K transfer errs 9.6%, recomputed ≤1.5%) | §4.24 |
 
 Full write-up with figures and numbers:
 **[docs/results_report.md](docs/results_report.md)**.
@@ -153,4 +154,6 @@ radiative-equilibrium check is included (F18). The response letter is
    and NLTE come afterwards. Paper III (`paper3/`) opens the constructive
    question — how much redistribution information is actually required? —
    and its first gate is passed: a discrete-table R_ij reproduces both
-   forests (F25), La II at 4–8 groups and Ce II at 32–64.
+   forests (F25), La II at 4–8 groups and Ce II at 32–64 — and the
+   kernel's state space is just (T_gas, τ_scale, ion): the source spectrum
+   transfers freely and the epoch axis collapses onto τ_scale (F26).

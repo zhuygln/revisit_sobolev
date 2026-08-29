@@ -1136,6 +1136,28 @@ speed; tables 14-500 kB dominated by the exit-line list. R5 blocked: no
 Nd II GSI files in data/. Next per plan: temperature/epoch transferability
 (P5-P6), low-rank structure (P8), the mixture composition rule (P9).
 
+## 9u. P5/P6: three predictions, three confirmations (2026-08-29)
+
+Predicted before the runs, from the kernel's structure (its rows depend on
+the state only through {tau_j} and the within-group absorbing-line mix):
+source-T transfer near-exact; gas-T genuine (Boltzmann factors move each
+line's tau by its own factor); epoch collapsing onto tau_scale (geometry
+never enters the kernel; tau propto n t = t^-2 homologously).
+
+All three landed (report 4.24): T_src 4000-8000 K with the fixed 6000 K
+kernel -- worst 1.4%, indistinguishable from recomputed; T_gas 5000 K with
+the 3000 K kernel -- 9.6%, recomputed 0.2%; the epoch tau-collapse EXACT
+within noise at every epoch including t = 0.5 d where tau_max = 34 and the
+fixed kernel fails at 13%. The tau-matched control is the elegant one: a
+1 d atom with n_ion scaled t^-2 has the identical tau set, its kernel
+trains in the 1 d geometry, and it reproduces the 0.5 d transport as well
+as the 0.5 d kernel itself does.
+
+So the Phase-7 question answered itself early: R_ij(T_gas, tau_scale,
+ion), with T_src free and t folded into tau_scale. A production table is
+~4 LTE temperatures x a few tau_scales x ions at tens of kB each.
+Costs: each sweep 4 configs x 6-9 legs, whole chain ~13 min.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,
