@@ -62,6 +62,7 @@ Source is [manuscript.tex](docs/paper/manuscript.tex); rebuild with
 | F22 | **No scalar ε reproduces La II fluorescence (outcome B).** Sweeping the two-level-atom thermalisation parameter on the same opacity as the physics leg, ε_best is 0.02–0.06 in the red and blue, 0.36 in the UV, and the optical 4500–6000 Å band is outside the TLA's reach at any ε; the redistribution matrices show why — branching is a blue → optical channel, thermalisation a blue → red one, and ε interpolates between them. The expansion leg's ε_best ≈ 0.3 in the 3800–3955 Å band is a compensation with its +21% opacity error and does not carry to other bands | §4.20 |
 | F23 | **The closure verdict survives 0.1c; the frozen shortcut does not.** With worldline-consistent transport (per-packet clock, exact Doppler, epoch-diluted τ, aberrated re-emission) on a 0.05–0.15c shell, no scalar ε reproduces branching either (ε_best 0.20–0.49 by band, red unreachable) — but calibrated ε values shift by 0.15–0.27 vs the slow shell and the redistribution structure changes, so v_bulk is a validity-map axis; a frozen first-order snapshot overstates blue transmission 3.8× at 0.1c and is unusable for closure work | §4.21 |
 | F24 | **Outcome C, and the closure's density limit.** ε_best is ion-dependent: La → Ce shifts of 0.11–0.24 per band with reachability flipping in opposite directions, and the La+Ce blend tracks the dominant (Ce) forest — composition sets the calibration. The branching-aware Poisson closure is density-limited: +21% on La II's 949-line forest, +113% on Ce II's 22,960-line one, where per-bin saturation clipping leaves the closure three orders of magnitude too transparent in a band the true opacity blacks out | §4.22 |
+| F25 | **The middle method works (Paper III).** A group-to-group redistribution operator with discrete exit-frequency tables reproduces explicit A·β branching on the same opacity: La II to ≤1.6% in every band with a 4×4 matrix, Ce II to 2.9%/0.7% at 32/64 groups, bolometric to ≤0.5%, tables of tens–hundreds of kB. Within-group re-emission must be discrete: a continuous PDF double-counts self-absorption with an error that grows under refinement | §4.23 |
 
 Full write-up with figures and numbers:
 **[docs/results_report.md](docs/results_report.md)**.
@@ -149,4 +150,7 @@ radiative-equilibrium check is included (F18). The response letter is
    the branching-aware closure itself is density-limited (+21% on La II,
    +113% on Ce II, whose 22,960-line forest the Poisson opacity cannot
    black out) (F24). Paper II's identity is that result; manuscript text
-   and NLTE come afterwards.
+   and NLTE come afterwards. Paper III (`paper3/`) opens the constructive
+   question — how much redistribution information is actually required? —
+   and its first gate is passed: a discrete-table R_ij reproduces both
+   forests (F25), La II at 4–8 groups and Ce II at 32–64.

@@ -1097,6 +1097,45 @@ outcome-C statement, measured a second way.
 *Costs.* Ce legs 5-25 s each (3 seeds x 2e6); whole E9 ~10 min, E10 ~9 min.
 Results in e9_ceII.json, e10_blend.json.
 
+## 9t. Paper III R1-R4: the 4x4 matrix that worked, after the artifact that taught me why (2026-08-29)
+
+*Build.* `paper3/` per the received plan: `forest_mc` gains one mode
+(`sobolev_group`) and an rng-inert event collector (Gate 0 = 0.0 sigma,
+bit-for-bit against e4/e9); `RedistributionKernel` trains on the
+chain-collapsed (nu_abs -> nu_exit) events -- 1.18M (La), 4.57M (Ce).
+Design choices recorded in paper3/README.md: event-level kernel,
+photon-count sampling rows, R^E + q_dep as the conservation object
+(exact to 1e-16), q_core left to transport.
+
+*The v1 artifact -- worth a subsection of the methods paper on its own.*
+With within-group re-emission from a continuous sub-histogram, the closure
+UNDERSHOT the 3800-3955 band by an amount that GREW with refinement (-5% at
+8 groups -> -21% at 128) while bolometric stayed sub-percent. Non-
+convergence under refinement smells like transport, not information loss,
+and the interactions-per-packet counter nailed it: 0.216 -> 0.272 vs 0.196
+in branch. A histogram-sampled frequency lands just above the true exit
+line half the time, and the packet immediately re-sweeps the line whose
+escape probability the kernel's training already resolved. Exits are
+discrete line frequencies; sample them exactly (float64 events -- float32
+storage would have broken the equality the at-resonance skip relies on)
+and the artifact vanishes.
+
+*R3/R4 with discrete tables.* La II: worst band 1.6% at Ng = 4 (!),
+chi2/dof 0.2-0.3 across the whole 200-bin spectrum, bolometric -0.01%,
+fresh seeds confirm. Ce II: monotone 7.5% -> 2.9% (32) -> 0.7% (64).
+Gate 1 excellent (La) / strong-to-excellent (Ce). Why the asymmetry: La's
+blue->blue block is 0.79 -- redistribution is nearly input-independent, the
+global discrete emission distribution does the work; Ce moves real energy
+across bands (blue->blue 0.25) and needs the input dependence resolved.
+chi2/dof < 1 partly reflects matched launch seeds with the reference
+(correlated noise); the fresh-seed check covers it.
+
+*Answer to the plan's boxed question:* yes -- the middle method is worth
+pursuing. Costs: kernels build in seconds; group legs run at branch-leg
+speed; tables 14-500 kB dominated by the exit-line list. R5 blocked: no
+Nd II GSI files in data/. Next per plan: temperature/epoch transferability
+(P5-P6), low-rank structure (P8), the mixture composition rule (P9).
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

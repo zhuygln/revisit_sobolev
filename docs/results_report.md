@@ -1211,6 +1211,65 @@ mechanism, now measured under fluorescence.
 3. ε_best does change with forest density/composition — by tracking the
    dominant ion (table above), which is the outcome-C statement itself.
 
+### 4.23 Paper III R1–R4 — a small redistribution matrix does reproduce lanthanide branching (F25)
+
+`paper3/` (plan in `paper3/plan.md`): the middle method between scalar ε and
+explicit branching — a group-to-group operator R_ij sampled once per
+absorption event, no atomic level inspected after absorption. Same Sobolev
+opacity on both sides, so every error is redistribution compression alone.
+
+- **Phase 0** (`phase0_reference/reference.py`): the branch legs re-run with
+  an event collector (rng-inert, Gate 0 = 0.0σ, bit-for-bit) log every
+  chain-collapsed event (ν_absorbed → ν_exit): 1.18M events for La II,
+  4.57M for Ce II, 3 seeds × 2×10⁶.
+- **Kernel** (`redistribution/kernel.py`): photon-count rows drive sampling;
+  the energy matrix R^E with q_dep (net comoving deposit, negative for net
+  blueward fluorescence) closes Σ_j R^E_ij + q_dep_i = 1 to 10⁻¹⁶ by
+  construction. Five-test battery (energy rows, identity ⇒ coherent, rebin
+  invariance exact on nested edges, empty-row fallback, zero opacity).
+- **The one methodological finding en route:** with a *continuous*
+  within-group re-emission PDF the closure double-counts self-absorption —
+  a histogram-sampled frequency lands just above its true exit line half
+  the time and re-sweeps the line whose escape the kernel's training
+  already resolved. The error **grows with refinement** (interactions per
+  packet 0.216 → 0.272 vs 0.196 in branch; 3800–3955 Å −5% at 8 groups,
+  −21% at 128; first `compression_laII.json`). Exits are line frequencies,
+  so the within-group tables must be **discrete**; with exact-frequency
+  tables the at-resonance convention skips the just-emitted line and the
+  artifact vanishes. Any grouped-redistribution implementation needs this
+  or an equivalent correction.
+
+#### The compression sweep (R3/R4), worst band residual vs full branching
+
+| N_g | La II worst dF_b | La χ²/dof | Ce II worst dF_b | Ce χ²/dof | table (La / Ce) |
+|---|---|---|---|---|---|
+| 4 | 1.6% | 0.3 | 7.5% | 3.5 | 14 / 224 kB |
+| 8 | 0.7% | 0.2 | 7.4% | 3.3 | 16 / 225 kB |
+| 16 | 1.0% | 0.2 | 7.3% | 2.5 | 20 / 230 kB |
+| 32 | 0.9% | 0.3 | **2.9%** | 0.6 | 34 / 244 kB |
+| 64 | 0.3% | 0.2 | **0.7%** | 0.3 | 87 / 297 kB |
+| 128 | 1.1% | 0.2 | 1.5% | 0.3 | 289 / 499 kB |
+
+Bolometric closes to ≤0.5% at every N_g (≤0.05% by 64 groups); fresh-seed
+runs (11–13) confirm the matched-seed values (wide bands ±0.16%, the narrow
+band within its ~1% MC noise). Table sizes are dominated by the discrete
+exit-line list, not the matrix.
+
+**Gate 1: excellent for La II at N_g = 4; strong for Ce II at 32 and
+sub-percent at 64.** The answer to the plan's immediate question is yes —
+the middle method is worth pursuing. Two readings, both earned:
+(i) La II's redistribution is almost input-independent (blue→blue block
+0.79) — the global discrete emission distribution does most of the work and
+a 4×4 matrix suffices; Ce II moves far more energy between bands
+(blue→blue 0.25, blue→optical 0.19, optical→red 0.13) and needs 32–64
+groups — the plan's Gate-2 "adaptive resolution" outcome, with both ions
+comfortably compressible. (ii) Where the scalar ε failed (F22), the
+calibration didn't transfer (F24), and the Poisson closure hit its density
+limit (F24), a ≤64-group discrete-table R_ij reproduces both forests to
+better than 1% at a table cost of tens to hundreds of kB. R5 (Nd II) is
+blocked pending GSI Nd II data; phases 5+ (temperature, epoch, low-rank,
+mixtures) are open.
+
 ## 5. Findings register
 
 | # | Finding | Where |
@@ -1239,6 +1298,7 @@ mechanism, now measured under fluorescence.
 | F22 | No scalar ε reproduces La II fluorescence (outcome B): ε_best 0.02–0.06 (red, blue), 0.36 (UV) on the same opacity, the optical 4500–6000 Å band unreachable at any ε; branching is a blue → optical channel, thermalisation a blue → red one | §4.20 |
 | F23 | At v_bulk ~ 0.1c with worldline-consistent transport, outcome B survives (ε_best 0.20–0.49 by band, red unreachable) but calibrated ε values shift by 0.15–0.27 and the redistribution structure changes; the frozen-snapshot convention overstates blue transmission 3.8× and must not be used at high β | §4.21 |
 | F24 | Outcome C: ε_best is ion-dependent (La vs Ce shifts 0.11–0.24, reachability flips in opposite directions; the La+Ce blend tracks Ce) — and the branching-aware Poisson closure is density-limited: +21% on La II's 949-line forest but +113% on Ce II's 22,960-line forest, where saturation clipping leaves the closure 3 orders of magnitude too transparent in the band | §4.22 |
+| F25 | A discrete-table group redistribution operator reproduces explicit lanthanide branching: La II at 4–8 groups (≤1.6% every band), Ce II at 32–64 (≤2.9%/0.7%), bolometric ≤0.5‰–0.5%; within-group re-emission must be discrete (a continuous PDF double-counts self-absorption, error growing with refinement) | §4.23 |
 
 ## 6. Caveats and limitations
 
