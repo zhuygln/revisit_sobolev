@@ -47,6 +47,19 @@ def pump_band():
             NU_13 / (1.0 - 0.8 * np.sqrt(R_OUT**2 - R_CORE**2) / ct))
 
 
+
+
+def _toy_kernel():
+    """A small kernel for the sobolev_group mode in generic-mode tests:
+    built from synthetic events spanning the toy atom's band."""
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "paper3"))
+    from redistribution import RedistributionKernel
+    rng = np.random.default_rng(7)
+    nin = rng.uniform(3e14, 1.3e15, 20000)
+    nout = nin * rng.uniform(0.7, 1.05, 20000)
+    return RedistributionKernel.from_branching_mc(nin, nout, np.ones(20000), 8)
+
+
 # ---------------------------------------------------------------- conservation
 
 @pytest.mark.parametrize("mode", MODES)
@@ -56,7 +69,8 @@ def test_photon_number_is_conserved_in_every_mode(mode):
     if "thermal" in mode or "tla" in mode:
         # give the upper level a population so the thermal sampler has weight
         fa.emis_w = np.array([1.0, 1.0]); fa.temperature = 3000.0
-    res = run_mc(fa, R_CORE, R_OUT, T_EXP, lo, hi, 20000, mode, seed=1, eps=0.5)
+    kw = {"kernel": _toy_kernel()} if mode == "sobolev_group" else {}
+    res = run_mc(fa, R_CORE, R_OUT, T_EXP, lo, hi, 20000, mode, seed=1, eps=0.5, **kw)
     assert res["n_escaped"] + res["n_core"] + res["n_absorbed"] == res["n_packets"]
     if mode.endswith("absorb"):
         assert res["n_absorbed"] == res["n_interacted"]
@@ -204,7 +218,8 @@ def test_energy_identity_holds_to_roundoff_in_every_mode(mode):
     if "thermal" in mode or "tla" in mode:
         fa.emis_w = np.array([1.0, 1.0])   # the toy atom's upper level is unpopulated
     lo, hi = pump_band()
-    res = run_mc(fa, R_CORE, R_OUT, T_EXP, lo, hi, 30000, mode, seed=2, eps=0.5)
+    kw = {"kernel": _toy_kernel()} if mode == "sobolev_group" else {}
+    res = run_mc(fa, R_CORE, R_OUT, T_EXP, lo, hi, 30000, mode, seed=2, eps=0.5, **kw)
     a = res["accounting"]
     assert abs(a["identity_residual"]) < 1e-12
     assert a["N_inj"] == res["n_packets"]

@@ -100,7 +100,7 @@ from sobolev.atomic_data import load_gsi
 from sobolev.constants import C, SIGMA_CLASSICAL, H, K_B
 from sobolev.populations import boltzmann_fractions_from_levels, statistical_weight
 
-MODES = ("sobolev_absorb", "expansion_absorb", "sobolev_thermal",
+MODES = ("sobolev_group", "sobolev_absorb", "expansion_absorb", "sobolev_thermal",
          "expansion_thermal", "sobolev_branch",
          # E4: two-level-atom thermalisation parameter eps -- with probability
          # eps a thermal re-emission, otherwise coherent (resonant) scattering;
@@ -369,7 +369,8 @@ def sample_launch(rng, nu_min, nu_max, n, t_core=None):
 def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
            seed=0, emit_window=None, dnu_over_nu=4.17e-5, max_steps=100000,
            t_core=None, beta_on_expansion=False, exp_emit="bin",
-           launch_weight="photon", eps=1.0, relativity=None):
+           launch_weight="photon", eps=1.0, relativity=None,
+           kernel=None, collect_events=False):
     """exp_emit : how the expansion legs place a thermally re-emitted packet
     in frequency. "bin" (default) -- uniformly within the sampled line's
     comoving bin, which is what an emissivity kappa_exp B_nu per bin means and
@@ -399,6 +400,8 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
     emissivity weights w_b and the E8 exit kernel (`expansion_branch`)."""
     if mode not in MODES:
         raise ValueError(f"mode must be one of {MODES}, got {mode!r}")
+    if mode == "sobolev_group" and kernel is None:
+        raise ValueError("sobolev_group needs a RedistributionKernel via kernel=")
     if relativity not in (None, "worldline"):
         raise ValueError(f"relativity must be None or 'worldline', got {relativity!r}")
     wl = relativity == "worldline"
@@ -488,6 +491,10 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
     last_line = np.full(n_packets, -1, np.int64)    # E7: last emitting line
     # expansion mode: optical depth still to travel before the next interaction
     tau_r = rng.exponential(1.0, n_packets) if not sobolev else None
+    # Paper III: per-event (nu_absorbed_cm, nu_exit_rest, packet weight) --
+    # the branch chain collapsed to one pair; draws no rng, so collecting is
+    # bit-for-bit inert for every leg
+    ev_in, ev_out, ev_w = ([], [], []) if collect_events else (None, None, None)
     # worldline transport: per-packet light-time clock and velocity boundaries
     if wl:
         ctime = np.full(n_packets, ct)
@@ -606,6 +613,30 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
         # new direction) until one escapes. `cur_up` tracks the upper level
         # the packet currently sits in (branch mode); a re-absorption in the
         # line just emitted returns it to that line's upper level.
+        if outcome == "group":
+            # Paper III closure: the absorbed packet's group decides where it
+            # re-emits; no atomic level is inspected after absorption. Rows
+            # never populated in the reference scatter coherently (nan).
+            nu_rest = kernel.sample_nu_out(nu_abs_cm, rng)
+            coh_k = ~np.isfinite(nu_rest)
+            if coh_k.any():
+                nu_rest[coh_k] = nu_abs_cm[coh_k]
+            if wl:
+                mu_c = rng.uniform(-1.0, 1.0, hi.size)
+                bl = r[hi] / ctime[hi]
+                gl = 1.0 / np.sqrt(1.0 - bl * bl)
+                den = 1.0 + bl * mu_c
+                mu[hi] = (mu_c + bl) / den
+                nu[hi] = nu_rest * gl * den
+            else:
+                mu_new = rng.uniform(-1.0, 1.0, hi.size)
+                mu[hi] = mu_new
+                nu[hi] = nu_rest / (1.0 - r[hi] * mu_new / ct)
+            e_dep_lab[hi] += H * (nu_lab_before - nu[hi])
+            e_dep_cm[hi] += H * (nu_abs_cm - nu_rest)
+            if collect_events:
+                ev_in.append(np.asarray(nu_abs_cm)); ev_out.append(nu_rest.copy()); ev_w.append(w[hi])
+            continue
         todo = np.arange(hi.size)
         bin_emit = not sobolev and exp_emit == "bin"   # expansion legs: thermal draws are bins
         is_bin = np.zeros(hi.size, bool)               # which entries of new_line are bin ids
@@ -689,6 +720,8 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
             nu_rest[coherent] = nu_abs_cm[coherent]
         ok = first & ~is_bin & ~coherent
         np.add.at(chain_exit, new_line[ok], 1)
+        if collect_events:
+            ev_in.append(np.asarray(nu_abs_cm)); ev_out.append(nu_rest.copy()); ev_w.append(w[hi])
         if wl:
             # isotropic in the comoving frame, aberrated to the lab
             mu_c = rng.uniform(-1.0, 1.0, hi.size)
@@ -733,7 +766,11 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
                 n_interacted=int((n_inter > 0).sum()), first_branch=first_branch,
                 chain_exit=chain_exit, steps=step + 1, accounting=accounting,
                 e_dep_lab=e_dep_lab, e_dep_cm=e_dep_cm, e_lev=e_lev, n_events=n_events,
-                n_reabs=n_reabs, nu_final=nu_final, first_line=first_line, last_line=last_line)
+                n_reabs=n_reabs, nu_final=nu_final, first_line=first_line, last_line=last_line,
+                events=((np.concatenate(ev_in) if ev_in else np.empty(0),
+                         np.concatenate(ev_out) if ev_out else np.empty(0),
+                         np.concatenate(ev_w) if ev_w else np.empty(0))
+                        if collect_events else None))
 
 
 def _weights(res, weight):
