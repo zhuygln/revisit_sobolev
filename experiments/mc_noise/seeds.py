@@ -38,8 +38,8 @@ sys.path.insert(0, str(ROOT))
 from sobolev.constants import C
 from sobolev.spectra import band_ratio
 
-SEDONA = "/home/yozhuz_223/personal/pubsed/src/sedona6.ex"
-SEDONA_HOME = "/home/yozhuz_223/personal/pubsed"
+SEDONA_HOME = os.environ.get("SEDONA_HOME", os.path.expanduser("~/personal/pubsed"))
+SEDONA = os.environ.get("SEDONA_EXE", f"{SEDONA_HOME}/src/sedona6.ex")
 FOREST = ROOT / "experiments/laII_forest"
 R_CORE, T_CORE = 8.64e12, 6000.0
 BAND, MARGIN = (3800.0, 3955.0), (3952.0, 3970.0)

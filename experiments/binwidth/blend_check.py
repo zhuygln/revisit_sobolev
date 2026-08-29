@@ -12,8 +12,8 @@ import numpy as np
 HERE = Path(__file__).parent; ROOT = HERE.parents[1]
 sys.path.insert(0, str(ROOT))
 from sobolev.spectra import band_ratio
-SEDONA = "/home/yozhuz_223/personal/pubsed/src/sedona6.ex"
-SEDONA_HOME = "/home/yozhuz_223/personal/pubsed"
+SEDONA_HOME = os.environ.get("SEDONA_HOME", os.path.expanduser("~/personal/pubsed"))
+SEDONA = os.environ.get("SEDONA_EXE", f"{SEDONA_HOME}/src/sedona6.ex")
 BLEND = ROOT / "experiments/multiion"
 BAND, MARGIN, RC, TC = (3800.0, 3955.0), (3952.0, 3970.0), 8.64e12, 6000.0
 C = 2.99792458e10

@@ -1,0 +1,29 @@
+# Makefile.wsl -- no-root WSL2 build (Ubuntu 22.04)
+#
+# Deps live in a micromamba env at ~/personal/sedona-deps/env (gsl, hdf5,
+# zlib, openmpi) plus Lua 5.1.5 built from source with `make generic`.
+#
+# MPI is not optional: src/main/sedona.h hardcodes `#define MPI_PARALLEL 1`,
+# so a serial g++ build fails on mpi.h. We therefore compile with mpicxx --
+# but conda's mpicxx wrapper defaults to conda's own compiler, so force the
+# system g++ underneath it with OMPI_CXX.
+#
+# Build:  cd src && bash install.sh wsl   ->  src/sedona6.ex
+# Run:    SEDONA_HOME=~/personal/pubsed
+
+DEPS    = $(HOME)/personal/sedona-deps
+
+GSL_DIR  = $(DEPS)/env
+HDF5_DIR = $(DEPS)/env
+LUA_DIR  = $(DEPS)/lua-5.1.5
+
+CXX = env OMPI_CXX=g++ $(DEPS)/env/bin/mpicxx
+
+CXXFLAGS = -O3 -Wno-c++11-long-long
+
+# the conda env's shared libs must be findable at run time as well as link time
+CLOPT_EXTRA = -Wl,-rpath,$(DEPS)/env/lib
+
+include make.exec
+
+CLOPT += $(CLOPT_EXTRA)

@@ -37,8 +37,8 @@ from sobolev.formal_transfer import emergent_luminosity, planck_bnu
 from sobolev.optical_depth import tau_sobolev
 from sobolev.sobolev_leg import tau_sobolev_relativistic
 
-SEDONA = "/home/yozhuz_223/personal/pubsed/src/sedona6.ex"
-SEDONA_HOME = "/home/yozhuz_223/personal/pubsed"
+SEDONA_HOME = os.environ.get("SEDONA_HOME", os.path.expanduser("~/personal/pubsed"))
+SEDONA = os.environ.get("SEDONA_EXE", f"{SEDONA_HOME}/src/sedona6.ex")
 M_P = 1.67262192e-24
 
 # --- the shipped 2-level atom: one line, f from A ---

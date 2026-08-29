@@ -37,8 +37,8 @@ sys.path.insert(0, str(ROOT))
 from sobolev.constants import C
 from sobolev.formal_transfer import planck_bnu
 
-SEDONA = "/home/yozhuz_223/personal/pubsed/src/sedona6.ex"
-SEDONA_HOME = "/home/yozhuz_223/personal/pubsed"
+SEDONA_HOME = os.environ.get("SEDONA_HOME", os.path.expanduser("~/personal/pubsed"))
+SEDONA = os.environ.get("SEDONA_EXE", f"{SEDONA_HOME}/src/sedona6.ex")
 M_P = 1.67262192e-24; SIGMA_CLASSICAL = 0.026540083433884684
 T_EXP = 20 * 86400.0; V_CORE, V_MAX = 1.0e8, 3.0e8; T_SHELL = 2000.0
 F_LU = 0.6647; LAMBDA0_CM = 12398.42 / 10.2 * 1e-8; NU0 = C / LAMBDA0_CM

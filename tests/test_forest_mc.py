@@ -495,6 +495,8 @@ def test_worldline_forest_differential_matches_analytic():
     from pathlib import Path
     from sobolev.optical_depth import tau_sobolev
     from sobolev.sobolev_leg import sobolev_attenuation
+    if not (ROOT / "data/57LaII_transitions_calib.txt").exists():
+        pytest.skip("GSI La II data not present")
     root = Path(__file__).resolve().parents[1]
     d = np.load(root / "experiments/laII_forest/forest_lines.npz")
     sys.path.insert(0, str(root / "paper2/phase1"))
@@ -527,6 +529,8 @@ def test_blend_atom_structure_and_identity():
     root = Path(__file__).resolve().parents[1]
     la = (root / "data/57LaII_levels_calib.txt", root / "data/57LaII_transitions_calib.txt")
     ce = (root / "data/58CeII_levels_calib.txt", root / "data/58CeII_transitions_calib.txt")
+    if not (la[1].exists() and ce[1].exists()):
+        pytest.skip("GSI La II / Ce II data not present")
     t_exp = 86400.0
     single = {}
     for name, (lp, tp) in (("la", la), ("ce", ce)):

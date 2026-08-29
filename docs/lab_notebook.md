@@ -1158,11 +1158,63 @@ ion), with T_src free and t folded into tau_scale. A production table is
 ~4 LTE temperatures x a few tau_scales x ions at tens of kB each.
 Costs: each sweep 4 configs x 6-9 legs, whole chain ~13 min.
 
+## 9v. Second machine: what a clone does not carry (2026-08-29)
+
+Stood the project up on a new WSL2 box. The science all reproduced --
+Paper III Gate 0 bit-for-bit on both ions (La II 1,176,141 events, Ce II
+4,571,017, every band 0.0 sigma), R3 at Ng = 4 giving the same 1.62% worst
+band, and the Paper II phase-1 driver returning the -38% closure gap. Under
+numpy 2.5.2 the reference JSONs differ from the committed ones only in the
+last decimal place (summation order) with `n_events` identical, so the event
+stream itself is unchanged.
+
+What did *not* survive the move, in rising order of how long it took to see:
+
+1. *Python.* The box's default is 3.9; the package needs >= 3.10 and
+   numpy >= 2. Made `.venv` a 3.12 env so the notebook's absolute
+   `.venv/bin/python` launch idiom keeps working.
+2. *Data.* `data/` is gitignored, so a clone has none of it -- but two tests
+   (`test_worldline_forest_differential_matches_analytic`,
+   `test_blend_atom_structure_and_identity`) lacked the `pytest.skip` guard
+   the other three have and *failed* rather than skipped. Guards added; a
+   data-less clone now reports 169 passed / 5 skipped, no red.
+3. *The SEDONA build recipe.* `Makefile.wsl` is written in §5 as living "in
+   the pubsed clone" -- which is outside this repo, so it was simply gone.
+   Rewrote it from §5's prose and this time committed it, at
+   `docs/sedona/Makefile.wsl`, with the whole machine walkthrough in
+   `docs/sedona/SETUP.md`. It builds clean first try. Both §5 gotchas were
+   real and still are: `sedona.h:10` hardcodes `#define MPI_PARALLEL 1`, and
+   conda's mpicxx needs `OMPI_CXX=g++` under it. Added `-Wl,-rpath` so the
+   env's libs resolve without `LD_LIBRARY_PATH`.
+4. *The one that would have bitten silently.* All ten SEDONA drivers
+   hardcoded `/home/yozhuz_223/personal/pubsed` -- the first machine's home.
+   Every `experiments/` script was unrunnable anywhere else. Now
+   `SEDONA_HOME` (default `~/personal/pubsed`) with a `SEDONA_EXE` override.
+5. *LaTeX.* conda-forge `texlive-core` cannot build `pdflatex.fmt`: it ships
+   `mktexlsr` as a shell script where the TeX Live perl layer wants the
+   `mktexlsr.pl` module, so `fmtutil` dies in `@INC`. TinyTeX is the fix.
+   The manuscript rebuilds to the same 21 pages, text identical but for
+   `\today` -- and the committed PDF is 21 pp, not the 19 the README claimed
+   (the README's "68 tests" was equally stale; it is 174).
+
+*A blocked item that was never blocked.* R5/P10 wanted Nd II and the notes
+said "no Nd II GSI files in data/". Nd II is in the same Zenodo record as
+La and Ce -- it is just the biggest ion in the archive (687 MB of
+transitions, 79% of the download), which is presumably why it never came
+down. Extracted and parsed: 9,994 levels, 3,336,077 transitions, 10 s and
+1.9 GB peak RSS, half-integer J as fractions exactly like Ce II. So Gate 2
+(is compression generic across three ions?) and the atomic-data robustness
+test are both open.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,
   deps `~/personal/sedona-deps`. Rebuild: `cd ~/personal/pubsed/src && bash
-  install.sh wsl`.
+  install.sh wsl`. The `Makefile.wsl` that build needs is committed here at
+  `docs/sedona/Makefile.wsl` -- copy it into `src/makefiles/` first. Full
+  from-scratch setup for a new machine: `docs/sedona/SETUP.md`.
+- Experiment drivers find SEDONA through `SEDONA_HOME` (default
+  `~/personal/pubsed`) or `SEDONA_EXE`. Never hardcode a home directory.
 - Figures are working outputs in `outputs/` (gitignored); the copies the
   report references live in `docs/figures/` (committed).
 - SEDONA run directories under `experiments/**/run_*/` are gitignored;

@@ -26,13 +26,15 @@ variable at fixed line width and geometry.
 
 ## The paper
 
-**[docs/paper/manuscript.pdf](docs/paper/manuscript.pdf)** — 19 pp in MNRAS
+**[docs/paper/manuscript.pdf](docs/paper/manuscript.pdf)** — 21 pp in MNRAS
 format, readable directly on GitHub. Written for a reader with no
 radiative-transfer background: a primer builds every concept from scratch and
 an appendix derives every formula.
 
 Source is [manuscript.tex](docs/paper/manuscript.tex); rebuild with
-`cd docs/paper && make` (needs pdflatex + bibtex).
+`cd docs/paper && make` (needs pdflatex + bibtex — see
+[docs/sedona/SETUP.md](docs/sedona/SETUP.md) §4; conda-forge's texlive-core
+does not work).
 
 ## Findings
 
@@ -80,7 +82,9 @@ notebooks/     Phase 0: single-line toy model, GSI line spacing
 paper2/        Paper II: Phase 0 (SEDONA audit, TARDIS record, three-level
                branching MC) and Phase 1 (whole-ion Sobolev/expansion MC
                with fluorescence, the La II measurement)
-tests/         68 tests pinning the physics of every module
+paper3/        Paper III: the reduced redistribution closure (kernel,
+               frozen reference, compression sweep, T and epoch transfer)
+tests/         174 tests pinning the physics of every module
 docs/          results report, lab notebook, planning inputs, paper/
 data/          raw atomic data (gitignored; provenance in data/README.md)
 outputs/       working figures (gitignored; committed copies in docs/figures/)
@@ -88,15 +92,26 @@ outputs/       working figures (gitignored; committed copies in docs/figures/)
 
 ## Setup
 
+Needs Python >= 3.10 and numpy >= 2, so a distro 3.8/3.9 will not do.
+
 ```bash
-python -m venv .venv && source .venv/bin/activate
-pip install -e ".[dev]" h5py
-pytest                      # 68 passed
+python3 -m venv .venv              # or: conda create -p .venv python=3.12
+.venv/bin/python -m pip install -e ".[dev]" h5py
+.venv/bin/python -m pytest         # 174 passed
 ```
 
 Atomic data is not committed — see [data/README.md](data/README.md) for the
-Zenodo record and re-download instructions. SEDONA lives outside this repo;
-its no-root WSL2 build recipe is in the lab notebook, §5.
+Zenodo record and re-download instructions. Tests that need it skip cleanly
+when `data/` is empty, so a data-less clone reports passes and 5 skips.
+
+SEDONA lives outside this repo and is needed only by `experiments/`
+(everything in `paper2/` and `paper3/` is pure Python). Its no-root WSL2
+build recipe is in the lab notebook §5, with the working `Makefile.wsl` and
+the full machine-setup walkthrough — Python, data, SEDONA, LaTeX — in
+**[docs/sedona/SETUP.md](docs/sedona/SETUP.md)**.
+
+The SEDONA experiment drivers find the binary through `SEDONA_HOME`
+(default `~/personal/pubsed`) or `SEDONA_EXE`.
 
 Per-experiment reproduction commands are in
 [docs/results_report.md](docs/results_report.md) §7.

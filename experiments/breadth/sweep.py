@@ -44,8 +44,8 @@ from sobolev.constants import C, SIGMA_CLASSICAL
 from sobolev.populations import boltzmann_fractions_from_levels, statistical_weight
 from sobolev.sobolev_leg import expansion_damp, sobolev_attenuation
 
-SEDONA = "/home/yozhuz_223/personal/pubsed/src/sedona6.ex"
-SEDONA_HOME = "/home/yozhuz_223/personal/pubsed"
+SEDONA_HOME = os.environ.get("SEDONA_HOME", os.path.expanduser("~/personal/pubsed"))
+SEDONA = os.environ.get("SEDONA_EXE", f"{SEDONA_HOME}/src/sedona6.ex")
 M_P = 1.67262192e-24
 CM1_TO_EV = 1.239841984e-4
 SB = 5.670374e-5

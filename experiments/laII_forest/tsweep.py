@@ -31,8 +31,8 @@ from sobolev.populations import boltzmann_fractions_from_levels
 
 HERE = Path(__file__).parent
 ROOT = HERE.parents[1]
-SEDONA = "/home/yozhuz_223/personal/pubsed/src/sedona6.ex"
-SEDONA_HOME = "/home/yozhuz_223/personal/pubsed"
+SEDONA_HOME = os.environ.get("SEDONA_HOME", os.path.expanduser("~/personal/pubsed"))
+SEDONA = os.environ.get("SEDONA_EXE", f"{SEDONA_HOME}/src/sedona6.ex")
 
 M_P = 1.67262192e-24
 A_LA = 139.0
