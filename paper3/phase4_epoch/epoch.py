@@ -8,7 +8,7 @@ tau set as the target epoch). Prediction, in advance: tau_matched == own to
 within noise -- beta and the branch chains depend only on {tau_j}, and
 geometry never enters the kernel -- so R(t) collapses onto R(tau_scale).
 """
-import json, sys
+import argparse, json, sys
 from pathlib import Path
 import numpy as np
 
@@ -17,12 +17,11 @@ ROOT = HERE.parents[1]
 for p in (ROOT, ROOT / "paper2/phase1", ROOT / "paper3", ROOT / "paper3/phase0_reference"):
     sys.path.insert(0, str(p))
 from forest_mc import ForestAtom, band_ratio, run_mc
-from run_forest import LEV, TR, R_CORE, R_OUT, T_EXP, T_SHELL, T_CORE, nu_of
+from run_forest import R_CORE, R_OUT, T_EXP, T_SHELL, T_CORE, nu_of
 from redistribution import RedistributionKernel
-from reference import BANDS, SEEDS, N
+from reference import BANDS, SEEDS, N, ion_inputs
 
 NG = 32
-FIXED = ROOT / "paper3/phase1_groups/kernel_laII_ng32.npz"
 
 
 def train(atom, r_core, r_out, t_exp, lo, hi):
@@ -35,10 +34,10 @@ def train(atom, r_core, r_out, t_exp, lo, hi):
     return RedistributionKernel.from_branching_mc(nu_in, nu_out, np.ones(nu_in.size), NG)
 
 
-def main():
-    d = np.load(ROOT / "experiments/laII_forest/forest_lines.npz"); n_ref = float(d["n_ion"])
-    fixed = RedistributionKernel.load(FIXED)
-    results = {"ng": NG, "runs": {}}
+def main(ion):
+    LEV, TR, n_ref = ion_inputs(ion)
+    fixed = RedistributionKernel.load(ROOT / f"paper3/phase1_groups/kernel_{ion}_ng{NG}.npz")
+    results = {"ion": ion, "ng": NG, "runs": {}}
     for t_d in (0.5, 1.0, 2.0, 4.0):
         t_exp = T_EXP * t_d; rc, ro = R_CORE * t_d, R_OUT * t_d
         atom = ForestAtom.from_gsi(LEV, TR, T_SHELL, n_ref * t_d ** -3, t_exp, tau_min=1e-3)
@@ -70,9 +69,12 @@ def main():
             line += f"  {name}: {100*row[name]['worst']:5.2f}%"
         print(line, flush=True)
         results["runs"][f"{t_d:g}"] = row
-    (HERE / "epoch.json").write_text(json.dumps(results, indent=1))
-    print("wrote epoch.json")
+    name = "epoch.json" if ion == "laII" else f"epoch_{ion}.json"
+    (HERE / name).write_text(json.dumps(results, indent=1))
+    print(f"wrote {name}")
 
 
 if __name__ == "__main__":
-    main()
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--ion", default="laII", choices=["laII", "ceII", "ndII"])
+    main(ap.parse_args().ion)

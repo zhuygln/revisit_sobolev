@@ -65,7 +65,9 @@ does not work).
 | F23 | **The closure verdict survives 0.1c; the frozen shortcut does not.** With worldline-consistent transport (per-packet clock, exact Doppler, epoch-diluted τ, aberrated re-emission) on a 0.05–0.15c shell, no scalar ε reproduces branching either (ε_best 0.20–0.49 by band, red unreachable) — but calibrated ε values shift by 0.15–0.27 vs the slow shell and the redistribution structure changes, so v_bulk is a validity-map axis; a frozen first-order snapshot overstates blue transmission 3.8× at 0.1c and is unusable for closure work | §4.21 |
 | F24 | **Outcome C, and the closure's density limit.** ε_best is ion-dependent: La → Ce shifts of 0.11–0.24 per band with reachability flipping in opposite directions, and the La+Ce blend tracks the dominant (Ce) forest — composition sets the calibration. The branching-aware Poisson closure is density-limited: +21% on La II's 949-line forest, +113% on Ce II's 22,960-line one, where per-bin saturation clipping leaves the closure three orders of magnitude too transparent in a band the true opacity blacks out | §4.22 |
 | F25 | **The middle method works (Paper III).** A group-to-group redistribution operator with discrete exit-frequency tables reproduces explicit A·β branching on the same opacity: La II to ≤1.6% in every band with a 4×4 matrix, Ce II to 2.9%/0.7% at 32/64 groups, bolometric to ≤0.5%, tables of tens–hundreds of kB. Within-group re-emission must be discrete: a continuous PDF double-counts self-absorption with an error that grows under refinement | §4.23 |
-| F26 | **The kernel's state space is (T_gas, τ_scale, ion).** Source spectrum transfers freely (≤1.4%, 4000–8000 K); the epoch axis collapses exactly onto τ_scale (a τ-matched 1 d kernel equals each epoch's own kernel, while the fixed kernel fails at 13% where τ_max = 34); T_gas is the one genuine axis (3000→5000 K transfer errs 9.6%, recomputed ≤1.5%) | §4.24 |
+| F26 | **The kernel's state space is (T_gas, τ_scale, ion) — for La II.** Source spectrum transfers freely (≤1.4%, 4000–8000 K); the epoch axis collapses exactly onto τ_scale (a τ-matched 1 d kernel equals each epoch's own kernel, while the fixed kernel fails at 13% where τ_max = 34); T_gas is the one genuine axis (3000→5000 K transfer errs 9.6%, recomputed ≤1.5%). The source-spectrum half does not generalize — see F28 | §4.24, §4.25 |
+| F27 | **Gate 2: compression is generic (outcome A).** A discrete-table R_ij reproduces explicit branching for all three ions on the same opacity: La II 1.62% and Ce II 7.48% at N_g = 4, Ce reaching 2.89%/0.74% at 32/64 — and **Nd II 0.44% at N_g = 4**, the easiest of the three despite 3,336,077 transitions, because the fixed τ_max = 5 normalization leaves it only 4,496 opacity lines against Ce's 22,960. The blue→blue block separates the hard ion from the easy ones but does not order them | §4.25 |
+| F28 | **The kernel's state space is itself ion-dependent.** F26's structural claims carry to Nd II — the epoch axis still collapses onto τ_scale exactly, T_gas is still the genuine axis (6.4–19.2% fixed, ≤0.51% recomputed). Its third claim does not: Nd's fixed-kernel error is monotone in T_src and flips sign across the training point (+12.44 → −4.88% over 4000–8000 K) where La's is flat at ~1%. Denser groups draw a more evenly weighted absorbing-line mix, so reweighting the continuum reweights the rows | §4.25 |
 
 Full write-up with figures and numbers:
 **[docs/results_report.md](docs/results_report.md)**.
@@ -168,7 +170,13 @@ radiative-equilibrium check is included (F18). The response letter is
    black out) (F24). Paper II's identity is that result; manuscript text
    and NLTE come afterwards. Paper III (`paper3/`) opens the constructive
    question — how much redistribution information is actually required? —
-   and its first gate is passed: a discrete-table R_ij reproduces both
-   forests (F25), La II at 4–8 groups and Ce II at 32–64 — and the
-   kernel's state space is just (T_gas, τ_scale, ion): the source spectrum
-   transfers freely and the epoch axis collapses onto τ_scale (F26).
+   and both its gates are passed. A discrete-table R_ij reproduces
+   explicit branching on the same opacity (F25), and it does so for every
+   ion tried: La II and Nd II at four groups, Ce II at 32–64, which is
+   Gate 2's outcome A (F27). The epoch axis collapses exactly onto
+   τ_scale and T_gas is the one genuine thermodynamic axis (F26), both
+   ion-independent — but whether the source spectrum can be dropped is
+   not: it transfers freely for La and fails at 12% for Nd (F28), so
+   T_src must be checked per ion before a kernel is tabulated. Next:
+   the low-rank structure (P8), the mixture composition rule (P9), and
+   then grouped opacity (P11), which is the target architecture.

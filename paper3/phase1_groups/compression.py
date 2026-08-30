@@ -104,6 +104,6 @@ def main(ion, groups):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--ion", default="laII", choices=["laII", "ceII"])
+    ap.add_argument("--ion", default="laII", choices=["laII", "ceII", "ndII"])
     ap.add_argument("--groups", type=int, nargs="+", default=[4, 8, 16, 32, 64, 128])
     a = ap.parse_args(); main(a.ion, a.groups)

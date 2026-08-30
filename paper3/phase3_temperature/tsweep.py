@@ -24,12 +24,20 @@ ROOT = HERE.parents[1]
 for p in (ROOT, ROOT / "paper2/phase1", ROOT / "paper3", ROOT / "paper3/phase0_reference"):
     sys.path.insert(0, str(p))
 from forest_mc import ForestAtom, band_ratio, run_mc
-from run_forest import LEV, TR, R_CORE, R_OUT, T_EXP, T_SHELL, nu_of
+from run_forest import R_CORE, R_OUT, T_EXP, T_SHELL, nu_of
 from redistribution import RedistributionKernel
-from reference import BANDS, SEEDS, N
+from reference import BANDS, SEEDS, N, ion_inputs
 
 NG = 32
-FIXED = ROOT / "paper3/phase1_groups/kernel_laII_ng32.npz"
+
+
+def fixed_kernel_path(ion):
+    return ROOT / f"paper3/phase1_groups/kernel_{ion}_ng{NG}.npz"
+
+
+def out_path(here, which, ion):
+    """La II keeps the original filenames; other ions are suffixed."""
+    return here / (f"tsweep_{which}.json" if ion == "laII" else f"tsweep_{which}_{ion}.json")
 
 
 def run_config(atom, lo, hi, t_src, kernels):
@@ -67,10 +75,10 @@ def summarize(tag, out):
     return {"ref_bands": ref, **res}
 
 
-def main(which):
-    fixed = RedistributionKernel.load(FIXED)
-    d = np.load(ROOT / "experiments/laII_forest/forest_lines.npz"); n_ion = float(d["n_ion"])
-    results = {"which": which, "ng": NG, "runs": {}}
+def main(which, ion):
+    fixed = RedistributionKernel.load(fixed_kernel_path(ion))
+    LEV, TR, n_ion = ion_inputs(ion)
+    results = {"which": which, "ion": ion, "ng": NG, "runs": {}}
     if which == "src":
         atom = ForestAtom.from_gsi(LEV, TR, T_SHELL, n_ion, T_EXP, tau_min=1e-3)
         lo, hi = atom.op_nu.min() * 0.995, atom.op_nu.max() * 1.005
@@ -90,10 +98,13 @@ def main(which):
             # compare via the fixed kernel's edges by rebuilding own on them)
             results["runs"][f"{t_gas:.0f}"] = s
             print(f"      (opacity lines {atom.n_opacity}, tau_max {atom.op_tau.max():.1f})", flush=True)
-    (HERE / f"tsweep_{which}.json").write_text(json.dumps(results, indent=1))
-    print(f"wrote tsweep_{which}.json")
+    p = out_path(HERE, which, ion)
+    p.write_text(json.dumps(results, indent=1))
+    print(f"wrote {p.name}")
 
 
 if __name__ == "__main__":
-    ap = argparse.ArgumentParser(); ap.add_argument("--which", choices=["src", "gas"], required=True)
-    main(ap.parse_args().which)
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--which", choices=["src", "gas"], required=True)
+    ap.add_argument("--ion", default="laII", choices=["laII", "ceII", "ndII"])
+    a = ap.parse_args(); main(a.which, a.ion)

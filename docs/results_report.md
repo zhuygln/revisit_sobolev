@@ -1292,6 +1292,100 @@ Phase-7 "smallest state space" question is answered ahead of schedule:
 never needing the incident spectrum, at ~4 LTE temperatures × a few
 τ_scales × ions, tens of kB per entry.
 
+### 4.25 Paper III R5/P4 — Nd II, Gate 2, and an ion-dependent state space (F27, F28)
+
+`paper3/phase0_reference/reference.py --ion ndII`, `phase1_groups/compression.py
+--ion ndII`, then the P5/P6 sweeps re-run with `--ion ndII`. Nd II was
+recorded as blocked on missing data; it is in the same Zenodo record as La and
+Ce, and is simply the largest ion in the archive (687 MB, 3,336,077
+transitions). Gate 0 is skipped for Nd — it checks this wrapper against the
+Paper II result for the same ion, and there is no Paper II Nd run; the wrapper
+had already reproduced La II and Ce II bit-for-bit.
+
+**The forest is smaller than the line list suggests.** At the fixed τ_max = 5
+normalization, 57,916 Nd lines fall in the 3850–3950 Å window (579 per Å,
+against Ce's 24), so pinning the strongest line at τ = 5 puts n_ion at
+1,273 cm⁻³ — an order of magnitude below Ce's 11,641 — and leaves only 4,496
+lines above the τ > 10⁻³ cut, against Ce's 22,960. Held to the plan's own
+convention, the densest ion in the database is not the deepest problem: every
+Nd band sits monotonically between La and Ce.
+
+#### Gate 2: compression is generic (F27)
+
+| ion | bol | blue→blue | worst band error at N_g = 4 / 32 / 64 |
+|---|---|---|---|
+| La II | 0.9626 | 0.785 | 1.62% / 0.94% / 0.33% |
+| Ce II | 0.8256 | 0.247 | 7.48% / 2.89% / 0.74% |
+| Nd II | 0.9252 | 0.572 | **0.44% / 0.25% / 0.11%** |
+
+Outcome **A**, in its strongest form: all three ions compress, two of them at
+four groups. Nd reaches 0.44% in every band at N_g = 4, bolometric +0.05%,
+χ²/dof 0.4 over the 200-bin spectrum.
+
+*The §4.23 mechanism is only half confirmed.* The blue→blue block was offered
+as the explanation for why La compresses at 4 and Ce needs 32–64: a high block
+means redistribution is nearly input-independent, so the global exit
+distribution does the work. Ce remains the outlier on both axes — lowest block
+(0.247), the only real compression error. But Nd sits at 0.572, *below* La's
+0.785, and compresses *better*, so the block does not order La against Nd. La
+and Nd are both on the Monte Carlo noise floor at every group count (La's own
+sequence is non-monotone: 0.33% at 64 but 1.05% at 128), and this run cannot
+separate them. The block distinguishes the hard ion from the easy ones; it
+does not rank the easy ones. That needs more packets, not more groups.
+
+#### The state space is ion-dependent (F28, amending F26)
+
+The P5/P6 sweeps, re-run on Nd at N_g = 32 against the same-configuration
+branch reference:
+
+| axis | La II (F26) | Nd II | verdict |
+|---|---|---|---|
+| τ_scale collapse (epoch 0.5–4 d) | τ-matched = own at every epoch | τ-matched = own at every epoch (0.91/0.91, 0.25/0.25, 0.15/0.15, 0.14/0.06%) | **holds, ion-independent** |
+| T_gas 2500–5000 K | fixed 3.9–9.6%, recomputed ≤1.5% | fixed 6.4/11.1/19.2%, recomputed ≤0.51% | **holds, larger amplitude** |
+| T_src 4000–8000 K | fixed 0.75–1.41% (flat) | fixed **+12.44 / +3.89 / +0.25 / −4.88%** | **fails for Nd** |
+
+The two structural claims carry over. The epoch axis collapses onto τ_scale
+for Nd exactly as for La — a 1 d kernel trained at the target epoch's τ set
+matches that epoch's own kernel at every epoch, including t = 0.5 d where
+τ_max = 26.4 and the fixed 1 d kernel errs 19.1%. T_gas remains the genuine
+axis, more strongly for Nd than La.
+
+What does not carry over is P5.1. For La the fixed-kernel error is flat at
+~1% across 4000–8000 K — its own noise floor, since the recomputed kernel
+scores the same — and F26 concluded the source spectrum transfers freely. For
+Nd the fixed-kernel error is **monotone in T_src and changes sign across the
+6000 K training point**: +12.44% at 4000 K, +3.89% at 5000, +0.25% at 6000
+(where fixed *is* own), −4.88% at 8000. A signed, monotone trend centred on
+the training temperature is a state-transfer signature, not scatter.
+
+The mechanism is the one §9u named, read the other way: the rows depend on the
+radiation field through the *within-group absorbing-line mix*. For La, 949
+opacity lines mean each group is dominated by a few strong lines whatever the
+incident spectrum, so the mix is spectrum-insensitive. Nd's groups draw from a
+much denser and more evenly weighted set, so reweighting the incident
+continuum reweights which lines absorb, and the kernel's rows move with it.
+
+So **R_ij(T_gas, τ_scale, ion)** is La's state space, not every ion's; for Nd,
+T_src is a fourth axis. The safe general statement is that the epoch axis
+always collapses onto τ_scale, T_gas is always genuine, and *whether* T_src
+can be dropped is itself an ion-dependent question that must be checked per
+ion before a kernel is tabulated.
+
+*Caveat.* One control point is off: at T_src = 5000 K the recomputed ("own")
+kernel errs −2.63% in band3800 where it is ≤0.25% at the other three
+temperatures. That bounds Nd's band3800 noise floor above La's and makes the
++3.89% fixed point at 5000 K marginal on its own. The 4000 K point (+12.44%)
+and the sign flip are well clear of it, so the conclusion stands, but the
+sweep is worth repeating at higher packet count before the numbers are quoted
+individually.
+
+*Costs.* Nd reference 17 s for 3 seeds × 2×10⁶ (1,648,874 events); each group
+leg 14–15 s; atom build 27 s including the 687 MB parse, 2.5 GB peak RSS.
+Tables 298–371 kB, dominated by the exit-line list.
+
+*Not done.* P10's atomic-data robustness test (GSI vs an independent Nd
+source) still needs a second data source.
+
 ## 5. Findings register
 
 | # | Finding | Where |
@@ -1321,7 +1415,9 @@ never needing the incident spectrum, at ~4 LTE temperatures × a few
 | F23 | At v_bulk ~ 0.1c with worldline-consistent transport, outcome B survives (ε_best 0.20–0.49 by band, red unreachable) but calibrated ε values shift by 0.15–0.27 and the redistribution structure changes; the frozen-snapshot convention overstates blue transmission 3.8× and must not be used at high β | §4.21 |
 | F24 | Outcome C: ε_best is ion-dependent (La vs Ce shifts 0.11–0.24, reachability flips in opposite directions; the La+Ce blend tracks Ce) — and the branching-aware Poisson closure is density-limited: +21% on La II's 949-line forest but +113% on Ce II's 22,960-line forest, where saturation clipping leaves the closure 3 orders of magnitude too transparent in the band | §4.22 |
 | F25 | A discrete-table group redistribution operator reproduces explicit lanthanide branching: La II at 4–8 groups (≤1.6% every band), Ce II at 32–64 (≤2.9%/0.7%), bolometric ≤0.5‰–0.5%; within-group re-emission must be discrete (a continuous PDF double-counts self-absorption, error growing with refinement) | §4.23 |
-| F26 | The redistribution kernel's state space is (T_gas, τ_scale, ion): the source spectrum transfers freely (≤1.4% across 4000–8000 K), the epoch axis collapses exactly onto τ_scale (τ-matched kernel = own kernel at every epoch, fixed kernel fails at 13%), and T_gas is the one genuine axis (9.6% error transferring 3000 → 5000 K; ≤1.5% recomputed) | §4.24 |
+| F26 | The redistribution kernel's state space is (T_gas, τ_scale, ion) **for La II**: the source spectrum transfers freely (≤1.4% across 4000–8000 K), the epoch axis collapses exactly onto τ_scale (τ-matched kernel = own kernel at every epoch, fixed kernel fails at 13%), and T_gas is the one genuine axis (9.6% error transferring 3000 → 5000 K; ≤1.5% recomputed). The T_src-free half does **not** generalize — see F28 | §4.24, §4.25 |
+| F27 | **Gate 2: compression is generic (outcome A).** All three ions compress with a discrete-table R_ij on the same opacity: La II 1.62% and Nd II 0.44% at N_g = 4, Ce II 2.89%/0.74% at 32/64. Nd II has 188× La's transitions but, at the fixed τ_max = 5 normalization, only 4,496 opacity lines against Ce's 22,960, and every Nd band sits between La and Ce. The §4.23 blue→blue mechanism separates the hard ion (Ce, block 0.247) from the easy ones but does not order them: Nd's block is 0.572, below La's 0.785, yet it compresses better — both are on the MC noise floor | §4.25 |
+| F28 | **The kernel's state space is itself ion-dependent.** The two structural claims of F26 carry to Nd II — the epoch axis collapses onto τ_scale exactly (τ-matched = own at every epoch, fixed kernel 19.1% at τ_max = 26.4) and T_gas stays the genuine axis (6.4–19.2% fixed, ≤0.51% recomputed). F26's third claim does not: the Nd fixed-kernel error is monotone in T_src and changes sign across the 6000 K training point (+12.44 / +3.89 / +0.25 / −4.88% at 4000/5000/6000/8000 K) where La's is flat at its ~1% noise floor. Denser groups draw from a more evenly weighted absorbing-line mix, so reweighting the continuum reweights the rows. Whether T_src can be dropped must be checked per ion | §4.25 |
 
 ## 6. Caveats and limitations
 

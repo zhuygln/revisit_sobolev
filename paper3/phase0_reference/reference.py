@@ -9,7 +9,10 @@ reference_events.npz (the raw event pairs, ~tens of MB) is gitignored --
 it regenerates deterministically from the recorded seeds; the json and the
 60-bin end-to-end matrix are committed.
 
-Usage: python reference.py [--ion laII|ceII]
+Nd II (R5) has no Paper II counterpart, so its Gate 0 is skipped -- see the
+note at the check itself.
+
+Usage: python reference.py [--ion laII|ceII|ndII]
 """
 import argparse, hashlib, json, sys, time
 from pathlib import Path
@@ -20,21 +23,59 @@ ROOT = HERE.parents[1]
 for p in (ROOT, ROOT / "paper2/phase1", ROOT / "paper3"):
     sys.path.insert(0, str(p))
 from sobolev.constants import C, H
+from sobolev.optical_depth import SIGMA_CLASSICAL
+from sobolev.atomic_data import load_gsi
+from sobolev.populations import boltzmann_fractions_from_levels, statistical_weight
 from forest_mc import ForestAtom, band_ratio, run_mc, spectrum
 from run_forest import LEV, TR, R_CORE, R_OUT, T_EXP, T_SHELL, T_CORE, nu_of
-from e9_ceII import CE_LEV, CE_TR, ce_n_ion
+from e9_ceII import CE_LEV, CE_TR, ce_n_ion, WINDOW, TAU_MAX_TARGET
+
+ND_LEV = ROOT / "data/60NdII_levels_calib.txt"
+ND_TR = ROOT / "data/60NdII_transitions_calib.txt"
 
 BANDS = {"UV": (1142.0, 3300.0), "blue": (3300.0, 4500.0), "optical": (4500.0, 6000.0),
          "red": (6000.0, 9000.0), "NIR": (9000.0, 17697.0), "band3800": (3800.0, 3955.0)}
 SEEDS = (1, 2, 3); N = 2_000_000
 
 
-def build_atom(ion):
+def nd_n_ion():
+    """setup.py's recipe verbatim on the Nd II files (as ce_n_ion does for Ce).
+
+    Nd II is the densest forest in the GSI set: 57,916 lines land in the
+    3850-3950 A window against Ce II's 2,376, so pinning the strongest line
+    at tau = 5 puts n_ion an order of magnitude below Ce's and leaves FEWER
+    lines above the tau > 1e-3 opacity cut (4,496 vs 22,960). The recipe is
+    held fixed for comparability across the three ions; the regime it selects
+    is deliberately the blanketed corner of F7.
+    """
+    levels = load_gsi(ND_LEV); lines = load_gsi(ND_TR)
+    lam = lines["WV_Transition"].to_numpy()
+    win = lines[(lam >= WINDOW[0]) & (lam < WINDOW[1])].reset_index(drop=True)
+    frac = boltzmann_fractions_from_levels(levels, T_SHELL)
+    pop = frac[win["Lower"].to_numpy()]
+    g_l = statistical_weight(win["J_Lower"].to_numpy())   # Nd II carries '9/2'-style J strings
+    f_lu = 10 ** win["Log(gf)"].to_numpy() / g_l
+    tau_per_n = SIGMA_CLASSICAL * f_lu * pop * win["WV_Transition"].to_numpy() * 1e-8 * T_EXP
+    return TAU_MAX_TARGET / tau_per_n.max(), len(win)
+
+
+def ion_inputs(ion):
+    """(levels path, transitions path, reference n_ion) for an ion.
+
+    Split out of build_atom so the P5/P6 sweeps, which rebuild the atom at
+    other temperatures and densities, can reach the same inputs without
+    duplicating each ion's normalization.
+    """
     if ion == "laII":
         d = np.load(ROOT / "experiments/laII_forest/forest_lines.npz")
-        n_ion, lev, tr = float(d["n_ion"]), LEV, TR
-    else:
-        n_ion, _ = ce_n_ion(); lev, tr = CE_LEV, CE_TR
+        return LEV, TR, float(d["n_ion"])
+    if ion == "ceII":
+        n_ion, _ = ce_n_ion(); return CE_LEV, CE_TR, n_ion
+    n_ion, _ = nd_n_ion(); return ND_LEV, ND_TR, n_ion
+
+
+def build_atom(ion):
+    lev, tr, n_ion = ion_inputs(ion)
     atom = ForestAtom.from_gsi(lev, tr, T_SHELL, n_ion, T_EXP, tau_min=1e-3)
     hashes = {p.name: hashlib.sha256(p.read_bytes()).hexdigest()[:16] for p in (lev, tr)}
     return atom, n_ion, hashes
@@ -85,6 +126,16 @@ def main(ion):
           " ".join(f"{b}={np.mean(out['bands'][b]):.4f}" for b in BANDS))
 
     # ---- Gate 0
+    if ion == "ndII":
+        # Gate 0 checks this wrapper against the Paper II result for the same
+        # ion. There is no Paper II Nd II run, so there is nothing to
+        # reproduce: the check is skipped rather than faked. The wrapper is
+        # already validated -- it reproduced La II and Ce II bit-for-bit
+        # (identical event counts, every band 0.0 sigma), and Nd changes only
+        # which files build_atom reads.
+        print("  Gate 0 skipped: no Paper II Nd II baseline exists to check against")
+        print("GATE 0 N/A")
+        return True
     ref_file = HERE.parents[0] / ("phase1_groups" if False else ".")  # keep flat
     src = ROOT / ("paper2/phase1/e4_eps_sweep.json" if ion == "laII" else "paper2/phase1/e9_ceII.json")
     prev = json.load(open(src))["legs"]["sobolev_branch"]["bands"] if ion == "laII" else \
@@ -103,5 +154,5 @@ def main(ion):
 
 
 if __name__ == "__main__":
-    ap = argparse.ArgumentParser(); ap.add_argument("--ion", default="laII", choices=["laII", "ceII"])
+    ap = argparse.ArgumentParser(); ap.add_argument("--ion", default="laII", choices=["laII", "ceII", "ndII"])
     main(ap.parse_args().ion)

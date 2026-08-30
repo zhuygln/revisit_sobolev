@@ -1206,6 +1206,99 @@ down. Extracted and parsed: 9,994 levels, 3,336,077 transitions, 10 s and
 (is compression generic across three ions?) and the atomic-data robustness
 test are both open.
 
+## 9w. R5: Nd II compresses, and Gate 2 lands on outcome A (2026-08-29)
+
+*The blocked item was never blocked* -- Nd II is in the same Zenodo record as
+La and Ce (notebook 9v). Added `nd_n_ion()` to the Phase 0 reference (the
+setup.py recipe verbatim, as `ce_n_ion` does for Ce), the `build_atom` branch
+and `--ion ndII`; `compression.py` needed only its `choices` list widened,
+everything else was already keyed off the ion name. The change is inert for
+the existing ions: La II re-ran bit-for-bit afterwards, 1,176,141 events and
+every band 0.0 sigma.
+
+*Gate 0 is skipped for Nd, deliberately.* It checks this wrapper against the
+Paper II result for the same ion, and there is no Paper II Nd run. Rather
+than invent a baseline, the check prints "GATE 0 N/A" with the reason: the
+wrapper is already validated -- it reproduced La II and Ce II bit-for-bit --
+and Nd changes only which files `build_atom` reads.
+
+*The surprise is the forest size.* Nd II has 3,336,077 transitions, 188x La
+and 8x Ce, but at the fixed tau_max = 5 normalization it yields only 4,496
+opacity lines against Ce's 22,960. 57,916 Nd lines land in the 3850-3950 A
+window (579 per angstrom, against Ce's 24), so pinning the strongest line at
+tau = 5 drives n_ion to 1273 cm^-3 -- an order of magnitude below Ce's
+11,641 -- and most of the forest falls below the tau > 1e-3 cut. Held to the
+plan's own convention, the densest ion in the database is not the deepest
+problem: every Nd band sits monotonically between La and Ce.
+
+| ion | bol | blue->blue | worst band error at N_g = 4 / 32 / 64 |
+|---|---|---|---|
+| La II | 0.9626 | 0.785 | 1.62% / 0.94% / 0.33% |
+| Ce II | 0.8256 | 0.247 | 7.48% / 2.89% / 0.74% |
+| Nd II | 0.9252 | 0.572 | 0.44% / 0.25% / 0.11% |
+
+*Gate 2: outcome A.* All three ions compress, and two of them at four
+groups. Nd is the easiest of the three despite the largest line list.
+
+*What this does to the 9t mechanism.* The blue->blue block was the proposed
+explanation for why La compresses at 4 and Ce needs 32-64: high blue->blue
+means redistribution is nearly input-independent and the global exit
+distribution does the work. Nd tests it and the test is only half passed.
+Ce still stands out as the ion with both the lowest block (0.247) and the
+only real compression error. But Nd sits at 0.572, below La's 0.785, and
+compresses *better* -- so the block does not order La against Nd. The honest
+reading is that La and Nd are both sitting on the MC noise floor at every
+group count (La's own sequence is non-monotone: 0.33% at 64 but 1.05% at
+128, which is noise, not information loss), and this run cannot resolve
+them. The block separates the hard ion from the easy ones; it does not rank
+the easy ones. Distinguishing them needs more packets, not more groups.
+
+*Costs.* Nd reference 17s for 3 seeds x 2e6 (1,648,874 events); each group
+leg 14-15s; atom build 27s including the 687 MB parse, 2.5 GB peak RSS.
+Tables are 298-371 kB against La's 14-500 kB -- dominated by the exit-line
+list, as before.
+
+*P5/P6 on Nd, same session.* Both sweeps were La-hardcoded in the same three
+places (LEV/TR, n_ion from forest_lines.npz, FIXED = kernel_laII_ng32).
+Factored `ion_inputs(ion)` out of build_atom and threaded `--ion` through
+tsweep.py and epoch.py; La keeps its original output filenames so the
+committed tsweep_src.json / epoch.json are not orphaned, and the refactor is
+provably identical for La (same paths, n_ion equal to the last bit).
+
+Two of F26's three claims carry to Nd and one does not.
+
+- *tau_scale collapse: holds, and cleanly.* tau_matched == own at every
+  epoch (0.91/0.91, 0.25/0.25, 0.15/0.15, 0.14/0.06%), including t = 0.5 d
+  where tau_max = 26.4 and the fixed 1 d kernel errs 19.1%. Same structural
+  result as La. Geometry still never enters the kernel.
+- *T_gas: still the genuine axis*, and stronger than La -- fixed 6.4% (2500),
+  11.1% (4000), 19.2% (5000) against La's 3.9/7.6/9.6; recomputed <= 0.51%.
+- *T_src: fails.* La's fixed-kernel error is flat at 0.75-1.41% across
+  4000-8000 K -- its noise floor, since the recomputed kernel scores the same
+  -- which is what F26 rests on. Nd's is +12.44 / +3.89 / +0.25 / -4.88% at
+  4000/5000/6000/8000: monotone, and it CHANGES SIGN across the 6000 K
+  training point. Noise does not do that. It is a state-transfer signature.
+
+The mechanism is 9u's, read the other way. The rows depend on the radiation
+field through the within-group absorbing-line mix. La's 949 opacity lines
+mean each group is dominated by a few strong lines whatever the incident
+spectrum, so the mix barely moves; Nd's groups draw from a denser, more
+evenly weighted set, so reweighting the continuum reweights which lines
+absorb and the rows move with it. So (T_gas, tau_scale, ion) is La's state
+space, not every ion's -- for Nd, T_src is a fourth axis, and whether it can
+be dropped is a per-ion question. Written up as F28, with F26 amended rather
+than left to look general.
+
+*One blemish worth repeating at higher N.* At T_src = 5000 the recomputed
+("own") kernel errs -2.63% in band3800 where it is <= 0.25% at the other
+three temperatures. That puts Nd's band3800 noise floor above La's and makes
+the +3.89% fixed point at 5000 marginal on its own. The 4000 K point and the
+sign flip are well clear of it, so the verdict stands, but the individual
+numbers should not be quoted until the sweep is repeated with more packets.
+
+*Not done here:* P10's atomic-data robustness test (GSI vs independent Nd
+data) still needs a second data source.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,
