@@ -1626,6 +1626,98 @@ So memory's sign is set by which failure mode dominates, not by which opacity
 rule is used — a sharper statement than "it helps S and not E", and one that
 only became visible once the units were right.
 
+### 4.29 Paper III E1 — the operator is local in frequency, not low-rank (F32)
+
+P8 asked whether the redistribution operator has only a few macroscopic modes,
+which would *explain* the compressibility of F25/F27 rather than merely record
+it. Reframed here as a physics question — nobody needs to save 14 kB — and the
+answer is no, three separate ways.
+
+`paper3/phase7_rank/rank.py`. Two operators are analysed, because they are not
+the same object: the **energy** matrix `R` (rows sum to 1−q_dep, and q_dep goes
+negative under blueward fluorescence, so it is not row-stochastic) and the
+**photon** matrix recovered by differencing `N_cum`, which is row-stochastic and
+is what transport actually samples. Empty rows are excluded throughout.
+
+**1. The effective dimension never saturates.** Participation ratio of the
+photon operator against group count:
+
+| ion | N_g=4 | 8 | 16 | 32 | 64 | 128 | scaling |
+|---|---|---|---|---|---|---|---|
+| La II | 2.12 | 3.39 | 5.92 | 8.33 | 12.57 | 19.95 | N_g^0.64 |
+| Ce II | 2.64 | 3.67 | 5.23 | 11.08 | 15.54 | 23.10 | N_g^0.66 |
+| Nd II | 1.56 | 2.72 | 4.36 | 7.32 | 12.97 | — | N_g^0.75 |
+
+No plateau, and `PR/N_g` falls from ~0.5 to ~0.2. There is no intrinsic mode
+count: the operator has the same character at every resolution it is examined
+at, with a near-universal exponent across three chemically different ions
+(949, 22,960 and 4,496 opacity lines respectively).
+
+**2. Low-rank approximation is genuinely poor**, and the reconstruction error
+shows this is not transport hypersensitivity. NMF factorization at N_g = 32:
+
+| rank k | La ΔF | La row-L1 | Ce ΔF | Ce row-L1 | Nd ΔF | Nd row-L1 |
+|---|---|---|---|---|---|---|
+| 1 | 439% | 1.633 | 98% | 1.400 | 42% | 1.115 |
+| 2 | 64% | 1.220 | 815% | 1.111 | 144% | 0.848 |
+| 4 | 76% | 0.786 | 704% | 0.987 | 135% | 0.738 |
+| 8 | 75% | 0.466 | 162% | 0.600 | 98% | 0.553 |
+| 12 | 20% | 0.225 | 223% | 0.383 | 79% | 0.323 |
+| 16 | 11% | 0.135 | — | — | 66% | 0.186 |
+
+Row-L1 is the total-variation distance per row, maximum 2.0. Rank 8 of a
+25-row operator still misses 0.47 on La and 0.60 on Ce — a 23–30% error on
+every row. The transport error tracks it, so this is the approximation failing,
+not transport being hypersensitive.
+
+**3. Rank anti-correlates with compressibility.** At N_g = 32 Ce has the
+*lowest* energy-operator dimension of the three (PR 1.60, σ₁ = 77.3%) and is by
+far the *hardest* to compress (32–64 groups against La's 4). The two operators
+also disagree violently on the same kernel — Ce is PR 1.60 by energy and 11.08
+by photon count, a factor of seven — because energy piles into one destination
+while photons scatter everywhere. "The rank of the kernel" is not well posed
+without saying which operator.
+
+#### What compresses, and why
+
+The decisive comparison is at matched parameter count, La II:
+
+| compression | parameters | worst band |
+|---|---|---|
+| **coarsening to N_g = 4** | **16** | **1.62%** |
+| rank-4 truncation at N_g = 32 | 228 | 76.11% |
+| rank-16 truncation at N_g = 32 | 912 | 11.30% |
+
+Sixteen numbers as a coarse matrix beat 912 numbers as a rank-16 factorization
+by a factor of seven, on identical physics. These are different operations:
+coarsening **averages neighbouring frequency groups**, truncation **projects
+onto dominant modes**. Only the first works.
+
+So the redistribution operator is **local in frequency but not low-rank**. A
+kernel that varies smoothly with input frequency has high numerical rank on a
+fine grid and coarse-grains perfectly; the smoothness, not any mode structure,
+is what F25 and F27 were measuring.
+
+**This unifies the two halves of Paper III.** Redistribution is smooth at the
+group scale, so it coarse-grains (F25, F27, F29). The opacity is a comb of
+resonances whose *ordering* within a bin decides a packet's fate, so it does not
+(F30, F31). Both results are statements about what is and is not smooth at the
+group scale, rather than two unrelated facts about compressibility.
+
+*A method correction.* The first truncation used SVD, which is ill-posed for a
+stochastic matrix: it produces negative entries, and clipping them to zero then
+renormalizing is a violent nonlinear operation on the distribution. NMF is both
+well-posed (non-negativity by construction) and the physically meaningful model
+— each input group becomes a mixture of k archetypal exit distributions, which
+is precisely the "few modes" question. The change moved the numbers only
+slightly, so the conclusion was not an artefact of the bad truncation, but the
+SVD version should not have been run.
+
+*Limits.* One group count for the transport truncation (N_g = 32), NMF from a
+single random start (its non-monotonicity in k reflects local minima as well as
+transport nonlinearity), and the within-group discrete exit tables held fixed
+throughout — this asks about group-to-group structure only.
+
 ## 5. Findings register
 
 | # | Finding | Where |
@@ -1661,6 +1753,7 @@ only became visible once the units were right.
 | F29 | **The composition rule works at the 5% level (P9).** An opacity-weighted mixture R_mix[i] = Σ_s w[i,s] R_s[i], with w taken from the blend's opacity alone and never from a blend run, reaches 4.27% worst-band on the La+Ce blend at N_g = 64 against a blend-trained kernel's 1.37%. It beats the best single-ion control by 2.4× and the gain is located: ce_only fails at −10.3% in the optical — the blue → optical branching channel — which La carries despite being 5% of the opacity, and the rule repairs it to −0.7% by composition weights alone. So composition leaves the kernel's state space at the 5% level (a per-ion library suffices) but explicit blend training is still needed below ~2%. Row-L1 distance does not order the legs and is not a usable proxy | §4.26 |
 | F30 | **The opacity is the binding constraint, not the redistribution (P11).** Carrying the identical R_ij, exact line opacity errs 0.92% (La II) and 2.21% (Ce II); grouping the opacity — by either single-scalar rule — takes that to 14–18% and 91–127%. The exact-sum binning (Στ) is too opaque on La (−14.5%) and the Poisson substitution too transparent (+17.8%); on Ce both are far too transparent. This is F15 as a design constraint: expansion preserves the interaction count E = Σ(1−e^−τ), exact-sum preserves the attenuation S = Στ, and one scalar per bin cannot carry both — a scattering problem needs both. κ_grouped + R_ij, the target architecture, therefore fails on dense forests; a bin carrying E *and* S is the obvious candidate A bin carrying **both** quantities (survival from S, line draw from p) was then tested: it works on La II (21.32% → **8.66%**, saturated band +21.3% → −0.7%) and fails on Ce II (112.86% → **139.27%**), where more opacity makes the band *brighter* because it is refilled by fluorescence faster than absorbed — redistribution-limited, not attenuation-limited. And `dual_group` is bit-identical to `binned_group`: a pure R_ij closure never draws a line in the bin, so it cannot use the second quantity at all | §4.27 |
 | F31 | **One remembered line is not the missing state — and the failure splits by line spacing.** Carrying exactly one extra number per packet (the frequency last emitted at, crediting that line's τ to the next free path) buys a factor 2.2 on La II (14.49% → **6.50%**, saturated band −14.5% → −6.3%), the cheapest grouped-opacity repair found. On Ce II it moves 126.66% → 116.31% and 91.29% → 79.46% — real but no rescue. The events/packet counter shows memory removes a comparable fraction of the excess interactions in both forests (39% La, 34% Ce), so the Ce error is not driven by excess interactions: it is the fluorescent refill of §4.19–4.20, and no local interaction bookkeeping reaches it. Sparse forests need one remembered line; dense forests need the resonance *sequence* | §4.28 |
+| F32 | **The redistribution operator is local in frequency, not low-rank — so "few modes" is the wrong explanation for its compressibility.** Effective dimension never saturates: participation ratio grows as N_g^0.64–0.75 across La/Ce/Nd with PR/N_g falling 0.5 → 0.2, and NMF rank-8 of a 25-row operator still misses row-L1 0.47 (23% total variation per row). Rank *anti*-correlates with compressibility — Ce has the lowest energy-operator dimension (PR 1.60) and is the hardest to compress. Decisive at matched parameter count: 16 numbers as a coarse 4×4 matrix give 1.62% where 912 numbers as a rank-16 factorization give 11.30%. Coarsening averages neighbouring groups; truncation projects onto modes; only the first works. This unifies Paper III — redistribution is smooth at the group scale so it coarse-grains (F25/F27), the opacity is a comb whose ordering decides a packet's fate so it does not (F30/F31) | §4.29 |
 
 ## 6. Caveats and limitations
 

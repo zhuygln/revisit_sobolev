@@ -1549,6 +1549,60 @@ independent knobs. That is exactly the orthogonality the phase diagram needs.
 Saturation (E/S) and crowding are invariant to the redistribution dial to
 1e-12, pinned by test. 23 new tests.
 
+## 9ac. E1: the answer is no, and the negative is better than the positive would have been (2026-08-30)
+
+*The question.* P8, reframed: does the redistribution operator have only a few
+macroscopic modes? If so that would EXPLAIN F25/F27's compressibility instead
+of just recording it. Prediction going in was "La near rank 1-2, Ce several,
+effective dimension <~ 3". All wrong.
+
+*1. The dimension never saturates.* Photon-operator participation ratio grows
+as N_g^0.64 (La), ^0.66 (Ce), ^0.75 (Nd), with PR/N_g falling 0.5 -> 0.2 and no
+plateau anywhere from N_g = 4 to 128. Three ions with 949, 22,960 and 4,496
+opacity lines give the same exponent to ~15%. There is no intrinsic mode count;
+the operator looks the same at every resolution you examine it with.
+
+*2. Low-rank approximation is simply bad.* NMF rank 8 of a 25-row operator
+still misses row-L1 0.47 -- a 23% total-variation error on every row, against a
+maximum possible 2.0 -- and the transport error tracks the reconstruction
+error, so this is not transport being hypersensitive.
+
+*3. Rank ANTI-correlates with compressibility.* Ce has the lowest
+energy-operator dimension of the three (PR 1.60, sigma1 = 77%) and is the
+hardest to compress. La has the highest (6.58) and compresses at four groups.
+And the two operators disagree by a factor of seven on the SAME kernel (Ce: 1.60
+by energy, 11.08 by photon count) because energy piles into one destination
+while photons scatter everywhere. "The rank of the kernel" is not well posed.
+
+*The comparison that settles it,* at matched parameter count on La II:
+
+  coarsening to N_g = 4          16 params   1.62%
+  rank-4 truncation at N_g = 32  228 params  76.11%
+  rank-16 truncation at N_g = 32 912 params  11.30%
+
+Sixteen numbers beat nine hundred and twelve by a factor of seven. Coarsening
+AVERAGES neighbouring groups; truncation PROJECTS onto modes. Only the first
+works, because the operator is LOCAL IN FREQUENCY and not LOW-RANK. A kernel
+that varies smoothly with input frequency has high numerical rank on a fine
+grid and coarse-grains perfectly -- smoothness is what F25/F27 were measuring
+all along, and I had been calling it "few modes" without checking.
+
+*Why the negative result is worth more.* It unifies the two halves of Paper
+III into one statement. Redistribution is smooth at the group scale, so it
+coarse-grains (F25, F27, F29). The opacity is a comb of resonances whose
+ORDERING inside a bin decides a packet's fate, so it does not (F30, F31). Not
+two unrelated facts about compressibility -- one fact about what is smooth at
+the group scale.
+
+*A method mistake, recorded.* I first truncated with SVD, which is ill-posed
+for a stochastic matrix: it produces negatives, and clipping them to zero then
+renormalizing destroys the distribution. It gave non-monotone transport errors
+of several hundred per cent, which I nearly wrote up before noticing that a
+709% error at rank 3 is a statement about my truncation and not about Ce. NMF
+is well-posed and is also the right physical model (each input group as a
+mixture of k archetypal exit distributions). The conclusion did not change --
+which is luck, not vindication.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,
