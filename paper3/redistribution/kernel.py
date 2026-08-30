@@ -138,6 +138,98 @@ class RedistributionKernel:
                 out[m] = self.edges[gj] * (self.edges[gj + 1] / self.edges[gj]) ** v
         return out
 
+    # ---- composition (P9) ----------------------------------------------
+    @classmethod
+    def mix(cls, kernels, w, metadata=None):
+        """Opacity-weighted composition rule: R_mix[i] = sum_s w[i,s] R_s[i].
+
+        `kernels` are per-species kernels on IDENTICAL edges (build them with
+        the same nu_lo/nu_hi/n_groups); `w` is (n_groups, n_species) with rows
+        summing to 1 -- the fraction of group-i absorption belonging to each
+        species. The point of the rule is that w comes from the mixture's
+        opacity alone, so a blend needs no blend-specific training.
+
+        Convex mixing preserves the conservation object exactly: sum_j R_mix
+        + q_mix = sum_s w[i,s] (sum_j R_s + q_s) = sum_s w[i,s] = 1.
+
+        Rows a species never populated contribute nothing and its weight is
+        redistributed over the species that did; a row no species populated
+        stays empty (transport scatters those coherently).
+
+        The within-group exit tables are marginal over the input group -- the
+        same approximation the single-species kernel already makes -- so they
+        are merged per output group, weighting each species by the flow the
+        mixture sends it there.
+        """
+        ks = list(kernels)
+        edges = ks[0].edges
+        for k in ks[1:]:
+            if k.edges.shape != edges.shape or not np.allclose(k.edges, edges):
+                raise ValueError("mix() needs kernels on identical edges")
+        w = np.asarray(w, float)
+        ng, ns = ks[0].n_groups, len(ks)
+        if w.shape != (ng, ns):
+            raise ValueError(f"w must be (n_groups, n_species) = {(ng, ns)}, got {w.shape}")
+
+        # per-species row-normalized photon rows
+        rows = np.stack([np.diff(np.hstack([np.zeros((ng, 1)), k.N_cum]), axis=1) for k in ks])
+        live = np.stack([~k.empty_rows for k in ks])                  # (ns, ng)
+        wl = w.T * live                                                # zero out unpopulated
+        norm = wl.sum(axis=0)
+        with np.errstate(invalid="ignore", divide="ignore"):
+            wn = np.where(norm > 0, wl / np.where(norm > 0, norm, 1.0), 0.0)
+
+        N_row = np.einsum("si,sij->ij", wn, rows)
+        R = np.einsum("si,sij->ij", wn, np.stack([k.R for k in ks]))
+        q_dep = np.einsum("si,si->i", wn, np.stack([k.q_dep for k in ks]))
+        counts = np.einsum("si,si->i", wn, np.stack([k.counts for k in ks]))
+        counts = np.where(norm > 0, counts, 0.0)
+        with np.errstate(invalid="ignore", divide="ignore"):
+            tot = N_row.sum(axis=1, keepdims=True)
+            N_cum = np.where(tot > 0, np.cumsum(N_row, axis=1) / np.where(tot > 0, tot, 1.0), 0.0)
+
+        # Flow the mixture sends into each output group, per species. The
+        # per-group absorption budget must be SPECIES-INDEPENDENT (counts,
+        # the mixture's own row occupancy), or each species is weighted by
+        # its absolute run size as well as by w and the composition is
+        # counted twice -- which shows up as a mixture worse than its own
+        # dominant component.
+        T = np.einsum("i,si,sij->sj", counts, wn, rows)
+
+        sub_cum = np.zeros((ng, ks[0].sub_cum.shape[1]))
+        for j in range(ng):
+            if T[:, j].sum() <= 0:
+                sub_cum[j] = np.linspace(1 / sub_cum.shape[1], 1, sub_cum.shape[1])
+                continue
+            h = sum(T[si, j] * np.diff(np.hstack([0.0, k.sub_cum[j]])) for si, k in enumerate(ks))
+            sub_cum[j] = np.cumsum(h / h.sum())
+
+        vals_out, cum_out, off_out = [], [], [0]
+        for j in range(ng):
+            v, ww = [], []
+            for si, k in enumerate(ks):
+                if k.disc_vals is None or T[si, j] <= 0:
+                    continue
+                a, b = k.disc_off[j], k.disc_off[j + 1]
+                if b <= a:
+                    continue
+                c = k.disc_cum[a:b]
+                v.append(k.disc_vals[a:b])
+                ww.append(T[si, j] * np.diff(np.hstack([0.0, c])))
+            if v:
+                vv = np.concatenate(v); wwv = np.concatenate(ww)
+                u, inv = np.unique(vv, return_inverse=True)
+                wu = np.bincount(inv, weights=wwv)
+                vals_out.append(u); cum_out.append(np.cumsum(wu / wu.sum()))
+            off_out.append(off_out[-1] + (vals_out[-1].size if v else 0))
+        disc_vals = np.concatenate(vals_out) if vals_out else np.zeros(0)
+        disc_cum = np.concatenate(cum_out) if cum_out else np.zeros(0)
+
+        md = dict(metadata or {}); md["mixed_from"] = len(ks)
+        return cls(edges, R, N_cum, q_dep, sub_cum, counts, md,
+                   disc_vals=disc_vals, disc_cum=disc_cum,
+                   disc_off=np.array(off_out, int))
+
     # ---- validation / io ----------------------------------------------
     def validate_energy(self):
         """max |sum_j R_ij + q_dep_i - 1| over populated rows (exact up to

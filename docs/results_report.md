@@ -1386,6 +1386,69 @@ Tables 298–371 kB, dominated by the exit-line list.
 *Not done.* P10's atomic-data robustness test (GSI vs an independent Nd
 source) still needs a second data source.
 
+### 4.26 Paper III P9 — the composition rule: a per-ion kernel library, priced (F29)
+
+`paper3/phase5_mixture/mixture.py`. The plan's question: does an
+opacity-weighted composition rule
+
+    R_mix[i] = Σ_s w[i,s] R_s[i]
+
+reproduce a kernel trained on the blend itself? If it does, the kernel table
+is **per ion** and every mixture is assembled from it for free, instead of the
+table growing with the number of compositions.
+
+The weights come from the blend's opacity alone and never from a blend run:
+`w[i,s]` is species s's share of Σ(1−e^−τ) among the opacity lines of group i.
+That is what makes the rule a prediction rather than a fit. Convex mixing
+preserves the conservation object identically, so Σ_j R_mix + q_mix = 1 holds
+to roundoff for every row.
+
+La II + Ce II at their reference densities (E10's blend, 23,909 opacity lines,
+**94.9% Ce by opacity**), all four legs scored against the same blend branch
+reference, 3 seeds × 2×10⁶, all kernels on the blend's group edges:
+
+| leg | UV | blue | optical | red | NIR | 3800–3955 | worst |
+|---|---|---|---|---|---|---|---|
+| explicit (blend-trained) | −0.2 | +0.9 | −0.1 | +0.0 | −0.1 | +1.4 | **1.37%** |
+| **mixed (the rule)** | −0.3 | +2.3 | −0.7 | −0.1 | +0.0 | +4.3 | **4.27%** |
+| ce_only (control) | +0.3 | +6.4 | **−10.3** | +1.2 | +1.3 | +4.1 | 10.31% |
+| la_only (control) | +33.2 | −10.6 | +45.4 | +15.9 | −15.7 | +17.1 | 45.42% |
+
+The single-ion controls are the point of the experiment. E10 found ε_best
+tracks the dominant forest, so on a 95%-Ce blend the rule is only tested if it
+beats `ce_only` — otherwise "just use the dominant ion" would be the cheaper
+answer.
+
+**It does, and the gain is located.** `ce_only` fails almost entirely in one
+band: the optical, at −10.3%. That is the blue → optical channel §4.20
+identified as branching's signature, and it is carried disproportionately by
+La — the 5%-by-opacity minority species. Injecting La through composition
+weights alone repairs it to −0.7%, a factor 14, and takes the worst band from
+10.31% to 4.27%. A minority species can dominate a redistribution channel, and
+the opacity-weighted rule recovers that without ever seeing the blend.
+
+**What the rule costs:** 3.1× the explicit kernel's error (4.27% vs 1.37%) at
+N_g = 64, and 2.0× at N_g = 32 (6.87% vs 3.49%). So it clears Gate 1's
+*strong* bar (|dF_b| < 5% in every band) at N_g = 64 but not at 32, and does
+not reach *excellent* (<2%) at either. The practical reading: a per-ion
+library plus opacity weights is a usable closure for mixtures at the 5% level
+and removes composition from the table's state space; explicit blend training
+is still required below ~2%.
+
+*The residual is not in the rows.* The row-L1 distance from the explicit
+kernel is 1.288 (mixed), 1.315 (ce_only) and 1.042 (la_only) — la_only is the
+*closest* in row-L1 while being 10× worse in transport, so row-L1 does not
+order these legs at all. It is measured only over rows both kernels populate,
+and La's kernel leaves most of the blend's grid empty, so its average is taken
+over a small easy subset. Row distance is not a usable proxy for closure
+error here; the transport comparison is the measurement.
+
+*Limits.* One blend, one composition ratio, one temperature. Whether the rule
+holds at comparable La:Ce fractions — where neither species dominates and the
+mixing is not a small correction to one ion — is untested, and is the obvious
+next measurement. The within-group exit tables are merged marginally over the
+input group, the same approximation the single-species kernel already makes.
+
 ## 5. Findings register
 
 | # | Finding | Where |
@@ -1418,6 +1481,7 @@ source) still needs a second data source.
 | F26 | The redistribution kernel's state space is (T_gas, τ_scale, ion) **for La II**: the source spectrum transfers freely (≤1.4% across 4000–8000 K), the epoch axis collapses exactly onto τ_scale (τ-matched kernel = own kernel at every epoch, fixed kernel fails at 13%), and T_gas is the one genuine axis (9.6% error transferring 3000 → 5000 K; ≤1.5% recomputed). The T_src-free half does **not** generalize — see F28 | §4.24, §4.25 |
 | F27 | **Gate 2: compression is generic (outcome A).** All three ions compress with a discrete-table R_ij on the same opacity: La II 1.62% and Nd II 0.44% at N_g = 4, Ce II 2.89%/0.74% at 32/64. Nd II has 188× La's transitions but, at the fixed τ_max = 5 normalization, only 4,496 opacity lines against Ce's 22,960, and every Nd band sits between La and Ce. The §4.23 blue→blue mechanism separates the hard ion (Ce, block 0.247) from the easy ones but does not order them: Nd's block is 0.572, below La's 0.785, yet it compresses better — both are on the MC noise floor | §4.25 |
 | F28 | **The kernel's state space is itself ion-dependent.** The two structural claims of F26 carry to Nd II — the epoch axis collapses onto τ_scale exactly (τ-matched = own at every epoch, fixed kernel 19.1% at τ_max = 26.4) and T_gas stays the genuine axis (6.4–19.2% fixed, ≤0.51% recomputed). F26's third claim does not: the Nd fixed-kernel error is monotone in T_src and changes sign across the 6000 K training point (+12.44 / +3.89 / +0.25 / −4.88% at 4000/5000/6000/8000 K) where La's is flat at its ~1% noise floor. Denser groups draw from a more evenly weighted absorbing-line mix, so reweighting the continuum reweights the rows. Whether T_src can be dropped must be checked per ion | §4.25 |
+| F29 | **The composition rule works at the 5% level (P9).** An opacity-weighted mixture R_mix[i] = Σ_s w[i,s] R_s[i], with w taken from the blend's opacity alone and never from a blend run, reaches 4.27% worst-band on the La+Ce blend at N_g = 64 against a blend-trained kernel's 1.37%. It beats the best single-ion control by 2.4× and the gain is located: ce_only fails at −10.3% in the optical — the blue → optical branching channel — which La carries despite being 5% of the opacity, and the rule repairs it to −0.7% by composition weights alone. So composition leaves the kernel's state space at the 5% level (a per-ion library suffices) but explicit blend training is still needed below ~2%. Row-L1 distance does not order the legs and is not a usable proxy | §4.26 |
 
 ## 6. Caveats and limitations
 

@@ -68,6 +68,7 @@ does not work).
 | F26 | **The kernel's state space is (T_gas, τ_scale, ion) — for La II.** Source spectrum transfers freely (≤1.4%, 4000–8000 K); the epoch axis collapses exactly onto τ_scale (a τ-matched 1 d kernel equals each epoch's own kernel, while the fixed kernel fails at 13% where τ_max = 34); T_gas is the one genuine axis (3000→5000 K transfer errs 9.6%, recomputed ≤1.5%). The source-spectrum half does not generalize — see F28 | §4.24, §4.25 |
 | F27 | **Gate 2: compression is generic (outcome A).** A discrete-table R_ij reproduces explicit branching for all three ions on the same opacity: La II 1.62% and Ce II 7.48% at N_g = 4, Ce reaching 2.89%/0.74% at 32/64 — and **Nd II 0.44% at N_g = 4**, the easiest of the three despite 3,336,077 transitions, because the fixed τ_max = 5 normalization leaves it only 4,496 opacity lines against Ce's 22,960. The blue→blue block separates the hard ion from the easy ones but does not order them | §4.25 |
 | F28 | **The kernel's state space is itself ion-dependent.** F26's structural claims carry to Nd II — the epoch axis still collapses onto τ_scale exactly, T_gas is still the genuine axis (6.4–19.2% fixed, ≤0.51% recomputed). Its third claim does not: Nd's fixed-kernel error is monotone in T_src and flips sign across the training point (+12.44 → −4.88% over 4000–8000 K) where La's is flat at ~1%. Denser groups draw a more evenly weighted absorbing-line mix, so reweighting the continuum reweights the rows | §4.25 |
+| F29 | **The composition rule works at the 5% level (P9).** An opacity-weighted mixture of per-ion kernels — weights from the blend's opacity alone, no blend run — reaches 4.27% worst-band on La+Ce at N_g = 64 where a blend-trained kernel gets 1.37%, beating the best single-ion control by 2.4×. The gain is located: `ce_only` fails at −10.3% in the optical, the blue → optical branching channel that La carries despite being 5% of the opacity, and the rule repairs it to −0.7%. Composition therefore leaves the state space at the 5% level — a per-ion library suffices — while explicit blend training is still needed below ~2% | §4.26 |
 
 Full write-up with figures and numbers:
 **[docs/results_report.md](docs/results_report.md)**.
@@ -177,6 +178,9 @@ radiative-equilibrium check is included (F18). The response letter is
    τ_scale and T_gas is the one genuine thermodynamic axis (F26), both
    ion-independent — but whether the source spectrum can be dropped is
    not: it transfers freely for La and fails at 12% for Nd (F28), so
-   T_src must be checked per ion before a kernel is tabulated. Next:
-   the low-rank structure (P8), the mixture composition rule (P9), and
-   then grouped opacity (P11), which is the target architecture.
+   T_src must be checked per ion before a kernel is tabulated. Composition,
+   by contrast, does leave the state space at the 5% level: an
+   opacity-weighted mixture of per-ion kernels reaches 4.27% on the La+Ce
+   blend with no blend training, beating the dominant ion alone by 2.4×
+   (F29). Next: the low-rank structure (P8), then grouped opacity (P11),
+   which is the target architecture.

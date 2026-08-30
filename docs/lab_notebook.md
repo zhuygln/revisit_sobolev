@@ -1299,6 +1299,52 @@ numbers should not be quoted until the sweep is repeated with more packets.
 *Not done here:* P10's atomic-data robustness test (GSI vs independent Nd
 data) still needs a second data source.
 
+## 9x. P9: composition is cheap at 5%, and a 5% ion owns a whole band (2026-08-29)
+
+*The rule.* `RedistributionKernel.mix()`: R_mix[i] = sum_s w[i,s] R_s[i] with
+w[i,s] species s's share of sum(1 - e^-tau) in group i, taken from the blend's
+OPACITY and never from a blend run -- otherwise it is a fit, not a rule.
+Convex mixing preserves sum_j R + q_dep = 1 identically, which is a pleasant
+free property. Per-ion kernels are trained on the blend's grid (nu_lo/nu_hi
+passed explicitly) so the rows are mixable at all.
+
+*Two bugs the smoke test caught, both worth recording.*
+
+1. I weighted each species' exit table by its own ABSOLUTE run size as well
+   as by w, counting the composition twice. Symptom: the mixture came out
+   worse than its own 95% component, which is impossible for a sane convex
+   rule and is what made me look. The per-group absorption budget has to be
+   species-independent.
+2. My first reading of the smoke test was wrong and the production run
+   refuted it. At N_g = 8 / 5e4 the mixed kernel's rowL1 beat ce_only's while
+   its transport was worse, and I took that to localize the failure to the
+   exit tables. At production the ordering does not hold at all: la_only has
+   the LOWEST rowL1 (1.042) and by far the worst transport (45.4%). The
+   `live` mask only scores rows both kernels populate, and La leaves most of
+   the blend grid empty, so its rowL1 is an average over a small easy subset.
+   rowL1 is not a proxy for closure error. Do not use it as one.
+
+*The result (report 4.26).* N_g = 64, La+Ce at reference densities, 94.9% Ce
+by opacity: explicit 1.37%, mixed 4.27%, ce_only 10.31%, la_only 45.42%.
+
+The controls were the whole point -- on a 95% Ce blend, "just use Ce" is the
+cheap answer unless the rule beats it. It does, by 2.4x, and the gain sits in
+one band. ce_only's failure is almost entirely optical, -10.3%; that is the
+blue -> optical branching channel from 4.20, and La carries it while being 5%
+of the opacity. The rule repairs it to -0.7% knowing nothing but the opacity
+weights. A minority species owning a redistribution channel is the thing I
+would not have guessed, and it is why the composition rule is worth having.
+
+*The price.* 3.1x the explicit kernel's error at N_g = 64, 2.0x at 32. Clears
+Gate 1's "strong" bar (<5% every band) at 64, not at 32; never reaches
+"excellent" (<2%). So composition leaves the state space at the 5% level -- a
+per-ion library plus opacity weights, no blend training -- and stays in it
+below 2%.
+
+*Untested and obvious next:* one blend, one ratio, one temperature. The
+interesting case is comparable La:Ce, where neither dominates and the mixing
+is not a small correction to one ion.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,
