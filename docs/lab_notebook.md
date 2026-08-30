@@ -1345,6 +1345,64 @@ below 2%.
 interesting case is comparable La:Ce, where neither dominates and the mixing
 is not a small correction to one ion.
 
+## 9y. P11: the redistribution half was never the hard half (2026-08-30)
+
+*Setup.* Three opacity treatments carrying the SAME R_ij (N_g = 32, trained
+once from sobolev_branch), all scored against sobolev_branch on the same
+atom. Two new transport modes in forest_mc: `binned_group` (bin optical
+depth sum tau -- the same binning with NO Poisson substitution) and
+`expansion_group` (sum(1 - e^-tau), the substitution). `expansion_bins`
+gained a weight argument; everything else in the not-sobolev path was
+already opacity-agnostic, and the `outcome == "group"` block did not care
+which opacity fed it. `binned_absorb` exists as the correctness check:
+binned-exact must reproduce line-by-line Sobolev in pure absorption, because
+optical depths add (F12), and it does (0.1852 vs 0.1796 in band3800 at 3e5;
+expansion gives 0.3451, the F4 error).
+
+*One bug of mine, caught by the counter again.* The `outcome == "group"`
+block `continue`s before the end-of-step `tau_r` redraw, which only the
+non-Sobolev legs need -- it was written when sobolev_group was the only
+group mode. The new legs therefore kept an already-spent optical depth and
+re-interacted immediately: 0.944 events/packet against the reference 0.196.
+Redrawing tau_r in the group path fixed it (expansion_group 0.186 vs
+expansion_branch 0.190). Third time the interactions-per-packet diagnostic
+has caught a transport bug (9t, and twice here); it belongs in every leg.
+
+*The result.*
+
+| worst band | La II (949 lines) | Ce II (22,960) |
+|---|---|---|
+| R_ij alone, exact line opacity | 0.92% | 2.21% |
+| + bin resolution (sum tau) | 14.49% | 126.66% |
+| + Poisson (sum 1-e^-tau) | 17.84% | 91.29% |
+| Poisson + exact A*beta [F24] | 21.32% | 112.86% |
+
+The last row lands on F24's +21% / +113% on the same two forests, so the
+harness is validated against a result taken independently.
+
+*What it means.* The redistribution operator is not the problem and never
+was. Same R_ij, exact opacity: 0.92% and 2.21%. Group the opacity by either
+rule and it is 14-18% / 91-127%. Everything Paper III has established about
+redistribution survives untouched; the opacity representation is the binding
+constraint and it binds an order of magnitude harder on the dense forest.
+
+*Why both rules fail, and this is the satisfying part.* On La they bracket
+the truth from opposite sides -- sum tau too OPAQUE (-14.5%), Poisson too
+TRANSPARENT (+17.8%) -- and the events/packet counter says why sum tau
+misbehaves: 0.317 vs 0.196, because a tau = 8 line contributes 8 to sum tau
+and therefore ~8 interactions where the physics has one. That is F15 read as
+a design constraint. Expansion preserves the interaction count E exactly and
+gets survival wrong; exact-sum preserves the attenuation S exactly and gets
+the count wrong. One scalar per bin cannot carry both, and a scattering
+problem needs both. On Ce the bracket collapses and both are too transparent.
+
+*So the target architecture fails on dense forests.* kappa_grouped + R_ij is
+not usable for anything Ce-like, and P12 must not be built on it. The
+constructive move is obvious and cheap: a bin carrying BOTH E and S --
+interaction rate from E, attenuation from S -- still O(1) numbers per bin,
+directly testable with what is now in place. That is the next experiment,
+and it is a better one than P8.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

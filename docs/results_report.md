@@ -1449,6 +1449,67 @@ mixing is not a small correction to one ion — is untested, and is the obvious
 next measurement. The within-group exit tables are merged marginally over the
 input group, the same approximation the single-species kernel already makes.
 
+### 4.27 Paper III P11 — the opacity is the binding constraint, not the redistribution (F30)
+
+`paper3/phase6_opacity/opacity.py`. Every Paper III measurement up to here
+held the opacity fixed — Sobolev line-by-line on both sides — so that any
+error was redistribution compression alone. That isolation was the plan's
+instruction and it has done its job (F25, F27, F29). But no production code
+can afford line-by-line Sobolev opacity; that is the entire reason expansion
+opacity exists. P11 is where the two halves meet.
+
+Three opacity treatments, all carrying **the same R_ij** (N_g = 32, trained
+once from the explicit branch physics), all against `sobolev_branch` on the
+same atom, 3 seeds × 2×10⁶, SEDONA's production bin dν/ν = 4.17×10⁻⁵:
+
+| treatment | La II (949 opacity lines) | Ce II (22,960) |
+|---|---|---|
+| R_ij alone, exact line opacity | **0.92%** | **2.21%** |
+| + bin resolution, Σsrc τ per bin | 14.49% | **126.66%** |
+| + Poisson substitution, Σ(1−e^−τ) | 17.84% | 91.29% |
+| (Poisson + exact A·β exit) [F24] | 21.32% | 112.86% |
+
+The last row reproduces F24's +21% / +113% on the same two forests, which
+validates the setup independently.
+
+**The redistribution operator is not the problem.** Carrying the identical
+R_ij, exact line opacity gives 0.92% and 2.21%. The moment the opacity is
+grouped — by either rule — the error becomes 14–18% on La and 91–127% on Ce.
+Everything Paper III has established about redistribution survives; the
+opacity representation is the binding constraint, and it binds an order of
+magnitude harder on the dense forest.
+
+**Both single-scalar rules fail, and they fail differently.** On La II they
+bracket the truth from opposite sides: the exact-sum binning is *too opaque*
+(band3800 −14.5%) and the Poisson substitution *too transparent* (+17.8%). On
+Ce II the bracket collapses — both are far too transparent (+126.7%, +91.3%).
+The interactions-per-packet counter shows why the exact-sum rule misbehaves:
+0.317 against the reference's 0.196 on La, 0.918 against 0.762 on Ce. A line
+at τ = 8 contributes 8 to Στ and therefore ~8 interactions, where the physics
+has one.
+
+**This is F15 restated as a design constraint.** Expansion opacity preserves
+the expected interaction count E = Σ(1−e^−τ) exactly and applies Poisson
+survival to what is a Bernoulli product; the exact-sum binning preserves the
+attenuation S = Στ exactly and destroys the interaction count. *One scalar per
+bin cannot carry both*, and in a scattering problem both are needed — the
+first sets where interactions happen, the second how much light survives.
+
+**Consequence for the architecture.** κ_grouped + R_ij, the plan's stated
+target, does not work on dense forests. P12's light curves must not be built
+on it for anything Ce-like; the useful direction is the opacity
+representation, not further refinement of the redistribution side.
+
+**The constructive reading.** The two rules fail in opposite directions on La
+because each preserves exactly one of F15's two quantities. A bin carrying
+*both* — interaction rate from E, attenuation from S — is the obvious
+candidate, is still O(1) numbers per bin, and is directly testable with the
+machinery now in place. That is the natural next experiment.
+
+*Limits.* One group count (N_g = 32; the redistribution side is already
+converged there for both ions), one bin width, two ions, LTE populations.
+Nd II is untested here.
+
 ## 5. Findings register
 
 | # | Finding | Where |
@@ -1482,6 +1543,7 @@ input group, the same approximation the single-species kernel already makes.
 | F27 | **Gate 2: compression is generic (outcome A).** All three ions compress with a discrete-table R_ij on the same opacity: La II 1.62% and Nd II 0.44% at N_g = 4, Ce II 2.89%/0.74% at 32/64. Nd II has 188× La's transitions but, at the fixed τ_max = 5 normalization, only 4,496 opacity lines against Ce's 22,960, and every Nd band sits between La and Ce. The §4.23 blue→blue mechanism separates the hard ion (Ce, block 0.247) from the easy ones but does not order them: Nd's block is 0.572, below La's 0.785, yet it compresses better — both are on the MC noise floor | §4.25 |
 | F28 | **The kernel's state space is itself ion-dependent.** The two structural claims of F26 carry to Nd II — the epoch axis collapses onto τ_scale exactly (τ-matched = own at every epoch, fixed kernel 19.1% at τ_max = 26.4) and T_gas stays the genuine axis (6.4–19.2% fixed, ≤0.51% recomputed). F26's third claim does not: the Nd fixed-kernel error is monotone in T_src and changes sign across the 6000 K training point (+12.44 / +3.89 / +0.25 / −4.88% at 4000/5000/6000/8000 K) where La's is flat at its ~1% noise floor. Denser groups draw from a more evenly weighted absorbing-line mix, so reweighting the continuum reweights the rows. Whether T_src can be dropped must be checked per ion | §4.25 |
 | F29 | **The composition rule works at the 5% level (P9).** An opacity-weighted mixture R_mix[i] = Σ_s w[i,s] R_s[i], with w taken from the blend's opacity alone and never from a blend run, reaches 4.27% worst-band on the La+Ce blend at N_g = 64 against a blend-trained kernel's 1.37%. It beats the best single-ion control by 2.4× and the gain is located: ce_only fails at −10.3% in the optical — the blue → optical branching channel — which La carries despite being 5% of the opacity, and the rule repairs it to −0.7% by composition weights alone. So composition leaves the kernel's state space at the 5% level (a per-ion library suffices) but explicit blend training is still needed below ~2%. Row-L1 distance does not order the legs and is not a usable proxy | §4.26 |
+| F30 | **The opacity is the binding constraint, not the redistribution (P11).** Carrying the identical R_ij, exact line opacity errs 0.92% (La II) and 2.21% (Ce II); grouping the opacity — by either single-scalar rule — takes that to 14–18% and 91–127%. The exact-sum binning (Στ) is too opaque on La (−14.5%) and the Poisson substitution too transparent (+17.8%); on Ce both are far too transparent. This is F15 as a design constraint: expansion preserves the interaction count E = Σ(1−e^−τ), exact-sum preserves the attenuation S = Στ, and one scalar per bin cannot carry both — a scattering problem needs both. κ_grouped + R_ij, the target architecture, therefore fails on dense forests; a bin carrying E *and* S is the obvious candidate | §4.27 |
 
 ## 6. Caveats and limitations
 
