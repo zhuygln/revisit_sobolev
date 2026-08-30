@@ -456,11 +456,13 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
     needs_thermal = outcome in ("thermal", "tla")
     thermal = atom.thermal_sampler(emit_window) if (needs_thermal and (sobolev or exp_emit == "line")) else None
     if not sobolev:
+        # "dual" carries survival on the exact-sum grid, so its credit unit is
+        # tau as well; only the Poisson grid credits p.
+        bin_weight = ("exact" if mode.startswith("binned")
+                      else "dual" if mode.startswith("dual") else "poisson")
         edges, E = atom.expansion_bins(dnu_over_nu, nu_lo=min(nu_min, atom.op_nu.min()) * 0.5,
                                        nu_hi=max(nu_max, atom.op_nu.max()) * 1.01,
-                                       weight=("exact" if mode.startswith("binned")
-                                               else "dual" if mode.startswith("dual")
-                                               else "poisson"))
+                                       weight=bin_weight)
         # cumulative E from the top (high frequency) downward; G(nu) = optical
         # depth accumulated sweeping from the top edge down to nu.
         # G is piecewise linear in nu inside each bin.
@@ -692,12 +694,21 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
                 tau_r[hi] = rng.exponential(1.0, hi.size)
                 if line_memory:
                     # one remembered number per packet: the frequency just
-                    # emitted at. Credit that line's own tau so it is passed
-                    # for free -- the binned at-resonance skip.
+                    # emitted at. Credit that line's own contribution so it is
+                    # passed for free -- the binned at-resonance skip.
+                    #
+                    # The credit must be in the GRID's units, i.e. the same
+                    # weight the bin was built from (expansion_bins): op_p for
+                    # the Poisson grid, op_tau for the exact-sum grid. Crediting
+                    # op_tau on a Poisson grid over-credits a saturated line by
+                    # tau/(1-e^-tau) -- 8x at tau = 8 -- which pushes the packet
+                    # far too red instead of merely past its own line.
                     j = np.searchsorted(atom.op_nu, nu_rest)
                     j = np.clip(j, 0, atom.op_nu.size - 1)
                     same = atom.op_nu[j] == nu_rest
-                    tau_r[hi] += np.where(same, atom.op_tau[j], 0.0)
+                    credit = (atom.op_p[j] if bin_weight == "poisson"
+                              else atom.op_tau[j])   # "exact" and "dual" both survive on sum tau
+                    tau_r[hi] += np.where(same, credit, 0.0)
             continue
         todo = np.arange(hi.size)
         bin_emit = not sobolev and exp_emit == "bin"   # expansion legs: thermal draws are bins

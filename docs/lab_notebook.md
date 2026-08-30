@@ -1478,6 +1478,77 @@ rescue it, the next thing to try is not another scalar patch -- it is keeping
 a compact ORDERED list of resonances per group, compressing their properties
 rather than their count, since the count is what carries the ordering.
 
+## 9aa. Stage 0, and a correction I predicted wrong (2026-08-30)
+
+*The units bug was real.* `line_memory` credits the emitting line's optical
+depth back to the packet, but `tau_r` is measured in the GRID's units -- the
+weight `expansion_bins` was built from. The first implementation credited
+`op_tau` everywhere, over-crediting a saturated line on the Poisson grid by
+tau/(1-e^-tau), a factor 8 at tau = 8. Now `op_p` on the Poisson grid,
+`op_tau` on the exact-sum and dual grids. (I got the dual case wrong on the
+first pass too -- "dual" carries SURVIVAL on the exact-sum grid and only its
+line-selection on p, so its credit is tau. Caught before running.)
+
+*Effect: small, and confined to the expansion legs.* La 20.03 -> 19.84%,
+Ce 79.46 -> 81.66%. Binned and dual unchanged, as they must be. F31's table
+in report 4.28 and the README row are corrected.
+
+*What I predicted and got wrong.* I expected the fix to remove the anomaly
+that memory HELPS the exact-sum opacity and HURTS the Poisson one. It does
+not: La is still 14.49 -> 6.50% with S and 17.84 -> 19.84% with E. The real
+explanation is the sign of the failure being corrected, not a units artefact:
+
+- memory always makes a grouped opacity MORE TRANSPARENT (it credits away
+  optical depth, so the packet travels further before interacting);
+- La's Poisson leg is already too transparent (+17.8%, the survival
+  substitution), so more transparency is worse;
+- Ce's error is the opposite kind -- its band is OVER-FILLED by fluorescent
+  refill driven by excess interactions -- so removing excess interactions
+  removes refill and the error falls, 91.29 -> 81.66%.
+
+Memory's sign is therefore set by which failure mode dominates, not by which
+opacity rule is in use. That is a sharper statement than the one 9z made, and
+it only became visible once the units were right.
+
+## 9ab. Stage 0: the phase-diagram infrastructure (2026-08-30)
+
+*`sobolev/forest_stats.py`.* Five statistics existed only as copy-pasted
+one-liners at five call sites and two did not exist at all. Now one module:
+`saturation_stats`, `SE_sums` (F15's S, E and E/S), `crowding` (saturated
+lines per unit ln lambda -- scale-free, so a forest at 4000 A and one at
+12000 A with the same crowding land on the same point), `spacing_stats`
+(wrapping the existing `nearest_neighbour_velocity_spacing`), and the new
+`redistribution_range`, which is the one that matters: mean/median
+|d ln lambda| per event plus the SAME-GROUP FRACTION. Ray-resolved S and E
+already exist as `crossing_depths`; deliberately not reimplemented.
+
+*`paper3/synthetic/forest.py`.* No new class needed -- `ForestAtom.__init__`
+already builds `branch_lines`/`branch_cum`/`exit_cum` from `upper` and `A`
+alone. Exit channels get f_osc = 0 and n_lower = 0, so tau = 0 keeps them out
+of the opacity set while `beta_all` forces them to escape freely: the
+`three_level` pattern, generalized to N lines.
+
+*The dial is faithful, and there are two of them.* Measured against the
+branch reference at 150 lines, tau = 5, span 0.25:
+
+| dial dlnlam | measured &lt;\|dlnlam\|&gt; | same-group |
+|---|---|---|
+| n_exit = 1 | 0.0000 | 1.000 |
+| 0.02 | 0.0167 | 0.166 |
+| 0.15 | 0.1251 | 0.166 |
+| 0.40 | 0.3339 | 0.165 |
+
+n_exit = 1 is EXACTLY coherent scattering (`nu_out == nu_in` bit-for-bit, not
+approximately) -- the zero of the range axis. The measured range is ~0.83x the
+dial, which is not a leak but the A*beta weighting: the absorbing line has
+beta = 0.199 at tau = 5, so 81% of exits take the free channel. And the
+same-group fraction is flat in dlnlam while `f_return` moves it, so HOW FAR
+exits reach and HOW OFTEN a photon returns to its own resonance are two
+independent knobs. That is exactly the orthogonality the phase diagram needs.
+
+Saturation (E/S) and crowding are invariant to the redistribution dial to
+1e-12, pinned by test. 23 new tests.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

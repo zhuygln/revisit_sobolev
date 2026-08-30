@@ -1567,7 +1567,7 @@ frequency, and exits below τ_min carry no opacity and cost nothing.
 | binned (S) + R_ij | 14.49% | −14.5% | 0.317 | 126.66% | +126.7% | 0.918 |
 | **binned + memory** | **6.50%** | **−6.3%** | 0.270 | **116.31%** | +116.3% | 0.865 |
 | expansion (E) + R_ij | 17.84% | +17.8% | 0.186 | 91.29% | +91.3% | 0.832 |
-| **expansion + memory** | 20.03% | +20.0% | 0.163 | **79.46%** | +79.5% | 0.781 |
+| **expansion + memory** | 19.84% | +19.8% | 0.168 | **81.66%** | +81.7% | 0.798 |
 | reference (`sobolev_branch`) | — | — | 0.196 | — | — | 0.762 |
 
 **On La II one number buys a factor 2.2** — 14.49% → 6.50%, saturated band
@@ -1576,7 +1576,7 @@ it beats the two-quantity bin's group variant outright, at one float per
 packet against one extra array per bin.
 
 **On Ce II it does not rescue the closure**: 126.66% → 116.31%, and
-91.29% → 79.46% for the Poisson opacity. Real, and in the right direction,
+91.29% → 81.66% for the Poisson opacity. Real, and in the right direction,
 but the dense forest stays catastrophically wrong. **The last emitted line is
 therefore not the minimal missing state variable.**
 
@@ -1600,12 +1600,31 @@ outside, the missing information is not a scalar correction at all: it is the
 them. That is what a single number per bin cannot encode and what one
 remembered frequency does not restore.
 
-*Diagnostic value.* Memory helps the exact-sum opacity and not the Poisson
-one (La: 14.49 → 6.50 vs 17.84 → 20.03). That is the expected signature: with
-S survival the emitting line carries its full τ into the bin, so re-absorbing
-on it is severe; with E every line contributes at most 1, so self-absorption
-was never the dominant term there. The mechanism behaves as diagnosed even
-where the cure is insufficient.
+*A units correction, and what it did not explain.* The credit must be in the
+grid's own units — the weight the bin was built from — so `op_p` on the Poisson
+grid and `op_tau` on the exact-sum and two-quantity grids. The first
+implementation credited `op_tau` everywhere, over-crediting a saturated line on
+the Poisson grid by τ/(1−e^−τ), a factor 8 at τ = 8. Fixed. The effect is small
+and confined to the expansion legs: La 20.03 → 19.84%, Ce 79.46 → 81.66%; the
+binned and two-quantity numbers are unchanged because they were already
+crediting the right quantity. The numbers above are the corrected ones.
+
+The correction was expected to remove the anomaly that memory *helps* the
+exact-sum opacity and *hurts* the Poisson one. **It does not** — La still goes
+14.49 → 6.50% with S and 17.84 → 19.84% with E. The explanation is not a units
+artefact but the sign of the failure being corrected:
+
+- Memory always makes a grouped opacity **more transparent**: it credits away
+  optical depth so the packet travels further before its next interaction.
+- La's Poisson leg is already too transparent (+17.8%, the survival
+  substitution), so added transparency makes it worse.
+- Ce's error is the opposite kind. Its band is *over-filled* by fluorescent
+  refill driven by excess interactions, so removing excess interactions removes
+  refill and the error falls, 91.29 → 81.66%.
+
+So memory's sign is set by which failure mode dominates, not by which opacity
+rule is used — a sharper statement than "it helps S and not E", and one that
+only became visible once the units were right.
 
 ## 5. Findings register
 
