@@ -1548,6 +1548,65 @@ the target architecture even there.
 converged there for both ions), one bin width, two ions, LTE populations.
 Nd II is untested here.
 
+### 4.28 Paper III — is one remembered line the missing state? (F31)
+
+F30 localized the grouped-opacity failure to a specific mechanism: a bin has
+no way to skip the line a packet was just emitted from, so the packet
+re-absorbs on it, double-counting a self-absorption the kernel's training has
+already resolved. The minimal test of that diagnosis is to carry exactly **one
+extra number per packet** — the frequency it last emitted at — and credit that
+line's own optical depth to the next free-path draw. No atomic level is
+inspected after emission; the credit is a lookup from the opacity by
+frequency, and exits below τ_min carry no opacity and cost nothing.
+
+`run_mc(..., line_memory=True)`, N_g = 32, 3 seeds × 2×10⁶:
+
+| leg | La II worst | 3800–3955 Å | ev/pkt | Ce II worst | 3800–3955 Å | ev/pkt |
+|---|---|---|---|---|---|---|
+| R_ij, exact line opacity | 0.92% | −0.9% | 0.196 | 2.21% | +1.6% | 0.761 |
+| binned (S) + R_ij | 14.49% | −14.5% | 0.317 | 126.66% | +126.7% | 0.918 |
+| **binned + memory** | **6.50%** | **−6.3%** | 0.270 | **116.31%** | +116.3% | 0.865 |
+| expansion (E) + R_ij | 17.84% | +17.8% | 0.186 | 91.29% | +91.3% | 0.832 |
+| **expansion + memory** | 20.03% | +20.0% | 0.163 | **79.46%** | +79.5% | 0.781 |
+| reference (`sobolev_branch`) | — | — | 0.196 | — | — | 0.762 |
+
+**On La II one number buys a factor 2.2** — 14.49% → 6.50%, saturated band
+−14.5% → −6.3%. That is the cheapest repair found for a grouped opacity and
+it beats the two-quantity bin's group variant outright, at one float per
+packet against one extra array per bin.
+
+**On Ce II it does not rescue the closure**: 126.66% → 116.31%, and
+91.29% → 79.46% for the Poisson opacity. Real, and in the right direction,
+but the dense forest stays catastrophically wrong. **The last emitted line is
+therefore not the minimal missing state variable.**
+
+**The events-per-packet counter says why, and it is the informative part.**
+Memory removes a comparable *fraction* of the excess interactions on both
+ions — La 0.317 → 0.270 against a reference 0.196 (39% of the excess), Ce
+0.918 → 0.865 against 0.762 (34%). The mechanism is doing the same job in
+both forests. But removing a third of the excess interactions nearly halves
+the La error and barely dents the Ce one, which means the Ce error is not
+driven by excess interactions at all. It is the fluorescent refill of
+§4.19–4.20: on a forest at 24 lines per Å the deep band is filled from
+elsewhere faster than it is absorbed, and no correction to the *local*
+interaction bookkeeping can reach that.
+
+**Two regimes, and it is the line spacing that separates them.** Where the
+forest is sparse enough that a packet's fate is set by the few resonances it
+meets, one remembered line recovers most of what binning destroys. Where the
+forest is dense enough that the band is refilled by redistribution from
+outside, the missing information is not a scalar correction at all: it is the
+*resonance sequence* — which lines, in what order, with how much bin between
+them. That is what a single number per bin cannot encode and what one
+remembered frequency does not restore.
+
+*Diagnostic value.* Memory helps the exact-sum opacity and not the Poisson
+one (La: 14.49 → 6.50 vs 17.84 → 20.03). That is the expected signature: with
+S survival the emitting line carries its full τ into the bin, so re-absorbing
+on it is severe; with E every line contributes at most 1, so self-absorption
+was never the dominant term there. The mechanism behaves as diagnosed even
+where the cure is insufficient.
+
 ## 5. Findings register
 
 | # | Finding | Where |
@@ -1582,6 +1641,7 @@ Nd II is untested here.
 | F28 | **The kernel's state space is itself ion-dependent.** The two structural claims of F26 carry to Nd II — the epoch axis collapses onto τ_scale exactly (τ-matched = own at every epoch, fixed kernel 19.1% at τ_max = 26.4) and T_gas stays the genuine axis (6.4–19.2% fixed, ≤0.51% recomputed). F26's third claim does not: the Nd fixed-kernel error is monotone in T_src and changes sign across the 6000 K training point (+12.44 / +3.89 / +0.25 / −4.88% at 4000/5000/6000/8000 K) where La's is flat at its ~1% noise floor. Denser groups draw from a more evenly weighted absorbing-line mix, so reweighting the continuum reweights the rows. Whether T_src can be dropped must be checked per ion | §4.25 |
 | F29 | **The composition rule works at the 5% level (P9).** An opacity-weighted mixture R_mix[i] = Σ_s w[i,s] R_s[i], with w taken from the blend's opacity alone and never from a blend run, reaches 4.27% worst-band on the La+Ce blend at N_g = 64 against a blend-trained kernel's 1.37%. It beats the best single-ion control by 2.4× and the gain is located: ce_only fails at −10.3% in the optical — the blue → optical branching channel — which La carries despite being 5% of the opacity, and the rule repairs it to −0.7% by composition weights alone. So composition leaves the kernel's state space at the 5% level (a per-ion library suffices) but explicit blend training is still needed below ~2%. Row-L1 distance does not order the legs and is not a usable proxy | §4.26 |
 | F30 | **The opacity is the binding constraint, not the redistribution (P11).** Carrying the identical R_ij, exact line opacity errs 0.92% (La II) and 2.21% (Ce II); grouping the opacity — by either single-scalar rule — takes that to 14–18% and 91–127%. The exact-sum binning (Στ) is too opaque on La (−14.5%) and the Poisson substitution too transparent (+17.8%); on Ce both are far too transparent. This is F15 as a design constraint: expansion preserves the interaction count E = Σ(1−e^−τ), exact-sum preserves the attenuation S = Στ, and one scalar per bin cannot carry both — a scattering problem needs both. κ_grouped + R_ij, the target architecture, therefore fails on dense forests; a bin carrying E *and* S is the obvious candidate A bin carrying **both** quantities (survival from S, line draw from p) was then tested: it works on La II (21.32% → **8.66%**, saturated band +21.3% → −0.7%) and fails on Ce II (112.86% → **139.27%**), where more opacity makes the band *brighter* because it is refilled by fluorescence faster than absorbed — redistribution-limited, not attenuation-limited. And `dual_group` is bit-identical to `binned_group`: a pure R_ij closure never draws a line in the bin, so it cannot use the second quantity at all | §4.27 |
+| F31 | **One remembered line is not the missing state — and the failure splits by line spacing.** Carrying exactly one extra number per packet (the frequency last emitted at, crediting that line's τ to the next free path) buys a factor 2.2 on La II (14.49% → **6.50%**, saturated band −14.5% → −6.3%), the cheapest grouped-opacity repair found. On Ce II it moves 126.66% → 116.31% and 91.29% → 79.46% — real but no rescue. The events/packet counter shows memory removes a comparable fraction of the excess interactions in both forests (39% La, 34% Ce), so the Ce error is not driven by excess interactions: it is the fluorescent refill of §4.19–4.20, and no local interaction bookkeeping reaches it. Sparse forests need one remembered line; dense forests need the resonance *sequence* | §4.28 |
 
 ## 6. Caveats and limitations
 

@@ -1433,6 +1433,51 @@ forest fluorescent refill amplifies that rather than damping it. Restoring
 line identity at emission is the only lever left, and it costs exactly the
 thing grouping was supposed to buy.
 
+## 9z. The minimal-memory test: right mechanism, wrong scale (2026-08-30)
+
+*The ask.* F30 said the grouped opacity cannot skip the line a packet was
+just emitted from. Minimal test of that diagnosis: carry ONE number per
+packet, the frequency last emitted at, and credit that line's own tau to the
+next free-path draw. `run_mc(line_memory=True)`. No atomic level inspected
+after emission -- the credit is an opacity lookup by frequency, and exits
+below tau_min carry no opacity and cost nothing. Six lines of transport.
+
+*Result.* La II 14.49% -> 6.50% (saturated band -14.5% -> -6.3%). One float
+per packet, factor 2.2, and it beats the two-quantity bin's group variant
+which costs an extra array per bin. Ce II 126.66% -> 116.31%, and
+91.29% -> 79.46% on the Poisson opacity. Real, right direction, no rescue.
+
+*So the last emitted line is NOT the minimal missing state variable*, and the
+events/packet counter says why in a way I found genuinely clarifying. Memory
+removes a COMPARABLE FRACTION of the excess interactions in both forests --
+La 0.317 -> 0.270 against a reference 0.196, so 39% of the excess; Ce
+0.918 -> 0.865 against 0.762, so 34%. The mechanism is doing the same job in
+both. But a third of the excess interactions nearly halves the La error and
+barely dents the Ce one. Therefore the Ce error is not driven by excess
+interactions at all. It is 4.19-4.20's fluorescent refill: at 24 lines per
+angstrom the deep band fills from elsewhere faster than it absorbs, and no
+correction to LOCAL interaction bookkeeping can reach that.
+
+*The clean statement of the two regimes.* Sparse forest: a packet's fate is
+set by the few resonances it meets, so one remembered line recovers most of
+what binning destroyed. Dense forest: the band is refilled by redistribution
+from outside, and the missing information is not a scalar correction but the
+RESONANCE SEQUENCE -- which lines, in what order, with how much bin between
+them. A single number per bin cannot encode that and one remembered
+frequency does not restore it.
+
+*A confirming detail.* Memory helps the exact-sum opacity and NOT the Poisson
+one (La 14.49 -> 6.50 vs 17.84 -> 20.03). Exactly the expected signature:
+with S survival the emitting line carries its full tau into the bin so
+re-absorbing on it is severe; with E every line contributes at most 1, so
+self-absorption was never dominant there. The mechanism behaves as diagnosed
+even where the cure is not enough.
+
+*What this sets up.* If one bin scalar fails and one remembered line does not
+rescue it, the next thing to try is not another scalar patch -- it is keeping
+a compact ORDERED list of resonances per group, compressing their properties
+rather than their count, since the count is what carries the ordering.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

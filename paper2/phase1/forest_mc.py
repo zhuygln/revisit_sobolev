@@ -403,8 +403,19 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
            seed=0, emit_window=None, dnu_over_nu=4.17e-5, max_steps=100000,
            t_core=None, beta_on_expansion=False, exp_emit="bin",
            launch_weight="photon", eps=1.0, relativity=None,
-           kernel=None, collect_events=False):
-    """exp_emit : how the expansion legs place a thermally re-emitted packet
+           kernel=None, collect_events=False, line_memory=False):
+    """line_memory : the minimal-memory closure (P11 follow-up). A grouped
+    opacity cannot skip the line a packet was just emitted from, so the packet
+    immediately re-absorbs on it -- the F30 residual. With line_memory=True a
+    *_group leg carries exactly ONE extra number, the frequency it last
+    emitted at, and credits that line's own optical depth to the next
+    free-path draw, so the emitting line is passed for free. This is the
+    binned analogue of the Sobolev legs' at-resonance skip, whose escape
+    probability the kernel's training already contains. No atomic level is
+    inspected after emission: the credit is looked up from the opacity by
+    frequency, and exits below tau_min carry no opacity and cost nothing.
+
+    exp_emit : how the expansion legs place a thermally re-emitted packet
     in frequency. "bin" (default) -- uniformly within the sampled line's
     comoving bin, which is what an emissivity kappa_exp B_nu per bin means and
     what SEDONA does; the packet then sweeps the rest of the bin at the bin's
@@ -679,6 +690,14 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
                 # already-spent optical depth and re-interacts immediately --
                 # events/packet inflates ~5x and the deep bands go opaque.
                 tau_r[hi] = rng.exponential(1.0, hi.size)
+                if line_memory:
+                    # one remembered number per packet: the frequency just
+                    # emitted at. Credit that line's own tau so it is passed
+                    # for free -- the binned at-resonance skip.
+                    j = np.searchsorted(atom.op_nu, nu_rest)
+                    j = np.clip(j, 0, atom.op_nu.size - 1)
+                    same = atom.op_nu[j] == nu_rest
+                    tau_r[hi] += np.where(same, atom.op_tau[j], 0.0)
             continue
         todo = np.arange(hi.size)
         bin_emit = not sobolev and exp_emit == "bin"   # expansion legs: thermal draws are bins

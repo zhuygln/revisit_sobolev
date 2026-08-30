@@ -51,20 +51,24 @@ DNU = 4.17e-5
 
 def legs(atom, lo, hi, n, kernel, modes):
     out = {}
-    for mode in modes:
+    for tag in modes:
+        mode = tag
         t0 = time.time()
         rows, inter = [], []
         for s in SEEDS:
-            kw = {"kernel": kernel} if mode.endswith("_group") else {}
+            kw = {"kernel": kernel} if "_group" in mode else {}
+            if mode.endswith("+mem"):
+                kw["line_memory"] = True
+            mode = mode.replace("+mem", "")
             res = run_mc(atom, R_CORE, R_OUT, T_EXP, lo, hi, n, mode,
                          seed=s, t_core=T_CORE, dnu_over_nu=DNU, **kw)
             rows.append({b: band_ratio(res, *nu_of(*w), weight="energy")[0] for b, w in BANDS.items()})
             inter.append(float(res["n_events"].mean()))
-        out[mode] = {"bands": {b: float(np.mean([r[b] for r in rows])) for b in BANDS},
+        out[tag] = {"bands": {b: float(np.mean([r[b] for r in rows])) for b in BANDS},
                      "events_per_packet": float(np.mean(inter)),
                      "wall_s": time.time() - t0}
-        print(f"  {mode:18s} " + " ".join(f"{b}={out[mode]['bands'][b]:.4f}" for b in BANDS)
-              + f"  [{out[mode]['wall_s']:.0f}s, {out[mode]['events_per_packet']:.3f} ev/pkt]",
+        print(f"  {tag:20s} " + " ".join(f"{b}={out[tag]['bands'][b]:.4f}" for b in BANDS)
+              + f"  [{out[tag]['wall_s']:.0f}s, {out[tag]['events_per_packet']:.3f} ev/pkt]",
               flush=True)
     return out
 
@@ -89,7 +93,8 @@ def main(ion, ng, n):
 
     res = legs(atom, lo, hi, n, kernel,
                ["sobolev_branch", "expansion_branch", "dual_branch",
-                "sobolev_group", "binned_group", "expansion_group", "dual_group"])
+                "sobolev_group", "binned_group", "expansion_group", "dual_group",
+                "binned_group+mem", "expansion_group+mem", "dual_group+mem"])
     ref = res["sobolev_branch"]["bands"]
 
     out = {"ion": ion, "ng": ng, "n": n, "dnu_over_nu": DNU, "n_ion": n_ion,
@@ -112,6 +117,9 @@ def main(ion, ng, n):
         "plus_bin_resolution": g["binned_group"]["worst"],
         "plus_poisson": g["expansion_group"]["worst"],
         "dual_bin_group": g["dual_group"]["worst"],
+        "binned_plus_memory": g["binned_group+mem"]["worst"],
+        "expansion_plus_memory": g["expansion_group+mem"]["worst"],
+        "dual_plus_memory": g["dual_group+mem"]["worst"],
         "poisson_with_exact_exit": g["expansion_branch"]["worst"],
         "dual_with_exact_exit": g["dual_branch"]["worst"],
     }
@@ -121,6 +129,10 @@ def main(ion, ng, n):
           f"\n    + bin resolution            {100*d['plus_bin_resolution']:7.2f}%"
           f"\n    + Poisson substitution      {100*d['plus_poisson']:7.2f}%"
           f"\n    + two-quantity bin          {100*d['dual_bin_group']:7.2f}%"
+          f"\n  + one remembered frequency (minimal memory):"
+          f"\n    binned + memory            {100*d['binned_plus_memory']:7.2f}%"
+          f"\n    expansion + memory         {100*d['expansion_plus_memory']:7.2f}%"
+          f"\n    two-quantity + memory      {100*d['dual_plus_memory']:7.2f}%"
           f"\n  with the exact A*beta exit (opacity alone):"
           f"\n    Poisson  (expansion_branch) {100*d['poisson_with_exact_exit']:7.2f}%  [F24]"
           f"\n    two-quantity (dual_branch)  {100*d['dual_with_exact_exit']:7.2f}%")
