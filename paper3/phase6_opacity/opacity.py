@@ -88,8 +88,8 @@ def main(ion, ng, n):
     print(f"  kernel trained on {nu_in.size} events", flush=True)
 
     res = legs(atom, lo, hi, n, kernel,
-               ["sobolev_branch", "expansion_branch",
-                "sobolev_group", "binned_group", "expansion_group"])
+               ["sobolev_branch", "expansion_branch", "dual_branch",
+                "sobolev_group", "binned_group", "expansion_group", "dual_group"])
     ref = res["sobolev_branch"]["bands"]
 
     out = {"ion": ion, "ng": ng, "n": n, "dnu_over_nu": DNU, "n_ion": n_ion,
@@ -111,14 +111,19 @@ def main(ion, ng, n):
         "redistribution_only": g["sobolev_group"]["worst"],
         "plus_bin_resolution": g["binned_group"]["worst"],
         "plus_poisson": g["expansion_group"]["worst"],
+        "dual_bin_group": g["dual_group"]["worst"],
         "poisson_with_exact_exit": g["expansion_branch"]["worst"],
+        "dual_with_exact_exit": g["dual_branch"]["worst"],
     }
     d = out["decomposition"]
     print(f"\n  P11 decomposition (worst band):"
           f"\n    R_ij alone                  {100*d['redistribution_only']:7.2f}%"
           f"\n    + bin resolution            {100*d['plus_bin_resolution']:7.2f}%"
           f"\n    + Poisson substitution      {100*d['plus_poisson']:7.2f}%"
-          f"\n    (Poisson + exact A*beta)    {100*d['poisson_with_exact_exit']:7.2f}%  [F24]")
+          f"\n    + two-quantity bin          {100*d['dual_bin_group']:7.2f}%"
+          f"\n  with the exact A*beta exit (opacity alone):"
+          f"\n    Poisson  (expansion_branch) {100*d['poisson_with_exact_exit']:7.2f}%  [F24]"
+          f"\n    two-quantity (dual_branch)  {100*d['dual_with_exact_exit']:7.2f}%")
     (HERE / f"opacity_{ion}_ng{ng}.json").write_text(json.dumps(out, indent=1))
     print(f"wrote opacity_{ion}_ng{ng}.json")
 

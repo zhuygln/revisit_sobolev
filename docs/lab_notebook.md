@@ -1397,11 +1397,41 @@ the count wrong. One scalar per bin cannot carry both, and a scattering
 problem needs both. On Ce the bracket collapses and both are too transparent.
 
 *So the target architecture fails on dense forests.* kappa_grouped + R_ij is
-not usable for anything Ce-like, and P12 must not be built on it. The
-constructive move is obvious and cheap: a bin carrying BOTH E and S --
-interaction rate from E, attenuation from S -- still O(1) numbers per bin,
-directly testable with what is now in place. That is the next experiment,
-and it is a better one than P8.
+not usable for anything Ce-like, and P12 must not be built on it.
+
+*The constructive move, tested the same day, and it half works.* A bin
+carrying BOTH quantities -- survival from S = sum tau, the within-bin line
+draw from the p = 1-e^-tau distribution (`dual_*` modes, one extra array per
+bin). On La II it does exactly what F15 predicts: the saturated band goes
++21.3% -> -0.7% and the worst band 21.32% -> 8.66%. There, F24's density
+limit really IS the Poisson survival substitution.
+
+On Ce II it fails, and worse than what it replaces: 139.27% against
+expansion's 112.86%. The DIRECTION is what taught me something. S >= E
+always, so S survival is strictly more opaque -- yet the band gets BRIGHTER
+(1.33 vs 1.18 against a reference of 0.56). More opacity means more
+interactions (0.961 ev/pkt vs 0.864), every interaction is a fluorescent
+redraw, and on a forest this dense the band refills from elsewhere faster
+than it absorbs. That is 4.19-4.20's fluorescent refill working against the
+closure. The deep band on a dense forest is REDISTRIBUTION-limited, not
+attenuation-limited, so no survival law can fix it. I had assumed the La
+result would generalize and said so before Ce ran; it does not.
+
+*And the repair is unavailable to the architecture anyway.* `dual_group` came
+out bit-identical to `binned_group` -- every band, both ions, not close but
+identical -- because the group path never draws a line within the bin, so the
+p-distribution has nothing to attach to. The two-quantity bin only helps a
+closure that restores line identity at absorption, which is precisely what
+R_ij is defined not to do. So even on La II, where the fix works, it is not
+available to kappa_grouped + R_ij.
+
+*Where that leaves P11.* Four opacity rules tried; on the dense forest they
+span 91-139% and none is usable. The redistribution operator is 0.92% / 2.21%
+throughout. The problem is not which scalar the bin carries, it is that a bin
+has no way to skip the line a packet was just emitted from, and on a dense
+forest fluorescent refill amplifies that rather than damping it. Restoring
+line identity at emission is the only lever left, and it costs exactly the
+thing grouping was supposed to buy.
 
 ## 10. Standing environment notes
 

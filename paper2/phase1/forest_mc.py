@@ -114,7 +114,12 @@ MODES = ("sobolev_group", "sobolev_absorb", "expansion_absorb", "sobolev_thermal
          # R_ij as sobolev_group, so the opacity treatment is the only thing
          # that differs. "binned" bins the lines with no Poisson substitution
          # (sum tau); "expansion" is the substitution (sum 1 - e^-tau).
-         "binned_group", "binned_absorb", "expansion_group")
+         "binned_group", "binned_absorb", "expansion_group",
+         # P11's constructive test: the two-quantity bin -- survival from
+         # S = sum tau, within-bin line draw from the p distribution. If F24's
+         # density limit is purely the Poisson survival substitution, dual_branch
+         # recovers the explicit physics where expansion_branch does not.
+         "dual_branch", "dual_group", "dual_absorb")
 
 
 # --------------------------------------------------------------------------
@@ -279,22 +284,32 @@ class ForestAtom:
             Sobolev result (F12: optical depths add), so it isolates the cost
             of losing the resonance frequency to bin resolution from the cost
             of the Poisson substitution itself (Paper III P11).
+        weight="dual"    : the TWO-QUANTITY bin (P11's constructive reading).
+            Survival is carried by S = sum tau, which is the exact Bernoulli
+            attenuation; the within-bin line draw is carried by the p = 1-e^-tau
+            distribution, which is the exact interaction-probability weighting.
+            F15 says one scalar cannot do both jobs -- this carries both, at
+            the cost of one extra array per bin.
         """
-        if weight not in ("poisson", "exact"):
-            raise ValueError(f"weight must be 'poisson' or 'exact', got {weight!r}")
+        if weight not in ("poisson", "exact", "dual"):
+            raise ValueError(f"weight must be 'poisson', 'exact' or 'dual', got {weight!r}")
         lo = self.op_nu.min() * (1 - 10 * dnu_over_nu) if nu_lo is None else nu_lo
         hi = self.op_nu.max() * (1 + 10 * dnu_over_nu) if nu_hi is None else nu_hi
         n = int(np.ceil(np.log(hi / lo) / np.log1p(dnu_over_nu))) + 1
         edges = lo * (1 + dnu_over_nu) ** np.arange(n + 1)
         E = np.zeros(n)
         b = np.clip(np.searchsorted(edges, self.op_nu, side="right") - 1, 0, n - 1)
+        # survival weight (drives G and therefore where interactions happen)
         wgt = self.op_p if weight == "poisson" else self.op_tau
         np.add.at(E, b, wgt)
+        # within-bin line-selection weight: the probability of interacting
+        # with each line, which is p even when survival is carried by tau
+        sel = self.op_p if weight in ("poisson", "dual") else self.op_tau
         # CSR by bin for sampling the absorbing line within a bin (E8): lines
         # are already sorted by frequency, so each bin's lines are contiguous
         self._bin_of_line = b
         self._bin_start = np.searchsorted(b, np.arange(n + 1), side="left")
-        self._cum_in_bin = np.cumsum(wgt) - np.repeat(np.concatenate([[0.0], np.cumsum(wgt)])[self._bin_start[:-1]], np.diff(self._bin_start))
+        self._cum_in_bin = np.cumsum(sel) - np.repeat(np.concatenate([[0.0], np.cumsum(sel)])[self._bin_start[:-1]], np.diff(self._bin_start))
         return edges, E
 
     def sample_line_in_bin(self, b, u):
@@ -432,7 +447,9 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
     if not sobolev:
         edges, E = atom.expansion_bins(dnu_over_nu, nu_lo=min(nu_min, atom.op_nu.min()) * 0.5,
                                        nu_hi=max(nu_max, atom.op_nu.max()) * 1.01,
-                                       weight="exact" if mode.startswith("binned") else "poisson")
+                                       weight=("exact" if mode.startswith("binned")
+                                               else "dual" if mode.startswith("dual")
+                                               else "poisson"))
         # cumulative E from the top (high frequency) downward; G(nu) = optical
         # depth accumulated sweeping from the top edge down to nu.
         # G is piecewise linear in nu inside each bin.

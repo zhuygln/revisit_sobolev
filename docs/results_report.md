@@ -1500,11 +1500,49 @@ target, does not work on dense forests. P12's light curves must not be built
 on it for anything Ce-like; the useful direction is the opacity
 representation, not further refinement of the redistribution side.
 
-**The constructive reading.** The two rules fail in opposite directions on La
-because each preserves exactly one of F15's two quantities. A bin carrying
-*both* — interaction rate from E, attenuation from S — is the obvious
-candidate, is still O(1) numbers per bin, and is directly testable with the
-machinery now in place. That is the natural next experiment.
+#### The two-quantity bin: it works on the sparse forest and fails on the dense one
+
+The two rules fail in opposite directions on La because each preserves exactly
+one of F15's quantities, so the obvious candidate is a bin carrying *both* —
+survival from S = Στ (the exact Bernoulli attenuation), the within-bin line
+draw from the p = 1−e^−τ distribution (the exact interaction weighting). Still
+O(1) numbers per bin. It was tested (`dual_*` modes) and the answer is split:
+
+| | La II worst | 3800–3955 Å | Ce II worst | 3800–3955 Å |
+|---|---|---|---|---|
+| R_ij, exact line opacity | 0.92% | −0.9% | 2.21% | +1.6% |
+| binned (S) + R_ij | 14.49% | −14.5% | 126.66% | +126.7% |
+| expansion (E) + R_ij | 17.84% | +17.8% | 91.29% | +91.3% |
+| **two-quantity + R_ij** | 14.49% | −14.5% | 126.66% | +126.7% |
+| expansion + A·β [F24] | 21.32% | +21.3% | 112.86% | +112.9% |
+| **two-quantity + A·β** | **8.66%** | **−0.7%** | **139.27%** | **+139.3%** |
+
+**On La II it does what F15 predicts.** Separating the two quantities takes
+the saturated band from +21.3% to −0.7% and the worst band from 21.32% to
+8.66%. In that regime F24's density limit really is the Poisson survival
+substitution, and removing it removes the error. The residual moves to the
+blue (−8.7%), the self-absorption signature: with S survival a packet
+re-emitted at an exact line frequency re-absorbs on the line it just left,
+because a bin cannot skip it.
+
+**On Ce II it fails, and fails worse than what it replaces** — 139.27%
+against expansion's 112.86%. The direction is the informative part. S ≥ E
+always, so S survival is strictly *more* opaque, yet the band gets *brighter*
+(1.33 vs 1.18 against a reference of 0.56). That is not an attenuation
+failure. More opacity means more interactions (0.961 events/packet against
+0.864), every interaction is a fluorescent redraw, and on a forest this dense
+the band is refilled from elsewhere faster than it is absorbed — §4.19–4.20's
+fluorescent refill, now working against the closure. The deep band on a dense
+forest is redistribution-limited, not attenuation-limited, so fixing the
+survival law cannot fix it.
+
+**A pure group closure cannot use the second quantity at all.** `dual_group`
+is bit-identical to `binned_group` in every band and both ions — not close,
+identical — because the group path never draws a line within the bin, so the
+p-distribution has nothing to attach to. The two-quantity bin only helps a
+closure that restores line identity at absorption, which is exactly what R_ij
+is defined not to do. So the one repair that works on La II is unavailable to
+the target architecture even there.
 
 *Limits.* One group count (N_g = 32; the redistribution side is already
 converged there for both ions), one bin width, two ions, LTE populations.
@@ -1543,7 +1581,7 @@ Nd II is untested here.
 | F27 | **Gate 2: compression is generic (outcome A).** All three ions compress with a discrete-table R_ij on the same opacity: La II 1.62% and Nd II 0.44% at N_g = 4, Ce II 2.89%/0.74% at 32/64. Nd II has 188× La's transitions but, at the fixed τ_max = 5 normalization, only 4,496 opacity lines against Ce's 22,960, and every Nd band sits between La and Ce. The §4.23 blue→blue mechanism separates the hard ion (Ce, block 0.247) from the easy ones but does not order them: Nd's block is 0.572, below La's 0.785, yet it compresses better — both are on the MC noise floor | §4.25 |
 | F28 | **The kernel's state space is itself ion-dependent.** The two structural claims of F26 carry to Nd II — the epoch axis collapses onto τ_scale exactly (τ-matched = own at every epoch, fixed kernel 19.1% at τ_max = 26.4) and T_gas stays the genuine axis (6.4–19.2% fixed, ≤0.51% recomputed). F26's third claim does not: the Nd fixed-kernel error is monotone in T_src and changes sign across the 6000 K training point (+12.44 / +3.89 / +0.25 / −4.88% at 4000/5000/6000/8000 K) where La's is flat at its ~1% noise floor. Denser groups draw from a more evenly weighted absorbing-line mix, so reweighting the continuum reweights the rows. Whether T_src can be dropped must be checked per ion | §4.25 |
 | F29 | **The composition rule works at the 5% level (P9).** An opacity-weighted mixture R_mix[i] = Σ_s w[i,s] R_s[i], with w taken from the blend's opacity alone and never from a blend run, reaches 4.27% worst-band on the La+Ce blend at N_g = 64 against a blend-trained kernel's 1.37%. It beats the best single-ion control by 2.4× and the gain is located: ce_only fails at −10.3% in the optical — the blue → optical branching channel — which La carries despite being 5% of the opacity, and the rule repairs it to −0.7% by composition weights alone. So composition leaves the kernel's state space at the 5% level (a per-ion library suffices) but explicit blend training is still needed below ~2%. Row-L1 distance does not order the legs and is not a usable proxy | §4.26 |
-| F30 | **The opacity is the binding constraint, not the redistribution (P11).** Carrying the identical R_ij, exact line opacity errs 0.92% (La II) and 2.21% (Ce II); grouping the opacity — by either single-scalar rule — takes that to 14–18% and 91–127%. The exact-sum binning (Στ) is too opaque on La (−14.5%) and the Poisson substitution too transparent (+17.8%); on Ce both are far too transparent. This is F15 as a design constraint: expansion preserves the interaction count E = Σ(1−e^−τ), exact-sum preserves the attenuation S = Στ, and one scalar per bin cannot carry both — a scattering problem needs both. κ_grouped + R_ij, the target architecture, therefore fails on dense forests; a bin carrying E *and* S is the obvious candidate | §4.27 |
+| F30 | **The opacity is the binding constraint, not the redistribution (P11).** Carrying the identical R_ij, exact line opacity errs 0.92% (La II) and 2.21% (Ce II); grouping the opacity — by either single-scalar rule — takes that to 14–18% and 91–127%. The exact-sum binning (Στ) is too opaque on La (−14.5%) and the Poisson substitution too transparent (+17.8%); on Ce both are far too transparent. This is F15 as a design constraint: expansion preserves the interaction count E = Σ(1−e^−τ), exact-sum preserves the attenuation S = Στ, and one scalar per bin cannot carry both — a scattering problem needs both. κ_grouped + R_ij, the target architecture, therefore fails on dense forests; a bin carrying E *and* S is the obvious candidate A bin carrying **both** quantities (survival from S, line draw from p) was then tested: it works on La II (21.32% → **8.66%**, saturated band +21.3% → −0.7%) and fails on Ce II (112.86% → **139.27%**), where more opacity makes the band *brighter* because it is refilled by fluorescence faster than absorbed — redistribution-limited, not attenuation-limited. And `dual_group` is bit-identical to `binned_group`: a pure R_ij closure never draws a line in the bin, so it cannot use the second quantity at all | §4.27 |
 
 ## 6. Caveats and limitations
 

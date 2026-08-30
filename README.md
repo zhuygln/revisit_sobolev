@@ -69,7 +69,7 @@ does not work).
 | F27 | **Gate 2: compression is generic (outcome A).** A discrete-table R_ij reproduces explicit branching for all three ions on the same opacity: La II 1.62% and Ce II 7.48% at N_g = 4, Ce reaching 2.89%/0.74% at 32/64 — and **Nd II 0.44% at N_g = 4**, the easiest of the three despite 3,336,077 transitions, because the fixed τ_max = 5 normalization leaves it only 4,496 opacity lines against Ce's 22,960. The blue→blue block separates the hard ion from the easy ones but does not order them | §4.25 |
 | F28 | **The kernel's state space is itself ion-dependent.** F26's structural claims carry to Nd II — the epoch axis still collapses onto τ_scale exactly, T_gas is still the genuine axis (6.4–19.2% fixed, ≤0.51% recomputed). Its third claim does not: Nd's fixed-kernel error is monotone in T_src and flips sign across the training point (+12.44 → −4.88% over 4000–8000 K) where La's is flat at ~1%. Denser groups draw a more evenly weighted absorbing-line mix, so reweighting the continuum reweights the rows | §4.25 |
 | F29 | **The composition rule works at the 5% level (P9).** An opacity-weighted mixture of per-ion kernels — weights from the blend's opacity alone, no blend run — reaches 4.27% worst-band on La+Ce at N_g = 64 where a blend-trained kernel gets 1.37%, beating the best single-ion control by 2.4×. The gain is located: `ce_only` fails at −10.3% in the optical, the blue → optical branching channel that La carries despite being 5% of the opacity, and the rule repairs it to −0.7%. Composition therefore leaves the state space at the 5% level — a per-ion library suffices — while explicit blend training is still needed below ~2% | §4.26 |
-| F30 | **The opacity is the binding constraint, not the redistribution (P11).** With the identical R_ij, exact line opacity errs 0.92% (La II) / 2.21% (Ce II); grouping the opacity takes that to 14–18% / 91–127% whichever single-scalar rule is used — Στ too opaque on La (−14.5%), Σ(1−e^−τ) too transparent (+17.8%), both far too transparent on Ce. F15 as a design constraint: one scalar per bin cannot carry both the attenuation and the interaction count, and scattering needs both. The κ_grouped + R_ij target architecture fails on dense forests; a bin carrying both is the candidate | §4.27 |
+| F30 | **The opacity is the binding constraint, not the redistribution (P11).** With the identical R_ij, exact line opacity errs 0.92% (La II) / 2.21% (Ce II); grouping the opacity takes that to 14–18% / 91–127% whichever single-scalar rule is used — Στ too opaque on La (−14.5%), Σ(1−e^−τ) too transparent (+17.8%), both far too transparent on Ce. F15 as a design constraint: one scalar per bin cannot carry both the attenuation and the interaction count, and scattering needs both. The κ_grouped + R_ij target architecture fails on dense forests; a bin carrying both is the candidate A bin carrying **both** quantities (survival from S, line draw from p) was then tested: it works on La II (21.32% → **8.66%**, saturated band +21.3% → −0.7%) and fails on Ce II (112.86% → **139.27%**), where more opacity makes the band *brighter* because it is refilled by fluorescence faster than absorbed — redistribution-limited, not attenuation-limited. And `dual_group` is bit-identical to `binned_group`: a pure R_ij closure never draws a line in the bin, so it cannot use the second quantity at all | §4.27 |
 
 Full write-up with figures and numbers:
 **[docs/results_report.md](docs/results_report.md)**.
@@ -189,6 +189,10 @@ radiative-equilibrium check is included (F18). The response letter is
    Ce II by either single-scalar rule (F30). The redistribution half was
    never the hard half — one scalar per bin cannot carry both the
    attenuation and the interaction count, and scattering needs both. So
-   κ_grouped + R_ij is not usable on dense forests, and the next
-   experiment is a bin carrying both quantities rather than more
-   redistribution refinement.
+   κ_grouped + R_ij is not usable on dense forests. A bin carrying both
+   quantities was then tried: it works on La II (21.3% → 8.7%) and fails
+   on Ce II (112.9% → 139.3%), where the deep band is redistribution- not
+   attenuation-limited — and a pure R_ij closure cannot use the second
+   quantity at all, since it never draws a line in the bin. Restoring
+   line identity at emission is the remaining lever, and it costs the
+   thing grouping was meant to buy.
