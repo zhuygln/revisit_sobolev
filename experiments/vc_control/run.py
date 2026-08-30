@@ -37,8 +37,9 @@ from sobolev.formal_transfer import emergent_luminosity, planck_bnu
 from sobolev.optical_depth import tau_sobolev
 from sobolev.sobolev_leg import tau_sobolev_relativistic
 
-SEDONA_HOME = os.environ.get("SEDONA_HOME", os.path.expanduser("~/personal/pubsed"))
-SEDONA = os.environ.get("SEDONA_EXE", f"{SEDONA_HOME}/src/sedona6.ex")
+from sobolev.sedona import sedona_cmd, sedona_home, sedona_timeout
+
+SEDONA_HOME = sedona_home()
 M_P = 1.67262192e-24
 
 # --- the shipped 2-level atom: one line, f from A ---
@@ -117,8 +118,8 @@ run = HERE / "run_bb"
 run.mkdir(exist_ok=True)
 (run / "param.lua").write_text(PARAM)
 print("running SEDONA ...", flush=True)
-r = subprocess.run([SEDONA, "param.lua"], cwd=run, capture_output=True, text=True,
-                   env={**os.environ, "SEDONA_HOME": SEDONA_HOME}, timeout=5000)
+r = subprocess.run(sedona_cmd(), cwd=run, capture_output=True, text=True,
+                   env={**os.environ, "SEDONA_HOME": SEDONA_HOME}, timeout=sedona_timeout(5000))
 print(f"  rc={r.returncode}")
 
 s = np.loadtxt(run / "spectrum_1.dat", comments="#")

@@ -44,8 +44,9 @@ from sobolev.constants import C, SIGMA_CLASSICAL
 from sobolev.populations import boltzmann_fractions_from_levels, statistical_weight
 from sobolev.sobolev_leg import expansion_damp, sobolev_attenuation
 
-SEDONA_HOME = os.environ.get("SEDONA_HOME", os.path.expanduser("~/personal/pubsed"))
-SEDONA = os.environ.get("SEDONA_EXE", f"{SEDONA_HOME}/src/sedona6.ex")
+from sobolev.sedona import sedona_cmd, sedona_home, sedona_timeout
+
+SEDONA_HOME = sedona_home()
 M_P = 1.67262192e-24
 CM1_TO_EV = 1.239841984e-4
 SB = 5.670374e-5
@@ -249,8 +250,8 @@ for mix_name, members in MIXES.items():
                     )
                 )
                 r = subprocess.run(
-                    [SEDONA, "param.lua"], cwd=run, capture_output=True, text=True,
-                    env={**os.environ, "SEDONA_HOME": SEDONA_HOME}, timeout=2000,
+                    sedona_cmd(), cwd=run, capture_output=True, text=True,
+                    env={**os.environ, "SEDONA_HOME": SEDONA_HOME}, timeout=sedona_timeout(2000),
                 )
                 if r.returncode != 0:
                     fluxes[mode] = None

@@ -38,8 +38,9 @@ sys.path.insert(0, str(ROOT))
 from sobolev.constants import C
 from sobolev.spectra import band_ratio
 
-SEDONA_HOME = os.environ.get("SEDONA_HOME", os.path.expanduser("~/personal/pubsed"))
-SEDONA = os.environ.get("SEDONA_EXE", f"{SEDONA_HOME}/src/sedona6.ex")
+from sobolev.sedona import sedona_cmd, sedona_home, sedona_timeout
+
+SEDONA_HOME = sedona_home()
 FOREST = ROOT / "experiments/laII_forest"
 R_CORE, T_CORE = 8.64e12, 6000.0
 BAND, MARGIN = (3800.0, 3955.0), (3952.0, 3970.0)
@@ -104,10 +105,10 @@ def run_one(label, model, vd, mode, seed):
             forest=FOREST, model=model, dnu=dnu_for(vd), seed=seed, vd=vd * 1e5,
             bb=1 if mode == "bb" else 0, exp=0 if mode == "bb" else 1,
         ))
-        r = subprocess.run([SEDONA, "param.lua"], cwd=run, capture_output=True,
+        r = subprocess.run(sedona_cmd(), cwd=run, capture_output=True,
                            text=True,
                            env={**os.environ, "SEDONA_HOME": SEDONA_HOME},
-                           timeout=40000)
+                           timeout=sedona_timeout(40000))
         if r.returncode != 0 or not spec.exists():
             (run / "run.log").write_text(r.stdout[-4000:] + "\n" + r.stderr[-2000:])
             return label, mode, seed, None

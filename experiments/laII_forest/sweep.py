@@ -18,8 +18,9 @@ from pathlib import Path
 import numpy as np
 
 HERE = Path(__file__).parent
-SEDONA_HOME = os.environ.get("SEDONA_HOME", os.path.expanduser("~/personal/pubsed"))
-SEDONA = os.environ.get("SEDONA_EXE", f"{SEDONA_HOME}/src/sedona6.ex")
+from sobolev.sedona import sedona_cmd, sedona_home, sedona_timeout
+
+SEDONA_HOME = sedona_home()
 
 M_P = 1.67262192e-24
 A_LA = 139.0
@@ -98,9 +99,9 @@ for tau_max in TAU_MAXES:
                 PARAM.format(mod=mod, dnu=dnu, bb=bb, exp=ex, vd=vd)
             )
             r = subprocess.run(
-                [SEDONA, "param.lua"], cwd=run, capture_output=True, text=True,
+                sedona_cmd(), cwd=run, capture_output=True, text=True,
                 env={**os.environ, "SEDONA_HOME": SEDONA_HOME},
-                timeout=560,
+                timeout=sedona_timeout(560),
             )
             if r.returncode != 0:
                 row[mode] = None

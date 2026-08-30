@@ -123,16 +123,35 @@ rank, and the `-Wl,-rpath` in `Makefile.wsl` resolves the conda libs without
 Put `~/personal/sedona-deps/env/bin` on `PATH` only if you want `mpirun` for
 running SEDONA multi-rank by hand.
 
-The experiment drivers locate the binary through the environment, defaulting
-to `~/personal/pubsed`:
+The experiment drivers go through `sobolev/sedona.py`, which reads:
 
-```bash
-SEDONA_HOME=/somewhere/else/pubsed   # optional
-SEDONA_EXE=/somewhere/else/sedona6.ex  # optional, overrides the above
-```
+| variable | default | meaning |
+|---|---|---|
+| `SEDONA_HOME` | `~/personal/pubsed` | the clone |
+| `SEDONA_EXE` | `$SEDONA_HOME/src/sedona6.ex` | the binary; overrides the above |
+| `SEDONA_TIMEOUT_SCALE` | `1.0` | multiplies every driver's timeout |
+| `SEDONA_NP` | `1` | MPI ranks |
+| `SEDONA_MPIRUN` | `mpirun` | launcher used when `SEDONA_NP > 1` |
 
-(Before 2026-08-29 these were hardcoded to one machine's home directory,
-which is why a clone elsewhere could not run any SEDONA experiment.)
+The defaults reproduce the historical behaviour exactly.
+
+**`SEDONA_TIMEOUT_SCALE` is the one to reach for on a slow machine.** The
+drivers carry per-experiment `subprocess` timeouts from 560 s to 60,000 s,
+tuned on the first machine. A budget that is too small does not announce
+itself — it kills the run partway with `TimeoutExpired` and no result. That
+is exactly what happened here: measured throughput was ~695 s per 10⁶ packets
+single-rank, putting `vc_control`'s 10⁷-packet run at ~6,950 s against its
+written 5,000 s. Either scale the timeouts or use more ranks.
+
+**`SEDONA_NP` changes the answer, so it is opt-in.** SEDONA seeds its RNG per
+rank, so a multi-rank run is comparable to the committed single-rank numbers
+only within Monte Carlo noise, never bit-for-bit. Use it to make a long run
+tractable, not to reproduce a committed value exactly. It needs `mpirun` on
+`PATH` (`~/personal/sedona-deps/env/bin`).
+
+(Before 2026-08-29 the path was hardcoded to one machine's home directory,
+which is why a clone elsewhere could not run any SEDONA experiment; the
+timeouts followed on the same day for the same reason.)
 
 Note the lab notebook §5 warning about passing a *trimmed* `env=` to
 `subprocess`: `env={SEDONA_HOME, PATH}` alone breaks the OpenMPI runtime.

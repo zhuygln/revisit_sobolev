@@ -48,8 +48,9 @@ ROOT = HERE.parents[1]
 sys.path.insert(0, str(ROOT))
 from sobolev.spectra import band_ratio
 
-SEDONA_HOME = os.environ.get("SEDONA_HOME", os.path.expanduser("~/personal/pubsed"))
-SEDONA = os.environ.get("SEDONA_EXE", f"{SEDONA_HOME}/src/sedona6.ex")
+from sobolev.sedona import sedona_cmd, sedona_home, sedona_timeout
+
+SEDONA_HOME = sedona_home()
 R_CORE, T_CORE = 8.64e12, 6000.0
 BAND = (3800.0, 3955.0)
 BLUE_MARGIN, RED_MARGIN = (3785.0, 3805.0), (3952.0, 3970.0)
@@ -117,10 +118,10 @@ def run_one(tag, model, n_iter, mode, seed, vd_kms=100.0):
             bb=1 if mode == "bb" else 0, exp=0 if mode == "bb" else 1,
             vd=vd_kms * 1e5, dnu=vd_kms * 1e5 / 2.99792458e10 / 8,
         ))
-        r = subprocess.run([SEDONA, "param.lua"], cwd=run, capture_output=True,
+        r = subprocess.run(sedona_cmd(), cwd=run, capture_output=True,
                            text=True,
                            env={**os.environ, "SEDONA_HOME": SEDONA_HOME},
-                           timeout=60000)
+                           timeout=sedona_timeout(60000))
         (run / "run.log").write_text(r.stdout[-6000:] + "\n" + r.stderr[-2000:])
         if r.returncode != 0 or not last.exists():
             return tag, n_iter, mode, seed, None

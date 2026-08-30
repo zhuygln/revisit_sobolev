@@ -31,8 +31,9 @@ from sobolev.populations import boltzmann_fractions_from_levels
 
 HERE = Path(__file__).parent
 ROOT = HERE.parents[1]
-SEDONA_HOME = os.environ.get("SEDONA_HOME", os.path.expanduser("~/personal/pubsed"))
-SEDONA = os.environ.get("SEDONA_EXE", f"{SEDONA_HOME}/src/sedona6.ex")
+from sobolev.sedona import sedona_cmd, sedona_home, sedona_timeout
+
+SEDONA_HOME = sedona_home()
 
 M_P = 1.67262192e-24
 A_LA = 139.0
@@ -99,8 +100,8 @@ def run_pair(tag, mod, vd):
         )
         t0 = time.time()
         r = subprocess.run(
-            [SEDONA, "param.lua"], cwd=run, capture_output=True, text=True,
-            env={**os.environ, "SEDONA_HOME": SEDONA_HOME}, timeout=3000,
+            sedona_cmd(), cwd=run, capture_output=True, text=True,
+            env={**os.environ, "SEDONA_HOME": SEDONA_HOME}, timeout=sedona_timeout(3000),
         )
         wall = time.time() - t0
         if r.returncode != 0:

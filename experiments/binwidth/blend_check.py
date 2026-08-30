@@ -12,8 +12,9 @@ import numpy as np
 HERE = Path(__file__).parent; ROOT = HERE.parents[1]
 sys.path.insert(0, str(ROOT))
 from sobolev.spectra import band_ratio
-SEDONA_HOME = os.environ.get("SEDONA_HOME", os.path.expanduser("~/personal/pubsed"))
-SEDONA = os.environ.get("SEDONA_EXE", f"{SEDONA_HOME}/src/sedona6.ex")
+from sobolev.sedona import sedona_cmd, sedona_home, sedona_timeout
+
+SEDONA_HOME = sedona_home()
 BLEND = ROOT / "experiments/multiion"
 BAND, MARGIN, RC, TC = (3800.0, 3955.0), (3952.0, 3970.0), 8.64e12, 6000.0
 C = 2.99792458e10
@@ -49,8 +50,8 @@ for dnu in (4.17e-5, 1.25e-4, 4.17e-4):
     for mode, bb, ex in (("bb",1,0),("exp",0,1)):
         run = HERE/f"blend_{dnu:.2e}_{mode}"; run.mkdir(exist_ok=True)
         (run/"param.lua").write_text(PARAM.format(b=BLEND,dnu=dnu,bb=bb,exp=ex))
-        r = subprocess.run([SEDONA,"param.lua"],cwd=run,capture_output=True,
-            text=True,env={**os.environ,"SEDONA_HOME":SEDONA_HOME},timeout=6000)
+        r = subprocess.run(sedona_cmd(),cwd=run,capture_output=True,
+            text=True,env={**os.environ,"SEDONA_HOME":SEDONA_HOME},timeout=sedona_timeout(6000))
         row[mode] = band_ratio(run/"spectrum_1.dat",BAND,MARGIN,RC,TC) if r.returncode==0 else None
     if row.get("bb") and row.get("exp"):
         row["d_exp"]=(row["exp"]-row["bb"])/row["bb"]
