@@ -404,16 +404,24 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
            t_core=None, beta_on_expansion=False, exp_emit="bin",
            launch_weight="photon", eps=1.0, relativity=None,
            kernel=None, collect_events=False, line_memory=False):
-    """line_memory : the minimal-memory closure (P11 follow-up). A grouped
-    opacity cannot skip the line a packet was just emitted from, so the packet
-    immediately re-absorbs on it -- the F30 residual. With line_memory=True a
-    *_group leg carries exactly ONE extra number, the frequency it last
-    emitted at, and credits that line's own optical depth to the next
-    free-path draw, so the emitting line is passed for free. This is the
-    binned analogue of the Sobolev legs' at-resonance skip, whose escape
-    probability the kernel's training already contains. No atomic level is
-    inspected after emission: the credit is looked up from the opacity by
+    """line_memory : MEMORY DEPTH m for the grouped legs (False/0 = none,
+    True = 1). A grouped opacity cannot skip the line a packet was just emitted
+    from, so the packet immediately re-absorbs on it -- the F30 residual. With
+    memory a *_group leg carries the last m opacity-line indices it emitted at
+    and credits each one still AHEAD of it (redward, since comoving frequency
+    decreases monotonically along a leg) to the next free-path draw, so those
+    lines are passed for free.
+
+    m = 1 is the binned analogue of the Sobolev legs' at-resonance skip, whose
+    escape probability the kernel's training already contains. m > 1 asks the
+    empirical question this cannot answer: how much of the recent ORDERED
+    resonance history must group transport keep to become Markovian enough?
+    No atomic level is inspected -- the credit is an opacity lookup by
     frequency, and exits below tau_min carry no opacity and cost nothing.
+
+    The credit consumes no random numbers, so every m shares one RNG stream and
+    the m-sweep is a controlled comparison; m = 0 is a literal no-op and is
+    bit-identical to line_memory=False.
 
     exp_emit : how the expansion legs place a thermally re-emitted packet
     in frequency. "bin" (default) -- uniformly within the sampled line's
@@ -540,6 +548,14 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
     last_line = np.full(n_packets, -1, np.int64)    # E7: last emitting line
     # expansion mode: optical depth still to travel before the next interaction
     tau_r = rng.exponential(1.0, n_packets) if not sobolev else None
+    # memory: ring buffer of the last m opacity-line indices each packet emitted
+    # at. Indices, not frequencies -- half the memory and no float-equality test
+    # at credit time. -1 is the empty sentinel.
+    m_mem = int(line_memory)
+    if m_mem < 0:
+        raise ValueError(f"line_memory must be >= 0, got {m_mem}")
+    mem_k = np.full((n_packets, m_mem), -1, np.int32) if (m_mem and not sobolev) else None
+    mem_ptr = np.zeros(n_packets, np.int8) if mem_k is not None else None
     # Paper III: per-event (nu_absorbed_cm, nu_exit_rest, packet weight) --
     # the branch chain collapsed to one pair; draws no rng, so collecting is
     # bit-for-bit inert for every leg
@@ -692,23 +708,29 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
                 # already-spent optical depth and re-interacts immediately --
                 # events/packet inflates ~5x and the deep bands go opaque.
                 tau_r[hi] = rng.exponential(1.0, hi.size)
-                if line_memory:
-                    # one remembered number per packet: the frequency just
-                    # emitted at. Credit that line's own contribution so it is
-                    # passed for free -- the binned at-resonance skip.
-                    #
+                if mem_k is not None:
                     # The credit must be in the GRID's units, i.e. the same
                     # weight the bin was built from (expansion_bins): op_p for
                     # the Poisson grid, op_tau for the exact-sum grid. Crediting
                     # op_tau on a Poisson grid over-credits a saturated line by
                     # tau/(1-e^-tau) -- 8x at tau = 8 -- which pushes the packet
                     # far too red instead of merely past its own line.
+                    wgt_mem = (atom.op_p if bin_weight == "poisson"
+                               else atom.op_tau)  # "exact" and "dual" survive on sum tau
                     j = np.searchsorted(atom.op_nu, nu_rest)
                     j = np.clip(j, 0, atom.op_nu.size - 1)
                     same = atom.op_nu[j] == nu_rest
-                    credit = (atom.op_p[j] if bin_weight == "poisson"
-                              else atom.op_tau[j])   # "exact" and "dual" both survive on sum tau
-                    tau_r[hi] += np.where(same, credit, 0.0)
+                    # record the line just emitted at, THEN credit the window --
+                    # so m = 1 credits exactly that line and nothing else
+                    mem_k[hi, mem_ptr[hi]] = np.where(same, j, -1).astype(np.int32)
+                    mem_ptr[hi] = (mem_ptr[hi] + 1) % m_mem
+                    km = mem_k[hi]                       # (hi.size, m)
+                    kc = np.maximum(km, 0)               # keep -1 from wrapping the gather
+                    # comoving frequency falls monotonically along a leg, so only
+                    # remembered lines at or below nu_rest are still ahead; the
+                    # ones above were already swept past and must not be credited
+                    ahead = (km >= 0) & (atom.op_nu[kc] <= nu_rest[:, None])
+                    tau_r[hi] += np.where(ahead, wgt_mem[kc], 0.0).sum(axis=1)
             continue
         todo = np.arange(hi.size)
         bin_emit = not sobolev and exp_emit == "bin"   # expansion legs: thermal draws are bins

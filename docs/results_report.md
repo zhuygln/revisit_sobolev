@@ -1718,6 +1718,76 @@ single random start (its non-monotonicity in k reflects local minima as well as
 transport nonlinearity), and the within-group discrete exit tables held fixed
 throughout — this asks about group-to-group structure only.
 
+### 4.30 Paper III E2 — memory depth, and the control parameter is band-local saturation (F33)
+
+F31 ended with an interpretation: "sparse forests need one remembered line;
+dense forests need the resonance *sequence*." E2 tests the second half by
+making memory a depth rather than a switch. `run_mc(line_memory=m)` carries a
+ring buffer of the last m opacity-line indices and credits each one still ahead
+of the packet (comoving frequency falls monotonically along a leg, so only lines
+at or below the emission frequency can be reached). The credit draws no random
+numbers, so every m shares one RNG stream and m = 0 is bit-identical to no
+memory — the sweep is exactly controlled, not statistically so.
+
+**Memory saturates at m ≤ 4 in every forest, and does nothing at all in the
+dense one.** Worst band, N_g = 32, 3 seeds × 2×10⁶:
+
+| m | La II binned | Nd II binned | **Ce II binned** | Ce II expansion |
+|---|---|---|---|---|
+| 1 | 6.50% | 8.41% | **116.31%** | 81.66% |
+| 2 | 6.42% | 8.07% | **116.54%** | 80.15% |
+| 4 | 6.39% | 7.98% | **116.86%** | 80.16% |
+| 8 | 6.40% | 7.95% | **116.75%** | 80.19% |
+| 16 | 6.40% | 7.95% | **116.79%** | 80.14% |
+
+La converges by m = 4 and Nd by m = 8, each gaining ~0.1–0.5 points beyond
+m = 1. **Ce gains nothing: 116.31 → 116.79% is flat across a sixteen-fold
+increase in remembered history.**
+
+**So the ordered resonance sequence is not the missing information, and F31's
+second clause is retracted.** Sixteen remembered resonances buy nothing on the
+forest that fails hardest. Whatever a group closure lacks on a dense forest, it
+is not history depth: memory is a *between-step* correction, and the failure is
+a *within-step* one — where in a crowded bin the absorption happened, which no
+amount of past history supplies.
+
+#### The density limit is not monotonic in line count
+
+Nd II was run through the full P11 decomposition for the first time here, and it
+breaks the reading that dense forests fail:
+
+| ion | opacity lines | saturated lines in 3800–3955 Å | Στ in band | expansion + A·β |
+|---|---|---|---|---|
+| **Nd II** | 4,496 | **1** | 11.4 | **1.79%** |
+| La II | 949 | 4 | 22.4 | 21.32% |
+| Ce II | 22,960 | 24 | 89.6 | 112.86% |
+
+Nd has **4.7× La's opacity lines and 1/12 its closure error**. The expansion
+closure on Nd is 1.79% with the exact exit kernel and 2.15% as a full group
+closure — that is a *working* closure, on the ion with the largest line list of
+the three. Total line count therefore does not order the failure, and F24's
+"density limit" is misnamed.
+
+What does order it, on these three points, is **band-local saturation**: the
+number of saturated lines inside the band being measured (1, 4, 24), equivalently
+the saturated-line count per transport bin (0.001, 0.004, 0.025), or Στ in the
+band (11.4, 22.4, 89.6). The forest-averaged crowding orders them too (4, 15, 26
+saturated lines per unit ln λ) but the band-local version is the physically right
+scale, because the failure is confined to one band while the forest spans a
+decade and a half.
+
+Three points cannot establish a law and the log-log slopes are not yet
+consistent (1.8 and 0.9 for successive pairs on the saturated-line count). This
+is precisely the gap the synthetic phase diagram is built to close: these
+candidates now have a target ordering to reproduce, and synthetic forests can
+vary band-local saturation independently of everything else.
+
+*Note on the memory sign.* Memory continues to help the exact-sum opacity and
+hurt the Poisson one on La (6.50 vs 19.84 → 20.47%), for the reason §4.28
+gives: it always adds transparency, which helps a too-opaque closure and hurts a
+too-transparent one. On Nd the Poisson leg is already accurate, so memory moves
+it only 1.36 → 1.66%.
+
 ## 5. Findings register
 
 | # | Finding | Where |
@@ -1752,8 +1822,9 @@ throughout — this asks about group-to-group structure only.
 | F28 | **The kernel's state space is itself ion-dependent.** The two structural claims of F26 carry to Nd II — the epoch axis collapses onto τ_scale exactly (τ-matched = own at every epoch, fixed kernel 19.1% at τ_max = 26.4) and T_gas stays the genuine axis (6.4–19.2% fixed, ≤0.51% recomputed). F26's third claim does not: the Nd fixed-kernel error is monotone in T_src and changes sign across the 6000 K training point (+12.44 / +3.89 / +0.25 / −4.88% at 4000/5000/6000/8000 K) where La's is flat at its ~1% noise floor. Denser groups draw from a more evenly weighted absorbing-line mix, so reweighting the continuum reweights the rows. Whether T_src can be dropped must be checked per ion | §4.25 |
 | F29 | **The composition rule works at the 5% level (P9).** An opacity-weighted mixture R_mix[i] = Σ_s w[i,s] R_s[i], with w taken from the blend's opacity alone and never from a blend run, reaches 4.27% worst-band on the La+Ce blend at N_g = 64 against a blend-trained kernel's 1.37%. It beats the best single-ion control by 2.4× and the gain is located: ce_only fails at −10.3% in the optical — the blue → optical branching channel — which La carries despite being 5% of the opacity, and the rule repairs it to −0.7% by composition weights alone. So composition leaves the kernel's state space at the 5% level (a per-ion library suffices) but explicit blend training is still needed below ~2%. Row-L1 distance does not order the legs and is not a usable proxy | §4.26 |
 | F30 | **The opacity is the binding constraint, not the redistribution (P11).** Carrying the identical R_ij, exact line opacity errs 0.92% (La II) and 2.21% (Ce II); grouping the opacity — by either single-scalar rule — takes that to 14–18% and 91–127%. The exact-sum binning (Στ) is too opaque on La (−14.5%) and the Poisson substitution too transparent (+17.8%); on Ce both are far too transparent. This is F15 as a design constraint: expansion preserves the interaction count E = Σ(1−e^−τ), exact-sum preserves the attenuation S = Στ, and one scalar per bin cannot carry both — a scattering problem needs both. κ_grouped + R_ij, the target architecture, therefore fails on dense forests; a bin carrying E *and* S is the obvious candidate A bin carrying **both** quantities (survival from S, line draw from p) was then tested: it works on La II (21.32% → **8.66%**, saturated band +21.3% → −0.7%) and fails on Ce II (112.86% → **139.27%**), where more opacity makes the band *brighter* because it is refilled by fluorescence faster than absorbed — redistribution-limited, not attenuation-limited. And `dual_group` is bit-identical to `binned_group`: a pure R_ij closure never draws a line in the bin, so it cannot use the second quantity at all | §4.27 |
-| F31 | **One remembered line is not the missing state — and the failure splits by line spacing.** Carrying exactly one extra number per packet (the frequency last emitted at, crediting that line's τ to the next free path) buys a factor 2.2 on La II (14.49% → **6.50%**, saturated band −14.5% → −6.3%), the cheapest grouped-opacity repair found. On Ce II it moves 126.66% → 116.31% and 91.29% → 79.46% — real but no rescue. The events/packet counter shows memory removes a comparable fraction of the excess interactions in both forests (39% La, 34% Ce), so the Ce error is not driven by excess interactions: it is the fluorescent refill of §4.19–4.20, and no local interaction bookkeeping reaches it. Sparse forests need one remembered line; dense forests need the resonance *sequence* | §4.28 |
+| F31 | **One remembered line is not the missing state — and the failure splits by line spacing.** Carrying exactly one extra number per packet (the frequency last emitted at, crediting that line's τ to the next free path) buys a factor 2.2 on La II (14.49% → **6.50%**, saturated band −14.5% → −6.3%), the cheapest grouped-opacity repair found. On Ce II it moves 126.66% → 116.31% and 91.29% → 79.46% — real but no rescue. The events/packet counter shows memory removes a comparable fraction of the excess interactions in both forests (39% La, 34% Ce), so the Ce error is not driven by excess interactions: it is the fluorescent refill of §4.19–4.20, and no local interaction bookkeeping reaches it. Sparse forests need one remembered line; ~~dense forests need the resonance *sequence*~~ — that second clause is **retracted by F33**, which finds no benefit from depth beyond m = 1 on Ce | §4.28, §4.30 |
 | F32 | **The redistribution operator is local in frequency, not low-rank — so "few modes" is the wrong explanation for its compressibility.** Effective dimension never saturates: participation ratio grows as N_g^0.64–0.75 across La/Ce/Nd with PR/N_g falling 0.5 → 0.2, and NMF rank-8 of a 25-row operator still misses row-L1 0.47 (23% total variation per row). Rank *anti*-correlates with compressibility — Ce has the lowest energy-operator dimension (PR 1.60) and is the hardest to compress. Decisive at matched parameter count: 16 numbers as a coarse 4×4 matrix give 1.62% where 912 numbers as a rank-16 factorization give 11.30%. Coarsening averages neighbouring groups; truncation projects onto modes; only the first works. This unifies Paper III — redistribution is smooth at the group scale so it coarse-grains (F25/F27), the opacity is a comb whose ordering decides a packet's fate so it does not (F30/F31) | §4.29 |
+| F33 | **Resonance-sequence depth is not the missing information, and the density limit is not about density (retracts F31's second clause).** Making memory a depth rather than a switch: La converges by m = 4 and Nd by m = 8, each gaining ≤0.5 points beyond m = 1, and **Ce gains nothing** — 116.31 → 116.79% across a sixteen-fold increase in remembered history. Memory is a between-step correction; the dense-forest failure is within-step. Nd II, run through P11 for the first time, breaks the density reading outright: 4.7× La's opacity lines and **1/12 its error** (expansion + A·β 1.79%, a working closure). What orders the three ions is **band-local saturation** — saturated lines inside the failing band (Nd 1, La 4, Ce 24), or Στ there (11.4, 22.4, 89.6) — not total line count. Three points cannot fix the exponent; that is what the synthetic phase diagram is for | §4.30 |
 
 ## 6. Caveats and limitations
 

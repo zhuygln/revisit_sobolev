@@ -47,6 +47,9 @@ from reference import BANDS, SEEDS, build_atom
 # SEDONA's production transport bin, the grid Paper I's F13 bin-width study
 # swept; the expansion legs are the closure as codes actually run it.
 DNU = 4.17e-5
+# E2: memory depth. How much of the recent ORDERED resonance history must group
+# transport keep? m = 1 is the at-resonance skip; m > 1 is the open question.
+MEM = (1, 2, 4, 8, 16)
 
 
 def legs(atom, lo, hi, n, kernel, modes):
@@ -57,9 +60,9 @@ def legs(atom, lo, hi, n, kernel, modes):
         rows, inter = [], []
         for s in SEEDS:
             kw = {"kernel": kernel} if "_group" in mode else {}
-            if mode.endswith("+mem"):
-                kw["line_memory"] = True
-            mode = mode.replace("+mem", "")
+            if "+m" in mode:
+                mode, m = mode.split("+m")
+                kw["line_memory"] = int(m)
             res = run_mc(atom, R_CORE, R_OUT, T_EXP, lo, hi, n, mode,
                          seed=s, t_core=T_CORE, dnu_over_nu=DNU, **kw)
             rows.append({b: band_ratio(res, *nu_of(*w), weight="energy")[0] for b, w in BANDS.items()})
@@ -93,8 +96,9 @@ def main(ion, ng, n):
 
     res = legs(atom, lo, hi, n, kernel,
                ["sobolev_branch", "expansion_branch", "dual_branch",
-                "sobolev_group", "binned_group", "expansion_group", "dual_group",
-                "binned_group+mem", "expansion_group+mem", "dual_group+mem"])
+                "sobolev_group", "binned_group", "expansion_group", "dual_group"]
+               + [f"binned_group+m{m}" for m in MEM]
+               + [f"expansion_group+m{m}" for m in MEM])
     ref = res["sobolev_branch"]["bands"]
 
     out = {"ion": ion, "ng": ng, "n": n, "dnu_over_nu": DNU, "n_ion": n_ion,
@@ -117,9 +121,9 @@ def main(ion, ng, n):
         "plus_bin_resolution": g["binned_group"]["worst"],
         "plus_poisson": g["expansion_group"]["worst"],
         "dual_bin_group": g["dual_group"]["worst"],
-        "binned_plus_memory": g["binned_group+mem"]["worst"],
-        "expansion_plus_memory": g["expansion_group+mem"]["worst"],
-        "dual_plus_memory": g["dual_group+mem"]["worst"],
+        "memory_sweep": {f"m{m}": {"binned": g[f"binned_group+m{m}"]["worst"],
+                                   "expansion": g[f"expansion_group+m{m}"]["worst"]}
+                         for m in MEM},
         "poisson_with_exact_exit": g["expansion_branch"]["worst"],
         "dual_with_exact_exit": g["dual_branch"]["worst"],
     }
@@ -129,11 +133,11 @@ def main(ion, ng, n):
           f"\n    + bin resolution            {100*d['plus_bin_resolution']:7.2f}%"
           f"\n    + Poisson substitution      {100*d['plus_poisson']:7.2f}%"
           f"\n    + two-quantity bin          {100*d['dual_bin_group']:7.2f}%"
-          f"\n  + one remembered frequency (minimal memory):"
-          f"\n    binned + memory            {100*d['binned_plus_memory']:7.2f}%"
-          f"\n    expansion + memory         {100*d['expansion_plus_memory']:7.2f}%"
-          f"\n    two-quantity + memory      {100*d['dual_plus_memory']:7.2f}%"
-          f"\n  with the exact A*beta exit (opacity alone):"
+          f"\n  memory depth m (worst band):"
+          + "".join(f"\n    m = {m:2d}   binned {100*d['memory_sweep'][f'm{m}']['binned']:7.2f}%"
+                    f"   expansion {100*d['memory_sweep'][f'm{m}']['expansion']:7.2f}%"
+                    for m in MEM)
+          + f"\n  with the exact A*beta exit (opacity alone):"
           f"\n    Poisson  (expansion_branch) {100*d['poisson_with_exact_exit']:7.2f}%  [F24]"
           f"\n    two-quantity (dual_branch)  {100*d['dual_with_exact_exit']:7.2f}%")
     (HERE / f"opacity_{ion}_ng{ng}.json").write_text(json.dumps(out, indent=1))

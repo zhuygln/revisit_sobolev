@@ -1603,6 +1603,63 @@ is well-posed and is also the right physical model (each input group as a
 mixture of k archetypal exit distributions). The conclusion did not change --
 which is luck, not vindication.
 
+## 9ad. E2: the sequence is not the answer, and Nd breaks the density story (2026-08-30)
+
+*Machinery.* `line_memory` is now a DEPTH, not a switch: a ring buffer of the
+last m opacity-line INDICES per packet (indices not frequencies -- half the
+memory, and no float-equality test at credit time), crediting each remembered
+line still ahead. The ordering constraint matters: comoving frequency falls
+monotonically along a leg, so only lines at or below the emission frequency can
+still be reached, and crediting the ones already swept past would be wrong.
+The credit draws no RNG, so every m shares one stream and m = 0 is
+BIT-IDENTICAL to no memory -- pinned by test, exactly rather than
+statistically, which is what makes the sweep a controlled comparison.
+
+*Result 1: memory saturates immediately, and does nothing for Ce.*
+
+| m | La binned | Nd binned | Ce binned |
+|---|---|---|---|
+| 1 | 6.50% | 8.41% | 116.31% |
+| 4 | 6.39% | 7.98% | 116.86% |
+| 16 | 6.40% | 7.95% | 116.79% |
+
+La converges by m = 4, Nd by m = 8, each gaining a few tenths beyond m = 1.
+Ce gains NOTHING across a sixteen-fold increase in remembered history.
+
+So 9z's closing line -- "dense forests need the resonance sequence" -- is
+WRONG and I am retracting it. It was a plausible reading of F31's two regimes
+and the depth sweep kills it. Memory is a BETWEEN-STEP correction; the
+dense-forest failure is a WITHIN-STEP one, about where in a crowded bin the
+absorption happened. No amount of past history supplies that. I should have
+been more careful calling an interpretation a conclusion.
+
+*Result 2, which I did not expect at all: Nd's expansion closure WORKS.*
+Running Nd through the full P11 decomposition for the first time:
+
+| ion | opacity lines | sat. lines in 3800-3955 | sum tau in band | expansion + A*beta |
+|---|---|---|---|---|
+| Nd II | 4,496 | 1 | 11.4 | 1.79% |
+| La II | 949 | 4 | 22.4 | 21.32% |
+| Ce II | 22,960 | 24 | 89.6 | 112.86% |
+
+Nd has 4.7x La's opacity lines and one twelfth its error. 1.79% with the exact
+exit kernel, 2.15% as a full group closure -- a working closure on the ion with
+the biggest line list of the three. So total line count does NOT order the
+failure and F24's "density limit" is misnamed.
+
+*What does order it, on three points:* band-local saturation. Saturated lines
+inside the band that fails (1, 4, 24), or equivalently per transport bin
+(0.001, 0.004, 0.025), or sum tau in the band (11.4, 22.4, 89.6). Forest-
+averaged crowding also orders them (4, 15, 26 per unit ln lambda) but the
+band-local version is the right scale -- the failure lives in one band while
+the forest spans a decade and a half, and averaging over the whole span was
+hiding the very thing that separates Nd from Ce.
+
+Three points cannot fix an exponent; the successive log-log slopes are 1.8 and
+0.9, which is not a law. But the phase diagram now has a TARGET ORDERING to
+reproduce and a candidate axis that can be varied independently in synthetic
+forests. That is a much better position than E3 would have been in yesterday.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,
