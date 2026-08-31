@@ -1710,6 +1710,59 @@ three real points are not "a general phase diagram and scaling law". The
 cheapest strengthening is more real atoms: the GSI archive has 27 ions, all
 already on disk, and three have been used.
 
+## 9af. E3b: thirteen ions, a broken normalization, and a sign change (2026-08-30)
+
+*The normalization had to be fixed before anything ran.* setup.py's recipe pins
+tau_max = 5 INSIDE 3850-3950 A. That works for La/Ce/Nd because their strongest
+lines sit in or near that window -- an accident. For Yb II the window holds only
+weak lines, so reaching tau = 5 there wants n_ion = 1.7e12 cm^-3, which puts
+tau_max at 1.7e8 and beta at 1.5e-8; a packet entering that resonance never
+escapes and `run_mc` raised "re-absorption chain did not terminate". That crash
+is a real physical statement about the recipe, not a bug. Switched the survey to
+the ion's GLOBAL strongest line: scale-free, identical for every ion, beta >=
+0.199 by construction.
+
+Worth flagging beyond this experiment: that window recipe is load-bearing in
+F24, F27, F30-F33. It does not invalidate them -- they are internally consistent
+and all three ions are ones where the window happens to hold near-strongest
+lines -- but no claim of UNIVERSALITY can rest on a normalization that silently
+depends on which ion you picked. Ce II's band3800 binned error is +126.7% under
+the window recipe and +12.2% under the global one, from a 25% density
+difference. That should have been checked much earlier.
+
+*Thirteen ions do not collapse.* La II S = 13.4 -> 6.55%; Pr II S = 13.8 ->
+31.39%. Identical saturation, 5x the error. Ce II at S = 66.8 errs 12.20%, LESS
+than Pr II at a fifth its saturation. The zero-saturation ions (Pr III, Tm III,
+Yb II, Ce III, Er III) anchor the trivial limit at 0.01-1.25%, and that is where
+most of the +0.75 rank correlation comes from.
+
+*And on real ions the axes cannot be separated.* Saturation and redistribution
+range correlate with the error equally (+0.75, +0.77) because in real atoms they
+are correlated with EACH OTHER -- a bigger ion has more of both. This is exactly
+the confounding the synthetic forests were built to break, and there, with the
+axes decorrelated by construction, saturation wins 0.91 to 0.25. The real survey
+cannot replace the synthetic experiment; it can only test transfer. Good to have
+learned that the cheap-looking route (more real ions) does not substitute for
+the expensive one.
+
+*The thing that explains all of it: the error CHANGES SIGN.* Density scan on
+Ce II, band 3800-3955:
+
+  n_ion   2910  5821  8731  11641  17462  29103
+  binned -33.4 -15.3 +21.4 +124.6  +94.7 +129.8 %
+
+Too OPAQUE at low density, too TRANSPARENT at high, crossing zero between
+S ~ 45 and 67 and then climbing +21 -> +125% across a density factor of 1.33.
+La II stays negative over its whole range (+0.5% to -36.6%) and never crosses.
+
+That is why nothing collapsed. A sign-changing error cannot be a power law, and
+two ions at matched saturation can differ 5x simply by sitting on opposite sides
+of the boundary. The two competing errors are ones already named -- exact-sum
+binning over-counts interactions (too opaque), fluorescent refill and the
+Poisson substitution add transparency -- and the locus where they cancel is a
+genuine phase boundary. F34's power-law framing is superseded by its own
+follow-up, one day later.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,
