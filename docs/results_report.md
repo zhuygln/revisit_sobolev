@@ -2010,6 +2010,64 @@ standard answers "at matched line strength, what does network topology change?";
 it does not answer what any of these ions does in a real kilonova, which needs
 the astrophysical standard (`from_conditions`).
 
+### 4.34 Paper III E4 — the synthetic model cannot reach the too-bright branch (F37)
+
+F35 located a ΔF = 0 boundary three ways at S ≈ 50. E4 set out to map it in
+controlled synthetic forests and test whether it moves with redistribution
+range — the question that decides whether the phase diagram is 1-D in
+saturation or genuinely 2-D. `paper3/synthetic/boundary.py` scans τ at fixed
+(line count, redistribution range) to bracket the crossing rather than grid
+blindly: 6 rows × 6 τ, S spanning 2.7 to 1459.
+
+**No crossing exists anywhere in the model.** All 36 conditions are negative,
+monotonically deepening to −99% and never turning. The redistribution range
+changes nothing structural: at N = 100 the sequence is −4.6 → −76.3% for
+dlnlam = 0.005 and −5.4 → −82.7% for dlnlam = 0.15, the same shape.
+
+**The reference transmission says why.** At matched band saturation the
+synthetic band is two to three times more opaque than any real ion's:
+
+| | S in band | reference transmission | ΔF |
+|---|---|---|---|
+| synthetic | 54.1 | **0.229** | −74.7% |
+| synthetic | 87.5 | 0.251 | −90.8% |
+| **Ce II** | 66.8 | **0.581** | **+12.2%** |
+| La II | 13.4 | 0.725 | −5.0% |
+| **Tm II** | 5.8 | **1.049** | −6.0% |
+
+Tm II's band transmits *more than the continuum entering it*. That is
+unambiguous net fluorescent refill: energy absorbed elsewhere in the forest is
+re-emitted into this band. Dy III does the same at 0.970. Real lanthanide
+forests **feed** the band from outside, which is what keeps it transparent as
+saturation rises — and what eventually makes the grouped closure over-bright.
+
+The synthetic forests have no such pathway. Their exit channels sit at a fixed
+±Δln λ from their own absorbing line and carry no opacity, so the model
+redistributes energy *locally* and never delivers a net inflow to the measured
+band. The band therefore only ever darkens, and the closure can only ever be
+too opaque. **The too-bright branch — the entire reason the boundary exists —
+is absent from the model by construction.**
+
+**So E4 is blocked on a model deficiency, not on a measurement.** The two
+competing errors of §4.32 are interaction over-counting (too opaque) and
+saturation/Poisson plus fluorescent refill (too bright); `synthetic_forest`
+implements the first and not the second. A boundary cannot be located in a
+model that contains only one side of it.
+
+*What the model needs.* Exits distributed over the forest rather than offset
+from their own line, enough exit channels per upper level for a photon absorbed
+outside the band to reach it, and a check on the diagnostic that exposed the
+problem: the reference band's transmission must approach — and for some
+configurations exceed — unity, as it does in Tm II and Dy III. Until it does,
+synthetic forests can calibrate the too-opaque regime and nothing else.
+
+*What survives from E4.* The negative result is itself informative: it isolates
+fluorescent refill as the *necessary* ingredient for the sign change, which the
+real-ion data implied but could not prove, since in real atoms refill and
+saturation cannot be separated. A model lacking only refill fails to produce
+only the bright branch — which is as close to a controlled demonstration of
+that mechanism as this project has.
+
 ## 5. Findings register
 
 | # | Finding | Where |
@@ -2050,6 +2108,7 @@ the astrophysical standard (`from_conditions`).
 | F34 | **Band-local saturation controls the grouped-closure failure; redistribution does not.** 96 synthetic forests with independently dialled crowding, saturation, spacing and redistribution range: Spearman ρ = +0.91 for Στ in the band and +0.86 for N_sat there, against **+0.25 and −0.31 for the two redistribution axes** — an independent confirmation of F33 from the opposite direction. The synthetic family collapses as ΔF = 0.162·N_sat^0.58 (scatter ×1.95), and the real atoms sit at ratio 0.71 / 0.40 / 1.25, two of three inside that scatter. Building the forests required first measuring the real τ distribution *inside* the failing band: mostly weak lines with a saturated tail, ln-spread 1.7–2.05 across all three ions. Band-to-forest geometry is eliminated as the residual cause (10× change → 16% effect); the emergent-cascade `ladder` forests match the real interpolation at matched N_sat (59–62% vs 62%) where the dialled ones overshoot (78–94%). A partial collapse: not yet a general law | §4.31 |
 | F35 | **The closure error changes sign — there is a phase boundary, not a scaling law (supersedes F34's power law).** Thirteen GSI ions under a uniform normalization do not collapse: La II and Pr II have identical band saturation (S = 13.4 vs 13.8) and differ 5× in error (6.55% vs 31.39%), while Ce II at 5× their saturation errs *less*. A density scan shows why: the binned closure is **too opaque at low density and too transparent at high density**, crossing zero for Ce II between S ≈ 45 and 67 then rising +21% → +125% across a density factor of 1.33. La II (−5.0%) and Pr II (−31.4%) are the same sign at matched saturation, so their 5× difference is within-regime scatter, not a sign flip — that remains open. Also: the project's τ_max = 5 *window* normalization is ion-specific by accident and diverges for most ions (Yb II demands n_ion = 1.7×10¹², β = 1.5×10⁻⁸, and the branch chain cannot terminate) — universality claims need the global normalization used here. On real ions saturation and redistribution range are confounded (ρ = +0.75 vs +0.77), which is why the decorrelated synthetic experiment (F34) is what identifies the cause | §4.32 |
 | F36 | **The normalization audit: three cross-ion claims revised.** Re-measuring five ions at matched line strength (`global_tau_max`) instead of the accidental window recipe: **F27 is strengthened** — every ion compresses at *four* groups to ≤4.3%, Ce II included, so "dense ions need 32–64 groups" was an artefact. **F24's density limit inverts** — the branching-aware Poisson closure is +14.7% on La II and **+1.9% on Ce II**, making Ce the better case, not the catastrophic one. **F33's null memory result is superseded** — memory is the most effective correction found (Pr II −31.4→−5.6%, Ce II +12.2→**+0.2%**); its null was a property of an over-dense Ce. **F30's structure survives on five ions**: redistribution 0.2–1.8%, grouped opacity −31% to +15%. Memory's *direction* now has a mechanism — it always adds transparency, which brightens an absorption-limited band (La −5.0→+4.5%, overshooting zero) and dims a refill-limited one (Ce +12.2→+0.2%) | §4.33 |
+| F37 | **The synthetic model contains only one side of the boundary — which isolates fluorescent refill as the cause of the other.** Scanning τ across S = 2.7 → 1459 at three redistribution ranges, all 36 controlled conditions are negative and deepen monotonically to −99%; no ΔF = 0 crossing exists in the model. The reference transmission shows why: at matched saturation the synthetic band is 2–3× more opaque than any real ion (S ≈ 55–90: synthetic 0.23–0.25 vs Ce II 0.58), because real forests **feed** the band from outside — Tm II transmits **1.049**, more than the continuum entering it, and Dy III 0.970. `synthetic_forest`'s exits sit at a fixed offset from their own line and carry no opacity, so it redistributes locally and never delivers net inflow; the band only darkens. E4 is therefore blocked on a model deficiency, not a measurement — and the failure is itself the controlled demonstration that fluorescent refill is what produces the too-bright branch | §4.34 |
 
 ## 6. Caveats and limitations
 

@@ -1763,6 +1763,57 @@ Poisson substitution add transparency -- and the locus where they cancel is a
 genuine phase boundary. F34's power-law framing is superseded by its own
 follow-up, one day later.
 
+## 9ag. E4: the model has only one side of the boundary (2026-08-31)
+
+*The plan.* Scan tau at fixed (n_lines, dlnlam) to BRACKET the Delta F = 0
+crossing rather than grid blindly, then ask whether the crossing S moves with
+redistribution range -- the question that decides 1-D vs 2-D.
+
+*The answer: there is no crossing in the model.* All 36 conditions negative,
+S from 2.7 to 1459, deepening monotonically to -99% and never turning.
+dlnlam changes nothing structural (-4.6 -> -76.3% at 0.005 vs -5.4 -> -82.7%
+at 0.15, same shape).
+
+*Why, and the diagnostic that found it.* Reference transmission in the measured
+band, at matched saturation:
+
+  synthetic S = 54.1  ->  ref 0.229   dF -74.7%
+  synthetic S = 87.5  ->  ref 0.251   dF -90.8%
+  real Ce II S = 66.8 ->  ref 0.581   dF +12.2%
+  real Tm II S =  5.8 ->  ref 1.049   dF  -6.0%
+
+Tm II's band transmits MORE THAN THE CONTINUUM ENTERING IT. Dy III 0.970. Real
+lanthanide forests FEED the measured band from outside; that is what keeps it
+transparent as saturation rises, and eventually what makes a grouped closure
+over-bright.
+
+My synthetic forests cannot do that. Exit channels sit at a fixed +-dlnlam from
+their OWN absorbing line and carry no opacity, so the model redistributes
+locally and never delivers a net inflow to the band. The band only darkens. The
+too-bright branch -- the entire reason the boundary exists -- is absent by
+construction.
+
+*So E4 is blocked on the model, not the measurement.* You cannot locate a
+boundary in a model containing one side of it. I should have checked
+`ref_core` against the real ions' band transmission when I calibrated the
+forests in 9ae; I matched the tau DISTRIBUTION and never checked what the band
+actually transmitted, which is the quantity the whole experiment is a ratio to.
+Match the observable, not only the inputs.
+
+*What the negative is worth.* In real atoms refill and saturation cannot be
+separated -- bigger ions have more of both -- so the real-ion data implies
+refill matters but cannot prove it. A model that lacks ONLY refill fails to
+produce ONLY the bright branch. That is as close to a controlled demonstration
+that fluorescent refill causes the sign change as this project has managed, and
+it came from the model being wrong rather than right.
+
+*The fix, for whoever runs it next:* exits distributed over the forest instead
+of offset from their own line; enough channels per upper level that a photon
+absorbed outside the band can reach it; and an acceptance test that the
+reference band transmission approaches and sometimes exceeds unity, as Tm II
+and Dy III do. Until then synthetic forests calibrate the too-opaque regime and
+nothing else.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,
