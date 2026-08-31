@@ -38,7 +38,7 @@ from forest_mc import band_ratio, run_mc
 from redistribution import RedistributionKernel
 
 from sobolev.constants import C
-from sobolev.forest_stats import forest_summary
+from sobolev.forest_stats import band_saturation, forest_summary
 
 R_CORE, R_OUT, T_EXP, T_CORE = 8.64e13, 2.592e14, 86400.0, 6000.0
 SEEDS = (1, 2, 3)
@@ -51,7 +51,7 @@ def bands_of(lo, hi):
     e = np.geomspace(lo, hi, 6)
     b = {f"s{i}": (e[i], e[i + 1]) for i in range(5)}
     mid = np.sqrt(lo * hi)
-    b["core"] = (mid / 1.02, mid * 1.02)
+    b["core"] = (mid / 1.10, mid * 1.10)
     return b
 
 
@@ -91,27 +91,58 @@ def condition(params, n, ng):
     w_group = float(np.log(hi / lo) / ng)
     row["w_group"] = w_group
     row["range_in_groups"] = row["mean_abs_dlnlam"] / w_group
+    # E2/F33: the closure error is ordered by saturation INSIDE the band being
+    # measured, not by the forest average, so the core band's census is the
+    # candidate control axis.
+    core = bands_of(lo, hi)["core"]
+    row.update({f"core_{k}": v for k, v in
+                band_saturation(atom, core[0], core[1]).items()})
+    # scale-free versions, so synthetic bands of one width and the real atoms'
+    # 3800-3955 A band of another can be placed on the same axis
+    w_core = float(np.log(core[1] / core[0]))
+    row["w_core"] = w_core
+    row["core_sat_per_lnlam"] = row["core_n_sat_band"] / w_core
+    row["core_S_per_lnlam"] = row["core_S_band"] / w_core
+
+    # A band the reference blacks out entirely has no defined ratio. That is a
+    # real regime, not a nuisance: at high crowding and high tau the core band
+    # goes to zero transmitted flux, and "the closure is N% wrong" stops meaning
+    # anything there. Such bands are dropped from dF and counted.
+    BLACK = 1e-3   # below 0.1% of continuum a band carries no observable flux
+    live_b = [k for k in ref if ref[k] > BLACK]
+    row["n_black_bands"] = len(ref) - len(live_b)
+    row["core_is_black"] = bool(ref["core"] <= BLACK)
+    if not live_b:
+        return None
+
+    def score(b):
+        dF = {k: b[k] / ref[k] - 1 for k in live_b}
+        return dF, max(abs(v) for v in dF.values()), dF.get("core")
 
     for tag, mem in (("group", False), ("group_mem", True)):
         b, _, ipp = measure(atom, lo, hi, n, "binned_group", kernel=kern, memory=mem)
-        dF = {k: b[k] / ref[k] - 1 for k in ref}
-        row[tag] = {"dF": dF, "worst": max(abs(v) for v in dF.values()),
-                    "core": dF["core"], "events_per_packet": ipp}
+        dF, worst, core_dF = score(b)
+        row[tag] = {"dF": dF, "worst": worst, "core": core_dF,
+                    "events_per_packet": ipp}
     # the redistribution-only control: same kernel, exact line opacity
     b, _, ipp = measure(atom, lo, hi, n, "sobolev_group", kernel=kern)
-    dF = {k: b[k] / ref[k] - 1 for k in ref}
-    row["redistribution_only"] = {"worst": max(abs(v) for v in dF.values()),
-                                  "core": dF["core"], "events_per_packet": ipp}
+    dF, worst, core_dF = score(b)
+    row["redistribution_only"] = {"worst": worst, "core": core_dF,
+                                  "events_per_packet": ipp}
     return row
 
 
 def grid(quick):
     if quick:
-        return dict(n_lines=[50, 200], tau=[1.0, 8.0], dlnlam=[0.01, 0.2],
+        return dict(n_lines=[75, 600], tau=[0.02, 0.5], dlnlam=[0.02],
                     f_return=[0.5])
-    return dict(n_lines=[25, 50, 100, 200, 400],
-                tau=[0.5, 2.0, 8.0, 30.0],
-                dlnlam=[0.004, 0.015, 0.06, 0.25],
+    # Calibrated against the real forests' band-local tau distributions
+    # (report 4.30): median tau 0.005-0.53, ln-spread 1.7-2.05, saturated
+    # fraction 0.006-0.267. A monodisperse forest is the wrong model -- it goes
+    # black instead of transmitting through the weak-line population.
+    return dict(n_lines=[25, 75, 200, 600],
+                tau=[0.005, 0.02, 0.1, 0.5],
+                dlnlam=[0.004, 0.02, 0.1],
                 f_return=[0.2, 0.8])
 
 
@@ -123,7 +154,7 @@ def main(n, ng, quick, out_name):
     rows, t0 = [], time.time()
     for i, vals in enumerate(combos):
         p = dict(zip(keys, vals))
-        p.update(span=0.3, n_exit=2, tau_spread=0.4, jitter=0.5, seed=7)
+        p.update(span=0.3, n_exit=2, tau_spread=1.8, jitter=0.5, seed=7)
         r = condition(p, n, ng)
         if r is None:
             print(f"  [{i+1}/{len(combos)}] {p} -- too few events, skipped", flush=True)
@@ -131,7 +162,8 @@ def main(n, ng, quick, out_name):
         rows.append(r)
         print(f"  [{i+1}/{len(combos)}] N={p['n_lines']:3d} tau={p['tau']:4.1f} "
               f"dlnlam={p['dlnlam']:.3f} fret={p['f_return']:.1f} | "
-              f"E/S {r['E_over_S']:.3f} Nsat {r['n_sat_per_lnlam']:6.0f} "
+              f"nb {r['core_n_band']:4d} Nsat {r['core_n_sat_band']:4d} "
+              f"E/S_b {r['core_E_over_S_band']:.3f} "
               f"rng/grp {r['range_in_groups']:6.2f} same {r['same_group_frac']:.2f} | "
               f"Rij {100*r['redistribution_only']['worst']:6.2f}% "
               f"grp {100*r['group']['worst']:7.2f}% "

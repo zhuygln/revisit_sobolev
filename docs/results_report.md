@@ -1788,6 +1788,80 @@ gives: it always adds transparency, which helps a too-opaque closure and hurts a
 too-transparent one. On Nd the Poisson leg is already accurate, so memory moves
 it only 1.36 → 1.66%.
 
+### 4.31 Paper III E3 — the synthetic phase diagram: saturation controls it, partially (F34)
+
+F33 identified band-local saturation as the variable ordering three ions. Three
+points cannot fix an exponent, and a referee can say "three peculiar atoms", so
+this sweeps 96 synthetic forests whose crowding, saturation, spacing and
+redistribution range vary independently (`paper3/synthetic/`), and asks whether
+one parameter collapses them — and whether the real atoms land on the same curve.
+
+**The synthetic forests had to be rebuilt against the real ones first.** Nobody
+had measured the τ distribution *inside* the failing band. Doing so:
+
+| ion | lines in band | median τ | frac(τ>1) | ln-spread |
+|---|---|---|---|---|
+| La II | 15 | 0.53 | 0.267 | 1.83 |
+| Nd II | 163 | 0.005 | 0.006 | 1.71 |
+| Ce II | 462 | 0.019 | 0.052 | 2.05 |
+
+Real forests are **mostly weak lines with a saturated tail**, and the ln-spread is
+1.7–2.05 in all three — a tight regularity across ions differing 30× in line
+count. The first synthetic grid used spread 0.4, near-monodisperse, which makes a
+forest either transparent or entirely black rather than transmitting through a
+weak-line population; every condition was degenerate, including the
+redistribution-only control at 155%. With the spread set to 1.8 the control
+returns to 0.6–10.6% and the sweep is meaningful.
+
+**Saturation controls the failure; redistribution barely enters.** Spearman rank
+correlation of the closure error against each candidate, 96 conditions:
+
+| candidate | ρ |
+|---|---|
+| **S = Στ in band** | **+0.91** |
+| N_sat per unit ln λ (forest average) | +0.87 |
+| **N_sat in band** | **+0.86** |
+| E/S in band | −0.79 |
+| lines in band | +0.75 |
+| same-group fraction | −0.31 |
+| redistribution range / group width | +0.25 |
+
+The two redistribution axes are nearly powerless. That is an independent
+confirmation of E2 from a completely different direction: memory depth did
+nothing (§4.30) and the redistribution range does nothing here, so the
+grouped-closure failure is set by **opacity structure, not redistribution
+structure**.
+
+**The collapse, and its limits.** Fitting the synthetic family:
+
+    ΔF = 0.162 · N_sat^0.58        scatter ×1.95, R² = 0.64
+    ΔF = (S in band)^0.65          scatter ×2.22, R² = 0.77
+
+Real atoms against the N_sat fit: Nd II ratio 0.71, La II 0.40, Ce II 1.25 —
+**two of three inside the synthetic family's own scatter**, La the outlier at
+2.5×. The real-atom slope on the same axis is 0.78 against the synthetic 0.58.
+Normalizing per unit ln λ makes the transfer *worse* (0/3 and 1/3 inside), so the
+raw band census is the quantity that carries across, not its density.
+
+**Two candidate explanations tested and one eliminated.** The synthetic band is a
+larger fraction of its forest (0.19 of 0.3 in ln λ) than the real band is of a
+lanthanide forest (0.04 of ~3.4), so photons cannot enter it from as far away.
+Varying the span at fixed band crowding moves the error only 83% → 69% across a
+tenfold change in that ratio — **the geometry is not the explanation**. The exit
+rule is: at matched N_sat = 13, the dialled forests give 78–94% while the
+`synthetic_ladder` forests, whose branching emerges from a real cascade
+structure, give 58.7–62.2% — much closer to the real-atom interpolation at that
+crowding, 62.1%. So the dial is qualitatively right and quantitatively harsh, and
+the ladder is the better model, which is what it was built to test.
+
+**Assessment against the PRL gate.** This is a *partial* collapse. Band-local
+saturation is clearly the controlling variable, the redistribution axes are
+clearly not, and the real atoms are broadly consistent with the synthetic law —
+but a factor-2 scatter, one 2.5× outlier and only three real points do not
+constitute "a general phase diagram and scaling law". The cheapest way to
+strengthen it is more real atoms: the GSI archive holds **27 ions**, all already
+downloaded, of which three have been used.
+
 ## 5. Findings register
 
 | # | Finding | Where |
@@ -1825,6 +1899,7 @@ it only 1.36 → 1.66%.
 | F31 | **One remembered line is not the missing state — and the failure splits by line spacing.** Carrying exactly one extra number per packet (the frequency last emitted at, crediting that line's τ to the next free path) buys a factor 2.2 on La II (14.49% → **6.50%**, saturated band −14.5% → −6.3%), the cheapest grouped-opacity repair found. On Ce II it moves 126.66% → 116.31% and 91.29% → 79.46% — real but no rescue. The events/packet counter shows memory removes a comparable fraction of the excess interactions in both forests (39% La, 34% Ce), so the Ce error is not driven by excess interactions: it is the fluorescent refill of §4.19–4.20, and no local interaction bookkeeping reaches it. Sparse forests need one remembered line; ~~dense forests need the resonance *sequence*~~ — that second clause is **retracted by F33**, which finds no benefit from depth beyond m = 1 on Ce | §4.28, §4.30 |
 | F32 | **The redistribution operator is local in frequency, not low-rank — so "few modes" is the wrong explanation for its compressibility.** Effective dimension never saturates: participation ratio grows as N_g^0.64–0.75 across La/Ce/Nd with PR/N_g falling 0.5 → 0.2, and NMF rank-8 of a 25-row operator still misses row-L1 0.47 (23% total variation per row). Rank *anti*-correlates with compressibility — Ce has the lowest energy-operator dimension (PR 1.60) and is the hardest to compress. Decisive at matched parameter count: 16 numbers as a coarse 4×4 matrix give 1.62% where 912 numbers as a rank-16 factorization give 11.30%. Coarsening averages neighbouring groups; truncation projects onto modes; only the first works. This unifies Paper III — redistribution is smooth at the group scale so it coarse-grains (F25/F27), the opacity is a comb whose ordering decides a packet's fate so it does not (F30/F31) | §4.29 |
 | F33 | **Resonance-sequence depth is not the missing information, and the density limit is not about density (retracts F31's second clause).** Making memory a depth rather than a switch: La converges by m = 4 and Nd by m = 8, each gaining ≤0.5 points beyond m = 1, and **Ce gains nothing** — 116.31 → 116.79% across a sixteen-fold increase in remembered history. Memory is a between-step correction; the dense-forest failure is within-step. Nd II, run through P11 for the first time, breaks the density reading outright: 4.7× La's opacity lines and **1/12 its error** (expansion + A·β 1.79%, a working closure). What orders the three ions is **band-local saturation** — saturated lines inside the failing band (Nd 1, La 4, Ce 24), or Στ there (11.4, 22.4, 89.6) — not total line count. Three points cannot fix the exponent; that is what the synthetic phase diagram is for | §4.30 |
+| F34 | **Band-local saturation controls the grouped-closure failure; redistribution does not.** 96 synthetic forests with independently dialled crowding, saturation, spacing and redistribution range: Spearman ρ = +0.91 for Στ in the band and +0.86 for N_sat there, against **+0.25 and −0.31 for the two redistribution axes** — an independent confirmation of F33 from the opposite direction. The synthetic family collapses as ΔF = 0.162·N_sat^0.58 (scatter ×1.95), and the real atoms sit at ratio 0.71 / 0.40 / 1.25, two of three inside that scatter. Building the forests required first measuring the real τ distribution *inside* the failing band: mostly weak lines with a saturated tail, ln-spread 1.7–2.05 across all three ions. Band-to-forest geometry is eliminated as the residual cause (10× change → 16% effect); the emergent-cascade `ladder` forests match the real interpolation at matched N_sat (59–62% vs 62%) where the dialled ones overshoot (78–94%). A partial collapse: not yet a general law | §4.31 |
 
 ## 6. Caveats and limitations
 

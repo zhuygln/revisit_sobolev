@@ -67,6 +67,36 @@ def crowding(atom, tau_cut=1.0):
                 span_lnlam=span)
 
 
+def band_saturation(atom, nu_lo, nu_hi, dnu_over_nu=4.17e-5):
+    """Saturation census restricted to one band -- the scale that matters.
+
+    E2 (§4.30) found the closure failure is ordered by saturation INSIDE the
+    band being measured, not by the forest average: Nd II has 4.7x La II's
+    opacity lines but one saturated line in the failing band against La's four,
+    and one twelfth the closure error. A forest spanning a decade and a half
+    averages that distinction away.
+
+    `sat_per_bin` counts saturated lines per transport bin of the given
+    dnu/nu -- the resolution the grouped opacity actually works at.
+    """
+    nu = np.asarray(atom.op_nu, float)
+    t = np.asarray(atom.op_tau, float)
+    m = (nu >= nu_lo) & (nu < nu_hi)
+    if not m.any():
+        return dict(n_band=0, n_sat_band=0, S_band=0.0, E_band=0.0,
+                    E_over_S_band=np.nan, sat_per_bin=0.0, sat_per_lnlam=0.0)
+    tb = t[m]
+    S = float(tb.sum()); E = float(-np.expm1(-tb).sum())
+    span = float(np.log(nu_hi / nu_lo))
+    n_bins = span / dnu_over_nu
+    n_sat = int((tb > 1).sum())
+    return dict(n_band=int(tb.size), n_sat_band=n_sat,
+                S_band=S, E_band=E,
+                E_over_S_band=(E / S if S > 0 else np.nan),
+                sat_per_bin=n_sat / n_bins if n_bins > 0 else np.nan,
+                sat_per_lnlam=n_sat / span if span > 0 else np.nan)
+
+
 def spacing_stats(atom, v_doppler=None):
     """Nearest-neighbour velocity spacing of the opacity lines, and (optionally)
     the overlap parameter O = v_D / dv against a given Doppler width.

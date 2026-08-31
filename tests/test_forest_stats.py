@@ -16,9 +16,9 @@ sys.path.insert(0, str(ROOT / "paper2/phase1"))
 from forest_mc import ForestAtom
 
 from sobolev.constants import C
-from sobolev.forest_stats import (SE_sums, crowding, forest_summary,
-                                  redistribution_range, saturation_stats,
-                                  spacing_stats)
+from sobolev.forest_stats import (SE_sums, band_saturation, crowding,
+                                  forest_summary, redistribution_range,
+                                  saturation_stats, spacing_stats)
 
 T_EXP = 86400.0
 
@@ -138,3 +138,23 @@ def test_forest_summary_is_one_row():
 def test_empty_events_do_not_crash():
     r = redistribution_range(np.array([np.nan]), np.array([np.nan]))
     assert r["n_events"] == 0
+
+
+def test_band_saturation_restricts_to_the_band():
+    a = _atom([5e14, 6e14, 7e14, 8e14], [5.0, 5.0, 0.01, 0.01])
+    b = band_saturation(a, 4.5e14, 6.5e14)
+    assert b["n_band"] == 2 and b["n_sat_band"] == 2
+    b2 = band_saturation(a, 6.5e14, 8.5e14)
+    assert b2["n_band"] == 2 and b2["n_sat_band"] == 0
+
+
+def test_band_saturation_S_matches_the_lines_inside():
+    a = _atom([5e14, 6e14, 7e14], [2.0, 3.0, 100.0])
+    b = band_saturation(a, 4.5e14, 6.5e14)
+    assert b["S_band"] == pytest.approx(5.0, rel=1e-6)
+
+
+def test_empty_band_is_reported_not_crashed():
+    a = _atom([5e14, 6e14], [1.0, 1.0])
+    b = band_saturation(a, 1e15, 2e15)
+    assert b["n_band"] == 0 and b["n_sat_band"] == 0

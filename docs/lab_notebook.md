@@ -1660,6 +1660,56 @@ Three points cannot fix an exponent; the successive log-log slopes are 1.8 and
 reproduce and a candidate axis that can be varied independently in synthetic
 forests. That is a much better position than E3 would have been in yesterday.
 
+## 9ae. E3: saturation controls it, redistribution does not, and the collapse is partial (2026-08-30)
+
+*The calibration step mattered more than I expected.* Nobody had measured the
+tau distribution INSIDE the failing band. Doing it: La 15 lines median tau 0.53
+frac(tau>1) 0.267; Nd 163 lines median 0.005 frac 0.006; Ce 462 lines median
+0.019 frac 0.052 -- and the ln-spread is 1.83 / 1.71 / 2.05, i.e. essentially
+the same across ions differing 30x in line count. Real forests are mostly WEAK
+lines with a saturated tail. My first synthetic grid used spread 0.4, near
+monodisperse, which makes a forest either transparent or entirely black instead
+of transmitting through the weak-line population -- every condition degenerate,
+redistribution-only control at 155%. With spread 1.8 the control returns to
+0.6-10.6% and the sweep means something. Worth remembering: calibrate the
+synthetic against the real DISTRIBUTION, not just its summary statistics.
+
+*Result 1, and the one I would keep if I could keep only one.* Across 96
+conditions the Spearman correlations are +0.91 (sum tau in band), +0.86 (N_sat
+in band) -- and +0.25 and -0.31 for the two REDISTRIBUTION axes. The
+redistribution range and the same-group fraction barely matter. Coming from a
+different direction, that is E2 again: memory depth did nothing, redistribution
+range does nothing, so the grouped-closure failure is set by OPACITY structure
+and not by redistribution structure at all. Two independent experiments now say
+the same thing, which is more than either says alone.
+
+*Result 2, the collapse.* dF = 0.162 N_sat^0.58, scatter x1.95, R2 = 0.64
+(sum tau gives R2 = 0.77 with slightly worse scatter). Real atoms against that
+fit: Nd 0.71, La 0.40, Ce 1.25 -- two of three inside the family's own scatter,
+La the outlier at 2.5x, real slope 0.78 vs synthetic 0.58.
+
+*A unit error of mine, caught.* I first compared the synthetic fit (a FRACTION)
+against real errors quoted in PERCENT and got ratios of 13-125, and briefly
+believed the real atoms missed the curve entirely. They do not. Check units
+before believing a two-orders-of-magnitude disagreement -- especially one that
+would have killed the PRL route on the spot.
+
+*Two explanations tested, one eliminated.* The synthetic band is 0.19 of a
+0.3-wide forest where the real band is 0.04 of ~3.4, so photons cannot enter
+from as far away. Varying the span at fixed band crowding moves the error
+83% -> 69% across a TENFOLD change in that ratio: geometry is not it. The exit
+rule is: at matched N_sat = 13 the dialled forests give 78-94% and the LADDER
+forests, whose branching emerges from real cascade structure, give 58.7-62.2%
+against a real-atom interpolation of 62.1%. So the dial is qualitatively right
+and quantitatively harsh, and the ladder is the better model -- which is exactly
+what the "both" option was built to find out.
+
+*Where this leaves the gate.* Partial. The controlling variable is identified
+and the null axes are identified, but factor-2 scatter, one 2.5x outlier and
+three real points are not "a general phase diagram and scaling law". The
+cheapest strengthening is more real atoms: the GSI archive has 27 ions, all
+already on disk, and three have been used.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,
