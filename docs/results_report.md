@@ -2054,12 +2054,34 @@ saturation/Poisson plus fluorescent refill (too bright); `synthetic_forest`
 implements the first and not the second. A boundary cannot be located in a
 model that contains only one side of it.
 
-*What the model needs.* Exits distributed over the forest rather than offset
-from their own line, enough exit channels per upper level for a photon absorbed
-outside the band to reach it, and a check on the diagnostic that exposed the
-problem: the reference band's transmission must approach — and for some
-configurations exceed — unity, as it does in Tm II and Dy III. Until it does,
-synthetic forests can calibrate the too-opaque regime and nothing else.
+*The fix, and how far it gets.* `synthetic_forest(delocalize=p)` places a
+fraction p of exit channels anywhere in the forest instead of at ±Δln λ from
+their own parent line — the physical content of an upper level decaying to
+lower levels spread across the term structure. It is necessary and not
+sufficient. At S = 54.1, going from p = 0 to p = 1 with six exit channels moves
+the band transmission 0.226 → 0.292 and the binned error −77.5% → **−25.3%**, a
+factor of three. But the target is Ce II's 0.581, so the model remains ~2× too
+opaque in the band.
+
+**And the sign change it now produces runs the wrong way.** Scanning τ at
+p = 1, n_exit = 6, the expansion leg crosses zero — from **+4.0% at S = 8.1 to
+−7.9% at S = 54.1**, continuing to −71% at S = 811. That is too bright at *low*
+saturation and too opaque at *high*, the reverse of every real ion: Ce II runs
+−33.4% at S = 22.3 to +124.6% at S = 89.6.
+
+So delocalizing the exits gives the model a boundary but not *the* boundary.
+Real forests refill the measured band more strongly as saturation rises; this
+model refills it less, because its exit channels terminate on unpopulated sink
+levels and a photon that leaves through one can never be re-absorbed and
+cascaded again. Giving exit lines their own opacity is the next change, and it
+is small.
+
+*A bug this exposed.* `boundary.crossing()` tested only `a < 0 ≤ b`, so it
+detected negative-to-positive crossings and silently missed the opposite —
+precisely the case the delocalized model produces. It reported "no crossing"
+for a row that plainly had one. Fixed to detect either direction and report
+which; any earlier all-negative row is unaffected, but the check had been
+one-sided since it was written.
 
 *What survives from E4.* The negative result is itself informative: it isolates
 fluorescent refill as the *necessary* ingredient for the sign change, which the

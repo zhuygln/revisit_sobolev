@@ -37,11 +37,16 @@ from sobolev.forest_stats import band_saturation, redistribution_range
 SEEDS = P.SEEDS
 
 
-def point(n_lines, tau, dlnlam, n, ng=32, seed=7):
-    """One forest: signed core-band error for the binned and expansion closures."""
+def point(n_lines, tau, dlnlam, n, ng=32, seed=7, delocalize=0.0, n_exit=2):
+    """One forest: signed core-band error for the binned and expansion closures.
+
+    `delocalize` is the F37 fix: without it the model has no net inflow to the
+    measured band and only the too-opaque branch exists.
+    """
     atom, _ = synthetic_forest(n_lines=n_lines, tau=tau, tau_spread=1.8,
-                               span=0.3, n_exit=2, dlnlam=dlnlam,
-                               f_return=0.5, jitter=0.5, seed=seed)
+                               span=0.3, n_exit=n_exit, dlnlam=dlnlam,
+                               f_return=0.5, jitter=0.5, seed=seed,
+                               delocalize=delocalize)
     lo, hi = atom.op_nu.min() * 0.99, atom.op_nu.max() * 1.01
     ref, ev, _ = P.measure(atom, lo, hi, n, "sobolev_branch")
     if ev is None or ev[0].size < 1000 or ref["core"] <= 1e-3:
@@ -52,6 +57,7 @@ def point(n_lines, tau, dlnlam, n, ng=32, seed=7):
     bs = band_saturation(atom, core[0], core[1])
     rr = redistribution_range(ev[0], ev[1], edges=kern.edges)
     out = {"n_lines": n_lines, "tau": tau, "dlnlam": dlnlam,
+           "delocalize": delocalize, "n_exit": n_exit,
            "S_band": bs["S_band"], "n_sat_band": bs["n_sat_band"],
            "n_band": bs["n_band"], "range": rr["mean_abs_dlnlam"],
            "same_group_frac": rr["same_group_frac"], "ref_core": ref["core"]}
@@ -63,13 +69,22 @@ def point(n_lines, tau, dlnlam, n, ng=32, seed=7):
 
 
 def crossing(rows, key):
-    """S at which the signed error crosses zero, by log-linear interpolation."""
+    """S at which the signed error crosses zero, by log-linear interpolation.
+
+    Detects the crossing in EITHER direction and reports which. The first
+    version tested only `a < 0 <= b` and so silently missed positive-to-negative
+    crossings -- which is exactly what the delocalized model turned out to
+    produce, the opposite direction from the real ions.
+    """
     r = sorted([x for x in rows if x[key] is not None], key=lambda x: x["S_band"])
     for a, b in zip(r, r[1:]):
-        if a[key] < 0 <= b[key] and a["S_band"] > 0 and b["S_band"] > 0:
+        if a["S_band"] <= 0 or b["S_band"] <= 0:
+            continue
+        if a[key] * b[key] < 0:
             f = -a[key] / (b[key] - a[key])
-            return float(np.exp(np.log(a["S_band"]) +
-                                f * (np.log(b["S_band"]) - np.log(a["S_band"]))))
+            S = float(np.exp(np.log(a["S_band"]) +
+                             f * (np.log(b["S_band"]) - np.log(a["S_band"]))))
+            return {"S": S, "direction": "neg_to_pos" if a[key] < 0 else "pos_to_neg"}
     return None
 
 

@@ -55,7 +55,8 @@ def _tau_draw(n, tau, spread, rng):
 
 def synthetic_forest(n_lines=200, tau=5.0, tau_spread=0.0, span=0.2,
                      n_exit=2, dlnlam=0.1, dlnlam_spread=0.0, f_return=0.5,
-                     jitter=0.0, seed=0, t_exp=T_EXP, lam_mid=LAM_MID):
+                     jitter=0.0, seed=0, t_exp=T_EXP, lam_mid=LAM_MID,
+                     delocalize=0.0):
     """A forest whose redistribution range is a dial.
 
     Parameters
@@ -76,6 +77,19 @@ def synthetic_forest(n_lines=200, tau=5.0, tau_spread=0.0, span=0.2,
     jitter : if > 0, line positions are perturbed by this fraction of the mean
         spacing (a regular comb is an unphysical special case -- it makes every
         group identical).
+    delocalize : probability that an exit channel is placed ANYWHERE in the
+        forest rather than at +-dlnlam from its own absorbing line.
+
+        F37: with purely local exits the model redistributes energy near where
+        it was absorbed and never delivers a NET INFLOW to a sub-band, so the
+        measured band only ever darkens and the closure can only ever be too
+        opaque. Real forests do the opposite -- Tm II's 3800-3955 A band
+        transmits 1.049, MORE than the continuum entering it, because energy
+        absorbed elsewhere is re-emitted into it. An upper level in a real atom
+        decays to lower levels spread across the whole term structure, so its
+        exit wavelengths are spread across the whole forest; that is what
+        delocalize models. Without it the too-bright branch of the sign
+        boundary (§4.32) does not exist in the model.
 
     Returns (atom, info) with info carrying the requested parameters.
     """
@@ -110,11 +124,19 @@ def synthetic_forest(n_lines=200, tau=5.0, tau_spread=0.0, span=0.2,
     if n_ch:
         a_each = (1.0 - f_return) / n_ch
         sink = n_lines + 1                     # first sink level index
+        lo_ln, hi_ln = np.log(lam_abs.min()), np.log(lam_abs.max())
         for i in range(n_lines):
             d = dlnlam * np.exp(rng.normal(0.0, dlnlam_spread, n_ch)) \
                 if dlnlam_spread > 0 else np.full(n_ch, dlnlam)
             sgn = rng.choice([-1.0, 1.0], n_ch)   # blueward and redward exits
             lam_x = lam_abs[i] * np.exp(sgn * d)
+            if delocalize > 0:
+                # a fraction of channels land anywhere in the forest, so a
+                # photon absorbed outside a sub-band can be re-emitted into it
+                far = rng.uniform(size=n_ch) < delocalize
+                if far.any():
+                    lam_x = lam_x.copy()
+                    lam_x[far] = np.exp(rng.uniform(lo_ln, hi_ln, int(far.sum())))
             for k in range(n_ch):
                 nu0.append(C / lam_x[k])
                 f_osc.append(0.0)              # carries no opacity ...
@@ -136,7 +158,7 @@ def synthetic_forest(n_lines=200, tau=5.0, tau_spread=0.0, span=0.2,
     info = dict(kind="dialled", n_lines=n_lines, tau=float(np.median(tau_abs)),
                 tau_spread=tau_spread, span=span, n_exit=n_exit,
                 dlnlam=dlnlam, f_return=f_return, jitter=jitter, seed=seed,
-                n_levels=n_levels)
+                n_levels=n_levels, delocalize=delocalize)
     return atom, info
 
 

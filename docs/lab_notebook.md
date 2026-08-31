@@ -1814,6 +1814,45 @@ reference band transmission approaches and sometimes exceeds unity, as Tm II
 and Dy III do. Until then synthetic forests calibrate the too-opaque regime and
 nothing else.
 
+## 9ah. The fix: necessary, not sufficient, and the crossing runs backwards (2026-08-31)
+
+*The change.* `synthetic_forest(delocalize=p)` puts a fraction p of exit
+channels anywhere in the forest instead of at +-dlnlam from their own parent
+line. That is the physical content of a real upper level decaying to lower
+levels spread across the whole term structure, and it is what 9ag identified as
+missing.
+
+*It works, partially.* At S = 54.1, p = 0 -> 1 with six exit channels:
+band transmission 0.226 -> 0.292, binned error -77.5% -> -25.3%. Factor of
+three. But Ce II sits at 0.581, so the model is still about twice too opaque in
+the band.
+
+*And the crossing it produces runs BACKWARDS.* Scanning tau at p = 1,
+n_exit = 6, the expansion leg goes
+
+  S      8.1   20.3   54.1  135.1  337.8  810.8
+  exp   +4.0   +1.5   -7.9  -20.8  -36.9  -47.3 %
+
+Too bright at LOW saturation, too opaque at HIGH. Every real ion does the
+reverse -- Ce II runs -33.4% at S = 22.3 to +124.6% at S = 89.6. So
+delocalizing gives the model a boundary but not THE boundary.
+
+*Why, most likely.* My exit channels terminate on sink levels with zero
+population, so a photon leaving through one can never be re-absorbed and
+cascaded again. Real forests refill the band MORE as saturation rises, because
+more absorption elsewhere feeds more re-emission and the cascade continues;
+mine refills LESS, because the exit is terminal. Giving exit lines their own
+opacity is the next change and it is small.
+
+*A bug this exposed, which matters more than the physics.* `crossing()` tested
+only `a < 0 <= b`. It detected negative-to-positive crossings and silently
+missed the opposite -- exactly the case the fixed model produces. It printed
+"no crossing" for a row that plainly had one, and I nearly reported that. Now
+detects either direction and says which. The earlier all-negative sweep is
+unaffected, but the check had been one-sided since I wrote it, and a one-sided
+test for a SIGN CHANGE is a bad piece of code to have written in an experiment
+whose entire subject is the sign.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,
