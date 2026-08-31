@@ -1933,14 +1933,18 @@ density**, crossing zero for Ce II between S ≈ 45 and 67 and then rising steep
 — +21% to +125% across a density factor of 1.33. La II stays negative over its
 whole range and never crosses.
 
-That is the structure, and it explains everything that would not fit. A
-sign-changing error cannot be described by a single power law, which is why
-F34's collapse had factor-2 scatter and why ions at matched saturation differ
-5×: they sit on opposite sides of a boundary. The two competing errors are the
-ones F15 and §4.28 already named — the exact-sum binning over-counts
-interactions (too opaque) while fluorescent refill and the Poisson substitution
-add transparency — and the locus where they cancel is a genuine phase boundary,
-not a scaling law.
+That is the structure, and a sign-changing error cannot be described by a single
+power law — which is why F34's collapse had factor-2 scatter. The two competing
+errors are the ones F15 and §4.28 already named: the exact-sum binning
+over-counts interactions (too opaque) while fluorescent refill and the Poisson
+substitution add transparency. The locus where they cancel is a genuine phase
+boundary, not a scaling law.
+
+**Correction.** This section first explained the La II / Pr II discrepancy by
+putting them on opposite sides of that boundary. The signed errors refute it:
+La II is −5.0% and Pr II −31.4% in band 3800–3955 Å, the *same* sign, both on
+the too-opaque side. Their 5× magnitude difference is unexplained scatter
+*within* a regime, not a sign flip, and remains open.
 
 **Assessment against the PRL gate.** There *is* a phase diagram, in the literal
 sense of a boundary separating two regimes with opposite-signed error. There is
@@ -1948,6 +1952,63 @@ sense of a boundary separating two regimes with opposite-signed error. There is
 boundary alone meets the bar is a judgement call, but the honest statement is
 that the controlling variable is identified, the null variables are identified,
 and the structure is a sign change rather than a scaling.
+
+### 4.33 Paper III — the normalization audit: three claims revised (F36)
+
+F35 showed the project's `window_tau_max` recipe is ion-specific by accident.
+Every cross-ion claim rested on it. `paper3/phase9_audit/audit.py` re-measures
+compression, the opacity decomposition and memory depth for five ions under the
+CONTROLLED standard (`global_tau_max`: every ion at the same strongest-line
+depth, τ_max = 5). Three seeds × 5×10⁵, all legs against each ion's own
+`sobolev_branch`, band 3800–3955 Å signed.
+
+| ion | opacity lines | N_sat | S in band | N_g=4 | N_g=32 | binned | expansion | +m1 | +m4 |
+|---|---|---|---|---|---|---|---|---|---|
+| Yb II | 38 | 0 | 0.0 | 0.01% | 0.02% | — | — | — | — |
+| Nd II | 3,844 | 1 | 8.6 | 0.57% | 1.14% | −12.9% | −1.4% | −1.9% | −1.1% |
+| La II | 849 | 3 | 13.4 | 0.97% | 0.41% | −5.0% | +14.7% | +4.5% | +5.4% |
+| Pr II | 3,397 | 3 | 13.8 | 2.09% | 0.23% | −31.4% | −2.0% | −5.6% | −3.7% |
+| Ce II | 20,262 | 20 | 66.8 | 4.32% | 1.81% | **+12.2%** | +1.9% | **+0.2%** | +5.2% |
+
+**F27 is confirmed and strengthened.** Every ion compresses at **four groups**
+to ≤4.3%, Ce II included. Under the window recipe Ce needed 32–64 groups (7.48%
+at N_g = 4); at matched line strength it reaches 4.32%. The "dense ions need
+many more groups" reading was a normalization artefact, not a property of the
+forest. Gate 2's outcome A is stronger than it was stated.
+
+**F24's density limit is a normalization artefact.** The headline "+21% on La II,
++113% on Ce II" for the branching-aware Poisson closure becomes **+14.7% on La II
+and +1.9% on Ce II** at matched line strength — Ce is now the *better* case, not
+the catastrophic one. What survives is that the closure error is ion-dependent
+and can be large; what does not survive is the specific claim that dense forests
+are where it fails. That claim inverted under a fair normalization.
+
+**F30's structure survives; its magnitudes do not.** Carrying the identical
+kernel, the redistribution-only leg is 0.23–1.81% across all five ions while the
+grouped-opacity legs span −31.4% to +14.7%. The opacity is the binding
+constraint and the redistribution is not — unchanged, and now demonstrated on
+five ions instead of two. The catastrophic Ce magnitudes belong to the old
+normalization.
+
+**F33's null memory result is superseded.** Under the window recipe Ce gained
+nothing from memory (116.31 → 116.79% across m = 1…16). At matched line strength
+memory is the most effective single correction found: Pr II −31.4 → −5.6%,
+Nd II −12.9 → −1.9%, **Ce II +12.2 → +0.2%**. The null was a property of an
+over-dense Ce sitting deep in the too-transparent regime, not a property of
+dense forests.
+
+**And memory's direction now has a mechanism.** It always credits optical depth
+away, so a packet travels further and interacts less. In an *absorption*-limited
+band that means more transmission — La II goes −5.0 → +4.5%, overshooting
+through zero. In a *refill*-limited band it means less fluorescent refill and a
+*fainter* band — Ce II goes +12.2 → +0.2%. The same correction moves the two
+bands in opposite directions because they are limited by different processes,
+which is the §4.32 sign structure appearing again one level down.
+
+*Caveat.* Five ions, one temperature, one epoch, one band. The controlled
+standard answers "at matched line strength, what does network topology change?";
+it does not answer what any of these ions does in a real kilonova, which needs
+the astrophysical standard (`from_conditions`).
 
 ## 5. Findings register
 
@@ -1987,7 +2048,8 @@ and the structure is a sign change rather than a scaling.
 | F32 | **The redistribution operator is local in frequency, not low-rank — so "few modes" is the wrong explanation for its compressibility.** Effective dimension never saturates: participation ratio grows as N_g^0.64–0.75 across La/Ce/Nd with PR/N_g falling 0.5 → 0.2, and NMF rank-8 of a 25-row operator still misses row-L1 0.47 (23% total variation per row). Rank *anti*-correlates with compressibility — Ce has the lowest energy-operator dimension (PR 1.60) and is the hardest to compress. Decisive at matched parameter count: 16 numbers as a coarse 4×4 matrix give 1.62% where 912 numbers as a rank-16 factorization give 11.30%. Coarsening averages neighbouring groups; truncation projects onto modes; only the first works. This unifies Paper III — redistribution is smooth at the group scale so it coarse-grains (F25/F27), the opacity is a comb whose ordering decides a packet's fate so it does not (F30/F31) | §4.29 |
 | F33 | **Resonance-sequence depth is not the missing information, and the density limit is not about density (retracts F31's second clause).** Making memory a depth rather than a switch: La converges by m = 4 and Nd by m = 8, each gaining ≤0.5 points beyond m = 1, and **Ce gains nothing** — 116.31 → 116.79% across a sixteen-fold increase in remembered history. Memory is a between-step correction; the dense-forest failure is within-step. Nd II, run through P11 for the first time, breaks the density reading outright: 4.7× La's opacity lines and **1/12 its error** (expansion + A·β 1.79%, a working closure). What orders the three ions is **band-local saturation** — saturated lines inside the failing band (Nd 1, La 4, Ce 24), or Στ there (11.4, 22.4, 89.6) — not total line count. Three points cannot fix the exponent; that is what the synthetic phase diagram is for | §4.30 |
 | F34 | **Band-local saturation controls the grouped-closure failure; redistribution does not.** 96 synthetic forests with independently dialled crowding, saturation, spacing and redistribution range: Spearman ρ = +0.91 for Στ in the band and +0.86 for N_sat there, against **+0.25 and −0.31 for the two redistribution axes** — an independent confirmation of F33 from the opposite direction. The synthetic family collapses as ΔF = 0.162·N_sat^0.58 (scatter ×1.95), and the real atoms sit at ratio 0.71 / 0.40 / 1.25, two of three inside that scatter. Building the forests required first measuring the real τ distribution *inside* the failing band: mostly weak lines with a saturated tail, ln-spread 1.7–2.05 across all three ions. Band-to-forest geometry is eliminated as the residual cause (10× change → 16% effect); the emergent-cascade `ladder` forests match the real interpolation at matched N_sat (59–62% vs 62%) where the dialled ones overshoot (78–94%). A partial collapse: not yet a general law | §4.31 |
-| F35 | **The closure error changes sign — there is a phase boundary, not a scaling law (supersedes F34's power law).** Thirteen GSI ions under a uniform normalization do not collapse: La II and Pr II have identical band saturation (S = 13.4 vs 13.8) and differ 5× in error (6.55% vs 31.39%), while Ce II at 5× their saturation errs *less*. A density scan shows why: the binned closure is **too opaque at low density and too transparent at high density**, crossing zero for Ce II between S ≈ 45 and 67 then rising +21% → +125% across a density factor of 1.33. Ions at matched saturation sit on opposite sides of that boundary. Also: the project's τ_max = 5 *window* normalization is ion-specific by accident and diverges for most ions (Yb II demands n_ion = 1.7×10¹², β = 1.5×10⁻⁸, and the branch chain cannot terminate) — universality claims need the global normalization used here. On real ions saturation and redistribution range are confounded (ρ = +0.75 vs +0.77), which is why the decorrelated synthetic experiment (F34) is what identifies the cause | §4.32 |
+| F35 | **The closure error changes sign — there is a phase boundary, not a scaling law (supersedes F34's power law).** Thirteen GSI ions under a uniform normalization do not collapse: La II and Pr II have identical band saturation (S = 13.4 vs 13.8) and differ 5× in error (6.55% vs 31.39%), while Ce II at 5× their saturation errs *less*. A density scan shows why: the binned closure is **too opaque at low density and too transparent at high density**, crossing zero for Ce II between S ≈ 45 and 67 then rising +21% → +125% across a density factor of 1.33. La II (−5.0%) and Pr II (−31.4%) are the same sign at matched saturation, so their 5× difference is within-regime scatter, not a sign flip — that remains open. Also: the project's τ_max = 5 *window* normalization is ion-specific by accident and diverges for most ions (Yb II demands n_ion = 1.7×10¹², β = 1.5×10⁻⁸, and the branch chain cannot terminate) — universality claims need the global normalization used here. On real ions saturation and redistribution range are confounded (ρ = +0.75 vs +0.77), which is why the decorrelated synthetic experiment (F34) is what identifies the cause | §4.32 |
+| F36 | **The normalization audit: three cross-ion claims revised.** Re-measuring five ions at matched line strength (`global_tau_max`) instead of the accidental window recipe: **F27 is strengthened** — every ion compresses at *four* groups to ≤4.3%, Ce II included, so "dense ions need 32–64 groups" was an artefact. **F24's density limit inverts** — the branching-aware Poisson closure is +14.7% on La II and **+1.9% on Ce II**, making Ce the better case, not the catastrophic one. **F33's null memory result is superseded** — memory is the most effective correction found (Pr II −31.4→−5.6%, Ce II +12.2→**+0.2%**); its null was a property of an over-dense Ce. **F30's structure survives on five ions**: redistribution 0.2–1.8%, grouped opacity −31% to +15%. Memory's *direction* now has a mechanism — it always adds transparency, which brightens an absorption-limited band (La −5.0→+4.5%, overshooting zero) and dims a refill-limited one (Ce +12.2→+0.2%) | §4.33 |
 
 ## 6. Caveats and limitations
 
