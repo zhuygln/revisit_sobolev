@@ -2179,6 +2179,94 @@ taking Ce II to +0.2% while moving La II *through* zero.
 and the Poisson grid only. The interaction term's own sign and scaling are not
 yet mapped.
 
+### 4.36 Paper III item 5 — a kilonova crosses the boundary at 1.2 days (F40)
+
+The question this section asks is not how inaccurate grouped opacity is, but
+whether an approximate transport model can *appear accurate at one epoch* while
+being badly wrong at others. Homologous expansion gives ρ ∝ t⁻³ and τ ∝ n t ∝
+t⁻², so ejecta sweep their own band saturation as they evolve. If the trajectory
+crosses the §4.32 boundary, the closure changes sign across the observable
+window.
+
+`paper3/phase10_kilonova/trajectory.py`. Ce II in lanthanide-rich ejecta,
+ρ(1 d) = 2×10⁻¹⁷ g cm⁻³, X_lan = 0.1, T cooling as t⁻¹ᐟ² from 5000 K, geometry
+expanding with t, epochs 0.5–8 d. Normalization is the **astrophysical**
+standard (`from_conditions`) — deliberately not the controlled standard of
+§4.33, because this is a different question. Signed band 3800–3955 Å:
+
+| t (d) | T_gas | n_ion | S in band | A redist | B opacity | **C practical** | C binned |
+|---|---|---|---|---|---|---|---|
+| 0.50 | 7071 | 68,775 | 221.0 | +0.6% | +63.6% | **+64.6%** | +79.7% |
+| 0.75 | 5774 | 20,378 | 105.0 | +2.1% | +44.4% | +37.1% | +60.1% |
+| 1.00 | 5000 | 8,597 | 61.5 | +2.0% | +18.8% | **+14.4%** | +28.7% |
+| 1.50 | 4082 | 2,547 | 28.5 | −1.3% | −26.3% | **−28.4%** | −31.1% |
+| 2.00 | 3536 | 1,075 | 16.3 | +0.4% | −4.1% | −7.4% | −1.1% |
+| 4.00 | 2500 | 134 | 4.0 | −0.3% | −3.7% | −5.1% | −5.8% |
+| 8.00 | 1768 | 17 | 0.9 | +0.3% | −0.2% | +0.6% | +0.2% |
+
+**The trajectory crosses at t = 1.17 d, at S = 47.5.** The boundary was located
+independently three other ways at S ≈ 50 — a single-ion density scan (44.8–67.2),
+a thirteen-ion survey (13.8–66.8), and a controlled synthetic forest (§4.34b).
+A realistic ejecta history walks through the same value, which is a fourth
+confirmation obtained from a completely different construction.
+
+**The consequence is a modelling systematic.** The practical closure is **+64.6%
+too bright at 0.5 d**, passes through **zero at 1.2 d**, and is **−28.4% too
+opaque at 1.5 d** — a swing of ninety points across a factor of three in time,
+straddling the epoch at which kilonova spectra are actually taken. A closure
+calibrated at 1.2 d would appear exact and would carry the wrong sign on either
+side of that epoch.
+
+**What the mechanism is, stated carefully.** In this trajectory the total's zero
+is driven by the *opacity* approximation changing sign (B crosses at 1.21 d,
+essentially with C), not by two large opposite errors cancelling. The
+redistribution approximation is small throughout, |A| ≤ 2.1%, as §4.35 found. So
+the deceptive agreement here arises because **one dominant error passes through
+zero**, not because two cancel. The cancellation mechanism is nonetheless
+present and visible: at 2 d the binned closure reads −1.1% while its own opacity
+piece alone reads −4.1%, the interaction term of §4.35 removing three quarters
+of it.
+
+Either way the practical conclusion is the same, and it is the point of the
+experiment: **near-zero residual at one epoch is not evidence that a closure is
+correct.** It can mean the ejecta happen to sit on a boundary the closure sweeps
+through.
+
+#### La II on the same trajectory: a sharper version of the same point
+
+The identical ejecta history run on La II does not cross — its practical
+closure stays positive throughout, +11.5% at 0.5 d to +1.5% at 8 d. But it
+shows something the Ce trajectory does not:
+
+| t (d) | S | B opacity | **C expansion** | **C binned** |
+|---|---|---|---|---|
+| 0.50 | 343.8 | +6.1% | +11.5% | +21.7% |
+| **0.75** | **161.0** | −3.1% | **+0.1%** | **−55.7%** |
+| 1.00 | 92.4 | +11.6% | +11.6% | −42.9% |
+| 1.50 | 41.4 | +11.7% | +12.8% | −29.2% |
+| 2.00 | 23.1 | +8.8% | +7.7% | −29.9% |
+| 4.00 | 5.5 | +8.0% | +7.0% | +1.1% |
+| 8.00 | 1.3 | +0.9% | +1.5% | +0.0% |
+
+**At 0.75 d the expansion closure reads +0.1% and the binned closure reads
+−55.7%, at the same epoch, same ejecta, same atom.** The two differ only in
+whether a bin carries Σ(1−e^−τ) or Στ — both defensible groupings, one of them
+apparently exact and the other wrong by more than half. A study validating the
+first against a reference at this epoch would conclude the grouped treatment is
+excellent, and would have learned nothing about the second.
+
+That is the thesis in its strongest form. Ce II shows a closure sweeping through
+zero as conditions evolve; La II shows two closures at a *single* epoch
+disagreeing by 56 points with one of them sitting on zero. Neither near-zero
+residual carries information about correctness.
+
+*Limits.* Two ions, one density history, one composition, one band, LTE
+populations, and a temperature law imposed rather than solved. The crossing
+epoch depends on ρ(1 d) and X_lan; what does not depend on them is that a
+homologous history sweeps S over orders of magnitude and must therefore cross
+any boundary lying inside that range. Single-ion ejecta are also not a real
+composition — §4.25's mixture rule would be needed for that.
+
 ## 5. Findings register
 
 | # | Finding | Where |
@@ -2222,6 +2310,7 @@ yet mapped.
 | F37 | **The synthetic model contains only one side of the boundary — which isolates fluorescent refill as the cause of the other.** Scanning τ across S = 2.7 → 1459 at three redistribution ranges, all 36 controlled conditions are negative and deepen monotonically to −99%; no ΔF = 0 crossing exists in the model. The reference transmission shows why: at matched saturation the synthetic band is 2–3× more opaque than any real ion (S ≈ 55–90: synthetic 0.23–0.25 vs Ce II 0.58), because real forests **feed** the band from outside — Tm II transmits **1.049**, more than the continuum entering it, and Dy III 0.970. `synthetic_forest`'s exits sit at a fixed offset from their own line and carry no opacity, so it redistributes locally and never delivers net inflow; the band only darkens. E4 is therefore blocked on a model deficiency, not a measurement — and the failure is itself the controlled demonstration that fluorescent refill is what produces the too-bright branch | §4.34 |
 | F38 | **The two approximations are not additive, and their interaction can flip the sign of the total.** Counterfactual legs isolating each — exact opacity + grouped redistribution (A), grouped opacity + exact A·β (B), both (C) — give |A| ≤ 1.4% on every ion, so the redistribution approximation contributes almost nothing (F30 by a third route, measured directly rather than inferred). B dominates, and for the least saturated ions C ≈ B. But at S ≳ 14 an interaction term appears, −6.4% (Pr II) and −4.3% (Ce II), large enough for **Pr II to run +4.3% too bright under the opacity approximation alone and −2.0% too opaque with both**. The zero of §4.32 is therefore not where the dominant error changes sign but where B plus the interaction does — so a closure whose pieces are separately validated can fail, or appear to succeed, for reasons neither piece shows alone | §4.35 |
 | F39 | **Recurrent exit opacity recovers the correct boundary orientation — the sign change now appears in three independent settings.** §4.34 predicted the missing physics: exits terminating on unpopulated levels cannot cascade, so the model refilled the band *less* as saturation rose where real forests refill *more*. Giving exit lines their own opacity on shared populated levels flips the boundary the right way: at exit_tau = 0.5 the binned closure runs **−62.3% → +2.5% → +39.1%**, crossing neg→pos at S = 179 (and at S = 688 for exit_tau = 2.0), where terminal exits gave no crossing at all or one running backwards. The boundary is therefore reproduced by a density scan, a 13-ion survey, and a controlled forest that separates the axes real atoms confound. Not claimed: the crossing *location*, which moves with exit_tau, or the expansion leg, which still fails | §4.34b |
+| F40 | **A realistic kilonova crosses the cancellation boundary at 1.2 days.** Homologous ejecta (ρ ∝ t⁻³, T ∝ t⁻¹ᐟ², X_lan = 0.1) sweep band saturation across four orders of magnitude in n_ion, and the practical grouped closure runs **+64.6% too bright at 0.5 d → zero at 1.17 d → −28.4% too opaque at 1.5 d** — ninety points across a factor of three in time, straddling the epoch kilonova spectra are taken. The crossing occurs at **S = 47.5**, matching the boundary located independently at S ≈ 50 by a density scan, a 13-ion survey and a controlled synthetic forest: a fourth confirmation from a different construction. Stated carefully, the zero here is the *opacity* error changing sign (B crosses at 1.21 d) rather than two large errors cancelling, with |A| ≤ 2.1% throughout; the cancellation mechanism is separately visible at 2 d, where the binned closure reads −1.1% while its opacity piece alone reads −4.1%. Either way: **near-zero residual at one epoch is not evidence a closure is correct** **La II on the same history sharpens it**: at 0.75 d the expansion closure reads **+0.1%** while the binned closure reads **−55.7%** — same epoch, same ejecta, same atom, differing only in whether a bin carries Σ(1−e^−τ) or Στ. One looks exact, the other is wrong by more than half. | §4.36 |
 
 ## 6. Caveats and limitations
 

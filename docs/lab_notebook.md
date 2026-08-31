@@ -1908,6 +1908,41 @@ or appear to succeed, for reasons neither half shows alone -- the same lesson
 as F36's memory correction taking Ce to +0.2% while moving La THROUGH zero, now
 with a mechanism instead of a coincidence.
 
+## 9ak. Item 5: the kilonova crosses at 1.2 days (2026-08-31)
+
+*Setup.* Homologous ejecta, rho ~ t^-3 from 2e-17 g/cm3 at 1 d, X_lan = 0.1,
+T ~ t^-1/2 from 5000 K, geometry expanding with t, 0.5-8 d. ASTROPHYSICAL
+normalization (from_conditions), deliberately not the controlled standard --
+different question. n_ion sweeps four orders of magnitude, so the trajectory
+must sweep S.
+
+*Ce II crosses at t = 1.17 d, S = 47.5.* +64.6% too bright at 0.5 d, zero at
+1.2 d, -28.4% too opaque at 1.5 d. Ninety points across a factor of three in
+time, straddling exactly the epoch kilonova spectra get taken.
+
+The number that matters: S = 47.5 at the crossing, against a boundary located
+independently at S ~ 50 by the density scan (44.8-67.2), the thirteen-ion
+survey (13.8-66.8) and the synthetic forest. Four constructions, one value.
+
+*Stated carefully:* in this trajectory the zero is the OPACITY error changing
+sign (B crosses at 1.21 d, essentially with C), not two large errors
+cancelling -- |A| <= 2.1% throughout. The cancellation mechanism shows up
+separately at 2 d, where the binned closure reads -1.1% while its own opacity
+piece reads -4.1%. Two different mechanisms with the same practical
+consequence; the paper should not conflate them.
+
+*La II, same history, does not cross -- and gives a better demonstration.* At
+t = 0.75 d the EXPANSION closure reads +0.1% and the BINNED closure reads
+-55.7%. Same epoch, same ejecta, same atom. The two differ only in whether a
+bin carries sum(1-e^-tau) or sum tau, both defensible, one apparently exact and
+one wrong by more than half. Anyone validating the first at this epoch learns
+nothing about the second.
+
+Ce shows a closure sweeping through zero as conditions evolve; La shows two
+closures at ONE epoch 56 points apart with one sitting on zero. Neither
+near-zero residual carries information about correctness. That is the thesis,
+and La states it without needing the ejecta to evolve at all.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,
