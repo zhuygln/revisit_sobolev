@@ -1853,6 +1853,61 @@ unaffected, but the check had been one-sided since I wrote it, and a one-sided
 test for a SIGN CHANGE is a bad piece of code to have written in an experiment
 whose entire subject is the sign.
 
+## 9ai. The one iteration: yes, and item 3 for free (2026-08-31)
+
+*The binary question was: does adding recurrent opacity to the exit channels
+recover the correct orientation of the phase boundary? Answer: yes.*
+
+`exit_tau` gives exit lines their own optical depth on a small set of SHARED
+POPULATED lower levels, as a real atom has. Absorption on an exit line then
+returns the photon to that upper level and it branches again. Scanning tau at
+delocalize = 1, n_exit = 6:
+
+  exit_tau = 0    binned all negative, no crossing;
+                  expansion crosses pos->neg at S = 23.7 (backwards)
+  exit_tau = 0.5  binned -62.3 -> +2.5 -> +39.1%, crossing NEG->POS at S = 179
+  exit_tau = 2.0  binned -53.7 -> +6.3 -> -2.7%, crossing NEG->POS at S = 688
+
+So the boundary now exists in three logically independent settings: the Ce
+density scan, the thirteen-ion survey, and a controlled forest where saturation
+and redistribution range are separated -- which real atoms never allow. And it
+required exactly the piece of physics 9ag predicted was missing, which is the
+strongest form of confirmation a diagnosis gets.
+
+*Stopping here, as agreed.* The crossing LOCATION is not universal (179 vs 688
+as exit_tau goes 0.5 -> 2.0), the expansion leg still fails, and band
+transmission (0.13-0.18) is still well below the real 0.58. Tuning further
+would be fitting a toy to Ce II and would read as post hoc. Existence and
+orientation are what the synthetic experiment was for; the real ions carry the
+rest.
+
+## 9aj. Item 3 came free, and it is better than expected
+
+The three counterfactual legs already existed as modes -- sobolev_group (exact
+opacity, grouped redistribution), expansion_branch (grouped opacity, exact
+A*beta), expansion_group (both) -- so the audit data answered item 3 with no
+new runs. Signed band 3800-3955:
+
+  ion       S      A       B       C     C-(A+B)
+  Nd II    8.6   +1.1%   -1.6%   -1.4%    -0.9%
+  La II   13.4   -0.4%  +15.8%  +14.7%    -0.8%
+  Pr II   13.8   +0.1%   +4.3%   -2.0%    -6.4%
+  Ce II   66.8   +1.4%   +4.8%   +1.9%    -4.3%
+
+|A| <= 1.4% everywhere: the redistribution approximation contributes almost
+nothing, which is F30 reached a third way and this time MEASURED rather than
+inferred by difference. B dominates. But at S >~ 14 the errors stop being
+additive, and for Pr II the interaction term (-6.4%) is big enough to FLIP THE
+SIGN: opacity alone leaves the band +4.3% too bright, both together -2.0% too
+opaque.
+
+That is the causal content of the boundary. The zero is not where the dominant
+single-approximation error changes sign; it is where B plus the interaction
+does. A closure whose two halves have each been validated separately can fail,
+or appear to succeed, for reasons neither half shows alone -- the same lesson
+as F36's memory correction taking Ce to +0.2% while moving La THROUGH zero, now
+with a mechanism instead of a coincidence.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

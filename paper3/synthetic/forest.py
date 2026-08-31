@@ -56,7 +56,7 @@ def _tau_draw(n, tau, spread, rng):
 def synthetic_forest(n_lines=200, tau=5.0, tau_spread=0.0, span=0.2,
                      n_exit=2, dlnlam=0.1, dlnlam_spread=0.0, f_return=0.5,
                      jitter=0.0, seed=0, t_exp=T_EXP, lam_mid=LAM_MID,
-                     delocalize=0.0):
+                     delocalize=0.0, exit_tau=0.0, n_sink=3):
     """A forest whose redistribution range is a dial.
 
     Parameters
@@ -90,6 +90,20 @@ def synthetic_forest(n_lines=200, tau=5.0, tau_spread=0.0, span=0.2,
         exit wavelengths are spread across the whole forest; that is what
         delocalize models. Without it the too-bright branch of the sign
         boundary (§4.32) does not exist in the model.
+    exit_tau, n_sink : optical depth carried by the exit lines, and how many
+        shared lower levels they terminate on.
+
+        With exit_tau = 0 (the original) each channel ends on its own
+        unpopulated sink, so a photon leaving through one can never be
+        re-absorbed: the exit is terminal and the cascade stops after one step.
+        Real forests refill a band MORE as saturation rises, because more
+        absorption elsewhere feeds more re-emission and the cascade continues;
+        a terminal exit refills LESS, which is why the delocalized model
+        produced a sign change running the wrong way (§4.34). Giving the exit
+        lines their own opacity, on a small set of SHARED populated lower
+        levels as a real atom has, makes absorption on an exit line return the
+        photon to that upper level and branch again -- the recurrent
+        fluorescence cycle.
 
     Returns (atom, info) with info carrying the requested parameters.
     """
@@ -124,6 +138,7 @@ def synthetic_forest(n_lines=200, tau=5.0, tau_spread=0.0, span=0.2,
     if n_ch:
         a_each = (1.0 - f_return) / n_ch
         sink = n_lines + 1                     # first sink level index
+        n_sink_eff = max(1, n_sink) if exit_tau > 0 else n_ch
         lo_ln, hi_ln = np.log(lam_abs.min()), np.log(lam_abs.max())
         for i in range(n_lines):
             d = dlnlam * np.exp(rng.normal(0.0, dlnlam_spread, n_ch)) \
@@ -139,12 +154,19 @@ def synthetic_forest(n_lines=200, tau=5.0, tau_spread=0.0, span=0.2,
                     lam_x[far] = np.exp(rng.uniform(lo_ln, hi_ln, int(far.sum())))
             for k in range(n_ch):
                 nu0.append(C / lam_x[k])
-                f_osc.append(0.0)              # carries no opacity ...
-                n_lower.append(0.0)            # ... so tau = 0, beta = 1
+                if exit_tau > 0:
+                    # a populated shared lower level: the exit line absorbs, so
+                    # the photon returns to this upper level and branches again
+                    f_osc.append(F_OSC)
+                    n_lower.append(exit_tau / tau_sobolev(F_OSC, 1.0, lam_x[k], t_exp))
+                    lower.append(sink + int(rng.integers(n_sink_eff)))
+                else:
+                    f_osc.append(0.0)          # carries no opacity ...
+                    n_lower.append(0.0)        # ... so tau = 0, beta = 1
+                    lower.append(sink + k)
                 A.append(a_each)
-                lower.append(sink + k)
                 upper.append(i + 1)            # SAME upper level -> branching
-        n_levels = sink + n_ch
+        n_levels = sink + n_sink_eff
     else:
         n_levels = n_lines + 1
 
@@ -158,7 +180,8 @@ def synthetic_forest(n_lines=200, tau=5.0, tau_spread=0.0, span=0.2,
     info = dict(kind="dialled", n_lines=n_lines, tau=float(np.median(tau_abs)),
                 tau_spread=tau_spread, span=span, n_exit=n_exit,
                 dlnlam=dlnlam, f_return=f_return, jitter=jitter, seed=seed,
-                n_levels=n_levels, delocalize=delocalize)
+                n_levels=n_levels, delocalize=delocalize,
+                exit_tau=exit_tau, n_sink=n_sink)
     return atom, info
 
 

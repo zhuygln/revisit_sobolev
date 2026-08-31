@@ -37,7 +37,8 @@ from sobolev.forest_stats import band_saturation, redistribution_range
 SEEDS = P.SEEDS
 
 
-def point(n_lines, tau, dlnlam, n, ng=32, seed=7, delocalize=0.0, n_exit=2):
+def point(n_lines, tau, dlnlam, n, ng=32, seed=7, delocalize=0.0, n_exit=2,
+          exit_tau=0.0):
     """One forest: signed core-band error for the binned and expansion closures.
 
     `delocalize` is the F37 fix: without it the model has no net inflow to the
@@ -46,7 +47,7 @@ def point(n_lines, tau, dlnlam, n, ng=32, seed=7, delocalize=0.0, n_exit=2):
     atom, _ = synthetic_forest(n_lines=n_lines, tau=tau, tau_spread=1.8,
                                span=0.3, n_exit=n_exit, dlnlam=dlnlam,
                                f_return=0.5, jitter=0.5, seed=seed,
-                               delocalize=delocalize)
+                               delocalize=delocalize, exit_tau=exit_tau)
     lo, hi = atom.op_nu.min() * 0.99, atom.op_nu.max() * 1.01
     ref, ev, _ = P.measure(atom, lo, hi, n, "sobolev_branch")
     if ev is None or ev[0].size < 1000 or ref["core"] <= 1e-3:
@@ -57,7 +58,7 @@ def point(n_lines, tau, dlnlam, n, ng=32, seed=7, delocalize=0.0, n_exit=2):
     bs = band_saturation(atom, core[0], core[1])
     rr = redistribution_range(ev[0], ev[1], edges=kern.edges)
     out = {"n_lines": n_lines, "tau": tau, "dlnlam": dlnlam,
-           "delocalize": delocalize, "n_exit": n_exit,
+           "delocalize": delocalize, "n_exit": n_exit, "exit_tau": exit_tau,
            "S_band": bs["S_band"], "n_sat_band": bs["n_sat_band"],
            "n_band": bs["n_band"], "range": rr["mean_abs_dlnlam"],
            "same_group_frac": rr["same_group_frac"], "ref_core": ref["core"]}
