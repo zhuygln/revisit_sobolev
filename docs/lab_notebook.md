@@ -1943,6 +1943,109 @@ closures at ONE epoch 56 points apart with one sitting on zero. Neither
 near-zero residual carries information about correctness. That is the thesis,
 and La states it without needing the ejecta to evolve at all.
 
+## 9al. §10: the error an observer sees is a colour, not a luminosity (2026-09-01)
+
+*The gap.* Every result from 4.23 to 4.36 is a band ratio in a 155 A window.
+Nobody observes that. A grep for filter / bandpass / magnitude / colour / light
+curve over the whole repo returned nothing, and `trajectory.py` calls
+`band_ratio` and throws away the emergent spectrum `run_mc` already hands it.
+So §10 is mostly plumbing that should have existed from the start:
+`sobolev/photometry.py` (absolute L_nu from the packet list, L_bol in the launch
+window, AB magnitudes in seven top-hat bands, colours) and
+`paper3/phase11_observables/observables.py` (F40's ejecta history, photometry
+instead of band ratios).
+
+*The normalization is checked twice* -- `planck_luminosity` against 4 pi r^2
+sigma T^4 to 1e-4, and the MC spectrum divided by the analytic core continuum
+against `band_ratio` to 0.2%. Getting an absolute scale wrong by 4 pi would have
+been invisible in every plot and fatal in every number.
+
+*Three changes from trajectory.py, each for a reason.* A fixed 1000-30000 A
+launch window (F40 took it from each atom's own opacity extent: 1128 A to 36.8
+um for Ce, so packets pile up in a far-IR tail no filter samples and no two
+epochs compare). A cooling core, with the frozen 6000 K core kept as the control
+that separates source reddening from opacity reddening. And `crossing_epoch`,
+because F40's headline -- 1.17 d, S = 47.5 -- was interpolated by hand and
+stored nowhere.
+
+*Result 1: the redistribution approximation is invisible.* Worst |dm| over every
+band and epoch: Ce 0.006, La 0.008, blend 0.008 mag, and 0.021 even at 0.2c.
+F30/F38 said "the opacity
+binds, not the redistribution" in band ratios; in magnitudes it says the kernel
+compression of F25/F27 costs less than a photometric error bar. That is the
+strongest form the compressible half of the hierarchy has taken.
+
+*Result 2: the error is chromatic.* Ce II at 0.5 d is 0.14 mag too bright
+bolometrically and 0.74 mag wrong in g-r -- five times larger -- because the
+closure moves flux from r into g rather than creating or destroying it. The
+four-ion blend does the same (0.737), so it is not a single-ion artefact.
+
+*Result 3: and the band residual does not track it, in either direction.*
+La II binned at 0.75 d: -59.5% in band, +0.007 mag bolometric. Ce II at 2.0 d:
+-26.0% in band, every |dm| <= 0.006. Ce II at 0.5 d: +55% in band, 0.455 mag in
+g. The band is a good diagnostic of the mechanism -- 4.32-4.36 were right to use
+it -- and a bad proxy for an observable.
+
+*Result 4: two defensible closures, opposite colours, one epoch.* La II at 1 d,
+expansion gives d(g-r) = -0.057 and binned +0.096. Same ejecta, same atom,
+differing only in whether a bin carries sum(1-e^-tau) or sum tau.
+
+*Result 5: it is opacity, not the source.* Freezing the core at 6000 K instead
+of cooling it changes the worst colour error by under 0.01 mag on both ions.
+
+*Result 6: Paper I's geometry is a floor.* trajectory.py inherits a 1000-3000
+km/s shell. tau does not care (tau ~ n t is velocity-free in homologous flow),
+but the wavelength interval a packet sweeps is dv/c, and under worldline
+transport the outer boundary recedes so packets stay in longer -- 2.07 vs 8.63
+events per packet at 0.1c. `velocity.py` holds epoch, density and composition
+fixed and moves only the shell velocity: |dm|max grows 34x (La) and 67x (Ce)
+from 0.01c to 0.3c while dm_bol stays under 0.011 mag. Every magnitude in
+Results 1-5 is a lower bound.
+
+*Result 7, and the thing I nearly got wrong.* At v_out = 0.01c the worldline and
+time-frozen treatments give reference band-3800 fluxes of 0.295 and 1.079 -- a
+factor of 3.7, at a velocity where relativistic corrections are 1%. It is not a
+bug: the frozen shell lets packets escape that the expanding one keeps. Rerunning
+the whole history under worldline moves La II's 0.5 d band residual from +20.9%
+to +89.3% -- and moves dm_bol from -0.032 to -0.055 and d(g-r) from -0.110 to
+-0.185, the same signs, the same structure, the same 3.4x colour-to-bolometric
+ratio. So: the band residual is fragile to the transport treatment and the
+magnitudes are not. Had I not checked, I would have quoted velocity-scaled
+magnitudes off a transport path I had not validated.
+
+*The density arithmetic that should have been in 4.36.* rho(1 d) = 2e-17 is
+tuned so Ce crosses inside the window; at 0.2c it corresponds to 5.9e-6 Msun,
+which is not ejecta. But tau goes as n_ion, not rho, and in n_ion the tuned
+value is within 5-20x of a LANTHANIDE-POOR component (M = 0.01 Msun, X_lan =
+1e-3) and 5100x below a lanthanide-rich one. So the boundary lies where a blue
+component lives, and red ejecta sit far past it for the whole observable window.
+Whether a kilonova crosses is set by X_lan and M_ej -- the parameters people
+infer from the spectra.
+
+*Result 8: a physically normalized kilonova.* M_ej = 0.01 Msun, v = 0.05-0.2c,
+X_lan = 1e-3, rho derived from the mass instead of tuned, worldline, 2-12 d.
+The practical closure is 0.06 mag bolometric and 0.63 mag in g; the binned
+variant reaches d(g-r) = -0.769 at 2 d and d(r-i) = +0.742 at 3 d, where its
+bolometric error is +0.000. An order of magnitude between what a bolometric
+check would see and what a colour would.
+
+And the diagnostic band dies exactly where it matters: from 4 d on the reference
+3800 A flux is below the level at which a ratio means anything, while dm is
+still tenths of a magnitude. Anyone validating this closure on band residuals
+runs out of signal before the interesting epochs.
+
+*Noise discipline, and a mistake caught by it.* The `sobolev_group` leg doubles
+as an empirical noise floor: it is <= 0.008 mag wherever the reference is well
+sampled, so a run in which it reads 0.31 mag is reporting its own resolution.
+The first blue-kilonova attempt did exactly that, and cranking the packet count
+2.5x did not fix it -- because the cause was not sampling. The ejecta cool, and
+by 12 d the g band carries 2.5e-6 of the reference bolometric luminosity; its
+"0.75 mag error" was a handful of photons. The fix is a mask, not more packets:
+`summary.py` drops any band carrying under 1% of the reference L_bol, computed
+from the stored spectrum so nothing needs re-running. With it the blue run's
+floor falls to 0.098 mag and the surviving entries are 6-8x above it.
+
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

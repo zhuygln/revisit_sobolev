@@ -114,3 +114,50 @@ The lesson generalizes past this project: a normalization chosen to make one
 atom convenient became load-bearing for claims about all atoms, and inverted one
 of them. Cross-ion claims need a standard that cannot depend on which ion was
 picked first.
+
+---
+
+## Addendum 2026-09-01 — F36–F41
+
+The audit above was written before the last six findings existed and its table
+header still reads "Paper III (F25–F35)". Classifying the rest, on the same
+three classes:
+
+| # | class | note |
+|---|---|---|
+| F36 | **the re-run itself** | not a finding to classify but the instrument that reclassified F24/F27/F30/F33 above |
+| F37 | **invariant as a negative** | "the synthetic model has only one side of the boundary" is a statement about that model, and its diagnosis (no net inflow to the band without delocalized exits) was confirmed by the fix that followed |
+| F38 | **structure invariant, magnitudes conditional** | "the two approximations are not additive" is a within-ion comparison at fixed opacity and survives; the interaction term's *size* (−6.4% Pr, −4.3% Ce) is one state, one band, one grid. The **sign-flip on Pr II is one ion** and should not be generalized |
+| F39 | **existence and orientation invariant; location conditional** | already stated that way in §4.34b — the crossing moves 179 → 688 with exit_tau, so only the sign structure is claimed. **Reproducibility debt**: `boundary.py`'s `main` does not drive the exit_tau scan, so the committed script regenerates only F37 |
+| F40 | **conditional** | one density history, one composition, LTE, imposed T(t), and ρ(1 d) chosen so the crossing lands inside 0.5–8 d. The invariant part is structural: a homologous history sweeps S over orders of magnitude and must cross any boundary inside that range. The *epoch* is not a prediction |
+| F41 | **invariant in structure, conditional in magnitude** | "the error is chromatic, not bolometric, and the narrow-band residual is a poor proxy for either" is a within-ion statement at fixed opacity, reproduced on two ions, a blend, two core laws and two velocity regimes. The *sizes* (0.74 mag in g−r at 0.5 d, >1 mag at kilonova velocities) belong to their stated states |
+
+### What §10 changes in the earlier classifications
+
+**F30's structural claim is now measured in observer units.** Across every ion,
+epoch and velocity regime run, the grouped-*redistribution* leg moves no band by
+more than ~0.01 mag. "The opacity binds, not the redistribution" stops being a
+statement about band ratios and becomes: *the kernel compression of F25/F27 is
+free to an observer.* That strengthens F27 and F32 as well — the compressible
+half of the hierarchy is compressible in the quantity people actually measure.
+
+**F40's diagnostic band is demoted.** §4.36's whole argument runs through the
+3800–3955 Å residual, and §4.37 shows that residual is a poor proxy for the
+photometric error in *both* directions: −59.5% in band with +0.007 mag
+bolometric (La II, binned, 0.75 d), and +55% in band with −0.74 mag in g−r
+(Ce II, 0.5 d). F40's conclusion survives — near-zero residual still carries no
+information about correctness — but the *quantity* in which the boundary was
+located should not be read as an observable.
+
+### Standing reproducibility debts
+
+Not classifications, but the same kind of problem the audit exists to catch:
+
+1. **F39's exit_tau scan has no driver and no data file.** `boundary.json` holds
+   only the F37 negative result.
+2. **The Ce II density scan** — the first of the four independent locations of
+   the boundary — exists only as six numbers in `docs/lab_notebook.md`.
+3. **The F38 A/B/C table has no generating script**; it is a manual join of
+   `phase9_audit/audit.json` with `phase8_survey/survey.json`.
+4. **F40's crossing (1.17 d, S = 47.5) was interpolated by hand.** Fixed in §10:
+   `observables.py:crossing_epoch` computes and stores it.

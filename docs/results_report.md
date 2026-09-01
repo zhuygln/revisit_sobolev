@@ -2267,6 +2267,230 @@ homologous history sweeps S over orders of magnitude and must therefore cross
 any boundary lying inside that range. Single-ion ejecta are also not a real
 composition — §4.25's mixture rule would be needed for that.
 
+### 4.37 Paper III §10 — the closure error is chromatic, not bolometric (F41)
+
+Everything in §4.23–§4.36 is a **band ratio**: escaped over launched energy in a
+155 Å window, measured against a reference run. That is the right quantity for
+asking whether a closure is accurate and the wrong one for asking whether anyone
+would notice. Nothing in this repository had been expressed in a quantity an
+astronomer interprets — a grep returned no filter, no bandpass, no magnitude, no
+colour, no light curve — and `trajectory.py` itself calls `band_ratio` and
+discards the emergent spectrum `run_mc` already hands it.
+
+`sobolev/photometry.py` closes that gap: absolute L_ν from the escaping packet
+list, escaping luminosity inside the launch window, AB magnitudes in seven
+top-hat bands (g r i z J H K) and the five colours. The absolute scale is
+checked two ways — `planck_luminosity` reproduces 4πr²σT⁴ to 10⁻⁴, and the MC
+spectrum divided by the analytic core continuum reproduces `band_ratio` to 0.2%
+on bands many bins wide (`tests/test_photometry.py`).
+
+`paper3/phase11_observables/observables.py` runs §4.36's ejecta history and
+records photometry instead of band ratios. Three changes from `trajectory.py`,
+each deliberate:
+
+* **A fixed launch window, 1000–30000 Å**, identical at every epoch and ion.
+  `trajectory.py:82` takes it from each atom's own opacity extent — for Ce II
+  that is 1128 Å to 36.8 µm, so most packets land in a far-IR tail no filter
+  samples and no two epochs are comparable. The blue edge matters physically:
+  it is UV photons fluorescing redward that refill the optical, and cutting at
+  2000 Å instead of 1000 Å moves Ce II's 0.5 d band residual by ten points.
+* **A cooling core**, T_core(t) = T_gas(t). §4.36 held 6000 K at every epoch,
+  freezing the injected continuum's shape. The frozen case is run as a control.
+* **The crossing is computed and stored.** §4.36's t = 1.17 d and S = 47.5 were
+  interpolated by hand and persisted nowhere; `crossing_epoch` does it in code.
+
+**What this experiment is, and is not.** The source is a blackbody core of
+*imposed* temperature and radius inside a line-blanketed shell — no radioactive
+heating, no energy equation, so the *shape* of L_bol(t) is the core's, not the
+ejecta's. The only quantity claimed is the **difference between two transport
+treatments on the identical source and identical ejecta**, in which distance and
+zero point cancel exactly. Absolute magnitudes are quoted for scale at 40 Mpc
+and are not comparable to a real kilonova. Bandpasses are top-hats, not
+transmission curves; on identical bands that is second order. "L_bol" means
+escaping energy inside the launch window. `summary.py` drops any band carrying
+less than 1% of the reference bolometric luminosity, because a band the ejecta
+have stopped emitting in is measured from a handful of packets.
+
+#### 1. The redistribution approximation is free to an observer
+
+Worst |Δm| over every live band and every epoch, `sobolev_group` — exact
+opacity, grouped R_ij:
+
+| ion | worst \|Δm\| | worst \|Δcolour\| |
+|---|---|---|
+| Ce II | **0.006 mag** | 0.008 |
+| La II | **0.008 mag** | 0.009 |
+| La+Ce+Pr+Nd blend | **0.008 mag** | 0.010 |
+| La II, worldline, v_out = 0.2c | 0.021 mag | 0.019 |
+
+F30 and F38 said "the opacity binds, not the redistribution" in band ratios. In
+magnitudes it says something sharper: **the kernel compression of F25/F27 costs
+less than a photometric error bar**, and stays under it at kilonova velocity.
+The compressible half of the hierarchy is compressible in the quantity people
+actually measure. This leg doubles as an empirical noise floor: a run in which
+it reads a tenth of a magnitude is reporting its own resolution.
+
+#### 2. The grouped-opacity error is chromatic
+
+Ce II on §4.36's history, practical closure (`expansion_group`), cooling core,
+10⁶ packets × 3 seeds:
+
+| t (d) | S | ΔF(3800) | Δm_bol | Δg | Δr | Δ(g−r) |
+|---|---|---|---|---|---|---|
+| 0.50 | 221.0 | +55.3% | **−0.143** | −0.455 | +0.286 | **−0.741** |
+| 0.75 | 105.0 | +49.9% | −0.033 | −0.199 | +0.099 | −0.298 |
+| 1.00 | 61.5 | +33.3% | −0.008 | −0.069 | +0.027 | −0.097 |
+| 1.50 | 28.5 | +5.0% | −0.001 | −0.022 | −0.002 | −0.020 |
+| 2.00 | 16.3 | **−26.0%** | **−0.000** | −0.004 | −0.002 | −0.002 |
+| 4.00 | 4.0 | −2.7% | −0.000 | — | +0.001 | — |
+
+At 0.5 d the closure is **0.14 mag too bright bolometrically and 0.74 mag wrong
+in g−r** — five times larger — because it moves flux out of r and into g rather
+than creating or destroying it. The four-ion blend does the same (worst
+Δ(g−r) = 0.737), so this is not a single-ion artefact.
+
+#### 3. The diagnostic band is a proxy for neither — in both directions
+
+The 3800–3955 Å residual carrying every result from §4.23 to §4.36 does not
+track the photometric error:
+
+| case | ΔF(3800) | Δm_bol | worst \|Δm\| |
+|---|---|---|---|
+| La II, binned closure, 0.75 d | **−59.5%** | **+0.007** | 0.067 |
+| Ce II, practical closure, 2.0 d | **−26.0%** | −0.000 | 0.006 |
+| Ce II, practical closure, 0.5 d | +55.3% | −0.143 | **0.455** |
+| blue kilonova, binned, 3.0 d (§8) | −58.6% | **+0.000** | **0.694** |
+
+A 60% error in the diagnostic band is a 0.007 mag bolometric error; a 26% error
+is photometrically invisible; a 55% error is nearly half a magnitude; and in the
+last row a closure that is bolometrically **exact** is 0.74 mag wrong in r−i.
+The band residual is a good diagnostic of the mechanism — §4.32–§4.36 were right
+to use it as one — and is not an observable.
+
+#### 4. Two defensible closures, opposite colours, one epoch
+
+§4.36's sharpest statement was that at 0.75 d La II's expansion closure reads
++0.1% and its binned closure −55.7% in the band. In colours, at 1.0 d:
+
+    expansion (Σ(1−e^−τ) per bin)   Δ(g−r) = −0.057
+    binned    (Στ per bin)          Δ(g−r) = **+0.096**
+
+Opposite signs, 0.15 mag apart, same epoch, same ejecta, same atom, differing
+only in what a bin carries. Both are defensible groupings. A study calibrating
+one of them here would conclude the grouped treatment is good to a few
+hundredths of a magnitude and would have learned nothing about the other.
+
+#### 5. The colour error is the opacity's, not the source's
+
+Running the identical history with the core frozen at 6000 K instead of cooling
+changes the worst colour error by less than 0.01 mag (Ce II 0.741 → 0.731;
+La II 0.131 → 0.133). The reddening along the trajectory is the line forest's,
+not the imposed photosphere's — which is what the control was for.
+
+#### 6. Paper I's geometry is a floor: the error grows steeply with ejecta speed
+
+`trajectory.py` inherits Paper I's shell, 1000–3000 km/s. Sobolev optical depth
+does not care — τ ∝ n t is velocity-free in homologous flow — but two things a
+grouped closure coarse-grains do. The wavelength interval a packet sweeps before
+escaping is Δv/c: 0.7% here against ~20% for real ejecta. And under worldline
+transport the outer boundary recedes, so packets stay inside longer and meet
+more resonances (2.07 → 8.63 events per packet at v_out = 0.1c).
+
+`velocity.py` holds epoch, density, composition and temperature fixed and moves
+only the shell's velocity, worldline throughout, t = 2 d:
+
+| v_out/c | La II Δm_bol | La II \|Δm\|max | Ce II Δm_bol | Ce II \|Δm\|max |
+|---|---|---|---|---|
+| 0.01 | −0.002 | 0.014 | −0.002 | 0.008 |
+| 0.03 | −0.006 | 0.063 | −0.005 | 0.027 |
+| 0.06 | −0.008 | 0.108 | −0.008 | 0.049 |
+| 0.10 | −0.010 | 0.199 | −0.009 | 0.185 |
+| 0.20 | −0.010 | 0.350 | −0.003 | 0.351 |
+| 0.30 | −0.007 | **0.478** | +0.011 | **0.538** |
+
+**From Paper I's velocity to a kilonova's the photometric error grows 34× (La)
+and 67× (Ce) at fixed saturation, while the bolometric error never exceeds
+0.011 mag.** At more saturated states the bolometric error grows too: at 0.3c,
+La II at 0.5 d (S = 344) reaches Δm_bol = −0.604 with |Δm|max = **1.696**, and
+Ce II at 1 d (S = 61.5) reaches −0.686 with |Δm|max = **1.888**. But the band
+and colour errors stay 2–4× the bolometric one at every state and every
+velocity. Every magnitude in §1–§5 is therefore a floor, not an estimate.
+
+#### 7. The band residual is fragile to the transport treatment; the magnitudes are not
+
+At v_out = 0.01c the worldline and time-frozen treatments give reference
+band-3800 fluxes of 0.295 and 1.079 — a factor of 3.7 at a velocity where
+relativistic corrections are 1%. This is not a defect: the frozen shell lets
+packets escape that the expanding one keeps (0.60 vs 0.94 events per packet).
+Rerunning §2's history under worldline transport:
+
+| ion | treatment | worst \|Δm\| | worst \|Δcolour\| | ratio col/bol at 0.5 d |
+|---|---|---|---|---|
+| La II | time-frozen | 0.156 | 0.131 | 3.4 |
+| La II | worldline | 0.219 | 0.185 | 3.4 |
+| Ce II | time-frozen | 0.455 | 0.741 | 5.2 |
+| Ce II | worldline | 0.869 | 1.130 | 4.7 |
+
+Worldline transport makes the errors 1.4–1.9× larger and changes nothing
+structural: same signs, same ordering, same chromatic-to-bolometric ratio. The
+conclusion of §1–§6 does not depend on which transport treatment is used; the
+band residual it was previously stated in does.
+
+#### 8. A physically normalized kilonova, and where the boundary actually lies
+
+§4.36's ρ(1 d) = 2×10⁻¹⁷ g cm⁻³ is documented in `trajectory.py:56` as chosen so
+Ce II crosses inside 0.5–8 d. At Paper I's velocities that is a statement about
+nothing in particular; at kilonova velocities it is a statement about a mass, and
+the mass is wrong — a uniform sphere out to 0.2c at that density holds
+**5.9×10⁻⁶ M⊙**, which is not ejecta. `observables.py --mass` therefore derives
+ρ(1 d) from (M_ej, v_max) so the comparison is run rather than asserted:
+
+| ejecta | ρ(1 d), g cm⁻³ | n_ion(Ce II, 1 d) | vs §4.36 |
+|---|---|---|---|
+| §4.36's tuned value | 2.0×10⁻¹⁷ | 8.6×10³ | 1 |
+| lanthanide-**poor**: M = 0.01 M⊙, v_max = 0.3c, X_lan = 10⁻³ | 1.0×10⁻¹⁴ | 4.4×10⁴ | 5 |
+| lanthanide-**poor**: M = 0.01 M⊙, v_max = 0.2c, X_lan = 10⁻³ | 3.4×10⁻¹⁴ | 1.5×10⁵ | 17 |
+| lanthanide-**rich**: M = 0.03 M⊙, v_max = 0.2c, X_lan = 0.1 | 1.0×10⁻¹³ | 4.4×10⁷ | 5100 |
+
+The tuned value is within a factor of 5–20 of a **lanthanide-poor** component's
+ionic density and 3.7 decades below a lanthanide-rich one's. §4.36's crossing is
+therefore less arbitrary than its tuning suggests — it lies roughly where a blue
+component lives — while red ejecta sit thousands of times past the boundary and
+stay saturated across the whole observable window. **Whether a kilonova crosses
+the cancellation boundary is set by X_lan and M_ej**, which are exactly the
+parameters kilonova spectra are used to infer.
+
+Running the lanthanide-poor case properly — La II, M_ej = 0.01 M⊙,
+v = 0.05–0.2c, X_lan = 10⁻³, ρ derived not tuned, worldline transport, epochs
+2–12 d, noise floor 0.098 mag:
+
+| t (d) | S | ΔF(3800) | Δm_bol | Δg | Δr | Δ(g−r) | Δ(r−i) |
+|---|---|---|---|---|---|---|---|
+| 2.0 | 394.3 | +214% | −0.060 | **−0.634** | −0.421 | −0.213 | −0.242 |
+| 3.0 | 171.2 | +17% | −0.019 | — | −0.463 | — | −0.342 |
+| 4.0 | 94.1 | +372% | −0.007 | — | — | — | — |
+| 6.0 | 40.3 | — | −0.001 | — | — | — | — |
+| 12.0 | 9.5 | — | +0.000 | — | — | — | — |
+
+and the binned variant on the same history reaches **Δ(g−r) = −0.769 at 2 d**
+and **Δ(r−i) = +0.742 at 3 d, where its bolometric error is +0.000 mag.**
+
+Two things follow. The practical closure's error on a physically normalized
+kilonova is **0.06 mag bolometric and 0.63–0.77 mag in a band or colour** — an
+order of magnitude apart. And **the band diagnostic dies exactly where the
+photometric error is largest**: from 4 d on the reference 3800 Å flux falls
+below the threshold at which a ratio means anything, while Δm is still tenths of
+a magnitude. Anyone validating this closure on band residuals would have run out
+of signal before the interesting epochs.
+
+*Limits.* One density history per composition, LTE populations, an imposed
+temperature law, a uniform sphere, an imposed blackbody core with no heating
+source, top-hat bandpasses, and — for the §1–§5 tables — Paper I's velocities,
+which §6 shows to be a floor. The blue-kilonova run's noise floor is 0.098 mag,
+so only its tenths-of-a-magnitude entries are claimed. Nothing here is a light
+curve: L_bol(t)'s shape is the imposed core's, and only differences between
+transport treatments are quoted.
+
 ## 5. Findings register
 
 | # | Finding | Where |
@@ -2311,6 +2535,7 @@ composition — §4.25's mixture rule would be needed for that.
 | F38 | **The two approximations are not additive, and their interaction can flip the sign of the total.** Counterfactual legs isolating each — exact opacity + grouped redistribution (A), grouped opacity + exact A·β (B), both (C) — give |A| ≤ 1.4% on every ion, so the redistribution approximation contributes almost nothing (F30 by a third route, measured directly rather than inferred). B dominates, and for the least saturated ions C ≈ B. But at S ≳ 14 an interaction term appears, −6.4% (Pr II) and −4.3% (Ce II), large enough for **Pr II to run +4.3% too bright under the opacity approximation alone and −2.0% too opaque with both**. The zero of §4.32 is therefore not where the dominant error changes sign but where B plus the interaction does — so a closure whose pieces are separately validated can fail, or appear to succeed, for reasons neither piece shows alone | §4.35 |
 | F39 | **Recurrent exit opacity recovers the correct boundary orientation — the sign change now appears in three independent settings.** §4.34 predicted the missing physics: exits terminating on unpopulated levels cannot cascade, so the model refilled the band *less* as saturation rose where real forests refill *more*. Giving exit lines their own opacity on shared populated levels flips the boundary the right way: at exit_tau = 0.5 the binned closure runs **−62.3% → +2.5% → +39.1%**, crossing neg→pos at S = 179 (and at S = 688 for exit_tau = 2.0), where terminal exits gave no crossing at all or one running backwards. The boundary is therefore reproduced by a density scan, a 13-ion survey, and a controlled forest that separates the axes real atoms confound. Not claimed: the crossing *location*, which moves with exit_tau, or the expansion leg, which still fails | §4.34b |
 | F40 | **A realistic kilonova crosses the cancellation boundary at 1.2 days.** Homologous ejecta (ρ ∝ t⁻³, T ∝ t⁻¹ᐟ², X_lan = 0.1) sweep band saturation across four orders of magnitude in n_ion, and the practical grouped closure runs **+64.6% too bright at 0.5 d → zero at 1.17 d → −28.4% too opaque at 1.5 d** — ninety points across a factor of three in time, straddling the epoch kilonova spectra are taken. The crossing occurs at **S = 47.5**, matching the boundary located independently at S ≈ 50 by a density scan, a 13-ion survey and a controlled synthetic forest: a fourth confirmation from a different construction. Stated carefully, the zero here is the *opacity* error changing sign (B crosses at 1.21 d) rather than two large errors cancelling, with |A| ≤ 2.1% throughout; the cancellation mechanism is separately visible at 2 d, where the binned closure reads −1.1% while its opacity piece alone reads −4.1%. Either way: **near-zero residual at one epoch is not evidence a closure is correct** **La II on the same history sharpens it**: at 0.75 d the expansion closure reads **+0.1%** while the binned closure reads **−55.7%** — same epoch, same ejecta, same atom, differing only in whether a bin carries Σ(1−e^−τ) or Στ. One looks exact, the other is wrong by more than half. | §4.36 |
+| F41 | **The closure error is chromatic, not bolometric, and the diagnostic band residual is a proxy for neither.** Converting §4.36's ejecta history into absolute L_ν, escaping luminosity and AB magnitudes: the grouped-**redistribution** approximation is invisible to an observer — worst \|Δm\| of **0.006 / 0.008 / 0.008 mag** on Ce II, La II and a four-ion blend — so F25/F27's kernel compression costs less than a photometric error bar. The grouped-**opacity** approximation is five times larger in colour than in luminosity: Ce II at 0.5 d is **0.14 mag too bright bolometrically and 0.74 mag wrong in g−r**, because the closure moves flux between bands rather than creating or destroying it. And the 3800–3955 Å residual carrying every result from §4.23 to §4.36 tracks neither — **−59.5% in band is +0.007 mag bolometric** (La II binned, 0.75 d), −26.0% is photometrically invisible (Ce II, 2 d), and +55% is 0.46 mag in g (Ce II, 0.5 d). Two defensible groupings give **opposite colour errors 0.15 mag apart at one epoch on one atom**. Every magnitude is a floor: at fixed saturation the photometric error grows **34× (La) to 67× (Ce) from Paper I's 0.01c to a kilonova's 0.3c** while Δm_bol stays under 0.011 mag, and it survives the worldline transport treatment, which changes the band residual by a factor of 4 and the magnitudes not at all. On a **physically normalized** kilonova — M_ej = 0.01 M⊙, v = 0.05–0.2c, X_lan = 10⁻³, ρ derived from the mass rather than tuned, worldline — the practical closure is **0.06 mag bolometric and 0.63–0.77 mag in a band or colour**, and at 3 d its binned variant is bolometrically **exact** while 0.74 mag wrong in r−i. The band diagnostic runs out of signal from 4 d on, exactly where the photometric error is still tenths of a magnitude | §4.37 |
 
 ## 6. Caveats and limitations
 

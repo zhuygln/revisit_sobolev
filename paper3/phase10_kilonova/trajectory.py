@@ -63,11 +63,33 @@ EPOCHS = (0.5, 0.75, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0)
 A_OF = {"58CeII": 140.1, "57LaII": 138.9, "60NdII": 144.2, "59PrII": 140.9}
 
 
-def state(t_d):
-    """Homologous ejecta state at epoch t_d (days)."""
+def state(t_d, core_law="fixed"):
+    """Homologous ejecta state at epoch t_d (days).
+
+    `core_law` sets the illuminating core, which §4.36 held frozen:
+
+      "fixed"  t_core = T_CORE = 6000 K at every epoch. **The default, so
+               F40's numbers and trajectory_*.json do not move.** Frozen at
+               8 days it is unphysical, but it is the clean control: with the
+               injected continuum's shape held constant, every change in the
+               emergent colours is opacity.
+      "cool"   t_core = T_gas(t), the photosphere cooling with the gas. The
+               physical case, in which source and opacity evolution are
+               entangled -- which is why the control is run alongside it.
+
+    L_core is only meaningful once a window is fixed, so it is not returned
+    here; see `sobolev.photometry.planck_luminosity`.
+    """
+    T_gas = T_GAS_1D * t_d ** -0.5
+    if core_law == "fixed":
+        t_core = T_CORE
+    elif core_law == "cool":
+        t_core = T_gas
+    else:
+        raise ValueError("core_law must be 'fixed' or 'cool'")
     return dict(t_exp=t_d * DAY,
                 rho=RHO_1D * t_d ** -3,
-                T_gas=T_GAS_1D * t_d ** -0.5,
+                T_gas=T_gas, t_core=t_core, core_law=core_law,
                 r_core=R_CORE * t_d, r_out=R_OUT * t_d)
 
 
