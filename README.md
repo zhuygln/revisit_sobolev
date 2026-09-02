@@ -112,7 +112,7 @@ Needs Python >= 3.10 and numpy >= 2, so a distro 3.8/3.9 will not do.
 ```bash
 python3 -m venv .venv              # or: conda create -p .venv python=3.12
 .venv/bin/python -m pip install -e ".[dev]" h5py
-.venv/bin/python -m pytest         # 174 passed
+.venv/bin/python -m pytest         # 283 passed (2026-09-02)
 ```
 
 Atomic data is not committed — see [data/README.md](data/README.md) for the

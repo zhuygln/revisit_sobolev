@@ -16,7 +16,7 @@ Design: rather than a blind grid, scan tau at fixed (n_lines, dlnlam) to
 BRACKET the crossing, then interpolate S at Delta F = 0 per row. That spends
 the compute where the contour is instead of where it is not.
 
-Usage: python boundary.py [--n 150000]
+Usage: python boundary.py [--n 150000] [--delocalize 1 --n-exit 6 --exit-tau 0.5,2.0]
 """
 import argparse, itertools, json, sys, time
 from pathlib import Path
@@ -89,25 +89,32 @@ def crossing(rows, key):
     return None
 
 
-def main(n, out_name):
-    N_LINES = (100, 300)
-    DLNLAM = (0.005, 0.03, 0.15)
-    TAU = (0.02, 0.06, 0.15, 0.4, 1.0, 2.5)
-    combos = list(itertools.product(N_LINES, DLNLAM))
-    print(f"{len(combos)} rows x {len(TAU)} tau, {n} packets x {len(SEEDS)} seeds", flush=True)
+def main(n, out_name, n_lines=(100, 300), dlnlam=(0.005, 0.03, 0.15),
+         tau=(0.02, 0.06, 0.15, 0.4, 1.0, 2.5), delocalize=0.0, n_exit=2,
+         exit_tau=(0.0,)):
+    """Scan tau at fixed (n_lines, dlnlam) for each exit_tau and bracket the
+    crossing. The defaults reproduce `boundary.json` (F37, the terminal-exit
+    model). F39's exit-opacity scan is `--delocalize 1 --n-exit 6
+    --exit-tau 0.5,2.0 --n-lines 100 --tau 0.06,0.15,0.4,1.0,2.5,6.0`;
+    until 2026-09-02 that run had no driver path and no committed JSON.
+    """
+    combos = list(itertools.product(exit_tau, n_lines, dlnlam))
+    print(f"{len(combos)} rows x {len(tau)} tau, {n} packets x {len(SEEDS)} seeds, "
+          f"delocalize={delocalize} n_exit={n_exit}", flush=True)
     all_rows, summary, t0 = [], [], time.time()
-    for nl, dl in combos:
+    for xt, nl, dl in combos:
         rows = []
-        for tau in TAU:
-            r = point(nl, tau, dl, n)
+        for ta in tau:
+            r = point(nl, ta, dl, n, delocalize=delocalize, n_exit=n_exit,
+                      exit_tau=xt)
             if r is None:
                 continue
             rows.append(r); all_rows.append(r)
-            print(f"  N={nl:3d} dln={dl:.3f} tau={tau:5.2f} | S {r['S_band']:8.1f} "
-                  f"Nsat {r['n_sat_band']:4d} rng {r['range']:.3f} | "
+            print(f"  xt={xt:4.2f} N={nl:3d} dln={dl:.3f} tau={ta:5.2f} | "
+                  f"S {r['S_band']:8.1f} Nsat {r['n_sat_band']:4d} rng {r['range']:.3f} | "
                   f"binned {100*r['binned']:+8.1f}%  exp {100*r['expansion']:+8.1f}%",
                   flush=True)
-        s = {"n_lines": nl, "dlnlam": dl,
+        s = {"exit_tau": xt, "n_lines": nl, "dlnlam": dl,
              "S_cross_binned": crossing(rows, "binned"),
              "S_cross_expansion": crossing(rows, "expansion"),
              "range_median": float(np.median([r["range"] for r in rows])) if rows else None}
@@ -115,13 +122,25 @@ def main(n, out_name):
         print(f"   -> zero crossing: binned S = {s['S_cross_binned']}, "
               f"expansion S = {s['S_cross_expansion']}", flush=True)
     (HERE / out_name).write_text(json.dumps(
-        {"n": n, "rows": all_rows, "summary": summary}, indent=1))
+        {"n": n, "delocalize": delocalize, "n_exit": n_exit,
+         "exit_tau": list(exit_tau), "n_lines": list(n_lines),
+         "dlnlam": list(dlnlam), "tau": list(tau),
+         "rows": all_rows, "summary": summary}, indent=1))
     print(f"wrote {out_name}  [{time.time()-t0:.0f}s]")
 
 
 if __name__ == "__main__":
+    fl = lambda t: tuple(float(x) for x in t.split(","))
     ap = argparse.ArgumentParser()
     ap.add_argument("--n", type=float, default=1.5e5)
     ap.add_argument("--out", default="boundary.json")
+    ap.add_argument("--n-lines", default="100,300")
+    ap.add_argument("--dlnlam", default="0.005,0.03,0.15")
+    ap.add_argument("--tau", default="0.02,0.06,0.15,0.4,1.0,2.5")
+    ap.add_argument("--delocalize", type=float, default=0.0)
+    ap.add_argument("--n-exit", type=int, default=2)
+    ap.add_argument("--exit-tau", default="0.0")
     a = ap.parse_args()
-    main(int(a.n), a.out)
+    main(int(a.n), a.out, n_lines=tuple(int(x) for x in a.n_lines.split(",")),
+         dlnlam=fl(a.dlnlam), tau=fl(a.tau), delocalize=a.delocalize,
+         n_exit=a.n_exit, exit_tau=fl(a.exit_tau))

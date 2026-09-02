@@ -80,13 +80,17 @@ def n_ion_for(lev_path, tr_path):
     return TAU_MAX_TARGET / mx, n_win
 
 
-def measure(ion, n):
+def measure(ion, n, n_ion=None):
+    """One ion at its global normalization, or at an explicit `n_ion` (the
+    density scan of §4.32, which `density_scan.py` drives)."""
     lev = DATA / f"{ion}_levels_calib.txt"
     tr = DATA / f"{ion}_transitions_calib.txt"
     if not (lev.exists() and tr.exists()):
         return {"ion": ion, "skipped": "files not extracted"}
     t0 = time.time()
-    n_ion, n_win = n_ion_for(lev, tr)
+    n_ion_global, n_win = n_ion_for(lev, tr)
+    if n_ion is None:
+        n_ion = n_ion_global
     if n_ion is None:
         return {"ion": ion, "skipped": f"no usable line in {WINDOW[0]:.0f}-{WINDOW[1]:.0f} A",
                 "n_window": n_win}

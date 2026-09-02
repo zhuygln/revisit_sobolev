@@ -161,3 +161,19 @@ Not classifications, but the same kind of problem the audit exists to catch:
    `phase9_audit/audit.json` with `phase8_survey/survey.json`.
 4. **F40's crossing (1.17 d, S = 47.5) was interpolated by hand.** Fixed in §10:
    `observables.py:crossing_epoch` computes and stores it.
+
+### Addendum (2026-09-02): debts 1–3 closed
+
+- Debt 1: `paper3/synthetic/boundary.py --delocalize 1 --n-exit 6 --exit-tau 0.5,2.0`
+  → `boundary_exit_tau.json`; crossings S = 179.6 / 689.0 reproduce §4.34b, and
+  the dlnlam that was never recorded turns out to be inert at delocalize = 1.
+- Debt 2: `paper3/phase8_survey/density_scan.py` → `density_scan_58CeII.json`
+  (three seeds; crossing S = 55.7; five of six points within 7 points of the
+  single-seed notebook numbers, the steepest one within 9).
+- Debt 3: `paper3/phase9_audit/counterfactual_table.py` → `counterfactual_table.json`
+  reproduces the §4.35 A/B/C table from `survey.json` alone.
+- Debt 4 was closed in §10 (`crossing_epoch`).
+- `tests/test_provenance.py` pins all three. Classification of F42 (§4.38):
+  **a robustness check, not a new claim** — the F41 chromatic effect is a
+  property of the spectra, not of the top-hat filters.
+

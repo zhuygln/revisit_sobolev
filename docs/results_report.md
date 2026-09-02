@@ -2232,11 +2232,19 @@ experiment: **near-zero residual at one epoch is not evidence that a closure is
 correct.** It can mean the ejecta happen to sit on a boundary the closure sweeps
 through.
 
+*One caveat on the word "realistic".* ρ(1 d) = 2×10⁻¹⁷ g cm⁻³ was chosen
+(`trajectory.py:56`) so that the crossing falls inside the 0.5–8 d window; this
+section shows that a kilonova at a density chosen to cross, crosses. Whether a
+kilonova at a density *derived* from an ejecta mass crosses is the question
+§4.37.8 and §4.39 answer with ρ from (M_ej, v_max).
+
 #### La II on the same trajectory: a sharper version of the same point
 
-The identical ejecta history run on La II does not cross — its practical
-closure stays positive throughout, +11.5% at 0.5 d to +1.5% at 8 d. But it
-shows something the Ce trajectory does not:
+The identical ejecta history run on La II: its *practical* closure does not
+cross — it stays positive throughout, +11.5% at 0.5 d to +1.5% at 8 d — while
+its *binned* closure runs +21.7% → −55.7% between 0.5 and 0.75 d and crosses
+again near 4 d. Which closure one means matters. And it shows something the Ce
+trajectory does not:
 
 | t (d) | S | B opacity | **C expansion** | **C binned** |
 |---|---|---|---|---|
@@ -2575,7 +2583,7 @@ transport treatments are quoted.
 # environment
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]" h5py
-pytest                    # 68 passed
+pytest                    # 283 passed (2026-09-02)
 
 # data (once): Zenodo 19335084 -> data/, see data/README.md
 # SEDONA (once): see lab_notebook.md "SEDONA build" entry
