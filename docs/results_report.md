@@ -2603,6 +2603,112 @@ and in one case (the blue kilonova's binned leg) move *which* colour is worst,
 from g−r to i−J, at the same epoch and nearly the same size. The effect is a
 property of the spectrum, not of the top-hats it was first measured with.
 
+### 4.39 A heating-powered source: the Source Model Gate
+
+Driver: `sobolev/source.py` (`--plot` writes
+`paper3/phase12_grid/source_gate.png`). Tests: `tests/test_source.py` (7).
+
+Everything up to §4.38 illuminated the line-blanketed shell with an *imposed*
+blackbody (T = 5000 K t^−1/2, R = v_core t). On that source the ejecta mass and
+the lanthanide fraction enter the transport only through n_ion ∝ ρ X_lan, so
+∂m/∂ln M ≡ ∂m/∂ln X_lan and the action plan's question — does the closure
+error point along a physical-parameter direction? — cannot be posed. This
+section replaces the imposed core with the simplest source in which (M_ej,
+v_ej) and X_lan act through different channels, and gates it before anything
+is run on it.
+
+#### 1. The model
+
+Four pieces, all standard, all cgs, no free parameter tuned to any result:
+
+- **Heating.** ε(t) = 4×10¹⁸ [½ − π⁻¹ arctan((t − t₀)/σ)]^1.3 erg g⁻¹ s⁻¹ with
+  t₀ = 1.3 s, σ = 0.11 s (Korobkin et al. 2012, the form Villar et al. 2017
+  use). Composition-independent by construction.
+- **Thermalization.** Barnes et al. (2016) eq. 35, f_th = 0.36 [e^{−a t_d} +
+  ln(1 + 2 b t_d^d)/(2 b t_d^d)], with (a, b, d) bilinear in (log₁₀ M, v) over
+  their Table 1, as MOSFiT does. The table starts at v = 0.1 c; the grid's
+  v = 0.05 c row is clamped to it and flagged (`fth_clamped`), a mild declared
+  underestimate of f_th there.
+- **Diffusion.** One-zone Arnett (1982): L(t) = (2/τ_d²) e^{−(t/τ_d)²} ∫₀ᵗ t′
+  e^{(t′/τ_d)²} Q̇(t′) dt′ with Q̇ = M ε f_th and τ_d = √(2 κ M/(β c v)),
+  β = 13.7 — solved as the ODE dL/dt = (2t/τ_d²)(Q̇ − L) with an exact
+  per-segment exponential integrator on a 3000-point log-t grid from 10⁻² s.
+  **κ = 1 cm² g⁻¹ is fixed across the grid and independent of X_lan.** This is
+  the Tier-1 control chosen on 2026-09-02: the lanthanide fraction sets the
+  line opacity the transport sees and nothing else, so it is not counted twice
+  (once in τ_d, once in the lines). X_lan in the grid is therefore an
+  *effective* or tracer abundance; a lanthanide-dependent κ is the deferred
+  Tier 2.
+- **Photosphere.** The plan specified v_ph = v_ej/2. The dry run of the grid
+  showed why that cannot be used with this transport: with ρ from a uniform
+  sphere out to v_ej, a launch surface at v_ej/2 puts 7/8 of the ejecta mass
+  *above* it, a line shell of τ ~ 10³ (τ_max 5×10⁵ at 0.5 d on the central
+  model) that no packet crosses within the step cap. Instead R_ph is where the
+  grey optical depth measured inward from the edge, with the same κ the
+  diffusion uses, reaches 2/3: κ ρ (R_out − R_ph) = 2/3. The transport then
+  launches from the surface the diffusion model itself defines. On the central
+  model (0.01 M⊙, 0.1 c) τ_grey(edge to centre) = 283 / 71 / 18 / 7.9 / 2.8 /
+  1.4 at 0.5 / 1 / 2 / 3 / 5 / 7 d, so v_ph/v_ej = 0.998 / 0.991 / 0.962 /
+  0.915 / 0.764 / 0.538: the photosphere sits at the edge early and recedes as
+  ρ t⁻² thins. It is floored at v_ej/2 (the plan's convention, kept as
+  `v_ph_frac=0.5`) and flagged once the grey depth can no longer support it —
+  by 7 d for every v = 0.2 c model and for (0.003, 0.1). T_eff =
+  [L/(4π σ R_ph²)]^{1/4}; T_gas = T_eff; the packets are launched from
+  r_core = R_ph at t_core = T_eff exactly as before, and `L_core_window` =
+  the Planck luminosity in the 1000–30000 Å window at (R_ph, T_eff) scales the
+  spectrum. **No transport code changed for the source.**
+
+#### 2. The gate
+
+Six pre-declared checks (`tests/test_source.py`), all passing:
+
+| # | check | result |
+|---|---|---|
+| 1 | Q̇ = const → L = Q̇(1 − e^{−(t/τ_d)²}) | 10⁻⁴ |
+| 2 | Q̇ ∝ t^−1.3: L peaks in [0.7, 1.5] τ_d; L/Q̇ → 1 at 5 τ_d | central model with f_th: t_peak = 0.60 τ_d = 1.25 d; L/Q̇(5 τ_d) = 1.035 |
+| 3 | t_peak ∝ √(κM/v) | doubling M at fixed v: ratio 1.408 (√2 = 1.414) |
+| 4 | ∫L dt = ∫Q̇ η(t′/τ_d) dt′, η(z) = √π z erfcx(z) | agree to 1.2×10⁻⁵; η(1) = 0.758 |
+| 5 | central model plausible | L(1 d) = 1.4×10⁴¹, T_eff = 7350 K (1 d), 3670 K (3 d), τ_d = 2.08 d, R_ph(1 d) = 2.6×10¹⁴ cm, ρ(1 d) = 2.7×10⁻¹³ g cm⁻³ |
+| 6 | `barnes_params(0.01, 0.1)` = (0.56, 0.17, 0.74); f_th(1 d) ≈ 0.5, decreasing; clamped at v = 0.05 | f_th = 0.60 / 0.52 / 0.40 / 0.33 / 0.26 / 0.23 at 0.5–7 d |
+
+Check 4 is the energy statement: of the 9.9×10⁴⁹ erg the heating deposits in
+30 d, only 4.0×10⁴⁶ erg is ever radiated — the rest is deposited in the first
+seconds and lost to expansion, which is what the Arnett solution is for. The
+nine (M, v) models:
+
+| M (M⊙) | v (c) | τ_d (d) | t_peak (d) | L(1 d) | T_eff 1 / 3 / 7 d (K) | v_ph/v_ej 1 / 3 / 7 d |
+|---|---|---|---|---|---|---|
+| 0.003 | 0.05 | 1.61 | 0.92 | 5.5×10⁴⁰ | 8270 / 3370 / 1660 | 0.99 / 0.93 / 0.62 |
+| 0.003 | 0.10 | 1.14 | 0.68 | 8.3×10⁴⁰ | 6550 / 2470 / 1300 | 0.97 / 0.72 / 0.50* |
+| 0.003 | 0.20 | 0.81 | 0.45 | 7.9×10⁴⁰ | 4820 / 1840 / 780 | 0.87 / 0.50* / 0.50* |
+| 0.01 | 0.05 | 2.94 | 1.70 | 7.5×10⁴⁰ | 8900 / 5010 / 2120 | 1.00 / 0.98 / 0.88 |
+| **0.01** | **0.10** | **2.08** | **1.25** | **1.4×10⁴¹** | **7350 / 3670 / 1840** | **0.99 / 0.92 / 0.54** |
+| 0.01 | 0.20 | 1.47 | 0.84 | 2.1×10⁴¹ | 5840 / 2590 / 1200 | 0.96 / 0.66 / 0.50* |
+| 0.03 | 0.05 | 5.10 | 2.93 | 8.3×10⁴⁰ | 9130 / 5810 / 3230 | 1.00 / 0.99 / 0.96 |
+| 0.03 | 0.10 | 3.60 | 2.15 | 1.6×10⁴¹ | 7630 / 4630 / 2250 | 1.00 / 0.97 / 0.85 |
+| 0.03 | 0.20 | 2.55 | 1.44 | 2.8×10⁴¹ | 6240 / 3430 / 1740 | 0.99 / 0.89 / 0.50* |
+
+(* floored.) The v = 0.05 c column has f_th clamped to the v = 0.1 c row of
+Barnes' table. These are the right orders of magnitude for a blue-to-red
+kilonova — AT2017gfo's L(1 d) ≈ 10⁴², T ≈ 7000 K falling to 3000 K by 4 d —
+and no more is claimed: plausibility, not a fit.
+
+#### 3. Caveats declared before the grid is run
+
+- T_eff ≈ 7000–9000 K at 0.5–1 d, where `ION_FRAC = 1` (no Saha) over-populates
+  the singly ionized stage and LTE at T_gas = T_eff samples the Boltzmann tail
+  heavily; the early epochs of the grid are the least trustworthy for that
+  reason as well as the cost reasons §4.40 records.
+- The photosphere is grey with the diffusion κ, while the transport above it is
+  pure line opacity: no continuum, no electron scattering. The two are
+  consistent only in the sense that both use the same κ and the same ρ.
+- ρ is uniform inside v_ej (`observables.rho_1d_from_mass`), so the line shell
+  above the photosphere is thin geometrically (v_ph/v_ej ≥ 0.9 before 3 d) but
+  dense: n_ion(Ce) at 1 d on the central model is 2.9×10⁶ cm⁻³, three orders of
+  magnitude above F40's chosen-to-cross trajectory (§4.36), and the band
+  saturation S is 10⁴–10⁵ at 0.5–1 d. What that costs, and what it does to the
+  harness's energy bookkeeping, is §4.40.
+
 ## 5. Findings register
 
 | # | Finding | Where |

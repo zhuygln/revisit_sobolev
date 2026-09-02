@@ -2087,6 +2087,45 @@ is meaningless on the blue-kilonova file whose *top-hat* floor is already
 0.098 (§9al), so the gate reads A_redist <= max(0.02, 1.5 x top-hat). Declared
 in the driver's docstring, not silently.
 
+## 9an. The source model, and the photosphere the plan got wrong (2026-09-02)
+
+*What was built.* `sobolev/source.py`: Korobkin heating, Barnes thermalization
+(their Table 1 re-checked against the paper: (0.56, 0.17, 0.74) at 0.01 M_sun,
+0.1 c), the one-zone Arnett solution as an ODE with an exact per-segment
+exponential integrator, and a photosphere. Six gate tests written before any
+number was looked at; all pass. Energy: closed form int Q eta(t'/tau_d) dt'
+agrees with int L dt to 1e-5, and the number itself is instructive -- 1e50 erg
+deposited in 30 d, 4e46 erg radiated. The heating curve dumps almost
+everything in the first seconds and the expansion eats it. That is what the
+Arnett model is *for*, and it is the reason the log-t grid has to start at
+1e-2 s.
+
+*The photosphere.* The plan said v_ph = v_ej/2 -- the "core" convention every
+earlier section used, where the core radius was a free choice because the
+core was imposed. On a physically normalized ejecta it is not a free choice.
+The dry run of the grid (before any transport) printed tau_max = 5e5 at 0.5 d
+on the central model with the launch surface at v_ej/2, and the first probe
+run hit `max_steps` at 1 d: 7/8 of the ejecta mass sits above v_ej/2 in a
+uniform sphere, and a line shell of tau ~ 1e3 is not something a packet
+crosses in 1e5 steps. The fix is not a bigger step cap, it is the right
+surface: the diffusion model already has an opacity, so the launch surface
+is where kappa rho (R_out - R_ph) = 2/3 -- the photosphere the one-zone
+model itself implies. On the central model that is 0.99 v_ej at 1 d, 0.92 at
+3 d, receding to the v_ej/2 floor by 7 d. `v_ph_frac=0.5` is kept as an
+option and as the floor, and `v_ph_floored` is stored per epoch. This is a
+deviation from the approved plan and is flagged in the report (section
+4.39.1) for the user.
+
+*What it does to the transport's regime.* n_ion(Ce) = 2.9e6 cm^-3 at 1 d on
+the central model, S = 8e4 in the 3800 A band, tau_max = 1.4e4. F40's
+trajectory, chosen so the crossing would fall in the window, had n_ion ~ 2e3.
+The physically normalized kilonova is a thousand times denser in the lines,
+and the harness has never been run there. That is the next entry.
+
+*Still frozen.* ION_FRAC = 1 at T_eff = 7000-9000 K; LTE at T_gas = T_eff;
+grey photosphere below a pure-line shell; uniform rho. All stated in section
+4.39.3, none fixed.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,
