@@ -2499,6 +2499,110 @@ so only its tenths-of-a-magnitude entries are claimed. Nothing here is a light
 curve: L_bol(t)'s shape is the imposed core's, and only differences between
 transport treatments are quoted.
 
+### 4.38 Provenance closures, real passbands and Gate 1 (F42)
+
+Drivers: `paper3/phase8_survey/density_scan.py`,
+`paper3/phase9_audit/counterfactual_table.py`, `paper3/synthetic/boundary.py
+--delocalize 1 --n-exit 6 --exit-tau 0.5,2.0`, `data/filters/fetch_filters.py`,
+`paper3/phase11_observables/gate1.py`. Data: `density_scan_{58CeII,57LaII}.json`,
+`counterfactual_table.json`, `boundary_exit_tau.json`, `data/filters/*.dat`,
+`gate1_realfilters.json`. Tests: `tests/test_provenance.py` (6),
+`tests/test_passbands.py` (7).
+
+This section is the housekeeping the action plan demanded before any new
+measurement: the three findings that lived only as numbers in the notebook now
+have drivers and data files, and the photometry of §4.37 is re-done through
+real filter curves without re-running a single packet.
+
+#### 1. The three reproducibility debts are closed
+
+**The Ce II density scan (F35) reproduces with three seeds.** `density_scan.py`
+takes the F36 global normalization (n_ion = 8675 at global τ_max = 5 for Ce II)
+and scales it by {1/3, 2/3, 1, 4/3, 2, 10/3}, the same factors §4.32 used, at
+5×10⁵ packets × 3 seeds:
+
+| n_ion / n_global | 1/3 | 2/3 | 1 | 4/3 | 2 | 10/3 |
+|---|---|---|---|---|---|---|
+| S (band Στ) | 22.2 | 44.5 | 66.8 | 89.1 | 133.6 | 222.7 |
+| binned, 3 seeds | −35.2% | −15.0% | **+12.2%** | +127.5% | +101.6% | +127.1% |
+| binned, §4.32 single seed | −33.4% | −15.3% | +21.4% | +124.6% | +94.7% | +129.8% |
+| expansion, 3 seeds | −32.2% | −22.0% | +1.9% | +95.5% | +71.7% | +89.8% |
+
+Crossing (log-linear in S): binned **S = 55.7**, expansion S = 64.6, both
+neg→pos — inside the "S ≈ 45–67" bracket F35 quotes. Five of six points agree
+with the single-seed numbers to ≤ 7 points; the third differs by 9 (+21.4 →
++12.2%), which is where the curve is steepest (a factor 1.33 in density moves the
+error by 115 points) and where seed scatter is amplified accordingly. La II on the
+same scan: binned +3.1 / −5.0 / −31.8% at S = 3.3 / 13.4 / 33.4 (F35's
+"all-negative except +0.5%" was a single seed; the sign structure holds, the
+expansion leg is positive at all three and never crosses).
+
+**The F38 counterfactual table is generated, not joined by hand.**
+`counterfactual_table.py` reads `phase8_survey/survey.json` (the only file
+carrying all three legs) and emits exactly the §4.35 numbers: interaction
+C − (A + B) = −0.9 / −0.8 / **−6.4** / **−4.3**% for Nd II / La II / Pr II /
+Ce II, |A| ≤ 1.4%, and Pr II's B > 0 > C sign flip.
+
+**The F39 exit-τ scan has a driver and a data file.** `boundary.py` now threads
+`delocalize / n_exit / exit_tau / n_lines` through `main` and the JSON header.
+Re-run at 1.5×10⁵ packets × 3 seeds: exit_tau = 0.5 gives binned
+−61.0 → +0.9 → +19.7 → +23.7 → +40.4 → +34.5% across τ = 0.06–6, crossing
+neg→pos at **S = 179.6** (§4.34b quoted 179); exit_tau = 2.0 crosses at
+**S = 689.0** (quoted 688). The scan covered dlnlam ∈ {0.005, 0.03, 0.15} to find
+which the original used, and the answer is that it does not matter: **at
+delocalize = 1 the three dlnlam rows are identical to every printed digit**, so
+the exit-line placement is fully delocalized and the spacing parameter is inert.
+Recorded in the JSON; the §4.34b numbers are reproduced by all three.
+
+**§4.36's La II sentence is corrected** (its practical closure does not cross,
+its binned closure does, twice), and the section now says what
+`trajectory.py:56` already said — ρ(1 d) was chosen so the crossing lands in the
+window. A kilonova at a density chosen to cross, crosses; the physically
+normalized runs (§4.37.8, §4.39) are where the density is derived.
+
+#### 2. Real passbands
+
+`data/filters/` holds the SVO Filter Profile Service curves for **DECam g r i z**
+(CTIO, photon-counting) and **2MASS J H Ks** — the AT2017gfo follow-up system —
+fetched by `fetch_filters.py` on 2026-09-02 with SHA-256 prefixes pinned in the
+README and in `test_passbands.py`. `photometry.Passband.bin_weights` integrates
+each curve as W_b = ∫_bin T dλ/λ over the 200 log-spaced spectral bins on a
+0.2 Å resampling, so a histogram L_ν is integrated exactly rather than sampled
+at bin centres (DECam g spans 19 bins). A flat 3631 Jy source gives 0.000 mag in
+all seven; a 6000 K blackbody through DECam r agrees with a 20 001-point fine
+grid to < 0.01 mag; the top-hat path is bit-identical to before (0.0 round-trip
+error on every committed JSON). Keys are unchanged (`K` ↔ 2MASS Ks) so every
+colour and every downstream table is filter-set-agnostic.
+
+#### 3. Gate 1: the chromatic effect survives real filters
+
+`gate1.py` re-photometers the four committed F41 spectra from their stored
+L_ν — no transport is re-run — and compares worst |Δm| and |Δcolour| per leg:
+
+| file | leg | worst \|Δcolour\| top-hat → real | where |
+|---|---|---|---|
+| Ce II cool | C_both | 0.741 → **0.646** | g−r, 0.5 d |
+| Ce II cool | C_binned | 0.845 → **0.774** | g−r, 0.5 d |
+| Ce II cool | B_opacity | 0.749 → 0.658 | g−r, 0.5 d |
+| blend cool | C_both | 0.737 → **0.746** | g−r, 0.5 d |
+| blend cool | C_binned | 0.746 → **0.774** | g−r, 0.5 d |
+| blend cool | B_opacity | 0.856 → 0.880 | g−r, 0.5 d |
+| La II blue kilonova (worldline) | C_both | 0.342 → 0.328 | r−i, 3 d |
+| La II blue kilonova (worldline) | C_binned | 0.769 → **0.689** | g−r → i−J, 2 d |
+| La II cool | C_both / C_binned | 0.131 / 0.187 → 0.124 / 0.138 | g−r |
+
+and the A_redist leg (the redistribution approximation, F41's noise floor):
+0.006 → 0.008 (Ce), 0.008 → 0.009 (La), 0.008 → 0.009 (blend), 0.098 → 0.084 mag
+(blue kilonova, whose floor is set by its band mask, §4.37).
+
+Pre-declared criterion: every leg whose top-hat colour error is ≥ 0.6 mag keeps
+≥ 0.3 mag through real filters, and A_redist stays ≤ max(0.02, 1.5 × top-hat).
+**Gate 1 passes.** The real curves move the worst colour by −0.10 to +0.03 mag —
+DECam's g extends bluer than the 155 Å-wide top-hat and 2MASS J is narrower —
+and in one case (the blue kilonova's binned leg) move *which* colour is worst,
+from g−r to i−J, at the same epoch and nearly the same size. The effect is a
+property of the spectrum, not of the top-hats it was first measured with.
+
 ## 5. Findings register
 
 | # | Finding | Where |
@@ -2544,6 +2648,7 @@ transport treatments are quoted.
 | F39 | **Recurrent exit opacity recovers the correct boundary orientation — the sign change now appears in three independent settings.** §4.34 predicted the missing physics: exits terminating on unpopulated levels cannot cascade, so the model refilled the band *less* as saturation rose where real forests refill *more*. Giving exit lines their own opacity on shared populated levels flips the boundary the right way: at exit_tau = 0.5 the binned closure runs **−62.3% → +2.5% → +39.1%**, crossing neg→pos at S = 179 (and at S = 688 for exit_tau = 2.0), where terminal exits gave no crossing at all or one running backwards. The boundary is therefore reproduced by a density scan, a 13-ion survey, and a controlled forest that separates the axes real atoms confound. Not claimed: the crossing *location*, which moves with exit_tau, or the expansion leg, which still fails | §4.34b |
 | F40 | **A realistic kilonova crosses the cancellation boundary at 1.2 days.** Homologous ejecta (ρ ∝ t⁻³, T ∝ t⁻¹ᐟ², X_lan = 0.1) sweep band saturation across four orders of magnitude in n_ion, and the practical grouped closure runs **+64.6% too bright at 0.5 d → zero at 1.17 d → −28.4% too opaque at 1.5 d** — ninety points across a factor of three in time, straddling the epoch kilonova spectra are taken. The crossing occurs at **S = 47.5**, matching the boundary located independently at S ≈ 50 by a density scan, a 13-ion survey and a controlled synthetic forest: a fourth confirmation from a different construction. Stated carefully, the zero here is the *opacity* error changing sign (B crosses at 1.21 d) rather than two large errors cancelling, with |A| ≤ 2.1% throughout; the cancellation mechanism is separately visible at 2 d, where the binned closure reads −1.1% while its opacity piece alone reads −4.1%. Either way: **near-zero residual at one epoch is not evidence a closure is correct** **La II on the same history sharpens it**: at 0.75 d the expansion closure reads **+0.1%** while the binned closure reads **−55.7%** — same epoch, same ejecta, same atom, differing only in whether a bin carries Σ(1−e^−τ) or Στ. One looks exact, the other is wrong by more than half. | §4.36 |
 | F41 | **The closure error is chromatic, not bolometric, and the diagnostic band residual is a proxy for neither.** Converting §4.36's ejecta history into absolute L_ν, escaping luminosity and AB magnitudes: the grouped-**redistribution** approximation is invisible to an observer — worst \|Δm\| of **0.006 / 0.008 / 0.008 mag** on Ce II, La II and a four-ion blend — so F25/F27's kernel compression costs less than a photometric error bar. The grouped-**opacity** approximation is five times larger in colour than in luminosity: Ce II at 0.5 d is **0.14 mag too bright bolometrically and 0.74 mag wrong in g−r**, because the closure moves flux between bands rather than creating or destroying it. And the 3800–3955 Å residual carrying every result from §4.23 to §4.36 tracks neither — **−59.5% in band is +0.007 mag bolometric** (La II binned, 0.75 d), −26.0% is photometrically invisible (Ce II, 2 d), and +55% is 0.46 mag in g (Ce II, 0.5 d). Two defensible groupings give **opposite colour errors 0.15 mag apart at one epoch on one atom**. Every magnitude is a floor: at fixed saturation the photometric error grows **34× (La) to 67× (Ce) from Paper I's 0.01c to a kilonova's 0.3c** while Δm_bol stays under 0.011 mag, and it survives the worldline transport treatment, which changes the band residual by a factor of 4 and the magnitudes not at all. On a **physically normalized** kilonova — M_ej = 0.01 M⊙, v = 0.05–0.2c, X_lan = 10⁻³, ρ derived from the mass rather than tuned, worldline — the practical closure is **0.06 mag bolometric and 0.63–0.77 mag in a band or colour**, and at 3 d its binned variant is bolometrically **exact** while 0.74 mag wrong in r−i. The band diagnostic runs out of signal from 4 d on, exactly where the photometric error is still tenths of a magnitude | §4.37 |
+| F42 | **The chromatic closure error survives real filter curves, and the three notebook-only findings reproduce.** Re-photometering the committed F41 spectra through SVO DECam g r i z + 2MASS J H Ks (no packets re-run) keeps every ≥ 0.6 mag top-hat colour error at 0.65–0.77 mag (Ce II and the blend, g−r at 0.5 d) and the blue kilonova's binned leg at 0.69 mag — moving *which* colour is worst (g−r → i−J) but not its size — while the A_redist floor stays ≤ 0.009 mag. Gate 1 passes. Separately: the Ce II density scan reproduces with three seeds (crossing S = 55.7, five of six points within 7 points of the single-seed numbers), the F38 table is generated from `survey.json` (Pr II interaction −6.4%), and the F39 exit-τ scan has a driver and a data file (crossings S = 179.6 / 689.0 at τ_x = 0.5 / 2.0; dlnlam is inert at delocalize = 1). | §4.38 |
 
 ## 6. Caveats and limitations
 

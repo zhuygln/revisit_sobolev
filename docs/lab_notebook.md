@@ -2046,6 +2046,47 @@ from the stored spectrum so nothing needs re-running. With it the blue run's
 floor falls to 0.098 mag and the surviving entries are 6-8x above it.
 
 
+## 9am. Paying the provenance debts, and a real filter curve (2026-09-02)
+
+*Why first.* The action plan's Phase 1 starts with a source model and a grid,
+but the audit (`findings_audit.md`) listed three findings whose numbers existed
+only in this notebook: the Ce II density scan that first located the boundary,
+the F38 A/B/C table, and the F39 exit_tau scan. Nothing new should be built on
+top of numbers that cannot be regenerated, so these came first. Each took under
+an hour of wall time and each turned up something.
+
+*The density scan, three seeds.* `density_scan.py` reproduces §4.32's six
+points within 7 points at five of them and within 9 at the third (+21.4 ->
++12.2%). That third point is where the curve climbs 115 points over a density
+factor of 1.33, so a seed moves it a lot; the crossing itself is stable at
+S = 55.7 (binned) and 64.6 (expansion), both inside the bracket F35 quotes.
+Lesson filed: quote a crossing, not the nearest point to it.
+
+*The F38 table.* Reads survey.json, not audit.json -- audit.json has no
+sobolev_group leg, which is why the table was ever a manual join. The numbers
+are exact to the digit (Pr II -6.4%, Ce II -4.3%).
+
+*The exit_tau scan, and a parameter that does nothing.* The original F39 run
+did not record dlnlam, so the driver scanned all three candidate values to find
+which reproduced §4.34b. All three did, identically, to every printed digit.
+At delocalize = 1 the exit line is placed anywhere in the forest and the
+spacing parameter has no effect at all. Good to know; embarrassing that it took
+a 30-minute scan to know it. Crossings 179.6 and 689.0 against the quoted 179
+and 688.
+
+*Real filters.* DECam g r i z and 2MASS J H Ks from SVO, integrated as
+per-bin weights over the 200-bin spectral histogram rather than sampled at bin
+centres (DECam g covers 19 bins; centre sampling would be a different
+instrument). Gate 1 -- re-photometer the four committed F41 spectra, no packets
+-- passes: worst colour errors move by -0.10 to +0.03 mag and stay 0.65-0.77
+mag on Ce II and the blend where the top-hats gave 0.74-0.85. On the blue
+kilonova the binned leg's worst colour moves from g-r to i-J at the same epoch
+and about the same size. The redistribution leg stays at 0.008-0.009 mag. One
+criterion had to be restated before it could be applied: "A_redist <= 0.02 mag"
+is meaningless on the blue-kilonova file whose *top-hat* floor is already
+0.098 (§9al), so the gate reads A_redist <= max(0.02, 1.5 x top-hat). Declared
+in the driver's docstring, not silently.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

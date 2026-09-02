@@ -10,10 +10,14 @@ observer works in.
 Three deliberate limitations, all of which must be stated wherever the numbers
 appear:
 
-1. **The bandpasses are top-hats**, not transmission curves. There is no filter
-   data in this repo and no astropy/speclite to supply it. The quantity this
-   module exists to produce is a *difference between two transport treatments
-   on identical bands*, in which the profile shape is second order; an absolute
+1. **The default bandpasses are top-hats**, not transmission curves. Since
+   2026-09-02 `data/filters/` carries the DECam griz and 2MASS JHKs curves from
+   the SVO Filter Profile Service, and `Passband` integrates a histogram L_nu
+   through them exactly; `load_passbands()` returns them keyed like
+   `BANDS_PHOT` so every downstream key is filter-set-agnostic. Results quote
+   which set they used (`filter_set`). The quantity this module exists to
+   produce is still a *difference between two transport treatments on
+   identical bands*, in which the profile shape is second order; an absolute
    magnitude computed here is for scale only and is not photometry.
 2. **The source is imposed.** `run_mc` illuminates a line-blanketed shell with a
    blackbody core whose temperature and radius are inputs. There is no
@@ -28,6 +32,8 @@ Conventions follow what the repo already uses: the continuum normalization
 `4 pi^2 r_core^2 B_nu(T)` is `sobolev/spectra.py:64`'s, and `planck_bnu` is
 imported from `formal_transfer` rather than redefined.
 """
+from pathlib import Path
+
 import numpy as np
 
 from .constants import C, H
@@ -54,6 +60,63 @@ COLORS = (("g", "r"), ("r", "i"), ("i", "z"), ("i", "J"), ("J", "K"))
 # 40 Mpc -- the AT2017gfo distance, used only to put absolute magnitudes on a
 # familiar scale. Nothing in this module's conclusions depends on it.
 D_40MPC = 40.0 * 3.085677581e24
+
+# Real transmission curves: DECam griz + 2MASS JHKs (the AT2017gfo follow-up
+# system), keyed like BANDS_PHOT so `COLORS` and every result key carry over.
+FILTER_DIR = Path(__file__).resolve().parents[1] / "data" / "filters"
+FILTER_FILES = {"g": "decam_g", "r": "decam_r", "i": "decam_i", "z": "decam_z",
+                "J": "2mass_J", "H": "2mass_H", "K": "2mass_Ks"}
+
+
+class Passband:
+    """A transmission curve T(lambda) and its exact integral over a histogram.
+
+    `emergent_lnu` is a histogram on frequency bin `edges`, so the photon-
+    counting band average `int f_nu T dnu/nu / int T dnu/nu` is exactly
+    `sum_b f_b W_b / sum_b W_b` with `W_b = int_bin T dnu/nu` -- bin-averaged
+    weights, not centre sampling (DECam g spans ~19 of the 200 log bins). The
+    weights are computed on a 0.2 A resampling of the curve; since
+    |dnu/nu| = |dlambda/lambda| the integral is done in wavelength.
+    """
+
+    def __init__(self, lam, T, name=""):
+        lam, T = np.asarray(lam, float), np.asarray(T, float)
+        o = np.argsort(lam)
+        self.lam, self.T, self.name = lam[o], np.clip(T[o], 0.0, None), name
+        self.lam_lo, self.lam_hi = float(self.lam[0]), float(self.lam[-1])
+
+    @classmethod
+    def from_file(cls, path, name=""):
+        a = np.loadtxt(path)
+        return cls(a[:, 0], a[:, 1], name or Path(path).stem)
+
+    @property
+    def lam_eff(self):
+        """Photon-weighted effective wavelength, int lam T dlam / int T dlam."""
+        return float(np.trapezoid(self.lam * self.T, self.lam) / np.trapezoid(self.T, self.lam))
+
+    def bin_weights(self, edges_hz, dlam=0.2):
+        """W_b = int_bin T dnu/nu for each frequency bin; NaN-free, zero outside.
+
+        Raises ValueError if the curve is not fully inside the grid, because a
+        clipped filter is a different filter.
+        """
+        edges_hz = np.asarray(edges_hz, float)
+        lam_edges = np.sort(C / edges_hz) * 1e8                # A, ascending
+        if self.lam_lo < lam_edges[0] or self.lam_hi > lam_edges[-1]:
+            raise ValueError(f"{self.name}: {self.lam_lo:.0f}-{self.lam_hi:.0f} A "
+                             f"outside grid {lam_edges[0]:.0f}-{lam_edges[-1]:.0f} A")
+        lam = np.arange(self.lam_lo, self.lam_hi + dlam, dlam)
+        T = np.interp(lam, self.lam, self.T)
+        k = np.digitize(lam, lam_edges) - 1                     # wavelength-bin index
+        w_lam = np.bincount(k, weights=T / lam * dlam, minlength=len(lam_edges) - 1)
+        return w_lam[::-1]                                      # to ascending-frequency order
+
+
+def load_passbands(names=tuple(FILTER_FILES), directory=FILTER_DIR):
+    """The real filter set, keyed like BANDS_PHOT (the 2MASS Ks curve is 'K')."""
+    return {b: Passband.from_file(Path(directory) / f"{FILTER_FILES[b]}.dat", name=FILTER_FILES[b])
+            for b in names}
 
 
 def nu_edges(lam_lo, lam_hi, n_bins):
@@ -94,13 +157,24 @@ def emergent_lnu(res, edges, l_core_window):
     return e_bin * scale / np.diff(edges)
 
 
-def band_flux_nu(nu_c, l_nu, band, distance_cm=D_40MPC):
-    """Photon-weighted mean f_nu over a top-hat band, erg s^-1 cm^-2 Hz^-1.
+def band_flux_nu(nu_c, l_nu, band, distance_cm=D_40MPC, edges=None):
+    """Photon-weighted mean f_nu over a band, erg s^-1 cm^-2 Hz^-1.
 
     `int f_nu T dnu/nu / int T dnu/nu` -- the photon-counting average a CCD
-    measures, which is what AB magnitudes are defined against. Returns NaN if
-    the band is not covered by the grid.
+    measures, which is what AB magnitudes are defined against. A tuple `band`
+    is a top-hat (lam_lo, lam_hi) integrated by trapezoid over the bin centres
+    (unchanged since F41); a `Passband` needs the histogram `edges` and uses
+    the exact bin weights. Returns NaN if the band is not covered by the grid.
     """
+    if isinstance(band, Passband):
+        if edges is None:
+            raise ValueError("a Passband needs the histogram bin edges")
+        try:
+            w = band.bin_weights(edges)
+        except ValueError:
+            return np.nan
+        f_nu = np.asarray(l_nu, float) / (4.0 * np.pi * distance_cm**2)
+        return float(np.sum(f_nu * w) / np.sum(w))
     nu_lo, nu_hi = C / (band[1] * 1e-8), C / (band[0] * 1e-8)
     m = (nu_c >= nu_lo) & (nu_c <= nu_hi)
     if m.sum() < 2:
@@ -112,18 +186,19 @@ def band_flux_nu(nu_c, l_nu, band, distance_cm=D_40MPC):
     return num / den
 
 
-def ab_magnitude(nu_c, l_nu, band, distance_cm=D_40MPC):
-    """AB magnitude in one top-hat band. NaN if the band carries no flux."""
-    f = band_flux_nu(nu_c, l_nu, band, distance_cm)
+def ab_magnitude(nu_c, l_nu, band, distance_cm=D_40MPC, edges=None):
+    """AB magnitude in one band (top-hat tuple or Passband). NaN if no flux."""
+    f = band_flux_nu(nu_c, l_nu, band, distance_cm, edges)
     if not np.isfinite(f) or f <= 0.0:
         return np.nan
     return -2.5 * np.log10(f / F_AB)
 
 
-def magnitudes(nu_c, l_nu, bands=None, distance_cm=D_40MPC):
-    """AB magnitude in every band. `nu_c` are bin centres matching `l_nu`."""
+def magnitudes(nu_c, l_nu, bands=None, distance_cm=D_40MPC, edges=None):
+    """AB magnitude in every band. `nu_c` are bin centres matching `l_nu`;
+    `edges` the histogram edges, needed when `bands` holds Passbands."""
     bands = BANDS_PHOT if bands is None else bands
-    return {b: ab_magnitude(nu_c, l_nu, w, distance_cm) for b, w in bands.items()}
+    return {b: ab_magnitude(nu_c, l_nu, w, distance_cm, edges) for b, w in bands.items()}
 
 
 def colors(mags, pairs=COLORS):
