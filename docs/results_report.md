@@ -3909,7 +3909,7 @@ python paper3/phase12_grid/figures.py --which 6                    # fig6_tangen
 python paper3/phase12_grid/robustness.py chain --model model_M0.03_v0.05_X0.1 --t 3 --chain-max 2000 8000 --probe
 paper3/phase12_grid/robustness/run_chain.sh robustness/chain.log model_M0.03_v0.05_X0.1:3 ...   # the four cells, ~2 h each
 python paper3/phase12_grid/robustness.py table
-python paper3/phase12_grid/sensitivity.py --override paper3/phase12_grid/robustness/chain_*.json --override-chain 8000 --out /tmp/sens_chain8000.json
+python paper3/phase12_grid/sensitivity.py --override paper3/phase12_grid/robustness/chain_model_*_t[0-9].json --override-chain 8000 --out /tmp/sens_chain8000.json
 
 # Paper III phase 13, observability / Gate 3 (section 4.42)
 python paper3/phase13_observability/observe.py && python paper3/phase13_observability/observe.py --table --fig   # observability.json, fig5
