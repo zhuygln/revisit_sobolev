@@ -47,6 +47,14 @@ epoch marked `wall`. A RuntimeError from `run_mc` marks the epoch `max_steps`
 or `chain`. The JSON is rewritten
 after every epoch so a killed run keeps its rows.
 
+Reruns (§4.41): `--chain-max` changes the chain cap, `--n-override` skips the
+probe and runs every leg at that n (so a cell can be reproduced at its stored
+`n_used` with the stored seeds), `--t-scale` perturbs the source's launch
+temperature at fixed L (`SourceModel(t_scale=...)`; the JSON gets a `_T<s>`
+suffix) and `--t-scale-gas` scales T_gas with it. A cell redone at a larger
+budget is `--epochs t --budget 5400 --out <fresh file>` (see `run_grid.py
+--redo`); the row records the `budget_s` and `chain_max` it ran with.
+
 Usage: python grid.py --mass 0.01 --v 0.1 --xlan 0.01 [--n 300000] [--budget 1500]
        python grid.py --mass 0.01 --v 0.1 --xlan 0.01 --dry-run   (atoms only)
 """
@@ -81,8 +89,18 @@ NG = 32
 PASSBANDS = phot.load_passbands()
 
 
-def model_name(m, v, x):
-    return f"model_M{m:g}_v{v:g}_X{x:g}"
+SOURCE_KEYS = ("L", "Qdot", "f_th", "tau_d", "T_eff", "T_eff_grey", "R_ph", "fth_clamped",
+               "v_ph", "v_ph_floored", "tau_grey", "t_scale", "t_scale_gas")
+
+
+def model_name(m, v, x, t_scale=1.0):
+    s = f"model_M{m:g}_v{v:g}_X{x:g}"
+    return s if t_scale == 1.0 else s + f"_T{t_scale:g}"
+
+
+def build_state_atom(st, x_lan):
+    """The four-ion blend at a source state: (ForestAtom, n_ion dict)."""
+    return build_atom("blend", st, x_lan)
 
 
 def git_sha():
@@ -107,16 +125,21 @@ def photometer(o, edges, nu_c, dist):
     return o
 
 
-def run_epoch(st, x_lan, n, budget_s=BUDGET_S, ng=NG, relativity=RELATIVITY, dry_run=False):
-    """One epoch on a source state `st` (from `SourceModel.state`)."""
+def run_epoch(st, x_lan, n, budget_s=BUDGET_S, ng=NG, relativity=RELATIVITY, dry_run=False,
+              chain_max=CHAIN_MAX, n_override=None, atom=None):
+    """One epoch on a source state `st` (from `SourceModel.state`).
+
+    `n_override` skips the probe and runs every leg at that n; `atom` injects a
+    prebuilt (ForestAtom, n_ion) instead of the blend (tests, reruns).
+    """
     t_d = st["t_exp"] / DAY
     t0 = time.time()
-    atom, n_ion = build_atom("blend", st, x_lan)
+    atom, n_ion = atom if atom is not None else build_state_atom(st, x_lan)
     row = {"t_d": t_d, "n_ion": n_ion, "T_gas": st["T_gas"], "t_core": st["t_core"],
            "rho": st["rho"], "r_core": st["r_core"], "r_out": st["r_out"],
            "v_core": st["r_core"] / (C * st["t_exp"]), "v_out": st["r_out"] / (C * st["t_exp"]),
-           "x_lan": x_lan,
-           "source": {k: st[k] for k in ("L", "Qdot", "f_th", "tau_d", "T_eff", "R_ph", "fth_clamped")},
+           "x_lan": x_lan, "chain_max": chain_max, "budget_s": budget_s,
+           "source": {k: st[k] for k in SOURCE_KEYS if k in st},
            "n_opacity": int(atom.n_opacity),
            "tau_max": float(atom.op_tau.max()) if atom.n_opacity else 0.0,
            "rss_mb_atom": rss_mb()}
@@ -140,7 +163,7 @@ def run_epoch(st, x_lan, n, budget_s=BUDGET_S, ng=NG, relativity=RELATIVITY, dry
     def mc(mode, seed, n_run, wall_s=None, **kw):
         return run_mc(atom, st["r_core"], st["r_out"], st["t_exp"], lo, hi, n_run, mode,
                       seed=seed, t_core=st["t_core"], relativity=relativity,
-                      max_steps=MAX_STEPS, chain_max=CHAIN_MAX, chain_overflow="absorb",
+                      max_steps=MAX_STEPS, chain_max=chain_max, chain_overflow="absorb",
                       wall_s=wall_s, **kw)
 
     def failed(e):
@@ -148,24 +171,28 @@ def run_epoch(st, x_lan, n, budget_s=BUDGET_S, ng=NG, relativity=RELATIVITY, dry
         return "chain" if "chain" in m else "wall" if "wall" in m else "max_steps"
 
     # --- wall guard: probe the reference leg -------------------------------
-    n_probe = min(n, N_PROBE)
-    tp = time.time()
-    try:
-        pr = mc("sobolev_branch", SEEDS[0], n_probe, wall_s=budget_s)
-    except RuntimeError as e:
-        row.update(status=failed(e), error=str(e)[:200], t_wall=time.time() - t0)
-        return row
-    per_packet = (time.time() - tp) / n_probe
-    n_fit = int(budget_s / (COST_RUNS * per_packet))
-    n_used = n if n_fit >= n else max(N_FLOOR, n_fit)
-    row.update(n_used=n_used, probe_s_per_packet=per_packet, probe_n=n_probe,
-               probe_f_return=phot.return_fraction(pr), probe_f_dep=phot.deposited_fraction(pr),
-               probe_n_trapped=int(pr["n_trapped"]),
-               projected_s=COST_RUNS * per_packet * n_used,
-               status="ok" if n_used == n else "reduced_n")
-    if row["projected_s"] > OVER_FACTOR * budget_s:
-        row.update(status="over_budget", t_wall=time.time() - t0)
-        return row
+    if n_override is not None:
+        n_used = int(n_override)
+        row.update(n_used=n_used, n_override=True, status="ok" if n_used >= n else "reduced_n")
+    else:
+        n_probe = min(n, N_PROBE)
+        tp = time.time()
+        try:
+            pr = mc("sobolev_branch", SEEDS[0], n_probe, wall_s=budget_s)
+        except RuntimeError as e:
+            row.update(status=failed(e), error=str(e)[:200], t_wall=time.time() - t0)
+            return row
+        per_packet = (time.time() - tp) / n_probe
+        n_fit = int(budget_s / (COST_RUNS * per_packet))
+        n_used = n if n_fit >= n else max(N_FLOOR, n_fit)
+        row.update(n_used=n_used, probe_s_per_packet=per_packet, probe_n=n_probe,
+                   probe_f_return=phot.return_fraction(pr), probe_f_dep=phot.deposited_fraction(pr),
+                   probe_n_trapped=int(pr["n_trapped"]),
+                   projected_s=COST_RUNS * per_packet * n_used,
+                   status="ok" if n_used == n else "reduced_n")
+        if row["projected_s"] > OVER_FACTOR * budget_s:
+            row.update(status="over_budget", t_wall=time.time() - t0)
+            return row
 
     timing = {}
     try:
@@ -205,10 +232,14 @@ def run_epoch(st, x_lan, n, budget_s=BUDGET_S, ng=NG, relativity=RELATIVITY, dry
     return row
 
 
+HEADER_DEFAULTS = {"t_scale": 1.0, "t_scale_gas": False}   # absent from pre-§4.41 JSONs
+
+
 def run_model(m_ej, v_ej, x_lan, n=N_DEFAULT, epochs=EPOCHS, kappa=1.0, budget_s=BUDGET_S,
-              out=None, dry_run=False, verbose=True):
-    src = SourceModel(m_ej, v_ej, kappa=kappa)
-    out = Path(out) if out else HERE / "grid" / f"{model_name(m_ej, v_ej, x_lan)}.json"
+              out=None, dry_run=False, verbose=True, t_scale=1.0, t_scale_gas=False,
+              chain_max=CHAIN_MAX, n_override=None):
+    src = SourceModel(m_ej, v_ej, kappa=kappa, t_scale=t_scale, t_scale_gas=t_scale_gas)
+    out = Path(out) if out else HERE / "grid" / f"{model_name(m_ej, v_ej, x_lan, t_scale)}.json"
     out.parent.mkdir(exist_ok=True)
     d = {"m_ej_msun": m_ej, "v_ej_c": v_ej, "x_lan": x_lan, "kappa_src": kappa,
          "v_ph_frac": src.v_ph_frac, "tau_d_s": src.tau_d, "t_peak_s": src.t_peak,
@@ -217,7 +248,8 @@ def run_model(m_ej, v_ej, x_lan, n=N_DEFAULT, epochs=EPOCHS, kappa=1.0, budget_s
          "ng": NG, "lam_window": list(LAM_WIN), "n_spec": N_SPEC, "distance_cm": phot.D_40MPC,
          "filter_set": "real", "filters": {b: p.name for b, p in PASSBANDS.items()},
          "budget_s": budget_s, "over_factor": OVER_FACTOR, "n_floor": N_FLOOR,
-         "core": CORE, "max_steps": MAX_STEPS, "chain_max": CHAIN_MAX,
+         "core": CORE, "max_steps": MAX_STEPS, "chain_max": chain_max,
+         "t_scale": t_scale, "t_scale_gas": t_scale_gas, "n_override": n_override,
          "git": git_sha(), "dry_run": dry_run, "rows": []}
     if verbose:
         print(f"{out.name}: M={m_ej} v={v_ej} X={x_lan}  tau_d={src.tau_d/DAY:.2f} d  "
@@ -228,8 +260,9 @@ def run_model(m_ej, v_ej, x_lan, n=N_DEFAULT, epochs=EPOCHS, kappa=1.0, budget_s
     if out.exists() and not dry_run:
         try:
             prev = json.loads(out.read_text())
-            same = all(prev.get(k) == d[k] for k in ("n", "budget_s", "core", "chain_max",
-                                                     "max_steps", "over_factor", "n_floor"))
+            same = all(prev.get(k, HEADER_DEFAULTS.get(k)) == d[k]
+                       for k in ("n", "budget_s", "core", "chain_max", "max_steps",
+                                 "over_factor", "n_floor", "t_scale", "t_scale_gas", "n_override"))
             if same:
                 done = {r["t_d"]: r for r in prev["rows"] if r.get("status") in ("ok", "reduced_n")}
         except Exception:
@@ -240,7 +273,8 @@ def run_model(m_ej, v_ej, x_lan, n=N_DEFAULT, epochs=EPOCHS, kappa=1.0, budget_s
         if t_d in done:
             r = dict(done[t_d], resumed=True)
         else:
-            r = run_epoch(st, x_lan, n, budget_s=budget_s, dry_run=dry_run)
+            r = run_epoch(st, x_lan, n, budget_s=budget_s, dry_run=dry_run,
+                          chain_max=chain_max, n_override=n_override)
         d["rows"].append(r)
         d["t_wall"] = time.time() - t0
         out.write_text(json.dumps(d, indent=1))
@@ -277,6 +311,11 @@ if __name__ == "__main__":
     ap.add_argument("--budget", type=float, default=BUDGET_S)
     ap.add_argument("--out", default=None)
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--t-scale", type=float, default=1.0)
+    ap.add_argument("--t-scale-gas", action="store_true")
+    ap.add_argument("--chain-max", type=int, default=CHAIN_MAX)
+    ap.add_argument("--n-override", type=int, default=None)
     a = ap.parse_args()
     run_model(a.mass, a.v, a.xlan, int(a.n), tuple(float(e) for e in a.epochs.split(",")),
-              a.kappa, a.budget, a.out, a.dry_run)
+              a.kappa, a.budget, a.out, a.dry_run, t_scale=a.t_scale, t_scale_gas=a.t_scale_gas,
+              chain_max=a.chain_max, n_override=a.n_override)

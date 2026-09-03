@@ -84,6 +84,7 @@ does not work).
 | F42 | **The chromatic closure error survives real filter curves (Gate 1 passes), and the three notebook-only findings now have drivers and data.** DECam g r i z + 2MASS J H Ks from SVO, applied to the stored F41 spectra: every ≥ 0.6 mag top-hat colour error stays at 0.65–0.77 mag; the A_redist floor stays ≤ 0.009 mag. Ce II density scan, F38 table and F39 exit-τ scan reproduced. | [§4.38](docs/results_report.md) |
 | F43 | **On a heating-powered kilonova the grouped-opacity closure's colour error is 1–3 mag at every point of a 27-model (M_ej, v_ej, X_lan) grid, and its sign is uniform: too blue.** Worst live colour error per model 0.96–2.84 mag (C_both) against an A_redist floor of 0.02–0.13 mag; the closure's g is 0.2–2.1 mag too bright and its K up to 3.6 mag too faint. Every leg has the same L_bol by construction; the harness makes no bolometric statement at S ≳ 10⁴. | [§4.40](docs/results_report.md) |
 | F44 | **Gate 2: the closure error is not degenerate with (M_ej, v_ej, X_lan) — class C-B (distinct residual) at all 24 analysable grid points, every opacity closure, every robustness variant.** χ²_RT/N = 28–549; residual fraction R = 0.46–1.00 after the best three-parameter shift; A_redist is undetectable (C-C) at 23 of 24. A fit measures a residual, not a bias. | [§4.40](docs/results_report.md) |
+| F45 | **F43/F44 survive the floor mask and the core convention (chain cap: §4.44); a free luminosity history absorbs the residual as a *class* but not as a *misfit*.** Erratum: the §4.40 floor mask was a no-op (27 floored rows); re-baselined, Gate 2 is C-B at 20 of 21 analysable points. One free grey magnitude per epoch takes median R to 0.28 and 12 of 19 points to C-A — with 1–7 mag luminosity offsets and a leftover χ²_res/dof of 23. | [§4.41](docs/results_report.md) |
 
 Full write-up with figures and numbers:
 **[docs/results_report.md](docs/results_report.md)**.
@@ -102,7 +103,7 @@ paper2/        Paper II: Phase 0 (SEDONA audit, TARDIS record, three-level
                with fluorescence, the La II measurement)
 paper3/        Paper III: the reduced redistribution closure (kernel,
                frozen reference, compression sweep, T and epoch transfer)
-tests/         174 tests pinning the physics of every module
+tests/         300 tests pinning the physics of every module
 docs/          results report, lab notebook, planning inputs, paper/
 data/          raw atomic data (gitignored; provenance in data/README.md)
 outputs/       working figures (gitignored; committed copies in docs/figures/)

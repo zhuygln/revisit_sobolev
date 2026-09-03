@@ -23,6 +23,7 @@ import sensitivity as sens                     # noqa: E402  (mask rule shared w
 
 COLS = ("g-r", "r-i", "i-z", "i-J", "J-K")
 RAN = ("ok", "reduced_n")
+N_WELL = 100_000   # the A_redist floor is a MC-noise statement; quote it from well-sampled cells only
 
 
 def load(grid_dir):
@@ -50,7 +51,7 @@ def live_bands(r, d):
     frac = sens.band_fraction(r, d["lam_window"], d["n_spec"])
     return {b for b in sens.BANDS
             if np.isfinite(r["ref"]["mags"].get(b, np.nan)) and frac[b] >= sens.FRAC_MIN
-            and r["ref"]["mags"][b] <= sens.MAG_LIMIT[b] and not r["source"].get("v_ph_floored", False)}
+            and r["ref"]["mags"][b] <= sens.MAG_LIMIT[b] and not sens.row_floored(r, d)}
 
 
 def masked(d, live):
@@ -64,6 +65,10 @@ def cells(models):
     for (m, v, x), d in models:
         for r in d["rows"]:
             s = r["status"]
+            if s in RAN and sens.row_floored(r, d):
+                s += " (floored)"
+            if "redo" in r:
+                s += f" (redo {r['redo']['budget_s']:g} s)"
             base = f"| {m:g} | {v:g} | {x:g} | {r['t_d']:g} | {s} | {r.get('n_used', '')} | {r.get('band_S_band', float('nan')):.1e} |"
             if s in RAN:
                 lv = live_bands(r, d)
@@ -78,8 +83,8 @@ def cells(models):
 
 
 def per_model(models):
-    lines = ["| M | v | X | ran | over budget | failed | epochs run | live (band, epoch) | worst C_both \\|Δcol\\| | worst C_binned \\|Δcol\\| | max floor (A) |",
-             "|---|---|---|---|---|---|---|---|---|---|---|"]
+    lines = ["| M | v | X | ran | over budget | failed | epochs run | n_used (min–max) | floored epochs | live (band, epoch) | worst C_both \\|Δcol\\| | worst C_binned \\|Δcol\\| | max floor (A), n_used ≥ 1e5 |",
+             "|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
     for (m, v, x), d in models:
         rows = d["rows"]
         ran = [r for r in rows if r["status"] in RAN]
@@ -88,10 +93,16 @@ def per_model(models):
         lv = {r["t_d"]: live_bands(r, d) for r in ran}
         wb = max((worst(masked(r["legs"]["C_both"]["dcolor"], lv[r["t_d"]])) for r in ran), default=(np.nan, ""))
         wn = max((worst(masked(r["legs"]["C_binned"]["dcolor"], lv[r["t_d"]])) for r in ran), default=(np.nan, ""))
-        fl = max((worst(masked(r["legs"]["A_redist"]["dm"], lv[r["t_d"]]))[0] for r in ran), default=np.nan)
+        # the A_redist floor is quoted from well-sampled cells only (n_used >= N_WELL)
+        fl = max((worst(masked(r["legs"]["A_redist"]["dm"], lv[r["t_d"]]))[0] for r in ran
+                  if r.get("n_used", 0) >= N_WELL), default=np.nan)
         ep = ", ".join(f"{r['t_d']:g}" for r in ran)
+        nu = [r.get("n_used", 0) for r in ran]
+        n_used = f"{min(nu)}–{max(nu)}" if nu else ""
+        fl_ep = ", ".join(f"{r['t_d']:g}" for r in ran if sens.row_floored(r, d)) or "—"
         n_live = sum(len(v) for v in lv.values())
-        lines.append(f"| {m:g} | {v:g} | {x:g} | {len(ran)} | {ob} | {fail} | {ep} | {n_live} | {wb[0]:.2f} ({wb[1]}) | {wn[0]:.2f} ({wn[1]}) | {fl:.3f} |")
+        lines.append(f"| {m:g} | {v:g} | {x:g} | {len(ran)} | {ob} | {fail} | {ep} | {n_used} | {fl_ep} | {n_live} | "
+                     f"{wb[0]:.2f} ({wb[1]}) | {wn[0]:.2f} ({wn[1]}) | {fl:.3f} |")
     return "\n".join(lines)
 
 

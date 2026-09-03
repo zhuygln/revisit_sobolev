@@ -129,3 +129,27 @@ def test_gate6_barnes_parameters():
     # interpolation is exact on the table nodes and monotone between them
     a_mid = src.barnes_params(np.sqrt(1e-3 * 5e-3), 0.1)[0][0]
     assert 0.81 < a_mid < 2.01
+
+
+def test_t_scale_perturbs_the_launch_temperature_only():
+    """§4.43: `t_scale` changes t_core/T_eff at fixed L, R_ph, v_ph; T_gas only with t_scale_gas."""
+    base = src.SourceModel(0.01, 0.1).state(2.0)
+    hot = src.SourceModel(0.01, 0.1, t_scale=1.25).state(2.0)
+    gas = src.SourceModel(0.01, 0.1, t_scale=1.25, t_scale_gas=True).state(2.0)
+    for k in ("L", "R_ph", "r_core", "v_ph", "rho", "tau_grey", "v_ph_floored"):
+        assert hot[k] == base[k] and gas[k] == base[k]
+    assert hot["t_core"] == pytest.approx(1.25 * base["t_core"])
+    assert hot["T_eff"] == pytest.approx(1.25 * base["T_eff"])
+    assert hot["T_eff_grey"] == base["T_eff"]
+    assert hot["T_gas"] == base["T_gas"] and gas["T_gas"] == pytest.approx(1.25 * base["T_gas"])
+    assert (hot["t_scale"], hot["t_scale_gas"], gas["t_scale_gas"]) == (1.25, False, True)
+    assert base["t_scale"] == 1.0
+
+
+def test_v_ph_floored_flag_matches_the_clip():
+    """The floor flag is set exactly when the grey photosphere would sit below v_ej/2."""
+    m = src.SourceModel(0.003, 0.2)
+    flags = [m.state(t)["v_ph_floored"] for t in (0.5, 1.0, 2.0, 3.0, 5.0, 7.0)]
+    vph = [m.state(t)["v_ph"] for t in (0.5, 1.0, 2.0, 3.0, 5.0, 7.0)]
+    assert flags == [v == src.V_PH_MIN for v in vph]
+    assert any(flags) and not all(flags)

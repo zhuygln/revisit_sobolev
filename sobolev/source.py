@@ -153,8 +153,13 @@ class SourceModel:
     """Heating-powered one-zone kilonova: (M_ej, v_ej) -> L(t), T_eff(t), R_ph(t)."""
 
     def __init__(self, m_msun, v_ej_c, kappa=KAPPA_SRC, v_ph_frac=V_PH_FRAC,
-                 t_min=1e-2, t_max_d=30.0, n=3000):
+                 t_min=1e-2, t_max_d=30.0, n=3000, t_scale=1.0, t_scale_gas=False):
+        """`t_scale` perturbs the launch spectrum's temperature (t_core) at fixed
+        L and R_ph -- the diffusion solution and the photosphere are untouched,
+        only what illuminates the shell changes (§4.43's T-direction check);
+        `t_scale_gas` scales T_gas with it."""
         self.m_msun, self.v_ej_c, self.kappa, self.v_ph_frac = m_msun, v_ej_c, kappa, v_ph_frac
+        self.t_scale, self.t_scale_gas = float(t_scale), bool(t_scale_gas)
         self.tau_d = float(diffusion_time(m_msun, v_ej_c, kappa))
         _, self.fth_clamped = barnes_params(m_msun, v_ej_c)
         self.t = time_grid(t_min, t_max_d, n)
@@ -205,12 +210,15 @@ class SourceModel:
     def state(self, t_d):
         """The `trajectory.state` dict at epoch t_d (days), plus source diagnostics."""
         t = t_d * DAY
-        T = float(self.t_eff(t))
-        return dict(t_exp=t, rho=float(self.rho(t)), T_gas=T, t_core=T,
+        T_grey = float(self.t_eff(t))
+        T = T_grey * self.t_scale
+        return dict(t_exp=t, rho=float(self.rho(t)),
+                    T_gas=T if self.t_scale_gas else T_grey, t_core=T,
                     core_law="source", r_core=float(self.r_ph(t)),
                     r_out=self.v_ej_c * C * t,
                     L=float(self.luminosity(t)), Qdot=float(self.qdot_at(t)),
-                    f_th=float(self.f_th(t)), tau_d=self.tau_d, T_eff=T,
+                    f_th=float(self.f_th(t)), tau_d=self.tau_d, T_eff=T, T_eff_grey=T_grey,
+                    t_scale=self.t_scale, t_scale_gas=self.t_scale_gas,
                     R_ph=float(self.r_ph(t)), fth_clamped=self.fth_clamped,
                     v_ph=float(self.v_ph(t)), tau_grey=float(self.tau_grey(t)),
                     v_ph_floored=bool(self.v_ph_frac == "grey"

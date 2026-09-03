@@ -103,22 +103,29 @@ def fig4(sens, central_key, out):
     pts = list(d["points"])
     legs = ("C_both", "C_binned")
     fig, ax = plt.subplots(1, 3, figsize=(16, 6.5), gridspec_kw={"width_ratios": [1.3, 1.5, 1.4], "wspace": 0.12})
+    n_phys = 3   # cosines of the physical columns; nuisance amplitudes go in the text column
     for j, leg in enumerate(legs):
-        M = np.full((len(pts), 3), np.nan)
+        M = np.full((len(pts), n_phys), np.nan)
         for i, p in enumerate(pts):
             r = d["points"][p]["legs"][leg]
             if r.get("status") == "ok":
-                M[i] = r["cos"]
+                M[i] = r["cos"][:n_phys]
         im = ax[j].imshow(M, vmin=-1, vmax=1, cmap="RdBu_r", aspect="auto")
-        ax[j].set_xticks(range(3)); ax[j].set_xticklabels(["cos(d_RT, d_M)", "cos(d_RT, d_v)", "cos(d_RT, d_X)"], fontsize=8)
+        ax[j].set_xticks(range(n_phys)); ax[j].set_xticklabels(["cos(d_RT, d_M)", "cos(d_RT, d_v)", "cos(d_RT, d_X)"], fontsize=8)
         ax[j].set_yticks(range(len(pts)))
         ax[j].set_yticklabels(pts if j == 0 else [], fontsize=6)
-        ax[j].set_xlim(-0.5, 3.6)
+        ax[j].set_xlim(-0.5, n_phys + 0.6 + (0.6 if d.get("nuisance") else 0.0))
         for i, p in enumerate(pts):
             r = d["points"][p]["legs"][leg]
             txt = (r["cls"] + ("*" if r.get("unstable") else "")) if r.get("status") == "ok" else "—"
-            ax[j].text(2.6, i, txt, fontsize=6, va="center")
-        ax[j].set_title(f"{leg}: cosines and class (* = unstable)", fontsize=9)
+            if r.get("status") == "ok" and r.get("a_nuisance"):
+                nz = {n: a for n, a in r["a_nuisance"].items() if not n.startswith("L_")}
+                txt += " " + " ".join(f"{n}={a:+.1f}" for n, a in nz.items())
+            ax[j].text(n_phys - 0.4, i, txt, fontsize=6, va="center")
+        title = f"{leg}: cosines and class (* = unstable)"
+        if d.get("nuisance"):
+            title += f"\ntangent {d.get('tangent')}: + {', '.join(d['nuisance'])}"
+        ax[j].set_title(title, fontsize=9)
     fig.colorbar(im, ax=ax[1], shrink=0.7, pad=0.02)
     r = d["points"].get(central_key, {}).get("legs", {}).get("C_both", {})
     if r.get("status") == "ok":
@@ -135,12 +142,53 @@ def fig4(sens, central_key, out):
         ax[2].set_xlim(-lim, lim); ax[2].set_ylim(-lim, lim)
         ax[2].set_xlabel("Σ a_θ ∂m/∂lnθ (mag)"); ax[2].set_ylabel("d_RT = m_leg − m_ref (mag)")
         ax[2].legend(fontsize=7, ncol=2)
-        ax[2].set_title(f"central point, C_both: a = ({', '.join(f'{a:+.2f}' for a in r['a'])})\n"
+        ax[2].set_title(f"central point, C_both: a = ({', '.join(f'{a:+.2f}' for a in r['a'][:n_phys])})\n"
                         f"R = {r['R']:.2f}, χ²_RT/N = {r['chi2_RT_N']:.1f}, χ²_res/N = {r['chi2_res_N']:.1f}, class {r['cls']}",
                         fontsize=8)
     else:
         ax[2].axis("off")
     save(fig, out, "fig4_vectors")
+
+
+def fig6(sens_dir, central_key, out, leg="C_both"):
+    """R and chi2_res/dof per point against the tangent space T0..T3 (§4.41),
+    with the nuisance amplitudes the fits demand."""
+    files = {"T0": "sensitivity.json", "T1": "sensitivity_T1.json", "T2": "sensitivity_T2.json", "T3": "sensitivity_T3.json"}
+    D = {t: json.loads((Path(sens_dir) / f).read_text()) for t, f in files.items() if (Path(sens_dir) / f).exists()}
+    tgs = list(D)
+    pts = list(D[tgs[0]]["points"])
+    fig, ax = plt.subplots(1, 3, figsize=(15, 4.2))
+    for i, (key, lab, log) in enumerate((("R", "R = |residual| / |d_RT|", False), ("chi2_res_dof", "χ²_res / dof", True))):
+        for pt in pts:
+            y = []
+            for t in tgs:
+                q = D[t]["points"][pt]["legs"][leg]
+                y.append(q[key] if q.get("status") == "ok" and not q.get("underdetermined") else np.nan)
+            style = dict(color="C3", lw=2, marker="o", zorder=5) if pt == central_key else dict(color="0.5", lw=0.7, marker=".", alpha=0.7)
+            ax[i].plot(range(len(tgs)), y, **style)
+        med = [D[t]["summary"][leg].get("median_" + key) for t in tgs]
+        ax[i].plot(range(len(tgs)), med, "k-", lw=2, marker="s", label="median")
+        ax[i].axhline(0.3 if key == "R" else 4.0, color="C0", ls="--", lw=0.8, label="threshold")
+        ax[i].set_xticks(range(len(tgs))); ax[i].set_xticklabels([f"{t}\n+{','.join(D[t]['nuisance']) or '—'}" for t in tgs], fontsize=8)
+        ax[i].set_ylabel(lab)
+        if log:
+            ax[i].set_yscale("log")
+        ax[i].legend(fontsize=7)
+        ax[i].set_title(f"{leg}: {lab} vs tangent space\n(red = {central_key}; absent where underdetermined)", fontsize=8)
+    # amplitudes demanded: |a_L| max per point (T1), a_T (T2), a_2c (T3)
+    a_L = [max(abs(a) for a in q["a_nuisance"].values()) for q in (D["T1"]["points"][pt]["legs"][leg] for pt in pts)
+           if q.get("status") == "ok" and not q.get("underdetermined") and q["a_nuisance"]] if "T1" in D else []
+    a_T = [q["a_nuisance"]["T_bb"] for q in (D["T2"]["points"][pt]["legs"][leg] for pt in pts)
+           if q.get("status") == "ok" and not q.get("underdetermined") and "T_bb" in q["a_nuisance"]] if "T2" in D else []
+    a_2 = [q["a_nuisance"]["2c"] for q in (D["T3"]["points"][pt]["legs"][leg] for pt in pts)
+           if q.get("status") == "ok" and not q.get("underdetermined") and "2c" in q["a_nuisance"]] if "T3" in D else []
+    data = [v for v in (a_L, a_T, a_2) if v]
+    labels = [l for v, l in zip((a_L, a_T, a_2), ("max |a_L| (mag, T1)", "Δln T (T2)", "a_2c (blue-model flux, T3)")) if v]
+    ax[2].boxplot(data, widths=0.5, showfliers=True)
+    ax[2].set_xticks(range(1, len(data) + 1)); ax[2].set_xticklabels(labels, fontsize=8)
+    ax[2].axhline(0, color="k", lw=0.5)
+    ax[2].set_title("nuisance amplitudes the fits demand (determined points)", fontsize=9)
+    save(fig, out, "fig6_tangent")
 
 
 if __name__ == "__main__":
@@ -159,3 +207,5 @@ if __name__ == "__main__":
         fig3(out)
     if "4" in which:
         fig4(Path(a.sens), str((m, v, x)), out)
+    if "6" in which:
+        fig6(Path(a.sens).parent, str((m, v, x)), out)

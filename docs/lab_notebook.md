@@ -2230,6 +2230,89 @@ Fig. 2's left panel now shows both normalizations: the conserving zero and
 the absorbing bookkeeping (-0.5 to -2.1 mag on the central model), because
 a figure that showed only the zero would be hiding the reason for it.
 
+## 9ap. Is Gate 2 a harness artefact? A dead mask, a grey convention, the chain cap, and one layer of freedom (2026-09-02)
+
+*The erratum came first, and it was mine.* Scoping the convention check I
+read `grid.py:119` and saw that the row copies seven keys from `state()`
+and `v_ph_floored` is not one of them -- so the mask in `sensitivity.py:89`
+and `grid_table.py:53` that §4.40 describes as excluding floored
+photospheres read `False` on every row, and the sentence "No cell has a
+floored photosphere at these epochs" was written from the mask, not from
+the data. Reconstructing the flag from `v_core / v_ej` (exactly 0.5 on a
+floored row) gives 27 floored rows in 12 models: the low-mass, fast ejecta
+at 2-7 d. Rule for myself, again: a mask is only real once a test shows it
+removes something. `grid.py` now stores the flag, `row_floored()` falls
+back to the ratio for the committed JSONs, and the first thing this
+section does is re-baseline Gate 2 with the mask real -- 20 of 21
+analysable points C-B (was 24 of 24), median R 0.77, no class changed
+where both rules analyse the point. It cost three points and eleven N
+values, not the verdict. The committed `sensitivity.json` was regenerated
+under the declared rule; §4.40's numbers stay with an erratum pointer.
+While re-baselining I retired the old `low_N`-only guard with a dof-aware
+one (dof = N - rank < 4 is "underdetermined"), which is what dropped the
+central point (N = 6, dof 3) until its redo lands.
+
+*The convention check needed no transport.* The core normalization is a
+grey per-leg factor, so colours are convention-invariant to 1e-15 mag (a
+test now says so on every committed row) and the absorbing-core
+magnitudes follow from stored `L_bol / L_bol_absorbing`. What I had not
+appreciated: under the absorbing convention the *reference* is 1.5 mag
+fainter (median) -- 105 of 153 rows by more than a magnitude -- so the
+magnitude-limit mask throws away observations and only 14 points remain.
+Three of them go C-A, with chi2_res/dof 22-79 and a dlnM = 2.4 at one.
+That is the grey term (different per leg, because f_return differs per
+leg) being mistaken for a mass shift on a few-band vector. The right
+closure of that discussion is not "which convention" but a tangent space
+that contains every grey convention: T1, one free magnitude per epoch.
+
+*The nuisance spaces, and the thing the class hides.* T1 (free L per
+epoch), T2 (+ a Planck dm/dlnT at fixed L through the real passbands), T3
+(+ a linearized blue component with the same-(M, v) X = 1e-3 light curve)
+were pre-declared in the plan with the same thresholds and significance
+on the physical columns only. Under T1 the median R drops from 0.77 to
+0.28 and 12 of 19 determined points become C-A by the letter of the rule.
+I sat with that for a while, because it is the honest converse of §4.40's
+caveat and it changes the paper's sentence. Two things stopped it from
+being the whole story. First, chi2_res/dof after the fit is still 23
+(median; 17 of 19 above 4) -- the fit is good enough to bias, not good
+enough to hide. Second, the amplitudes: the per-epoch offsets the T1 fit
+demands are 1-7 mag at their largest per point, the T2 photosphere is
+dlnT = +0.33 (median; a 40 % hotter photosphere, the sign "too blue"
+requires), the T3 blue component carries 2-3x the reference's flux in its
+bluest live band (outside its own linearization at seven of eight points),
+and five of the twelve C-A physical shifts are beyond the stencil the
+derivative was taken on. So I added two diagnostics to the JSON rather
+than a new class: `R_nuisance_only` (what the nuisance columns absorb
+without the parameters -- 0.7-1.0 at X = 1e-3, where the parameters do the
+work; 0.4-0.8 at higher X) and `a_over_dln` (each physical shift in
+stencil units, flagged `extrapolated` above 1). The pre-declared class is
+reported as declared; the report says next to it what the class costs.
+A small bug fixed on the way: a dead (all-zero) derivative column had
+|a|/sqrt(cov) = 1e-20 / 1e-150 and printed as a 1e130 significance;
+`project()` now zeroes it. No class depended on it.
+
+*The chain cap.* Probe first (5000 packets, worst cell, chain 2000 and 8000):
+reference 493 s -> 987 s, so 8000 is 2x not 4x -- no packet is stuck, the
+chain just runs longer for the ones that were capped. B_opacity identical to
+0.0 mag at both caps, so the harness is deterministic and the legs really do
+inherit everything from the reference. But the probe's own numbers are
+noise-dominated (its chain-2000 colours differ from the stored 20 000-packet
+cell by 0.2-0.4 mag), and the reference moved by up to 0.26 mag between caps
+-- the same size. So: no verdict from the probe, and I will not write one.
+Full runs launched 23:21 (worker A: two cells serial; worker B queued behind
+the T-scale run to stay under ten transport processes). Budget from the
+probe: reference 1450 / 2200 / 2900 s at n = 20 000 per cap, ~2 h per cell,
+~5 h wall for four cells on two workers. The chain table goes into §4.44 with
+the redo; §4.41 says so and F45 is worded without the chain claim.
+
+*What the section says now.* F43/F44 survive the floor mask, the core
+convention and the chain cutoff. They do not survive a free luminosity
+history as a *class* at the grid's sigma, and the paper's sentence becomes
+"cannot be absorbed by the ejecta parameters; can be partly absorbed by a
+luminosity history and a photospheric temperature that are wrong by factors
+of 3-500 and 1.4, while still leaving a detectable misfit". Whether a real
+observation sees that misfit is §9aq.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

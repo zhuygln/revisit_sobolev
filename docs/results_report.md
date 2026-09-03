@@ -2794,7 +2794,9 @@ finished the 162 cells in 3.6 h wall (28.5 h of worker time). Outcome:
 The 88 cells with n_trapped > 0 thermalized at most 14 % of their packets in
 the chain cap; 23 cells returned more energy to the core than was injected
 (f_return > 1) and f_dep ran from −0.37 to +0.24 — the bookkeeping of §1,
-stored, not used. No cell has a floored photosphere at these epochs.
+stored, not used. ~~No cell has a floored photosphere at these epochs.~~
+*Erratum (§4.41.1): 27 rows in 12 models are floored; the mask that was
+meant to exclude them was a no-op, and Gate 2 is re-baselined there.*
 
 Per model, on the **masked** observables (band ≥ 1 % of L_bol, m ≤ 23.5
 optical / 21.5 NIR, the Gate 2 rule; the unmasked worst colours are
@@ -2972,6 +2974,302 @@ stated before the grid ran (plan §5):
    redistribution closure's own error as well as the MC noise, so the
    derivative-zeroing rule is conservative in the right direction.
 
+### 4.41 Are F43/F44 harness artefacts? The floor mask, the core convention, the chain cutoff, and one layer of source freedom (F45)
+
+Gate 2 (§4.40) rests on three harness conventions that became
+publication-level assumptions the moment the grid ran: the photosphere floor
+mask, the *conserving* core normalization (Δm_bol ≡ 0 by construction), and
+chain thermalization (`chain_max = 2000`, up to 14 % of the reference's
+packets). And its classes are computed against three parameters of a
+one-zone model. This section checks the first two conventions on the
+committed grid (no packets re-run), sets up the chain check (running; §4.44) and then asks
+the question §4.40 explicitly left open — what a fit with *more* freedom than
+(M, v, X_lan) could absorb — with the most generous nuisance directions that
+can be written down without a second transport model. The nine `over_budget`
+cells are being redone at a 5400 s budget in the background (§4.44 when they
+land); every number here is on the 153-cell grid as committed.
+
+Drivers: `sensitivity.py --floored {exclude,include} --core
+{conserving,absorbing} --tangent {T0,T1,T2,T3}`, `robustness.py chain|table`,
+`grid_table.py` (regenerated); JSON `sensitivity{,_floored_incl,_absorbing,_T1,_T2,_T3}.json`,
+`robustness/chain_*.json`.
+
+#### 1. Erratum: the floor mask was a no-op, and Gate 2 re-baselined
+
+§4.40 states "No cell has a floored photosphere at these epochs" and that the
+Gate 2 mask excludes rows whose grey photosphere sits on the v_ej/2 floor.
+Both were wrong in the same way: `sensitivity.py` and `grid_table.py` masked
+on `source.v_ph_floored`, but `grid.py` never copied that key from
+`SourceModel.state()` into the row, so the mask read `False` everywhere.
+Reconstructing the flag from the stored `v_core / v_ej` (= `V_PH_MIN` = 0.5
+exactly on a floored row; the two agree to 1e-6 and `grid.py` now stores the
+flag), **27 of the 153 rows in 12 of the 27 models are floored**: M = 0.003
+at v = 0.1 (5, 7 d) and v = 0.2 (2–7 d), M = 0.01 at v = 0.2 (5, 7 d), M = 0.03
+at v = 0.2 (7 d) — the low-mass, fast ejecta whose diffusion time has passed
+and whose photosphere the Tier-1 model would otherwise put inside v_ej/2. On
+those rows R_ph, T_eff and the launch geometry are the clamp's, not the
+model's.
+
+Gate 2 with the mask real (floored rows excluded, the declared rule), against
+the committed numbers (floored rows silently included):
+
+| leg | rule | analysable | C-A | C-B | C-C | underdet. | median N | median R | median χ²_RT/N | median χ²_res/dof |
+|---|---|---|---|---|---|---|---|---|---|---|
+| C_both | committed (§4.40, floored incl.) | 24 | 0 | 24 | 0 | — | 19 | 0.81 | 178 | 98 (per N) |
+| C_both | **floored excluded (new baseline)** | 21 | 0 | **20** | 0 | 1 | 17 | 0.77 | 149 | 105 |
+| C_both | floored included, new code | 24 | 0 | 23 | 0 | 1 | 19 | 0.82 | 177 | 110 |
+| C_binned | floored excluded | 21 | 0 | 20 | 0 | 1 | 17 | 0.74 | 195 | 117 |
+| C_binned | floored included, new code | 24 | 0 | 23 | 0 | 1 | 19 | 0.81 | 209 | 129 |
+
+The mask removes three points entirely — (0.003, 0.1, 0.01), (0.003, 0.2, 0.1)
+and (0.01, 0.2, 0.01) drop to 3, 0 and 0 usable observables once their own
+and their neighbours' floored epochs are gone — and shrinks N at eleven
+others (18 → 11 at (0.003, 0.1, 10⁻³), 21 → 14 at (0.01, 0.2, 10⁻³), 20 → 14
+at (0.003, 0.2, 10⁻³)). No class changes: every point analysable under both
+rules is C-B under both, R moves by ≤ 0.2 (0.96 → 0.76 at (0.003, 0.1, 10⁻³)
+is the largest), and all three robustness variants (σ×2, one-sided, 3 % cut)
+return C-B at all 20. The one new "underdetermined" is the central point
+(0.01, 0.1, 0.01), N = 6, which §4.40 reported as C-B `low_N`: the dof-aware
+rule introduced below (dof = N − rank < 4 is not a test of anything) retires
+it until the redo raises its N. **The new baseline is C_both C-B at 20 of 21
+analysable points (18 well sampled), R = 0.49–0.98 (median 0.77; 0.86 / 0.71
+/ 0.73 at X = 10⁻³ / 10⁻² / 10⁻¹), χ²_RT/N = 28–386, χ²_res/dof = 18–285.**
+`sensitivity.json` is regenerated under the new rule; the §4.40 numbers are
+left as written with this erratum pointing at them.
+
+A related correction to the noise-floor quotation, per the pre-declared
+rule that MC-noise statements come from well-sampled cells only:
+`grid_table.py per_model` now quotes the A_redist floor from cells with
+n_used ≥ 10⁵ (62 of the 121 cells with a live band) and lists n_used per
+model. On those cells the floor is **median 0.021 mag, 90th percentile
+0.044 mag**; the five cells above 0.05 mag (max 0.18 mag, i at
+(0.03, 0.2, 0.1) 5 d) are all bands carrying 3–5 % of L_bol, i.e. at the
+1 % cut. The 2×10⁴-packet cells (median 0.17 mag, max 0.41 mag) are excluded
+from the floor statement, as the action plan required; they were never used
+in a colour claim, but F43's "0.02–0.13 mag on the well-sampled models" is
+restated as 0.014–0.18 mag per model (median 0.034) with the ≥ 10⁵ rule.
+
+#### 2. Core convention: colours are exact, magnitudes carry a grey term, and a free L(t) subsumes both
+
+The core normalization is a *grey* per-leg factor
+(`photometry.py:139-178`): absorbing = L_core/E_inj, conserving = L_core/E_esc,
+applied to one escaped histogram. So (i) every colour in F43 is
+convention-invariant to machine precision (the test
+`test_absorbing_core_rederivation_matches_stored_dm_bol` checks that the
+per-band absorbing shift is grey within each epoch and reproduces the stored
+`dm_bol_absorbing` at 1e-15 mag on every committed row), and (ii) the
+absorbing-core magnitudes follow from stored quantities without transport:
+m^abs = m^cons + 2.5 log₁₀(L_bol / L_bol_absorbing) per leg and for the
+reference. The equilibrium convention (L_core/(E_inj − E_core − E_abs)) is
+undefined on 24 rows (f_return ≥ 1) and within 15 % of undefined on 13 more;
+it is dropped.
+
+Under the absorbing convention the *reference* is fainter by 0.03–4.2 mag
+(median 1.46; > 1 mag in 105 of 153 rows — the §4.40 point that the
+absorbing core is unphysical at S ~ 10⁵, where the ejecta return more energy
+to the core than the core injects), so the magnitude-limit mask removes
+observations: 14 points remain analysable (N = 5–31, median 10, six of them
+low_N). On those:
+
+| tangent | leg | analysable | C-A | C-B | underdet. | median R | median χ²_res/dof | C-A beyond the stencil |
+|---|---|---|---|---|---|---|---|---|
+| T0, conserving | C_both | 21 | 0 | 20 | 1 | 0.77 | 105 | 0 |
+| T0, absorbing | C_both | 14 | 3 | 9 | 2 | 0.37 | 68 | 1 |
+| T0, absorbing | C_binned | 14 | 3 | 9 | 2 | 0.37 | 81 | 2 |
+| T1 (T0 + free L per epoch) | C_both | 21 | 12 | 7 | 2 | 0.28 | 23 | 5 |
+| T1 | C_binned | 21 | 11 | 8 | 2 | 0.28 | 27 | 4 |
+
+The absorbing convention moves the class at three points — (0.003, 0.1, 10⁻³)
+N = 8, (0.03, 0.05, 0.01), (0.03, 0.1, 0.01) — to C-A, with χ²_res/dof still
+22–79 and, at the first, a fitted Δln M = 2.4 (a factor 11 in mass, twice the
+grid spacing). The reason is not that the closure error changed (colours are
+identical) but that the grey term the absorbing core adds to every leg's Δm
+is −0.5 to −3.9 mag (§4.40), it is *not* the same for the reference and the
+closure legs (f_return differs between them), and a per-epoch grey offset is
+exactly what a mass shift on a faint, few-band vector can mimic. That is a
+statement about the convention, not the closure, and the clean way to say so
+is the next tangent space: **T1 adds one free grey magnitude per epoch**
+(the most generous "any luminosity history" nuisance, which makes the class
+independent of *any* grey core convention by construction). T1 is discussed
+with T2 and T3 in part 4; the convention comparison itself is closed by the
+observation that colours are exact and that the only convention-dependent
+quantity, the grey per-epoch term, is absorbed by T1.
+
+#### 3. Chain cutoff
+
+Only the reference leg ever traps (`n_trapped = 0` for the four closure legs
+in all 153 rows), but the three group legs build their kernels from the
+reference's event stream, so a chain-cap check must rerun the reference and
+every leg. `robustness.py chain --model … --t … --chain-max 2000 4000 8000`
+does that at the stored `n_used` and seeds on the four cells with the highest
+reference trapped fraction — (0.03, 0.05, 0.1) at 3 d (13.8 %) and 2 d
+(13.6 %), (0.01, 0.05, 0.1) at 2 d (12.0 %), (0.03, 0.1, 0.1) at 1 d (10.5 %) —
+with the pre-declared criterion (plan §2): each live colour error of C_both
+and C_binned changes by < 25 % of its value and keeps its sign between chain
+2000 and 8000, and the class at those points with the chain-8000 cell
+substituted (`sensitivity.py --override`) stays C-B.
+
+A 5000-packet probe on the worst cell (`robustness/chain_…_t3_probe.json`)
+fixed the cost and passed the two structural checks before the full runs were
+committed: the reference costs 493 s at chain 2000 and 987 s at chain 8000
+(2.0×, not the 4× a stuck-packet scaling would give), and `B_opacity`,
+which does not depend on the reference, is identical to 0.0 mag at both
+caps (determinism). Raising the cap frees most of the capped packets
+(2008 → 433 of 15 000 thermalized, f_return 1.13 → 1.09) and moves the
+reference's own magnitudes by up to 0.26 mag (r) — but at 5000 packets the
+probe cannot say whether that is the cap or the noise: the probe's own
+chain-2000 C_both colour errors differ from the stored 20 000-packet cell
+by the same amount (d(g−r) +0.18 vs −0.21, d(J−K) −0.56 vs −0.76). The full
+runs (four cells × three caps at n_used = 20 000, reference ≈ 0.4 / 0.6 / 0.8
+h each, two workers behind the redo) are in progress; **the chain table and
+the verdict on the criterion are reported in §4.44 with the redo**, and F45
+below is stated without them.
+
+#### 4. One layer of source freedom: what a free L(t), a free photospheric temperature and a blue second component absorb
+
+`sensitivity.py --tangent T1|T2|T3` appends nuisance columns to the design
+matrix after the three physical ones, pre-declared (plan §3):
+
+- **T1 = T0 + L_t**: one grey column per epoch with ≥ 2 live observables
+  (an epoch with one live observable is dropped — same fit, one fewer column).
+- **T2 = T1 + T_bb**: ∂m_b/∂lnT of a Planck spectrum at fixed L (R² ∝ T⁻⁴)
+  at the row's `T_eff`, through the real passbands on the grid's 200-bin
+  1000–30 000 Å window, central difference at T(1 ± 0.05). At 5000 K the
+  column is (−2.1, −0.6, +0.2, +0.8, +1.5, +2.0, +2.4) mag per e-fold in
+  g r i z J H K — the "hotter photosphere" direction that can mimic
+  "too blue".
+- **T3 = T2 + 2c**: a linearized blue second component with the light curve
+  of the same-(M, v) X = 10⁻³ model, d(b, t) = −(2.5/ln 10)·10^{−0.4(m_blue − m_ref)},
+  amplitude a_2c in units of that model's flux; skipped at the X = 10⁻³ points
+  themselves. The linearization measure max |a_2c · 10^{−0.4(m_blue − m_ref)}|
+  over the live observables is reported (`lin_2c`; > 1 means the "second
+  component" outshines the reference in some band and the linear column
+  overstates what it absorbs).
+
+The classification is dof-aware (dof = N − rank(√W D) < 4 → `underdetermined`),
+tests significance on the physical columns only (a significant nuisance
+amplitude never makes C-A), and records two things the class alone hides:
+`R_nuisance_only`, the residual fraction when the nuisance columns are fitted
+*without* the physical parameters, and `a_over_dln`, each physical shift in
+units of the stencil its derivative was taken on (> 1 = the projection
+extrapolates beyond the neighbouring grid model).
+
+| tangent | leg | analysable | C-A | C-B | underdet. | median dof | median R | median χ²_res/dof | R ≤ 0.3 | χ²_res/dof > 4 | both | C-A beyond stencil |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| T0 | C_both | 21 | 0 | 20 | 1 | 14 | 0.77 | 105 | 0 | 20 | 0 | 0 |
+| T1 | C_both | 21 | 12 | 7 | 2 | 10 | 0.28 | 23 | 12 | 17 | 10 | 5 |
+| T2 | C_both | 21 | 10 | 8 | 3 | 9 | 0.24 | 9.6 | 13 | 16 | 11 | 4 |
+| T3 | C_both | 21 | 12 | 5 | 4 | 8 | 0.21 | 8.2 | 16 | 14 | 13 | 3 |
+| T0 | C_binned | 21 | 0 | 20 | 1 | 14 | 0.74 | 117 | 0 | 20 | 0 | 0 |
+| T1 | C_binned | 21 | 11 | 8 | 2 | 10 | 0.28 | 27 | 11 | 18 | 10 | 4 |
+| T2 | C_binned | 21 | 11 | 7 | 3 | 9 | 0.27 | 16 | 12 | 16 | 11 | 4 |
+| T3 | C_binned | 21 | 13 | 4 | 4 | 8 | 0.23 | 10.6 | 15 | 14 | 13 | 3 |
+
+Per point, C_both (dof / R / R_nuisance-only / χ²_res/dof / class / fitted
+(Δln M, Δln v, Δln X) / largest |a_L| in mag; T2 and T3 add a_T = Δln T and
+a_2c with `lin_2c`):
+
+| (M, v, X) | N | T0 | absorbing T0 | T1 | T2 | T3 |
+|---|---|---|---|---|---|---|
+| (0.003, 0.05, 0.001) | 20 | 17 / 0.89 / – / 66 / C-B / (+0.34, +0.09, -0.03) | 7 / 0.31 / – / 58 / C-B / (-0.05, -0.23, -2.11) | 13 / 0.25 / 0.76 / 7 / C-A / (-0.04, -0.61, -0.27) / 1.7 | 12 / 0.21 / 0.22 / 5 / C-B / (-0.37, +0.12, -0.26) / 1.4 / a_T +0.54 | 12 / 0.21 / 0.22 / 5 / C-B / (-0.37, +0.12, -0.26) / 1.4 / a_T +0.54 |
+| (0.003, 0.05, 0.01) | 17 | 14 / 0.72 / – / 118 / C-B / (+0.66, +0.28, -0.90) | only 0 usable observables | 10 / 0.32 / 0.58 / 33 / C-B / (+1.69, -0.00, -0.16) / 2.5 ⚠ | 9 / 0.30 / 0.38 / 33 / C-B / (+0.15, +0.71, -0.55) / 1.2 / a_T +0.81 ⚠ | 8 / 0.26 / 0.28 / 26 / C-A / (-0.51, +0.20, +3.16) / 0.9 / a_T +0.71 / a_2c +1.39 (lin 3.1) |
+| (0.003, 0.05, 0.1) | 13 | 11 / 0.88 / – / 163 / C-B / (+0.75, +0.30, +0.00) | only 0 usable observables | 8 / 0.47 / 0.58 / 64 / C-B / (+1.10, +0.16, -0.00) / 1.1 | 7 / 0.30 / 0.39 / 30 / C-B / (+0.27, +0.30, +0.00) / 1.6 / a_T +0.48 | 6 / 0.19 / 0.23 / 14 / C-A / (-0.90, -0.33, +0.00) / 1.0 / a_T +0.51 / a_2c +1.08 (lin 2.9) |
+| (0.003, 0.1, 0.001) | 11 | 8 / 0.76 / – / 76 / C-B / (+1.25, -0.43, -2.70) ⚠ | 5 / 0.17 / – / 35 / C-A / (+2.41, +0.11, -0.56) ⚠ | 6 / 0.24 / 0.93 / 10 / C-A / (+0.66, -1.13, -0.97) / 2.0 | 5 / 0.23 / 0.25 / 11 / C-B / (+0.38, -0.64, -0.77) / 1.6 / a_T +0.27 | 5 / 0.23 / 0.25 / 11 / C-B / (+0.38, -0.64, -0.77) / 1.6 / a_T +0.27 |
+| (0.003, 0.1, 0.01) | 3 | only 3 usable observables | only 0 usable observables | only 3 usable observables | only 3 usable observables | only 3 usable observables |
+| (0.003, 0.1, 0.1) | 0 | only 0 usable observables | only 0 usable observables | only 0 usable observables | only 0 usable observables | only 0 usable observables |
+| (0.003, 0.2, 0.001) | 14 | 11 / 0.49 / – / 79 / C-B / (+0.27, -0.57, +13.32) ⚠ | 5 / 0.35 / – / 186 / C-B / (+12.84, -6.57, +16.03) ⚠ | 9 / 0.30 / 0.97 / 35 / C-A / (+3.50, +0.04, +3.70) / 3.5 ⚠ | 8 / 0.27 / 0.29 / 32 / C-A / (+1.02, -0.64, +2.97) / 1.0 / a_T +0.71 ⚠ | 8 / 0.27 / 0.29 / 32 / C-A / (+1.02, -0.64, +2.97) / 1.0 / a_T +0.71 ⚠ |
+| (0.003, 0.2, 0.01) | 7 | 4 / 0.56 / – / 209 / C-B / (+0.07, +2.19, +2.02) ⚠ | only 0 usable observables | 3 / 0.41 / 0.99 / 148 / underdetermined / (+15.79, +0.01, -22.48) / 14.8 ⚠ | 2 / 0.33 / 0.54 / 151 / underdetermined / (+38.66, +0.28, -36.05) / 35.8 / a_T -2.10 ⚠ | 1 / 0.32 / 0.51 / 281 / underdetermined / (+19.37, +4.57, -67.99) / 22.0 / a_T -3.93 / a_2c -36.59 (lin 45.8) ⚠ |
+| (0.003, 0.2, 0.1) | 0 | only 0 usable observables | only 0 usable observables | only 0 usable observables | only 0 usable observables | only 0 usable observables |
+| (0.01, 0.05, 0.001) | 21 | 18 / 0.85 / – / 38 / C-B / (+0.08, -0.01, -0.94) | 15 / 0.32 / – / 23 / C-B / (+0.65, -0.09, -0.74) | 13 / 0.16 / 0.69 / 2 / C-A / (+1.11, -0.21, -0.43) / 1.5 | 12 / 0.15 / 0.26 / 2 / C-B / (+0.65, -0.08, -0.71) / 0.7 / a_T +0.19 | 12 / 0.15 / 0.26 / 2 / C-B / (+0.65, -0.08, -0.71) / 0.7 / a_T +0.19 |
+| (0.01, 0.05, 0.01) | 20 | 17 / 0.61 / – / 60 / C-B / (+0.34, +0.42, +0.65) | 3 / 0.12 / – / 28 / underdetermined / (+0.78, +0.00, -2.09) | 13 / 0.27 / 0.46 / 15 / C-A / (+1.46, +0.17, -0.51) / 1.6 | 12 / 0.14 / 0.32 / 4 / C-A / (+0.18, +0.48, -1.73) / 1.1 / a_T +0.60 | 11 / 0.13 / 0.17 / 4 / C-A / (+0.07, +0.42, -1.26) / 0.9 / a_T +0.60 / a_2c +0.16 (lin 0.4) |
+| (0.01, 0.05, 0.1) | 9 | 8 / 0.98 / – / 219 / C-B / (+0.19, +0.00, +0.00) | only 0 usable observables | 6 / 0.30 / 0.41 / 28 / C-B / (+0.99, +0.00, +0.00) / 1.1 | 5 / 0.29 / 0.35 / 30 / C-A / (+1.73, -0.00, +0.00) / 1.9 / a_T -0.26 | 4 / 0.06 / 0.13 / 2 / C-A / (-1.64, +0.00, +0.00) / 1.2 / a_T +0.97 / a_2c +0.93 (lin 2.6) |
+| (0.01, 0.1, 0.001) | 21 | 18 / 0.98 / – / 101 / C-B / (+0.05, -0.11, -0.96) | 14 / 0.46 / – / 88 / C-B / (-1.50, -1.60, -5.03) ⚠ | 14 / 0.26 / 0.85 / 9 / C-A / (-0.73, -1.58, -2.07) / 2.6 ⚠ | 13 / 0.24 / 0.26 / 8 / C-A / (-0.80, -0.77, -1.75) / 1.9 / a_T +0.38 | 13 / 0.24 / 0.26 / 8 / C-A / (-0.80, -0.77, -1.75) / 1.9 / a_T +0.38 |
+| (0.01, 0.1, 0.01) | 6 | 3 / 0.73 / – / 371 / underdetermined / (+0.14, +0.34, -1.83) | only 1 usable observables | 1 / 0.03 / 0.60 / 2 / underdetermined / (+4.80, +0.38, +1.25) / 8.3 ⚠ | 0 / 0.00 / 0.35 / nan / underdetermined / (-52.77, +10.69, -56.15) / 106.6 / a_T +20.99 ⚠ | 0 / 0.00 / 0.06 / nan / underdetermined / (-40.38, +9.67, +30.47) / 63.4 / a_T +17.55 / a_2c +16.05 (lin 35.5) ⚠ |
+| (0.01, 0.1, 0.1) | 3 | only 3 usable observables | only 0 usable observables | only 3 usable observables | only 3 usable observables | only 3 usable observables |
+| (0.01, 0.2, 0.001) | 14 | 11 / 0.90 / – / 138 / C-B / (+0.51, +0.41, -2.34) ⚠ | 8 / 0.42 / – / 132 / C-B / (-1.78, +2.36, -6.92) ⚠ | 9 / 0.20 / 0.98 / 9 / C-A / (+4.58, -0.45, +5.60) / 3.4 ⚠ | 8 / 0.19 / 0.30 / 8 / C-A / (+3.39, -1.12, +5.31) / 3.0 / a_T +0.44 ⚠ | 8 / 0.19 / 0.30 / 8 / C-A / (+3.39, -1.12, +5.31) / 3.0 / a_T +0.44 ⚠ |
+| (0.01, 0.2, 0.01) | 0 | only 0 usable observables | only 0 usable observables | only 0 usable observables | only 0 usable observables | only 0 usable observables |
+| (0.01, 0.2, 0.1) | 0 | only 0 usable observables | only 0 usable observables | only 0 usable observables | only 0 usable observables | only 0 usable observables |
+| (0.03, 0.05, 0.001) | 34 | 31 / 0.77 / – / 18 / C-B / (-0.01, -0.13, -1.52) | 28 / 0.38 / – / 19 / C-B / (+0.16, -0.47, -2.07) | 25 / 0.28 / 0.71 / 3 / C-A / (-0.21, -0.38, -0.94) / 1.1 | 24 / 0.21 / 0.35 / 2 / C-A / (-0.33, +0.18, -0.89) / 0.7 / a_T +0.27 | 24 / 0.21 / 0.35 / 2 / C-A / (-0.33, +0.18, -0.89) / 0.7 / a_T +0.27 |
+| (0.03, 0.05, 0.01) | 30 | 27 / 0.70 / – / 52 / C-B / (-0.15, +0.01, -2.40) | 15 / 0.16 / – / 22 / C-A / (-0.30, -0.18, -2.50) | 21 / 0.25 / 0.59 / 8 / C-A / (-0.65, -0.48, -2.94) / 2.3 | 20 / 0.21 / 0.39 / 7 / C-A / (-0.34, -0.14, -3.22) / 1.0 / a_T +0.28 | 19 / 0.17 / 0.20 / 4 / C-A / (-0.27, -0.39, +0.30) / 2.3 / a_T +0.14 / a_2c +0.92 (lin 2.0) |
+| (0.03, 0.05, 0.1) | 23 | 21 / 0.69 / – / 85 / C-B / (-0.31, +0.43, +0.00) | 6 / 1.00 / – / 2580 / C-B / (+0.00, +0.00, +0.00) | 16 / 0.35 / 0.49 / 29 / C-B / (-0.98, +0.12, -0.00) / 2.2 | 15 / 0.34 / 0.41 / 29 / C-B / (-0.73, +0.23, -0.00) / 1.4 / a_T +0.15 | 14 / 0.17 / 0.17 / 7 / C-B / (+0.06, +0.01, -0.00) / 0.5 / a_T +0.44 / a_2c +0.62 (lin 2.0) |
+| (0.03, 0.1, 0.001) | 30 | 27 / 0.86 / – / 62 / C-B / (-0.09, -0.19, -1.57) | 25 / 0.41 / – / 52 / C-B / (+1.21, -1.70, -5.18) ⚠ | 22 / 0.25 / 0.87 / 6 / C-A / (+0.37, -1.24, -1.68) / 1.9 | 21 / 0.25 / 0.30 / 6 / C-A / (+0.23, -0.87, -1.46) / 1.6 / a_T +0.12 | 21 / 0.25 / 0.30 / 6 / C-A / (+0.23, -0.87, -1.46) / 1.6 / a_T +0.12 |
+| (0.03, 0.1, 0.01) | 22 | 19 / 0.77 / – / 136 / C-B / (-0.31, +0.19, -1.11) | 7 / 0.19 / – / 79 / C-A / (+0.36, -1.24, -4.53) | 15 / 0.28 / 0.66 / 23 / C-A / (-1.92, +0.13, +1.44) / 4.6 ⚠ | 14 / 0.28 / 0.40 / 25 / C-A / (-1.92, +0.12, +1.43) / 4.6 / a_T -0.00 ⚠ | 13 / 0.20 / 0.33 / 13 / C-A / (-1.78, -0.10, +6.25) / 5.9 / a_T -0.06 / a_2c +1.25 (lin 2.9) ⚠ |
+| (0.03, 0.1, 0.1) | 15 | 13 / 0.73 / – / 109 / C-B / (-0.40, +0.43, +0.00) | only 3 usable observables | 10 / 0.46 / 0.61 / 56 / C-B / (-0.17, -0.68, -0.00) / 2.0 | 9 / 0.41 / 0.46 / 49 / C-B / (+0.15, -0.44, +0.00) / 2.0 / a_T +0.27 | 8 / 0.26 / 0.36 / 22 / C-A / (+0.25, -0.47, -0.00) / 0.9 / a_T +0.44 / a_2c +0.70 (lin 1.9) |
+| (0.03, 0.2, 0.001) | 26 | 23 / 0.89 / – / 116 / C-B / (-0.16, +0.27, -1.40) | 20 / 0.48 / – / 101 / C-B / (+1.70, +2.78, -7.04) ⚠ | 19 / 0.38 / 0.98 / 25 / C-B / (-0.72, +1.09, -1.24) / 2.1 ⚠ | 18 / 0.32 / 0.35 / 20 / C-B / (-0.67, -0.31, -0.32) / 1.8 / a_T +0.48 | 18 / 0.32 / 0.35 / 20 / C-B / (-0.67, -0.31, -0.32) / 1.8 / a_T +0.48 |
+| (0.03, 0.2, 0.01) | 10 | 7 / 0.78 / – / 285 / C-B / (-0.33, -0.74, +2.85) ⚠ | 2 / 0.38 / – / 582 / underdetermined / (-0.09, +2.18, -2.74) ⚠ | 5 / 0.24 / 0.80 / 36 / C-A / (-3.06, -0.84, -0.69) / 6.7 ⚠ | 4 / 0.08 / 0.36 / 5 / C-A / (+0.85, -1.21, -0.91) / 1.3 / a_T +1.33 ⚠ | 3 / 0.05 / 0.20 / 2 / underdetermined / (-0.42, -0.90, +2.29) / 2.8 / a_T +0.94 / a_2c +1.27 (lin 2.8) ⚠ |
+| (0.03, 0.2, 0.1) | 6 | 5 / 0.71 / – / 146 / C-B / (-0.28, +0.00, +0.00) | only 0 usable observables | 4 / 0.44 / 0.81 / 70 / C-B / (-1.42, +0.00, +0.00) / 2.9 ⚠ | 3 / 0.26 / 0.38 / 33 / underdetermined / (+5.72, -0.00, -0.00) / 12.2 / a_T +2.43 ⚠ | 2 / 0.20 / 0.34 / 29 / underdetermined / (+11.95, +0.00, -0.00) / 30.2 / a_T +3.84 / a_2c -3.52 (lin 5.5) ⚠ |
+
+(⚠ = a physical shift larger than the stencil, `extrapolated`; '–' = no nuisance column.)
+
+**Reading it.** Three things are true at once, and the pre-declared class
+reports only the first:
+
+1. *By the Gate-2 rule, one free grey magnitude per epoch turns most C-B
+   points into C-A.* Under T1, R falls from 0.77 to 0.28 (median) and 12 of
+   19 determined points meet R ≤ 0.3 with a significant physical shift; T2
+   and T3 lower R further (0.24, 0.21). The residual's *direction* is not
+   orthogonal to "a different luminosity history plus a different
+   (M, v, X)". This is the honest converse of §4.40's caveat, and it is what
+   the section is for.
+2. *What is left is still a detectable misfit at the grid's σ.* χ²_res/dof
+   after the T1 fit is 2–70 (median 23; 17 of 19 determined points above 4);
+   after T3, 2–32 (median 8; 14 of 17 above 4). At 10 of 19 (T1) and 13 of 17 (T3) points
+   the residual is both mostly absorbed *and* still detectable — the fit
+   would be "good enough to bias, not good enough to hide". The points where
+   the leftover falls to χ²_res/dof ≈ 2–3 — (0.01, 0.05, 10⁻³) and
+   (0.03, 0.05, 10⁻³) — are the two with the smallest closure error on the
+   grid (rms d_RT = 0.35–0.46 mag, no component above 0.9 mag), where a
+   quarter of a small vector is within σ.
+3. *The absorption is bought with implausible amplitudes.* The per-epoch
+   grey offsets the T1 fit demands are |a_L| = 1.1–6.7 mag at their largest
+   per point (median of all |a_L| 0.93 mag): a luminosity history off by a
+   factor 3–500 at single epochs, in a source whose L(t) is set by M, v and the
+   heating rate. The T2 photosphere is Δln T = −0.3 to +1.3 (median +0.33,
+   positive at 16 of 18 determined points: a 40 % hotter photosphere, up to
+   3.8×) — the sign expected for "closure too blue", and the size of the
+   temperature error a blackbody fit to the closure would report. The T3
+   second component has a_2c = 0.2–1.4 at the eight determined points where it
+   is used, with lin_2c = 1.9–3.1 at seven of them: the "blue component"
+   needed carries two to three times the reference's flux in its bluest live
+   band, which is outside the linearization (the true nonlinear absorption is
+   smaller, since −2.5 log₁₀(1 + 3) = −1.5 mag against the linear −3.3 mag). And the
+   physical shifts themselves are at or beyond the stencil: median
+   max|a|/Δlnθ = 0.9 under T1 (0.6 under T0), 5 of 12 C-A points beyond it
+   (Δln M = +3.5 and Δln X = +3.7 at (0.003, 0.2, 10⁻³); +4.6 / +5.6 at
+   (0.01, 0.2, 10⁻³)), where the linear projection is a scale estimate of a
+   shift the grid does not contain.
+
+The `R_nuisance_only` column separates the two mechanisms: at X = 10⁻³ the
+nuisance columns alone leave 0.69–0.98 of the norm and the physical
+parameters do the absorbing (a genuine parameter degeneracy once grey freedom
+is granted); at X = 10⁻² and 10⁻¹ the nuisance columns alone reach
+0.41–0.81 and the parameters add the rest. Under T3 the nuisance columns
+outnumber the physical ones (p = 8–11 against N = 6–34) and four points are
+underdetermined; T1 (p = 5–9) is the headline space and T3 the bound.
+
+**F45 — F43/F44 survive the floor mask and the core convention (the chain
+cap is pending, §4.44); they do not survive a free luminosity history, at the grid's σ, as a
+*class* — but the residual survives as a *misfit*.** With the floor mask
+real, Gate 2 is C-B at 20 of 21 analysable points (was 24 of 24 with the
+mask dead), median R 0.77. The colour errors of F43 are exactly
+convention-invariant; the absorbing-core magnitudes move the class at three
+faint, few-band points through a grey per-epoch term that the T1 space
+absorbs by construction. The chain-cap check is running and is reported in §4.44 (the probe cannot resolve it, part 3). Granting the fit one
+free grey magnitude per epoch (T1) — a freedom no physical source model has —
+absorbs the closure error to R = 0.28 (median) and makes 12 of 19 points
+C-A by the pre-declared rule, at the price of luminosity offsets of 1–7 mag
+at single epochs and parameter shifts at or beyond the grid spacing; a free
+photospheric temperature (T2: Δln T = +0.33 median, i.e. the closure looks
+like a 40 % hotter photosphere) and a linearized blue component (T3) take R
+to 0.21. After every one of these fits the residual is still χ²_res/dof =
+8–23 (median) at σ = 0.05 / 0.10 mag — detectable at 14–17 of the
+determined points. **The right statement for the paper is therefore not
+"cannot be absorbed" but "cannot be absorbed by the ejecta parameters, and
+can be partly absorbed by a luminosity history and a photospheric
+temperature that are wrong by factors of 3–500 and 1.4, respectively —
+while still leaving a detectable misfit".** Whether a real observation
+detects that misfit is §4.42.
+
 ## 5. Findings register
 
 | # | Finding | Where |
@@ -3020,6 +3318,7 @@ stated before the grid ran (plan §5):
 | F42 | **The chromatic closure error survives real filter curves, and the three notebook-only findings reproduce.** Re-photometering the committed F41 spectra through SVO DECam g r i z + 2MASS J H Ks (no packets re-run) keeps every ≥ 0.6 mag top-hat colour error at 0.65–0.77 mag (Ce II and the blend, g−r at 0.5 d) and the blue kilonova's binned leg at 0.69 mag — moving *which* colour is worst (g−r → i−J) but not its size — while the A_redist floor stays ≤ 0.009 mag. Gate 1 passes. Separately: the Ce II density scan reproduces with three seeds (crossing S = 55.7, five of six points within 7 points of the single-seed numbers), the F38 table is generated from `survey.json` (Pr II interaction −6.4%), and the F39 exit-τ scan has a driver and a data file (crossings S = 179.6 / 689.0 at τ_x = 0.5 / 2.0; dlnlam is inert at delocalize = 1). | §4.38 |
 | F43 | **On a heating-powered kilonova the grouped-opacity closure's colour error is 1–3 mag at every point of a 27-model (M_ej, v_ej, X_lan) grid, and its sign is uniform: too blue.** Four-ion blend, worldline transport, DECam + 2MASS at 40 Mpc, 162 epochs (153 ran, 9 X_lan = 0.1 early epochs over budget). Worst live colour error per model 0.96–2.84 mag (C_both; C_binned 1.24–3.05) against an A_redist floor of 0.02–0.13 mag on the well-sampled models; the central model runs from Δ(J−K) = −0.6 mag at 0.5 d to −1.9 mag at 3 d with Δ(g−r) inside −0.4 mag. 166 of 170 live NIR colour errors are negative: the closure's g is 0.2–2.1 mag too bright and its K up to 3.6 mag too faint. Every leg has the same L_bol by construction (conserving core); the absorbing-core Δm_bol of −0.5 to −3.9 mag is inner-boundary bookkeeping, and the harness makes no bolometric statement at S ≳ 10⁴. | §4.40 |
 | F44 | **Gate 2: the closure error is not degenerate with (M_ej, v_ej, X_lan) — class C-B, distinct residual, at all 24 analysable grid points, for every opacity closure, under every robustness variant.** χ²_RT/N = 28–549 (detectable), weighted residual fraction R = 0.46–1.00 after the best three-parameter shift (0.60–1.00 on the 20 well-sampled points), χ²_res/N = 17–373; the same class with σ doubled, one-sided derivatives and a 3 % band cut. The fitted shifts are median \|Δln M\| = 0.25, \|Δln v\| = 0.25, \|Δln X_lan\| = 0.95, so the error has a component along every parameter, but it leaves most of itself behind. A_redist is C-C (undetectable) at 23 of 24. Three X_lan = 0.1 points are unanalysable (mask intersection empty); R is against a one-zone model's three parameters, so C-B is an upper bound on distinctness. | §4.40 |
+| F45 | **F43/F44 survive the floor mask and the core convention (chain cap: §4.44); a free luminosity history absorbs the residual as a *class* but not as a *misfit*.** Erratum: the §4.40 floor mask was a no-op (27 floored rows in 12 models); with it real, Gate 2 is C-B at 20 of 21 analysable points (median R 0.77, χ²_res/dof 105), no class changed where both rules apply. Colours are exactly convention-invariant; the absorbing core moves three faint, few-band points to C-A through a grey per-epoch term. The chain-cap check (4 cells × chain_max 2000/4000/8000 at the stored n_used) is running; its 5000-packet probe passed the determinism check (B_opacity identical) and shows the cap moving the reference by up to 0.26 mag at 5000 packets, within that probe's own noise. One free grey magnitude per epoch (T1) takes median R to 0.28 and 12 of 19 points to C-A by the pre-declared rule — at the cost of 1–7 mag luminosity offsets, parameter shifts at or beyond the grid spacing, and a leftover χ²_res/dof of 23 (median; 17 of 19 above 4); a free photospheric temperature (Δln T = +0.33 median: the closure looks 40 % hotter) and a linearized blue component (T3) take R to 0.21 with χ²_res/dof 8. The A_redist floor from cells with n_used ≥ 10⁵ is 0.021 mag (median), 0.044 (90 %). | §4.41 |
 
 ## 6. Caveats and limitations
 
@@ -3061,6 +3360,12 @@ stated before the grid ran (plan §5):
   A_redist "noise floor" reaches 0.2–0.6 mag at the 2×10⁴-packet cells; and
   the Gate 2 classes rest on secant derivatives across a decade in X_lan and
   on correlated bands (χ²/N is a scale, not a p-value).
+- **Paper III phase 12 (§4.41):** the Gate 2 classes are against a one-zone
+  model's three parameters; one free grey magnitude per epoch (T1) already
+  absorbs the closure error to R ≈ 0.3 at most points, and the Planck
+  temperature column is a proxy (§4.43 measures the MC direction at one
+  point). The chain-cap check is pending (§4.44). The nuisance spaces are
+  underdetermined at the sparse points (dof < 4 under T3 at 4 of 21).
 
 ## 7. Reproduction
 
@@ -3068,7 +3373,7 @@ stated before the grid ran (plan §5):
 # environment
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]" h5py
-pytest                    # 283 passed (2026-09-02)
+pytest                    # 300 passed (2026-09-02)
 
 # data (once): Zenodo 19335084 -> data/, see data/README.md
 # SEDONA (once): see lab_notebook.md "SEDONA build" entry
@@ -3114,6 +3419,15 @@ OMP_NUM_THREADS=1 python paper3/phase12_grid/run_grid.py --workers 8   # 27 mode
 python paper3/phase12_grid/sensitivity.py                         # sensitivity.json, Gate 2 table
 python paper3/phase12_grid/grid_table.py --which all              # the section 4.40 tables
 python paper3/phase12_grid/figures.py                             # Figs 2-4 -> paper3/figures/
+
+# Paper III phase 12, robustness and nuisance spaces (section 4.41)
+python paper3/phase12_grid/sensitivity.py --floored include        # sensitivity_floored_incl.json
+python paper3/phase12_grid/sensitivity.py --core absorbing         # sensitivity_absorbing.json
+for T in T1 T2 T3; do python paper3/phase12_grid/sensitivity.py --tangent $T; done
+python paper3/phase12_grid/figures.py --which 6                    # fig6_tangent
+python paper3/phase12_grid/robustness.py chain --model model_M0.03_v0.05_X0.1 --t 3 --chain-max 2000 8000 --probe
+paper3/phase12_grid/robustness/run_chain.sh robustness/chain.log model_M0.03_v0.05_X0.1:3 ...   # the four cells, ~2 h each
+python paper3/phase12_grid/robustness.py table
 ```
 
 Long jobs: launch in the background with `python -u` and an **absolute** path
