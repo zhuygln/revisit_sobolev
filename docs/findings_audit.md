@@ -198,3 +198,34 @@ Not classifications, but the same kind of problem the audit exists to catch:
   normalization added to the harness (defaults preserved); the pre-probe
   removed; `low_N`.
 
+### Addendum (2026-09-02, later still): F45 and F46, and an erratum against F44
+
+- **Erratum (F44 / §4.40)**: the floor mask was a no-op (`grid.py` never
+  stored `v_ph_floored`); 27 of 153 rows were floored and included. Gate 2
+  re-baselined with the mask real: C-B at 20 of 21 analysable points (was
+  24 of 24), no class changed at any point analysable under both rules.
+  F44's row is restated; the §4.40 numbers stand with the erratum pointer.
+  Classification of the error: **a bookkeeping error in the harness, not
+  in the physics**; caught by reading the code, not by a test, which is
+  why `tests/test_grid_harness.py` and `tests/test_sensitivity.py` now pin
+  the flag.
+- **F45 (§4.41)**: robustness of F43/F44 to three harness conventions plus
+  one layer of source freedom. Drivers `sensitivity.py --floored/--core/--tangent`,
+  `robustness.py chain|table`, data `sensitivity_{floored_incl,absorbing,T1,T2,T3}.json`,
+  `robustness/chain_*.json`, Fig. 6, tests in `tests/test_sensitivity.py`
+  (nuisance absorption, dof accounting, absorbing re-derivation) and
+  `tests/test_grid_harness.py`. Classification: **a robustness result with
+  an honest converse** — the pre-declared class flips to C-A at most points
+  under a free luminosity history, and the report says so next to the
+  amplitudes that flip it (1–7 mag per epoch) and the misfit that remains
+  (χ²_res/dof ≈ 23). Two diagnostics (`R_nuisance_only`, `a_over_dln`)
+  were added *after* seeing the T1 result; they change no class and are
+  labelled as post hoc.
+- **F46 (§4.42)**: Phase 3A, three pre-declared scenarios and a
+  pre-declared Gate 3. Driver `paper3/phase13_observability/observe.py`,
+  data `observability.json`, Fig. 5, tests `tests/test_observability.py`.
+  Classification: **decision-grade** — the residual is detected everywhere
+  and survives (M, v, X) everywhere; under T1 its survival is a measured
+  function of NIR coverage (9/18, 3/8, 1/15). The expectation "NIR is the
+  leverage" was written before the run and is confirmed in a sharper form
+  (detection is optical, distinctness is NIR).

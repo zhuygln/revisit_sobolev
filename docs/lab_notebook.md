@@ -2313,6 +2313,40 @@ luminosity history and a photospheric temperature that are wrong by factors
 of 3-500 and 1.4, while still leaving a detectable misfit". Whether a real
 observation sees that misfit is §9aq.
 
+## 9aq. Phase 3A: six real measurements (2026-09-02)
+
+*Design before numbers.* Three scenarios at 40 Mpc on the grid's own
+epochs -- dense (AT2017gfo-like, griz + JHK at all six), sparse (optical at
+1, 3, 7 d, NIR at 2, 5 d, a magnitude shallower), optical (no NIR) -- with
+sigma(m) = sqrt(sigma_sys^2 + (1.0857/SNR)^2) from a 5-sigma depth, the
+reference setting sigma for every leg, and the Gate 2 projection re-run
+with the scenario's observables and errors (`observe.py` passes `sigma=`
+and `obs_mask=` into `analyse_point`; nothing is duplicated). Gate 3 was
+declared before the run: N_obs >= 8, chi2_RT,obs/N >= 4 and C-B under the
+tangent space. I expected the NIR to be the leverage and wrote that down as
+an expectation to be measured, not assumed.
+
+*What came out.* Detection is never the question: chi2_RT,obs/N is 41-1005
+in every scenario, at real errors of 0.03-0.04 mag the closure error is a
+30-40 sigma discrepancy in single bands, and even after the T1 fit the
+leftover is chi2_res/dof > 4 at 18/18 dense points. Under T0 the residual
+survives at every eligible point of every scenario, including optical-only
+(R is lower there, 0.53 median, but never under 0.3). Under T1 the picture
+splits exactly along the NIR: dense 9/18 survive (all four X = 0.1 points),
+sparse 3/8, optical 1/15. The NIR share of chi2_RT,obs is only 0.31
+(median) -- g and r carry the most chi2 -- so the detection is optical and
+the distinctness is NIR, which is a sharper form of the expectation than
+the one I wrote down. The central point is still underdetermined (N_obs =
+6) until the redo lands; Fig. 5's third panel shows its six points at
+-30 to +41 sigma.
+
+*What I would not claim.* The T1 survival counts are lower bounds on
+distinctness because a T1 "absorption" that costs 1-7 mag of luminosity
+history is not a fit anyone would accept (§9ap); chi2/N is a scale, not a
+p-value, because bands at an epoch share packets; and 40 Mpc is one
+distance (at 100 Mpc, 30 of 138 NIR dense observations at the eligible
+points drop below the depth -- noted, not rerun).
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

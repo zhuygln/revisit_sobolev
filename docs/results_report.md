@@ -3270,6 +3270,102 @@ temperature that are wrong by factors of 3–500 and 1.4, respectively —
 while still leaving a detectable misfit".** Whether a real observation
 detects that misfit is §4.42.
 
+### 4.42 Phase 3A: does the closure residual survive a real observation? (F46)
+
+§4.40–4.41 are noiseless and fully sampled: seven bands at six epochs with
+σ = 0.05 / 0.10 mag regardless of brightness. The Nature-Astronomy question
+is whether *six real measurements* still see the residual, and whether they
+can tell it from a different kilonova. `paper3/phase13_observability/observe.py`
+re-runs the Gate 2 projection with the observables and errors of three
+pre-declared scenarios at 40 Mpc, on the grid's own epochs (no
+interpolation), with `sensitivity.py`'s masks (≥ 1 % of L_bol, floor) on top:
+
+| scenario | bands × epochs | 5σ depth (opt / NIR) | σ_sys | median σ used |
+|---|---|---|---|---|
+| `dense` (AT2017gfo-like) | griz + JHK at 0.5, 1, 2, 3, 5, 7 d | 23.5 / 21.5 | 0.03 / 0.05 | 0.035 |
+| `sparse` (typical follow-up) | griz at 1, 3, 7 d; JHK at 2, 5 d | 22.5 / 20.5 | 0.03 / 0.05 | 0.044 |
+| `optical` (no NIR) | griz at 0.5, 1, 2, 3, 5, 7 d | 23.5 / — | 0.03 / — | 0.031 |
+
+Noise model σ(m) = √(σ_sys² + (1.0857/SNR)²), SNR = 5·10^{−0.4(m − m_5σ)};
+an observation is used only if the *reference* magnitude is above the
+depth, and the reference sets σ for every leg (identical weights across
+legs). χ²_RT,obs = Σ(d_RT/σ)² is the expected χ² of the closure error against
+the scenario's errors — analytic, Gaussian, no noise realizations; the
+within-epoch correlation caveat of §4.40 stands and χ²/N is a scale. Per
+(point, closure, scenario, tangent space T0–T3 of §4.41): N_obs, χ²_RT,obs/N,
+R, χ²_res/dof, class, and the NIR share of χ²_RT,obs.
+
+**Gate 3, pre-declared** (plan §5): at points with N_obs ≥ 8 under the
+scenario, the residual *survives* if χ²_RT,obs/N ≥ 4 and the class is C-B
+under the tangent space. Reported per scenario × tangent space; T1 is the
+headline nuisance space and T3 the bound (§4.41). C_both; C_binned in
+`observability.json` is within ±1 point of every entry.
+
+| scenario | tangent | analysable | eligible (N_obs ≥ 8) | detectable (χ²/N ≥ 4) | **survives** | underdet. | leftover χ²_res/dof > 4 (of determined) | median N_obs | median χ²_RT,obs/N | median R | median χ²_res/dof | median NIR share | survives by X_lan (10⁻³ / 10⁻² / 10⁻¹) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| dense | T0 | 21 | 18 | 18 | **18** | 0 | 18/18 | 20 | 234 | 0.86 | 193 | 0.31 | 9/9 / 5/5 / 4/4 |
+| dense | T1 | 21 | 18 | 18 | **9** | 0 | 18/18 | 20 | 234 | 0.29 | 40 | 0.31 | 2/9 / 3/5 / 4/4 |
+| dense | T2 | 21 | 18 | 18 | **8** | 0 | 18/18 | 20 | 234 | 0.25 | 27 | 0.31 | 2/9 / 2/5 / 4/4 |
+| dense | T3 | 21 | 18 | 18 | **3** | 1 | 16/17 | 20 | 234 | 0.23 | 21 | 0.31 | 2/9 / 0/5 / 1/4 |
+| sparse | T0 | 17 | 11 | 11 | **11** | 0 | 11/11 | 11 | 113 | 0.82 | 99 | 0.33 | 6/6 / 4/4 / 1/1 |
+| sparse | T1 | 16 | 8 | 8 | **3** | 0 | 6/8 | 11 | 122 | 0.15 | 13 | 0.32 | 2/4 / 1/3 / 0/1 |
+| sparse | T2 | 16 | 8 | 8 | **2** | 3 | 4/5 | 11 | 122 | 0.14 | 5.2 | 0.32 | 2/4 / 0/3 / 0/1 |
+| sparse | T3 | 16 | 8 | 8 | **3** | 4 | 3/4 | 11 | 122 | 0.13 | 5.3 | 0.32 | 2/4 / 1/3 / 0/1 |
+| optical | T0 | 20 | 16 | 16 | **16** | 0 | 16/16 | 14 | 248 | 0.53 | 127 | 0 | 9/9 / 4/4 / 3/3 |
+| optical | T1 | 19 | 15 | 15 | **1** | 3 | 9/12 | 14 | 248 | 0.13 | 8.6 | 0 | 1/9 / 0/4 / 0/2 |
+| optical | T2 | 19 | 15 | 15 | **3** | 4 | 8/11 | 14 | 248 | 0.11 | 7.3 | 0 | 2/9 / 1/4 / 0/2 |
+| optical | T3 | 19 | 15 | 15 | **4** | 5 | 7/10 | 14 | 248 | 0.10 | 6.4 | 0 | 2/9 / 1/4 / 1/2 |
+
+Fig. 5 (`fig5_observability`): the survival and leftover fractions per
+scenario × tangent space; the per-band share of χ²_RT,obs under `dense`
+(g and r carry a median 23 % and 21 % each, K 17 %, J 3 %); and the central
+point's d_RT/σ per observable (N_obs = 6 until the redo lands: r, i at 0.5 d
+at −30σ and −26σ, z, H, K at 3 d at −18σ, +24σ, +41σ).
+
+**F46 — Gate 3. Detection is not the question; distinctness is, and the
+NIR is what buys it.** Three findings:
+
+1. *Every scenario detects the closure error at every eligible point.*
+   χ²_RT,obs/N = 73–1005 under `dense`, 41–401 under `sparse`, 83–674 under
+   `optical`, never within a factor 10 of the threshold. At real photometric
+   errors (median σ = 0.03–0.04 mag, not the grid's 0.05/0.10) the error is
+   a 30–40σ discrepancy in single bands. Even after the T1 fit, the leftover
+   is χ²_res/dof > 4 at 18/18 (`dense`), 6/8 (`sparse`) and 9/12 (`optical`)
+   determined points: a fit with a free luminosity history would still
+   report a bad fit.
+2. *Under the three ejecta parameters (T0) the residual survives everywhere:
+   18/18, 11/11, 16/16.* Gate 3 passes on T0 in every scenario — including
+   `optical`, where R is lower (0.53 median against 0.86 dense; the optical
+   bands alone leave a residual that looks more like an (M, v, X) shift) but
+   never below the 0.3 threshold.
+3. *Under a free luminosity history (T1) the survival depends on the NIR.*
+   `dense`: 9 of 18 survive — every X = 0.1 point (4/4), 3/5 at X = 0.01,
+   2/9 at X = 10⁻³. `sparse` (NIR at two epochs, 1 mag shallower): 3 of 8.
+   `optical`: **1 of 15**. Without NIR, one grey magnitude per epoch and a
+   parameter shift absorb the closure error to R = 0.07–0.24 at every point
+   but one; with six-epoch NIR they cannot at half of them, and at none of
+   the lanthanide-rich (X = 0.1) ones. T2 and T3 lower the surviving counts
+   further (8, 2, 3 and 3, 3, 4) as §4.41 says they must, with the caveat
+   that T3 is underdetermined at 1–5 eligible points per scenario and its
+   2c column is outside its linearization at most points where it is used.
+   The NIR share of χ²_RT,obs is only 0.17–0.57 (median 0.31) under `dense`
+   — the *detection* is optical, the *distinctness* is NIR — which is the
+   measured form of the expectation the plan stated in advance.
+
+What Gate 3 settles: a real AT2017gfo-quality dataset detects the
+grouped-opacity closure error at ≥ 30σ in single bands, cannot absorb it
+into M_ej, v_ej, X_lan, and — if it has NIR at several epochs — cannot
+absorb it into a free luminosity history either at the lanthanide-rich
+points, which are the points where the closure is used. What it does not
+settle: the amplitude question of §4.41 (a T1 "absorption" that demands
+1–7 mag luminosity offsets is not a fit a modeller would accept, so the
+survival counts under T1 are lower bounds on distinctness); within-epoch
+correlations (χ²/N is a scale); and the 40 Mpc distance (at 100 Mpc, +2.0
+mag, 30 of the 138 NIR and 19 of the 231 optical `dense` observations at the
+eligible points fall below the depth — the scenario table is not rerun at
+other distances here). The redo of the nine X = 0.1 early epochs raises N_obs where the
+T1–T3 spaces are underdetermined; §4.44.
+
 ## 5. Findings register
 
 | # | Finding | Where |
@@ -3319,6 +3415,7 @@ detects that misfit is §4.42.
 | F43 | **On a heating-powered kilonova the grouped-opacity closure's colour error is 1–3 mag at every point of a 27-model (M_ej, v_ej, X_lan) grid, and its sign is uniform: too blue.** Four-ion blend, worldline transport, DECam + 2MASS at 40 Mpc, 162 epochs (153 ran, 9 X_lan = 0.1 early epochs over budget). Worst live colour error per model 0.96–2.84 mag (C_both; C_binned 1.24–3.05) against an A_redist floor of 0.02–0.13 mag on the well-sampled models; the central model runs from Δ(J−K) = −0.6 mag at 0.5 d to −1.9 mag at 3 d with Δ(g−r) inside −0.4 mag. 166 of 170 live NIR colour errors are negative: the closure's g is 0.2–2.1 mag too bright and its K up to 3.6 mag too faint. Every leg has the same L_bol by construction (conserving core); the absorbing-core Δm_bol of −0.5 to −3.9 mag is inner-boundary bookkeeping, and the harness makes no bolometric statement at S ≳ 10⁴. | §4.40 |
 | F44 | **Gate 2: the closure error is not degenerate with (M_ej, v_ej, X_lan) — class C-B, distinct residual, at all 24 analysable grid points, for every opacity closure, under every robustness variant.** χ²_RT/N = 28–549 (detectable), weighted residual fraction R = 0.46–1.00 after the best three-parameter shift (0.60–1.00 on the 20 well-sampled points), χ²_res/N = 17–373; the same class with σ doubled, one-sided derivatives and a 3 % band cut. The fitted shifts are median \|Δln M\| = 0.25, \|Δln v\| = 0.25, \|Δln X_lan\| = 0.95, so the error has a component along every parameter, but it leaves most of itself behind. A_redist is C-C (undetectable) at 23 of 24. Three X_lan = 0.1 points are unanalysable (mask intersection empty); R is against a one-zone model's three parameters, so C-B is an upper bound on distinctness. | §4.40 |
 | F45 | **F43/F44 survive the floor mask and the core convention (chain cap: §4.44); a free luminosity history absorbs the residual as a *class* but not as a *misfit*.** Erratum: the §4.40 floor mask was a no-op (27 floored rows in 12 models); with it real, Gate 2 is C-B at 20 of 21 analysable points (median R 0.77, χ²_res/dof 105), no class changed where both rules apply. Colours are exactly convention-invariant; the absorbing core moves three faint, few-band points to C-A through a grey per-epoch term. The chain-cap check (4 cells × chain_max 2000/4000/8000 at the stored n_used) is running; its 5000-packet probe passed the determinism check (B_opacity identical) and shows the cap moving the reference by up to 0.26 mag at 5000 packets, within that probe's own noise. One free grey magnitude per epoch (T1) takes median R to 0.28 and 12 of 19 points to C-A by the pre-declared rule — at the cost of 1–7 mag luminosity offsets, parameter shifts at or beyond the grid spacing, and a leftover χ²_res/dof of 23 (median; 17 of 19 above 4); a free photospheric temperature (Δln T = +0.33 median: the closure looks 40 % hotter) and a linearized blue component (T3) take R to 0.21 with χ²_res/dof 8. The A_redist floor from cells with n_used ≥ 10⁵ is 0.021 mag (median), 0.044 (90 %). | §4.41 |
+| F46 | **Gate 3: every scenario detects the closure error at every eligible point (χ²_RT,obs/N = 41–1005; 30–40σ in single bands at real errors) and it survives the ejecta parameters everywhere (18/18 dense, 11/11 sparse, 16/16 optical); under a free luminosity history its survival is set by the NIR — 9/18 with six-epoch JHK (all four X = 0.1 points), 3/8 with two NIR epochs, 1/15 without NIR.** The NIR carries only 31 % of χ²_RT,obs (g and r the most): detection is optical, distinctness is NIR. After the T1 fit the leftover is still χ²_res/dof > 4 at 18/18 dense points. | §4.42 |
 
 ## 6. Caveats and limitations
 
@@ -3373,7 +3470,7 @@ detects that misfit is §4.42.
 # environment
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]" h5py
-pytest                    # 300 passed (2026-09-02)
+pytest                    # 304 passed (2026-09-02)
 
 # data (once): Zenodo 19335084 -> data/, see data/README.md
 # SEDONA (once): see lab_notebook.md "SEDONA build" entry
@@ -3428,6 +3525,9 @@ python paper3/phase12_grid/figures.py --which 6                    # fig6_tangen
 python paper3/phase12_grid/robustness.py chain --model model_M0.03_v0.05_X0.1 --t 3 --chain-max 2000 8000 --probe
 paper3/phase12_grid/robustness/run_chain.sh robustness/chain.log model_M0.03_v0.05_X0.1:3 ...   # the four cells, ~2 h each
 python paper3/phase12_grid/robustness.py table
+
+# Paper III phase 13, observability / Gate 3 (section 4.42)
+python paper3/phase13_observability/observe.py --table --fig         # observability.json, fig5_observability
 ```
 
 Long jobs: launch in the background with `python -u` and an **absolute** path
