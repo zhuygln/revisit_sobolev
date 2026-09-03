@@ -55,3 +55,9 @@ experiments/**/ladder_*/
 experiments/**/ladder_model_*.mod
 experiments/laII_forest/laII_null.mod
 paper3/phase0_reference/reference_events_*.npz
+docs/paper3/*.aux
+docs/paper3/*.bbl
+docs/paper3/*.blg
+docs/paper3/*.log
+docs/paper3/*.out
+docs/paper3/*.toc

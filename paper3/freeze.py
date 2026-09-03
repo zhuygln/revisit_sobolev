@@ -256,6 +256,7 @@ def input_files():
     fs += sorted((P12 / "robustness").glob("chain_model_*.json"))
     fs += sorted((ROOT / "data" / "filters").glob("*.dat"))
     fs += [HERE / s for s in SOURCES] + [ROOT / "sobolev" / "photometry.py"]
+    fs += [f for f in (DOCS3 / "latex_tables.py", DOCS3 / "display_items.py") if f.exists()]
     return fs
 
 

@@ -3921,6 +3921,50 @@ the committed 0.80/0.31). The paper's Fig. 4b draws the per-key grid median
 and 16–84 % range of d_RT per band against ±0.5 and ±1 mag bands, keys
 with n < 5 greyed (J, H, K at 0.5 d; r at 5 d; z, J, H, K at 7 d).
 
+### 4.46 The manuscript: numbers as macros, budgets as checks (2026-09-03)
+
+`docs/paper3/` holds the Nature Astronomy manuscript and the tooling that
+keeps it honest. The chain is FROZEN.json → `latex_tables.py` → `numbers.tex`
+(121 `\newcommand` macros, one per quoted number, formatted in one place) +
+three table fragments (`tab_verdict`, `tab_grid`, `tab_scenarios`) →
+`manuscript.tex`, and FROZEN.json → `display_items.py` → eight figure files
+(four main, four Extended Data; 180 mm, 7 pt, Okabe–Ito, no timestamps).
+`freeze.py` runs both generators as part of the freeze, so their outputs are
+in FROZEN's output manifest and `--check --strict` regenerates and compares
+them (exit 0 on the current tree).
+
+`check_structure.py` (run by `make`) fails the build on: a missing required
+label; a section under 60 words; a figure or `\input` fragment missing on
+disk; a `\todo` outside its definition; a `numbers.tex` that is not the
+byte-identical regeneration from FROZEN; a generated macro never used in
+`manuscript.tex`/`si.tex`; a **literal result number in the prose** — "k of
+n", "k/n", a decimal with mag or %, a decimal range, an integer range in mag
+— unless the line ends `% literal-ok`, in which case the exemption is
+printed (12 today: the τ = 2/3 photosphere, the σ = 0.05/0.10 mag fit
+errors, the 23.5/21.5 mag depths, the 0.5 mag allowance); a retracted value
+(24 of 24, 166 of 170, 0.7 mag, the +0.33 T_eff reading, the pre-redo dense
+count); or a budget overrun (abstract ≤ 150, main ≤ 4000, Methods ≤ 3500,
+≤ 6 display items, ≤ 50 main-text references). Today: abstract 150, main
+2981, Methods 1558, 5 display items, 42 references. The two `\todo`s left —
+affiliation and repository URL — are the user's to fill and are the only
+check failures.
+
+Structure (main text, ~3000 words): 1 Introduction; 2 A same-code closure
+experiment; 3 Redistribution compresses, opacity does not (Fig. 1a–b); 4 A
+coherent chromatic bias across the grid (Fig. 1c, Fig. 2, Table 1; the
+chain-cap uncertainty in the text, 0.14–0.21 mag per band, signs 12 of 12,
+criterion 4 of 12); 5 Not a parameter degeneracy (Fig. 3a); 6
+Lanthanide-rich ejecta keep the residual (Fig. 3b–c; T1 by X; T2/T3 in one
+sentence; F47 worded narrowly); 7 Observable at 40 Mpc (Fig. 4a); 8 Against
+the model-error allowance (Fig. 4b; F49 wording); 9 Discussion (literature
+as consistency statements; limits; future work named). Methods carries the
+in-sample kernel, the 12.5 km/s bins, the calibrated atoms, the erratum
+sentence, the observing scenarios, the T_eff validation and the allowance
+construction; Data/Code availability point at FROZEN.json, the tag
+`paper3-freeze` and `freeze.py --check`. Headline amplitudes are quoted as
+`\HeadlineColourRange` = "1--3" mag (round-to-nearest of the 0.96–2.84
+per-model range), never finer.
+
 ## 5. Findings register
 
 | # | Finding | Where |
@@ -4045,7 +4089,7 @@ with n < 5 greyed (J, H, K at 0.5 d; r at 5 d; z, J, H, K at 7 d).
 # environment
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]" h5py
-pytest                    # 326 passed (2026-09-03)
+pytest                    # 347 passed (2026-09-03)
 
 # data (once): Zenodo 19335084 -> data/, see data/README.md
 # SEDONA (once): see lab_notebook.md "SEDONA build" entry
@@ -4122,6 +4166,10 @@ python paper3/freeze.py --check --strict       # four tiers: inputs, outputs, nu
 python paper3/phase12_grid/syserr.py           # syserr.json and the section 4.45.3 table
 python paper3/phase12_grid/grid_table.py --which all   # tables with value ± floor and the trapped fraction
 python paper3/phase12_grid/robustness.py table          # chain-cap table from robustness/chain_table.json
+
+# Paper III, the manuscript (section 4.46): numbers.tex + table fragments + figures come from FROZEN via freeze.py;
+# `make` builds manuscript.pdf and runs check_structure.py (fails only on the affiliation / repository-URL todos)
+cd docs/paper3 && make tables figures && make
 ```
 
 Long jobs: launch in the background with `python -u` and an **absolute** path

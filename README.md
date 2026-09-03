@@ -36,6 +36,16 @@ Source is [manuscript.tex](docs/paper/manuscript.tex); rebuild with
 [docs/sedona/SETUP.md](docs/sedona/SETUP.md) §4; conda-forge's texlive-core
 does not work).
 
+**[docs/paper3/manuscript.pdf](docs/paper3/manuscript.pdf)** — Paper III,
+Nature Astronomy Article format: *Coarse-grained line opacity leaves a
+detectable chromatic signature in kilonovae that ejecta parameters cannot
+mimic.* Every number in it is a macro generated from
+[paper3/FROZEN.json](paper3/FROZEN.json) (`docs/paper3/latex_tables.py`),
+every figure from the frozen JSONs (`docs/paper3/display_items.py`); `cd
+docs/paper3 && make` rebuilds it and runs a structure check that bans literal
+result numbers in the prose. The affiliation and repository URL are still
+placeholders.
+
 ## Findings
 
 | # | Finding | Detail |
@@ -109,7 +119,7 @@ paper3/        Paper III: the reduced redistribution closure (kernel,
                frozen reference, compression sweep, T and epoch transfer),
                the kilonova closure grid (phase12/13) and freeze.py +
                FROZEN.json, the frozen analysis the manuscript quotes
-tests/         326 tests pinning the physics of every module
+tests/         347 tests pinning the physics of every module
 docs/          results report, lab notebook, planning inputs, paper/
 data/          raw atomic data (gitignored; provenance in data/README.md)
 outputs/       working figures (gitignored; committed copies in docs/figures/)
@@ -122,7 +132,7 @@ Needs Python >= 3.10 and numpy >= 2, so a distro 3.8/3.9 will not do.
 ```bash
 python3 -m venv .venv              # or: conda create -p .venv python=3.12
 .venv/bin/python -m pip install -e ".[dev]" h5py
-.venv/bin/python -m pytest         # 326 passed (2026-09-03)
+.venv/bin/python -m pytest         # 347 passed (2026-09-03)
 ```
 
 Atomic data is not committed — see [data/README.md](data/README.md) for the

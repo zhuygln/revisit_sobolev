@@ -2526,6 +2526,39 @@ HEAD; then the regenerated set and FROZEN.json as the tagged commit
 `paper3-freeze`. Two commits, so FROZEN's inputs-dirty flag is false and the
 recorded HEAD is the commit whose drivers produced the numbers. 326 tests.
 
+## 9au. The manuscript, and a check that bans numbers (2026-09-03)
+
+*Numbers.* The rule was decided before a word was written: no result number
+appears in `manuscript.tex` as digits. `latex_tables.py` turns
+FROZEN.headline into 121 macros (`\GateTwoCB`, `\TOneCBXhigh`,
+`\ChainDmChange`...) with rounding in one table of formatters, plus the three
+table fragments; `\HeadlineColourRange` is the per-model range rounded to
+whole magnitudes ("1--3"), first rendered "0--3" by floor/ceil -- fixed to
+round-to-nearest. `check_structure.py` then greps the prose for "k of n",
+"k/n", decimals with mag or %, and ranges; a line may end `% literal-ok`
+and is printed for it. The first pass exempted 25 lines that matched
+nothing (definitions I had marked defensively) -- stripped so the exemption
+list means something. Definitions that do match (τ = 2/3, σ = 0.05/0.10 mag,
+depths, the 0.5 mag allowance) are the 12 that remain. One "of order 0.2 mag"
+for the chain-cap uncertainty was caught and replaced by the macro.
+
+*Two table bugs LaTeX only whispered about.* `tab_grid` had 13 cells in a
+12-column preamble and `tab_verdict` 10 in 9; pdflatex printed "Extra
+alignment tab has been changed to \cr" and produced a PDF anyway. Fixed and
+`_check_columns` added to the generator so a ragged row is an assertion, not
+a log line. Also a mid-line `% literal-ok` that commented out half a
+paragraph (six citations vanished from the count; noticed because the
+main-text citation tally dropped from 42 to 36 between two checker runs).
+Lesson repeated: an appended comment goes at the end of the *line*, and
+the checker's tallies are worth reading for drift, not only for failures.
+
+*Budgets.* Abstract 150/150 after one trim (160 first), main 2981/4000,
+Methods 1558/3500, 5 display items, 42 references. Figures render at ~150-
+160 mm because of the tight bounding box; the test accepts 130-180 mm.
+`freeze.py` now lists the two paper modules among its inputs and their
+outputs in the manifest; `--check --strict` 0 failures; 347 tests. Left as
+`\todo`: affiliation and repository URL -- the only two check failures.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,
