@@ -251,3 +251,21 @@ Not classifications, but the same kind of problem the audit exists to catch:
   pre-declared criterion fails (4 of 12) and is reported as failed, with the
   non-monotone cap dependence as the reason it does not indicate a
   systematic; the class half passes at all 27 points.
+- **F49 (§4.45)**: the σ_sys comparison. Driver
+  `paper3/phase12_grid/syserr.py`, data `syserr.json`, tests
+  `tests/test_syserr.py`. Classification: **derived, not measured** — no
+  new transport; every number is a statistic of `sensitivity.json`. The
+  design was corrected before code (masked rank-1 fit instead of a
+  ≥ 20-point SVD that would have kept seven optical keys; computed nulls
+  instead of an assumed 1/N), and both nulls are reported next to the
+  statistic (0.80 against 0.33 scrambled and 0.31 control). The T1
+  residual's weaker contrast (0.76 against 0.51) is printed, not hidden.
+  The claim is a consistency statement about the closure experiment; the
+  register row says so.
+- **The freeze (§4.45.1)**: `paper3/freeze.py`, `paper3/FROZEN.json`,
+  `tests/test_freeze.py`, tag `paper3-freeze`. Every number the manuscript
+  will quote is one of the 146 `headline` entries, regenerated from the
+  committed transport outputs and checked in four tiers; the strict check
+  (figures by hash) passes. The uncertainty convention (§4.45.2) is now
+  mechanical: the tables print value ± floor, and the chain-cap sentence
+  with its failed half accompanies every amplitude.

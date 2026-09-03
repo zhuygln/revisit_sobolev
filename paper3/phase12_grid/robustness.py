@@ -13,7 +13,8 @@ the reference and must be identical at every cap.
 
 Usage: python robustness.py chain --model model_M0.03_v0.05_X0.1 --t 3 --chain-max 2000 4000 8000
        python robustness.py chain ... --probe        (5000-packet reference timing only)
-       python robustness.py table
+       python robustness.py table          (Markdown from chain_summary)
+       python robustness.py summary        (chain_summary -> robustness/chain_table.json)
 """
 import argparse, json, sys, time
 from pathlib import Path
@@ -94,43 +95,114 @@ def chain(model, t_d, chain_maxes, probe=False, wall_budget_s=3600.0, verbose=Tr
     return rec
 
 
-def table(files=None):
+def _files(files=None):
     files = files or sorted(OUT.glob("chain_model_*.json"))
-    files = [f for f in files if not f.stem.endswith("_probe")]
-    print("| cell | chain_max | trapped (ref) | ref t (s) | leg | Δ(g−r) | Δ(i−J) | Δ(J−K) | max Δcol change vs 2000 (% of residual) |")
-    print("|---|---|---|---|---|---|---|---|---|")
-    summary = []
-    for f in files:
+    return [Path(f) for f in files if not Path(f).stem.endswith("_probe")]
+
+
+def chain_summary(files=None, base_cap="2000", rel_max=0.25):
+    """The chain-cap test as data (§4.44.3): per cell and cap, the reference's
+    trapped fraction, each leg's colour errors, the largest per-band change of the
+    reference magnitude and of the C_both/C_binned closure error against the grid's
+    cap, the relative change of each colour error and whether its sign is kept;
+    plus the pre-declared criterion (each colour error changes by < `rel_max` and
+    keeps its sign) tallied at the largest cap. Written to robustness/chain_table.json
+    by freeze.py; `table` renders it."""
+    cells = []
+    for f in _files(files):
         rec = json.loads(f.read_text())
         n3 = 3 * rec["n_used"]
-        cell = f"({rec['m_ej_msun']:g}, {rec['v_ej_c']:g}, {rec['x_lan']:g}) @ {rec['t_d']:g} d"
-        base = rec["runs"].get("2000")
+        base = rec["runs"].get(base_cap)
+        bands = list(rec["stored"]["ref"]["mags"])
+        cell = {"file": f.name, "model": rec["model"], "t_d": rec["t_d"],
+                "point": [rec["m_ej_msun"], rec["v_ej_c"], rec["x_lan"]], "n_used": rec["n_used"],
+                "floor_A_redist": max(abs(v) for v in rec["stored"]["legs"]["A_redist"]["dcolor"].values()),
+                "stored_matches_base": None, "runs": {}}
+        if base and "ref" in base:
+            cell["stored_matches_base"] = max(abs(base["ref"]["mags"][b] - rec["stored"]["ref"]["mags"][b])
+                                              for b in bands) < 1e-9
         for c, run in sorted(rec["runs"].items(), key=lambda kv: int(kv[0])):
-            if "ref" not in run:
-                print(f"| {cell} | {c} | — | — | — | {run['status']} | | | |"); continue
-            for leg in LEGS:
-                dc = run["legs"][leg]["dcolor"]
-                chg = ""
-                if base and "ref" in base and c != "2000":
-                    rel = [abs(dc[k] - base["legs"][leg]["dcolor"][k]) / max(abs(base["legs"][leg]["dcolor"][k]), 1e-9)
-                           for k in COLS]
-                    chg = f"{100*max(rel):.0f}"
-                    summary.append((cell, int(c), leg, max(rel),
-                                    all(np.sign(dc[k]) == np.sign(base["legs"][leg]["dcolor"][k]) for k in COLS)))
-                print(f"| {cell} | {c} | {run['ref']['n_trapped']/n3*100:.1f} % | "
-                      f"{run['timing']['reference']:.0f} | {leg} | "
-                      + " | ".join(f"{dc[k]:+.3f}" for k in COLS) + f" | {chg} |")
-    if summary:
-        worst = max(summary, key=lambda s: s[3])
-        print(f"\nworst change of a colour error vs chain 2000: {100*worst[3]:.0f} % "
-              f"({worst[0]}, chain {worst[1]}, {worst[2]}); signs preserved in "
-              f"{sum(s[4] for s in summary)}/{len(summary)} (cell, cap, leg) triples")
-    return summary
+            e = {"status": run["status"]}
+            if "ref" in run:
+                e.update(trapped_frac=run["ref"]["n_trapped"] / n3, t_ref_s=run["timing"]["reference"],
+                         legs={leg: {"dcolor": {k: run["legs"][leg]["dcolor"][k] for k in COLS},
+                                     "dm": dict(run["legs"][leg]["dm"])} for leg in LEGS})
+                if base and "ref" in base and c != base_cap:
+                    e["max_dm_ref_change"] = max(abs(run["ref"]["mags"][b] - base["ref"]["mags"][b]) for b in bands)
+                    e["B_opacity_mags_identical"] = all(run["legs"]["B_opacity"]["mags"][b] == base["legs"]["B_opacity"]["mags"][b]
+                                                        for b in bands)
+                    for leg in LEGS:
+                        dc, dc0 = run["legs"][leg]["dcolor"], base["legs"][leg]["dcolor"]
+                        el = e["legs"][leg]
+                        el["max_dm_change"] = max(abs(run["legs"][leg]["dm"][b] - base["legs"][leg]["dm"][b]) for b in bands)
+                        el["rel"] = {k: abs(dc[k] - dc0[k]) / max(abs(dc0[k]), 1e-9) for k in COLS}
+                        el["sign_kept"] = {k: bool(np.sign(dc[k]) == np.sign(dc0[k])) for k in COLS}
+                        el["criterion_met"] = {k: bool(el["rel"][k] < rel_max and el["sign_kept"][k]) for k in COLS}
+            cell["runs"][c] = e
+        cells.append(cell)
+    caps = sorted({c for cell in cells for c in cell["runs"]}, key=int)
+    top = caps[-1] if caps else None
+    summ = {"n_cells": len(cells), "base_cap": base_cap, "top_cap": top, "rel_max": rel_max,
+            "trapped_range_base": _rng([cell["runs"][base_cap]["trapped_frac"] for cell in cells
+                                        if "trapped_frac" in cell["runs"].get(base_cap, {})]),
+            "trapped_range_top": _rng([cell["runs"][top]["trapped_frac"] for cell in cells
+                                       if top and "trapped_frac" in cell["runs"].get(top, {})]),
+            "floor_range": _rng([cell["floor_A_redist"] for cell in cells]),
+            "stored_reproduced": all(cell["stored_matches_base"] for cell in cells)}
+    for leg in LEGS:
+        at_top = [cell["runs"][top]["legs"][leg] for cell in cells if top and "legs" in cell["runs"].get(top, {})]
+        every = [cell["runs"][c]["legs"][leg] for cell in cells for c in cell["runs"]
+                 if c != base_cap and "legs" in cell["runs"][c]]
+        summ[leg] = {"dm_change_range_top": _rng([e["max_dm_change"] for e in at_top]),
+                     "dm_change_range_all_caps": _rng([e["max_dm_change"] for e in every]),
+                     "signs_kept_top": [sum(sum(e["sign_kept"].values()) for e in at_top), len(COLS) * len(at_top)],
+                     "criterion_met_top": [sum(sum(e["criterion_met"].values()) for e in at_top), len(COLS) * len(at_top)],
+                     "worst_rel_top": max((max(e["rel"].values()) for e in at_top), default=None)}
+    summ["dm_ref_change_range_top"] = _rng([cell["runs"][top]["max_dm_ref_change"] for cell in cells
+                                            if top and "max_dm_ref_change" in cell["runs"].get(top, {})])
+    return {"cols": list(COLS), "legs": list(LEGS), "cells": cells, "summary": summ}
+
+
+def _rng(v):
+    v = [float(x) for x in v if x is not None]
+    return [min(v), max(v)] if v else None
+
+
+def table(files=None, data=None):
+    """Markdown rendering of `chain_summary` (report §4.44.3)."""
+    data = data or chain_summary(files)
+    base_cap = data["summary"]["base_cap"]
+    print("| cell | chain_max | trapped (ref) | ref t (s) | leg | Δ(g−r) | Δ(i−J) | Δ(J−K) | max \\|Δm_ref\\| vs base | max \\|Δ(Δm_b)\\| vs base | max Δcol change (% of residual) | floor (A) |")
+    print("|---|---|---|---|---|---|---|---|---|---|---|---|")
+    for cell in data["cells"]:
+        name = f"({cell['point'][0]:g}, {cell['point'][1]:g}, {cell['point'][2]:g}) @ {cell['t_d']:g} d"
+        for c, run in cell["runs"].items():
+            if "legs" not in run:
+                print(f"| {name} | {c} | — | — | — | {run['status']} | | | | | | |"); continue
+            for leg in data["legs"]:
+                el = run["legs"][leg]
+                chg = f"{100*max(el['rel'].values()):.0f}" if "rel" in el else "–"
+                dref = f"{run['max_dm_ref_change']:.2f}" if "max_dm_ref_change" in run else "–"
+                dleg = f"{el['max_dm_change']:.2f}" if "max_dm_change" in el else "–"
+                print(f"| {name} | {c} | {100*run['trapped_frac']:.1f} % | {run['t_ref_s']:.0f} | {leg} | "
+                      + " | ".join(f"{el['dcolor'][k]:+.3f}" for k in data["cols"])
+                      + f" | {dref} | {dleg} | {chg} | {cell['floor_A_redist']:.2f} |")
+    s = data["summary"]; top = s["top_cap"]
+    for leg in data["legs"]:
+        t = s[leg]
+        print(f"\n{leg} at cap {top}: per-band change {t['dm_change_range_top'][0]:.2f}–{t['dm_change_range_top'][1]:.2f} mag, "
+              f"signs kept {t['signs_kept_top'][0]}/{t['signs_kept_top'][1]}, < {100*s['rel_max']:.0f} % criterion met "
+              f"{t['criterion_met_top'][0]}/{t['criterion_met_top'][1]}, worst change {100*t['worst_rel_top']:.0f} %")
+    print(f"reference trapped {100*s['trapped_range_base'][0]:.1f}–{100*s['trapped_range_base'][1]:.1f} % at cap {base_cap}, "
+          f"{100*s['trapped_range_top'][0]:.1f}–{100*s['trapped_range_top'][1]:.1f} % at cap {top}; "
+          f"stored rows reproduced at cap {base_cap}: {s['stored_reproduced']}")
+    return data
 
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=("chain", "table"))
+    ap.add_argument("cmd", choices=("chain", "table", "summary"))
+    ap.add_argument("--out", default=str(OUT / "chain_table.json"))
     ap.add_argument("--model", default=None)
     ap.add_argument("--t", type=float, default=None)
     ap.add_argument("--chain-max", type=int, nargs="+", default=[2000, 4000, 8000])
@@ -139,5 +211,8 @@ if __name__ == "__main__":
     a = ap.parse_args()
     if a.cmd == "chain":
         chain(a.model, a.t, a.chain_max, probe=a.probe, wall_budget_s=a.wall_budget)
-    else:
+    elif a.cmd == "table":
         table()
+    else:
+        Path(a.out).write_text(json.dumps(chain_summary(), indent=1))
+        print("wrote", a.out)

@@ -3743,6 +3743,184 @@ number; their value is the X-derivative they supply to the X = 10⁻² points,
 which turned the central point from underdetermined into the clearest
 single case (N = 17, C-B under every space).
 
+### 4.45 The freeze, the uncertainty convention, and the closure error against the model-error allowance (F49)
+
+*Why this section exists.* The scientific case for Paper III was judged
+complete on 2026-09-03 (§4.44, F48); what remained before a manuscript was
+bookkeeping with teeth: one commit from which every headline number,
+table and figure regenerates, an uncertainty statement printed next to
+every amplitude the paper quotes, and one comparison that had not been made
+— the closure error against the generic "systematic-error allowance"
+σ_sys ≈ 0.5–1 mag that kilonova light-curve inference adds in quadrature to
+its photometric errors. None of this is a new simulation; every number
+below is computed from the JSONs already committed for §4.40–§4.44.
+
+#### 4.45.1 The freeze
+
+`paper3/freeze.py` imports the drivers (`sensitivity`, `robustness`,
+`grid_table`, `observe`, `tscale`, `figures`, `syserr`) and, with the
+working directory set to `paper3/phase12_grid`, regenerates in one pass:
+the six `sensitivity*.json` variants plus `sensitivity_chain8000.json`
+(the §4.44.3 override run, until now only in a scratch directory, and
+regenerated rather than copied — its override paths are the relative
+strings `robustness/chain_model_*_t[0-9].json`), `robustness/chain_table.json`
+(the §4.44.3 table as data, `robustness.chain_summary()`),
+`grid_table.json` (the §4.40/§4.44 tables as data, `grid_table.summary()`),
+`observability.json` and Fig. 5, `tscale.json` and Fig. 7, Figs. 2, 4 and 6,
+and `syserr.json` (§4.45.3). It then writes `paper3/FROZEN.json`: the git
+HEAD, whether any *input* is modified in the working tree, the
+`git rev-parse HEAD:<dir>` tree hashes of `grid/`, `grid/tscale/`,
+`robustness/` and `data/filters/` (identical before and after the freeze
+commit, since HEAD is its parent), the UTC time and library versions, the
+sha256 of every input (27 + 4 + 5 transport JSONs, 7 passbands, 10 driver
+sources) and of every derived output (12 JSONs, 10 figure files), and a flat
+`headline` dict of 146 numbers — every count, median, range and fraction
+the manuscript will quote, keyed `gate2.T1.cb_by_X`, `chain.criterion_met`,
+`syserr.one_mode.C_both`, and so on. The manuscript's `numbers.tex` (commit
+10) is generated from that dict, so a number that is not in `FROZEN.headline`
+cannot appear in the paper.
+
+`freeze.py --check` verifies a checkout in four tiers: (a) every input
+hashes as frozen and no input is missing from the manifest; (b) every
+committed output hashes as frozen (a hand-edited table fails here);
+(c) everything is regenerated into a scratch directory and every JSON is
+compared to the committed one *numerically* — a recursive walk with
+`math.isclose(rel_tol=1e-9, abs_tol=1e-12)`, NaN equal to NaN
+(`chi2_res_dof` at dof 0, dead-column cosines), key sets equal, and the
+condition number `cond` compared at 1e-6 because the near-singular normal
+matrices are BLAS-dependent; (d) `headline()` recomputed from the
+regenerated set equals `FROZEN.headline`. Figures are compared by hash and a
+mismatch is a warning unless `--strict`; with `SOURCE_DATE_EPOCH` fixed the
+PDFs and PNGs are byte-stable within one environment, and the strict check
+passes here (0 failures, 0 warnings, 73 s). The freeze run itself confirmed
+that the regenerated `sensitivity*.json`, `observability.json` and
+`tscale.json` are numerically identical to the committed ones (the only
+difference, `override_chain: 8000 → null`, is the CLI default recorded in a
+provenance field). The commit carrying the regenerated set is tagged
+`paper3-freeze`; the tag moves with commits 10 and 11.
+
+#### 4.45.2 The uncertainty convention
+
+Two statements now accompany every amplitude, and they are different
+things.
+
+*The Monte-Carlo floor, per cell.* Every colour and magnitude error in
+`grid_table.py`'s tables is printed as value ± floor, the floor being that
+cell's worst live |Δm| of A_redist — the leg that changes the
+redistribution bookkeeping and nothing physical, so its per-band error is
+the harness's own noise at that cell (§4.40). On the 62 cells with
+n_used ≥ 10⁵ the floor is 0.021 mag median, 0.044 at the 90th percentile,
+0.178 at most; on the nine redone cells (2 × 10⁴ packets) it is 0.13–0.53
+mag, and those cells are quoted with that floor beside them, never
+without. The tables also carry the trapped fraction per cell (reference
+packets thermalized by the chain cap, `n_trapped / 3 n_used`).
+
+*The chain cap, one sentence.* Wherever a 1–3 mag amplitude is quoted the
+sentence that goes with it is: **the chain cap moves single-band closure
+errors by ≤ 0.21 mag (0.14–0.21 at cap 8000, measured 2000 → 8000 at the
+four cells with the highest reference trapped fraction, 10.5–13.8 %, which
+the higher cap reduces to 2.8–3.2 %); every other cell has a lower trapped
+fraction; the sign of every C_both colour error (12 of 12) and the class at
+every point (27 of 27, medians R 0.83 / χ²_res/dof 116 with the four cells
+substituted) are unchanged; the pre-declared < 25 % magnitude criterion
+was met at 4 of 12 colours and failed at the 8 with |Δcolour| < 0.45 mag,
+which is inside those cells' 0.14–0.25 mag floor.** Headline amplitudes are
+quoted as ranges ("1–3 mag in colour", "0.96–2.84 mag worst colour error
+per model"), never to a precision the cap does not support; the class and
+the signs are the claims, the third decimal is not.
+
+#### 4.45.3 The closure error against the σ_sys allowance
+
+Kilonova light-curve inference commonly adds a "systematic" or
+"model-error" term σ_sys of 0.5–1 mag in quadrature to every photometric
+point, to stand in for whatever the radiative-transfer model gets wrong. The
+question `paper3/phase12_grid/syserr.py` answers is whether the closure
+error measured here looks like such a term: an unstructured allowance is
+uncorrelated between bands and epochs, symmetric in sign, and comparable to
+σ_sys in size. The input is `sensitivity.json` (T0): the live d_RT vector
+of every point, in magnitudes, unweighted — the allowance is in magnitudes,
+so no σ is applied — arranged as a 27-point × 38-key matrix
+(38 = the (band, epoch) keys live anywhere; 524 live entries for every leg,
+since the mask is the reference's).
+
+*Size.* 56 % of the 524 live C_both entries exceed 0.5 mag and 18 % exceed
+1 mag (C_binned 60 %, 22 %; A_redist 0 %, 0 %). The per-point
+χ²-equivalent Σ(d_RT/σ_sys)²/N — what the residual would contribute to a
+fit's χ²/N if the allowance were the only error — has grid median 0.56 at
+σ_sys = 1 mag (range 0.12–1.74) and 2.26 at 0.5 mag; for A_redist it is
+0.00 at either. So a 1 mag allowance would, on average, just absorb the
+error on this grid; a 0.5 mag allowance would not.
+
+*Structure.* Three tests, none of which an unstructured term passes. (i)
+Sign pattern: of the 39 coepochal live (g, K) pairs on the grid, 39 have
+d_RT(g) < 0 and d_RT(K) > 0 for C_both (38 for C_binned; 12 for A_redist,
+consistent with chance). (ii) One-mode fraction: a masked rank-1 fit on all
+524 live entries (alternating normal equations, 200 iterations, `v₀` the
+per-key median) captures f₁ = 0.80 of the squared Frobenius norm of the
+C_both matrix — the matrix is uncentred, so the coherent mean *is* the
+mode — and 0.77 for C_binned; a median-filled SVD on the 24 keys live at
+≥ 10 points gives 0.82 and 0.80. The mode's shape is the §4.44 picture in
+one vector: negative in g, r, i, z and positive in J, H, K at every epoch,
+growing redward. (iii) Two nulls: A_redist through the same construction
+gives 0.31 (SVD 0.22), and sign-scrambling the C_both entries (each entry
+× a random ±1, 1000 draws, seed 0 — amplitude and mask preserved, sign
+coherence destroyed) gives median 0.33, 95th percentile 0.36, maximum 0.40.
+The Marchenko–Pastur scale of an iid 27 × 38 matrix's first singular value,
+(√m + √n)²/(mn), is 0.16; the nulls sit above it because the mask and the
+per-key amplitudes are far from iid, which is why they are computed rather
+than assumed. C_both at 0.80 is twice its own scrambled null and 2.6× the
+control leg; per point, the first mode carries a median 0.82 of each
+point's squared norm.
+
+*After the luminosity history.* The same statistics on the T1 residual
+`d_RT − Σ a_θ d_θ` (§4.41, §4.44): 523 live entries, 51 above 0.5 mag and
+15 above 1 mag, χ²-equivalent 0.11 at 1 mag, one-mode fraction 0.76 against
+a scrambled null of 0.51 (the residual's amplitude is concentrated in fewer
+entries, so its null is higher and the contrast weaker). What a free
+luminosity history leaves behind is smaller than the allowance and still
+not unstructured.
+
+*What this does and does not say.* It is a consistency statement about a
+same-code closure experiment, not evidence that any published inference is
+affected: the grid is one heating-powered one-zone source with a grey
+photosphere and four ions, and σ_sys is meant to cover more than line
+transport. The narrow statement that the numbers support is: **a
+substantial part of what is often represented as an unstructured
+model-error allowance can arise from a specific, coherent transport
+approximation with a predictable blue/NIR signature** — 56 % of live
+observables beyond 0.5 mag, 80 % of the error's squared norm in one
+(band, epoch) mode against a 0.33 null, and the (g < 0, K > 0) sign pattern
+at 39 of 39 pairs. An allowance that is added in quadrature and assumed
+symmetric cannot represent that; a correlated, signed term could.
+
+**F49 — On the 27-point grid the C_both closure error exceeds 0.5 mag at
+56 % of the 524 live (band, epoch) observables (18 % beyond 1 mag), is
+signed (d_RT(g) < 0 and d_RT(K) > 0 at 39 of 39 coepochal pairs), and is
+one-mode (0.80 of its squared norm in a single band-epoch pattern, against
+0.33 for the sign-scrambled null and 0.31 for the redistribution-only
+control); per point it contributes a median χ²/N of 0.56 to a fit carrying
+a 1 mag systematic allowance and 2.26 with 0.5 mag.** A substantial part of
+what is represented as an unstructured model-error allowance can arise
+from one coherent transport approximation with a predictable blue/NIR
+signature; this is a consistency statement about the closure experiment,
+not a claim about any published fit.
+
+| leg | live | > 0.5 mag | > 1 mag | (g < 0, K > 0) pairs | one-mode f₁ | SVD (24 keys) | scrambled null median / 95 % | χ²/N at 1 mag (median, range) | at 0.5 mag |
+|---|---|---|---|---|---|---|---|---|---|
+| C_both | 524 | 0.56 | 0.18 | 39/39 | 0.80 | 0.82 | 0.33 / 0.36 | 0.56 (0.12–1.74) | 2.26 |
+| C_binned | 524 | 0.60 | 0.22 | 38/39 | 0.77 | 0.80 | 0.28 / 0.32 | 0.67 (0.18–1.59) | 2.68 |
+| A_redist | 524 | 0.00 | 0.00 | 12/39 | 0.31 | 0.22 | 0.33 / 0.38 | 0.00 (0.00–0.04) | 0.01 |
+| C_both, T1 residual | 523 | 0.10 | 0.03 | 13/39 | 0.76 | — | 0.51 | 0.11 | — |
+
+Data `paper3/phase12_grid/syserr.json`; driver `syserr.py` (~1 min, the
+scrambled null dominates); tests `tests/test_syserr.py` (rank-1 recovery
+under a 40 % mask, scrambled rank-1 far below 1, iid noise within 2× of the
+Marchenko–Pastur scale and masked fit = SVD when there are no gaps,
+threshold fractions and the sign pattern on hand vectors, χ² ∝ σ⁻², and
+the committed 0.80/0.31). The paper's Fig. 4b draws the per-key grid median
+and 16–84 % range of d_RT per band against ±0.5 and ±1 mag bands, keys
+with n < 5 greyed (J, H, K at 0.5 d; r at 5 d; z, J, H, K at 7 d).
+
 ## 5. Findings register
 
 | # | Finding | Where |
@@ -3789,15 +3967,28 @@ single case (N = 17, C-B under every space).
 | F40 | **A realistic kilonova crosses the cancellation boundary at 1.2 days.** Homologous ejecta (ρ ∝ t⁻³, T ∝ t⁻¹ᐟ², X_lan = 0.1) sweep band saturation across four orders of magnitude in n_ion, and the practical grouped closure runs **+64.6% too bright at 0.5 d → zero at 1.17 d → −28.4% too opaque at 1.5 d** — ninety points across a factor of three in time, straddling the epoch kilonova spectra are taken. The crossing occurs at **S = 47.5**, matching the boundary located independently at S ≈ 50 by a density scan, a 13-ion survey and a controlled synthetic forest: a fourth confirmation from a different construction. Stated carefully, the zero here is the *opacity* error changing sign (B crosses at 1.21 d) rather than two large errors cancelling, with |A| ≤ 2.1% throughout; the cancellation mechanism is separately visible at 2 d, where the binned closure reads −1.1% while its opacity piece alone reads −4.1%. Either way: **near-zero residual at one epoch is not evidence a closure is correct** **La II on the same history sharpens it**: at 0.75 d the expansion closure reads **+0.1%** while the binned closure reads **−55.7%** — same epoch, same ejecta, same atom, differing only in whether a bin carries Σ(1−e^−τ) or Στ. One looks exact, the other is wrong by more than half. | §4.36 |
 | F41 | **The closure error is chromatic, not bolometric, and the diagnostic band residual is a proxy for neither.** Converting §4.36's ejecta history into absolute L_ν, escaping luminosity and AB magnitudes: the grouped-**redistribution** approximation is invisible to an observer — worst \|Δm\| of **0.006 / 0.008 / 0.008 mag** on Ce II, La II and a four-ion blend — so F25/F27's kernel compression costs less than a photometric error bar. The grouped-**opacity** approximation is five times larger in colour than in luminosity: Ce II at 0.5 d is **0.14 mag too bright bolometrically and 0.74 mag wrong in g−r**, because the closure moves flux between bands rather than creating or destroying it. And the 3800–3955 Å residual carrying every result from §4.23 to §4.36 tracks neither — **−59.5% in band is +0.007 mag bolometric** (La II binned, 0.75 d), −26.0% is photometrically invisible (Ce II, 2 d), and +55% is 0.46 mag in g (Ce II, 0.5 d). Two defensible groupings give **opposite colour errors 0.15 mag apart at one epoch on one atom**. Every magnitude is a floor: at fixed saturation the photometric error grows **34× (La) to 67× (Ce) from Paper I's 0.01c to a kilonova's 0.3c** while Δm_bol stays under 0.011 mag, and it survives the worldline transport treatment, which changes the band residual by a factor of 4 and the magnitudes not at all. On a **physically normalized** kilonova — M_ej = 0.01 M⊙, v = 0.05–0.2c, X_lan = 10⁻³, ρ derived from the mass rather than tuned, worldline — the practical closure is **0.06 mag bolometric and 0.63–0.77 mag in a band or colour**, and at 3 d its binned variant is bolometrically **exact** while 0.74 mag wrong in r−i. The band diagnostic runs out of signal from 4 d on, exactly where the photometric error is still tenths of a magnitude | §4.37 |
 | F42 | **The chromatic closure error survives real filter curves, and the three notebook-only findings reproduce.** Re-photometering the committed F41 spectra through SVO DECam g r i z + 2MASS J H Ks (no packets re-run) keeps every ≥ 0.6 mag top-hat colour error at 0.65–0.77 mag (Ce II and the blend, g−r at 0.5 d) and the blue kilonova's binned leg at 0.69 mag — moving *which* colour is worst (g−r → i−J) but not its size — while the A_redist floor stays ≤ 0.009 mag. Gate 1 passes. Separately: the Ce II density scan reproduces with three seeds (crossing S = 55.7, five of six points within 7 points of the single-seed numbers), the F38 table is generated from `survey.json` (Pr II interaction −6.4%), and the F39 exit-τ scan has a driver and a data file (crossings S = 179.6 / 689.0 at τ_x = 0.5 / 2.0; dlnlam is inert at delocalize = 1). | §4.38 |
-| F43 | **On a heating-powered kilonova the grouped-opacity closure's colour error is 1–3 mag at every point of a 27-model (M_ej, v_ej, X_lan) grid, and its sign is uniform: too blue.** Four-ion blend, worldline transport, DECam + 2MASS at 40 Mpc, 162 epochs (153 ran, 9 X_lan = 0.1 early epochs over budget). Worst live colour error per model 0.96–2.84 mag (C_both; C_binned 1.24–3.05) against an A_redist floor of 0.02–0.13 mag on the well-sampled models; the central model runs from Δ(J−K) = −0.6 mag at 0.5 d to −1.9 mag at 3 d with Δ(g−r) inside −0.4 mag. 166 of 170 live NIR colour errors are negative: the closure's g is 0.2–2.1 mag too bright and its K up to 3.6 mag too faint. Every leg has the same L_bol by construction (conserving core); the absorbing-core Δm_bol of −0.5 to −3.9 mag is inner-boundary bookkeeping, and the harness makes no bolometric statement at S ≳ 10⁴. | §4.40 |
+| F43 | **On a heating-powered kilonova the grouped-opacity closure's colour error is 1–3 mag at every point of a 27-model (M_ej, v_ej, X_lan) grid, and its sign is uniform: too blue.** Four-ion blend, worldline transport, DECam + 2MASS at 40 Mpc, 162 epochs (153 ran, 9 X_lan = 0.1 early epochs over budget). Worst live colour error per model 0.96–2.84 mag (C_both; C_binned 1.24–3.05) against an A_redist floor of 0.02–0.13 mag on the well-sampled models; the central model runs from Δ(J−K) = −0.6 mag at 0.5 d to −1.9 mag at 3 d with Δ(g−r) inside −0.4 mag. 166 of 170 live NIR colour errors are negative: the closure's g is 0.2–2.1 mag too bright and its K up to 3.6 mag too faint. Every leg has the same L_bol by construction (conserving core); the absorbing-core Δm_bol of −0.5 to −3.9 mag is inner-boundary bookkeeping, and the harness makes no bolometric statement at S ≳ 10⁴. Completed-grid counts in F48 (195 of 199 NIR colour errors negative); the chain-cap sentence and the ± floor convention that accompany every amplitude are in §4.45.2 | §4.40, §4.44, §4.45 |
 | F44 | **Gate 2: the closure error is not degenerate with (M_ej, v_ej, X_lan) — class C-B, distinct residual, at all 24 analysable grid points, for every opacity closure, under every robustness variant.** χ²_RT/N = 28–549 (detectable), weighted residual fraction R = 0.46–1.00 after the best three-parameter shift (0.60–1.00 on the 20 well-sampled points), χ²_res/N = 17–373; the same class with σ doubled, one-sided derivatives and a 3 % band cut. The fitted shifts are median \|Δln M\| = 0.25, \|Δln v\| = 0.25, \|Δln X_lan\| = 0.95, so the error has a component along every parameter, but it leaves most of itself behind. A_redist is C-C (undetectable) at 23 of 24. Three X_lan = 0.1 points are unanalysable (mask intersection empty); R is against a one-zone model's three parameters, so C-B is an upper bound on distinctness. | §4.40 |
 | F45 | **F43/F44 survive the floor mask and the core convention (chain cap: §4.44); a free luminosity history absorbs the residual as a *class* but not as a *misfit*.** Erratum: the §4.40 floor mask was a no-op (27 floored rows in 12 models); with it real, Gate 2 is C-B at 20 of 21 analysable points (median R 0.77, χ²_res/dof 105), no class changed where both rules apply. Colours are exactly convention-invariant; the absorbing core moves three faint, few-band points to C-A through a grey per-epoch term. The chain-cap check (4 cells × chain_max 2000/4000/8000 at the stored n_used; §4.44.3) passes the determinism check (B_opacity identical, chain 2000 reproduces the stored magnitudes exactly) and moves single-band closure errors by 0.14–0.21 mag at the four worst-trapped cells — the reference's own shift, inside those cells' noise floor and non-monotone in the cap — with the class kept at all 27 points and the colour signs kept; the < 25 % magnitude criterion is met at only 4 of 12 colours there, so the sub-0.5-mag colour errors at those cells are not individually robust. One free grey magnitude per epoch (T1) takes median R to 0.28 and 12 of 19 points to C-A by the pre-declared rule — at the cost of 1–7 mag luminosity offsets, parameter shifts at or beyond the grid spacing, and a leftover χ²_res/dof of 23 (median; 17 of 19 above 4); a free photospheric temperature (Δln T = +0.33 median: the closure looks 40 % hotter) and a linearized blue component (T3) take R to 0.21 with χ²_res/dof 8. The A_redist floor from cells with n_used ≥ 10⁵ is 0.021 mag (median), 0.044 (90 %). | §4.41 |
 | F46 | **Gate 3: every scenario detects the closure error at every eligible point (χ²_RT,obs/N = 41–1005; 30–40σ in single bands at real errors) and it survives the ejecta parameters everywhere (18/18 dense, 11/11 sparse, 16/16 optical); under a free luminosity history its survival is set by the NIR — 9/18 with six-epoch JHK (all four X = 0.1 points), 3/8 with two NIR epochs, 1/15 without NIR.** The NIR carries only 31 % of χ²_RT,obs (g and r the most): detection is optical, distinctness is NIR. After the T1 fit the leftover is still χ²_res/dof > 4 at 18/18 dense points. Counts on the complete grid: §4.44 (26/26, 18/18, 25/25; T1 18/26 dense). | §4.42, §4.44 |
 | F47 | **The Planck temperature proxy of T2 is validated as a *gas*-temperature direction (cosine 0.92 with the measured transport response at the central point, 0.96–1.00 per epoch) with a lever arm 1.35× (2× at ≤ 1 d) larger than assumed; the illumination temperature alone does not reach the observer (a ×1.5625 change in the launch temperature moves no live band by more than the 0.13 mag noise floor, ‖d_T^MC‖ = 0.06 of the proxy); and the central point stays C-B with the measured direction (R 0.37, χ²_res/dof 46–49).** The closure residual is not a photospheric-temperature error. Four model runs (`--t-scale 0.8/1.25`, with and without `--t-scale-gas`), `tscale.py`, fig7. | §4.43 |
 | F48 | **With the grid complete (162 of 162 cells; nine early X = 0.1 epochs redone at a 5400 s budget), Gate 2 is C-B at 27 of 27 points (median R 0.83, χ²_res/dof 118) and Gate 3 at 26/26, 18/18, 25/25 eligible points under the ejecta parameters; a free luminosity history absorbs the residual at 8 of 9 lanthanide-poor points and 0 of 9 lanthanide-rich ones, and at real errors the residual survives that history at 16 of 17 `dense` X ≥ 10⁻² points.** The redone cells are the noisiest in the grid (A_redist floor 0.13–0.53 mag) and change no F43 number; 195 of 199 live NIR colour errors are negative. Chain cap (four worst-trapped cells, 2000 → 8000): per-band changes of 0.14–0.21 mag, equal to the reference's own shift and the cells' noise floor, non-monotone in the cap; signs kept at 12 of 12 C_both colours, the < 25 % magnitude criterion met at only 4 of 12 (the 0.1–0.45 mag colours fail it), class C-B kept at all 27 points (largest move R 0.82 → 0.56 at (0.01, 0.05, 0.1)); grid medians R 0.83, χ²_res/dof 116. Supersedes the counts of F44–F46. | §4.44 |
+| F49 | **The closure error is a coherent, signed, one-mode pattern the size of the σ_sys allowance:** C_both exceeds 0.5 mag at 56 % of 524 live observables (18 % beyond 1 mag), (g < 0, K > 0) at 39/39 coepochal pairs, 0.80 of its squared norm in one band-epoch mode against a 0.33 sign-scrambled null and 0.31 for A_redist; median χ²/N 0.56 against a 1 mag allowance, 2.26 against 0.5 mag. A consistency statement about the closure experiment, not a claim about any published fit | §4.45 |
 
 ## 6. Caveats and limitations
 
+- **Paper III amplitudes carry two uncertainties, and the third decimal is
+  not a claim.** Every colour and magnitude error is quoted against its
+  cell's A_redist floor (0.021 mag median on the 62 well-sampled cells,
+  0.13–0.53 on the nine redone ones) and against the chain cap, which moves
+  single-band errors by ≤ 0.21 mag at the four worst-trapped cells and
+  failed the pre-declared < 25 % criterion at 8 of 12 colours there
+  (§4.44.3, §4.45.2). The classes, the colour signs and the 1–3 mag
+  amplitudes are the claims; sub-0.5 mag colour errors at 2 × 10⁴-packet
+  cells are not individually robust. The σ_sys comparison (§4.45.3) is a
+  consistency statement about this closure experiment — one source model,
+  a grey photosphere, four ions — and says nothing about whether any
+  published inference is affected.
 - **Both treatments are now measured, but not in a scattering code.** F9
   measures the Sobolev approximation proper alongside the expansion-opacity
   implementation. The Sobolev leg is *analytically exact* here **only because
@@ -3854,7 +4045,7 @@ single case (N = 17, C-B under every space).
 # environment
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]" h5py
-pytest                    # 306 passed (2026-09-03)
+pytest                    # 326 passed (2026-09-03)
 
 # data (once): Zenodo 19335084 -> data/, see data/README.md
 # SEDONA (once): see lab_notebook.md "SEDONA build" entry
@@ -3924,6 +4115,13 @@ python paper3/phase12_grid/tscale.py --fig                           # tscale.js
 # Paper III phase 12, completing the grid (section 4.44); nine cells, 35-70 min each
 OMP_NUM_THREADS=1 python paper3/phase12_grid/run_grid.py --redo over_budget --budget 5400 --workers 8
 python paper3/phase12_grid/run_grid.py --merge-redo                  # then rerun sensitivity/grid_table/figures/observe above
+
+# Paper III, the freeze (section 4.45): every derived JSON, table and figure from the committed transport outputs
+python paper3/freeze.py                        # ~75 s; writes paper3/FROZEN.json (hashes + the 146 headline numbers)
+python paper3/freeze.py --check --strict       # four tiers: inputs, outputs, numeric regeneration, headline; exit 0 on the tag paper3-freeze
+python paper3/phase12_grid/syserr.py           # syserr.json and the section 4.45.3 table
+python paper3/phase12_grid/grid_table.py --which all   # tables with value ± floor and the trapped fraction
+python paper3/phase12_grid/robustness.py table          # chain-cap table from robustness/chain_table.json
 ```
 
 Long jobs: launch in the background with `python -u` and an **absolute** path

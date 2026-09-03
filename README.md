@@ -88,6 +88,7 @@ does not work).
 | F46 | **Gate 3: every scenario detects the closure error at every eligible point (χ²_RT,obs/N = 41–1005; 30–40σ in single bands at real errors) and it survives the ejecta parameters everywhere (18/18 dense, 11/11 sparse, 16/16 optical); under a free luminosity history its survival is set by the NIR — 9/18 with six-epoch JHK (all four X = 0.1 points), 3/8 with two NIR epochs, 1/15 without NIR.** Counts on the complete grid: §4.44. | [§4.42](docs/results_report.md) |
 | F47 | **The Planck temperature proxy is validated as a *gas*-temperature direction (cosine 0.92 with the measured transport response, lever arm 1.35× larger), the illumination temperature alone does not reach the observer (‖d_T^MC‖ = 0.06 of the proxy, every band within the 0.13 mag noise floor), and the central point stays C-B with the measured direction (R 0.37).** The closure residual is not a photospheric-temperature error. | [§4.43](docs/results_report.md) |
 | F48 | **With the grid complete (162 of 162 cells), Gate 2 is C-B at 27 of 27 points (median R 0.83, χ²_res/dof 118) and Gate 3 at 26/26, 18/18, 25/25 eligible points; a free luminosity history absorbs the residual at 8 of 9 lanthanide-poor points and 0 of 9 lanthanide-rich ones, and at real errors the residual survives it at 16 of 17 `dense` X ≥ 10⁻² points.** The chain cap moves single bands by 0.14–0.21 mag at the four worst-trapped cells (their own noise floor, non-monotone in the cap); class kept at all 27 points, colour signs kept, the < 25 % magnitude criterion met at 4 of 12 colours there. | [§4.44](docs/results_report.md) |
+| F49 | **The closure error is a coherent, signed, one-mode pattern the size of the σ_sys allowance:** C_both exceeds 0.5 mag at 56 % of 524 live observables (18 % beyond 1 mag), (g < 0, K > 0) at 39/39 coepochal pairs, 0.80 of its squared norm in one band-epoch mode against a 0.33 sign-scrambled null and 0.31 for A_redist; median χ²/N 0.56 against a 1 mag allowance, 2.26 against 0.5 mag. A consistency statement about the closure experiment, not a claim about any published fit. Every number the paper quotes is frozen in `paper3/FROZEN.json` (`freeze.py --check`, tag `paper3-freeze`) | [§4.45](docs/results_report.md) |
 
 Full write-up with figures and numbers:
 **[docs/results_report.md](docs/results_report.md)**.
@@ -105,8 +106,10 @@ paper2/        Paper II: Phase 0 (SEDONA audit, TARDIS record, three-level
                branching MC) and Phase 1 (whole-ion Sobolev/expansion MC
                with fluorescence, the La II measurement)
 paper3/        Paper III: the reduced redistribution closure (kernel,
-               frozen reference, compression sweep, T and epoch transfer)
-tests/         306 tests pinning the physics of every module
+               frozen reference, compression sweep, T and epoch transfer),
+               the kilonova closure grid (phase12/13) and freeze.py +
+               FROZEN.json, the frozen analysis the manuscript quotes
+tests/         326 tests pinning the physics of every module
 docs/          results report, lab notebook, planning inputs, paper/
 data/          raw atomic data (gitignored; provenance in data/README.md)
 outputs/       working figures (gitignored; committed copies in docs/figures/)
@@ -119,7 +122,7 @@ Needs Python >= 3.10 and numpy >= 2, so a distro 3.8/3.9 will not do.
 ```bash
 python3 -m venv .venv              # or: conda create -p .venv python=3.12
 .venv/bin/python -m pip install -e ".[dev]" h5py
-.venv/bin/python -m pytest         # 306 passed (2026-09-03)
+.venv/bin/python -m pytest         # 326 passed (2026-09-03)
 ```
 
 Atomic data is not committed — see [data/README.md](data/README.md) for the

@@ -2463,6 +2463,69 @@ full; F48 row restated.
 validation is one point and a finite difference; the §4.40 robustness
 variants (sigma x2, one-sided, 3 % cut) were not rerun on the completed grid.
 
+## 9at. The freeze, and the closure error against the allowance (2026-09-03)
+
+*The verdict.* The scientific case was judged complete this morning: stop
+growing the experiment tree, write the Nature Astronomy paper. Must-dos
+before a manuscript: one commit from which every headline regenerates; the
+chain-cap uncertainty printed beside every 1-3 mag amplitude; real-passband
+figures (already the case since 9am); the paper around F43-F48; a final
+literature search. Plus one comparison that costs no simulation: the closure
+error against the sigma_sys ~ 0.5-1 mag allowance kilonova fitters add in
+quadrature. Three decisions taken with the user: T2/T3 appear in the main
+text as one sentence carrying both the class count and the misfit, the
+abstract headlines T0 + T1 only; the affiliation stays a placeholder that
+the structure check flags; the sigma_sys comparison is main-text Fig. 4b.
+
+*Data before Markdown.* `robustness.table` and `grid_table.{cells,models}`
+only printed; the freeze needs the numbers as data. `robustness.chain_summary`
+now returns the four cells x three caps with per-band changes, sign flags
+and the criterion tally, and `table` renders it; `grid_table.rows/per_point/
+summary` return the per-cell and per-model records and the Markdown gains
+"value ± floor" (the cell's A_redist worst live |dm|) and a trapped-fraction
+column. Both reproduce every §4.44 number (0.14-0.21 / 12 of 12 / 4 of 12 /
+10.5-13.8 %; 195 of 199, 0.96-2.84, g -2.12...-0.24, K +3.64, floor
+0.021 / 0.044 on 62 cells, redone 0.13-0.53). One garbled expression in the
+sign tally caught by reading the output, not by a test -- then a test.
+
+*The allowance.* `syserr.py`: d_RT as a 27 x 38 (point x band-epoch)
+matrix, unweighted magnitudes, 524 live entries. The plan's first design
+had two mistakes the design review caught before any code: a ">= 20
+points per key" SVD threshold leaves only seven optical keys (so the
+primary statistic is a masked rank-1 fit on all live entries, alternating
+normal equations, with a median-filled SVD on the 24 keys live at >= 10
+points as the cross-check), and "the null is ~1/N" is wrong for a masked,
+non-iid matrix (so the nulls are computed: A_redist through the same
+construction, and sign-scrambled C_both, 1000 draws). Numbers: C_both one
+mode 0.80 (SVD 0.82), C_binned 0.77, A_redist 0.31; scrambled null
+0.33 / 0.36 at 95 %; (g < 0, K > 0) at 39 of 39 coepochal pairs; 56 % of
+live entries beyond 0.5 mag, 18 % beyond 1 mag; chi2/N 0.56 against a 1 mag
+allowance, 2.26 against 0.5 mag. The T1 residual keeps a one-mode 0.76 but
+against a null of 0.51 -- reported as the weaker contrast it is. F49, worded
+narrowly: a substantial part of what is represented as an unstructured
+allowance can arise from one coherent approximation with a predictable
+blue/NIR signature; a consistency statement, not a claim about any fit.
+
+*The freeze.* `paper3/freeze.py` imports the drivers, chdirs to
+phase12_grid so the override paths stay relative, regenerates the twelve
+derived JSONs and ten figure files in 73 s, and writes FROZEN.json: HEAD,
+an inputs-dirty flag, tree hashes of the transport directories (HEAD is the
+parent of the freeze commit, the trees are the same), sha256 of 53 inputs
+and 22 outputs, and 146 headline numbers -- the paper's `numbers.tex` will
+be generated from that dict and nothing else. The first run confirmed the
+committed sensitivity/observability/tscale JSONs regenerate numerically
+identical (the one diff is a CLI-default provenance field). `--check`
+regenerates into a scratch directory and compares every JSON with
+isclose(1e-9), NaN == NaN, `cond` at 1e-6; figures by hash, warning unless
+`--strict`. With SOURCE_DATE_EPOCH pinned the PDFs are byte-stable, and the
+strict check passes. Tests never run the pipeline: they test the comparison,
+the manifests, and each check tier on perturbed files in tmp_path.
+
+*Commit shape.* Sources, tests and docs first; then the freeze run on that
+HEAD; then the regenerated set and FROZEN.json as the tagged commit
+`paper3-freeze`. Two commits, so FROZEN's inputs-dirty flag is false and the
+recorded HEAD is the commit whose drivers produced the numbers. 326 tests.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,
