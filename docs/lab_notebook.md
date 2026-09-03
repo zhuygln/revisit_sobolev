@@ -2347,6 +2347,109 @@ p-value, because bands at an epoch share packets; and 40 Mpc is one
 distance (at 100 Mpc, 30 of 138 NIR dense observations at the eligible
 points drop below the depth -- noted, not rerun).
 
+## 9ar. Phase 3B: is "temperature" a real direction? Four runs say two things (2026-09-03)
+
+*Why I ran it.* T2's temperature column is a Planck derivative -- free, and
+therefore suspect twice over: a line forest need not respond like a
+blackbody, and "the photosphere's temperature" is two knobs in
+`SourceModel` (the launch spectrum's `t_core`, and `T_gas`, which builds the
+atom). The plan pre-declared the test: scale `t_core` by 0.8 and 1.25 with
+`T_gas` fixed, then again with `T_gas` scaled, take the finite difference
+with the grey L term removed, and compare with the proxy by weighted cosine
+and norm ratio on the central point's live observables. The threshold I
+wrote down was cosine < 0.8 -> use the MC direction and say the proxy is
+wrong.
+
+*What the runs took.* Four `grid.py` runs, 47-63 min each, three in
+parallel alongside the chain workers (5 transport processes, well under the
+RSS ceiling). Checks first: `L`, `R_ph`, `v_ph` identical to the base model
+at every epoch, `T_eff` scaled exactly, L_bol ratio 5.99-8.67 against
+1.5625^4 = 5.96 (the excess is the launch window's Planck fraction at
+1500-2300 K -- expected, and removed with the grey term). `tscale.py` had
+two bugs I hit on the way: it read `T_gas` from `source` (it is a row key)
+and it accepted a partially written model JSON (`grid.py` writes after
+every epoch for resume), so the first table had one epoch. Now it requires
+all six.
+
+*Result one, which I did not predict.* With `T_gas` fixed, scaling the
+launch temperature by 1.5625 -- two magnitudes of launched luminosity,
+removed -- changes no live band by more than 0.12 mag against a 0.13 mag
+noise floor. Norm ratio to the proxy 0.06. The forest erases the
+illumination spectrum at S ~ 1e5-3e5; the emergent colours belong to the
+gas. This is F26/F28's "the kernel transfers across T_src" seen from the
+observer's side, and it means there is no illumination-temperature nuisance
+for anyone to fit: the proxy can only be a gas-temperature direction.
+
+*Result two.* With `T_gas` scaled, cosine 0.92 overall and 0.96-1.00 at
+every epoch -- the shape is Planck's -- but the size is 1.35x the proxy
+(2.0-2.3x at 0.5-1 d, 0.8-1.0x at 2-7 d). Early, a hotter gas empties the
+optical bands more than the blueward shift alone would (g at 1 d +0.56 mag
+measured vs -0.08 proxy; K +2.31 vs +1.20): the blanketing response. So the
+proxy underestimates the lever arm early, which makes the T2/T3 fits of
+§9ap conservative rather than generous.
+
+*Reclassification.* Central point, T2 and T3, C_both and C_binned, proxy
+replaced by either MC direction: C-B in all eight cells, R 0.31-0.37 (proxy
+0.33-0.39), chi2_res/dof 46-50 (proxy 52-54), a_T keeps its sign. Beyond
+T1 the temperature direction absorbs nothing here. Fig. 7 shows the
+two panels side by side; the grey band is the noise floor.
+
+*Literature paragraph.* Written and placed at the end of §4.43 (prose
+only; four sources from `references.bib`, each checked against the paper's
+own numbers before quoting: Kasen 2017's two components, Gillanders 2022's
+X_lan <~ 5e-3 at +1.4 d vs ~0.05 later, Shingles/Collins 2023's faster
+evolution and secular component, and Fontes 2020's opposite-sign agreement
+between line-binned and expansion opacities under thermal re-emission --
+which is not in tension once redistribution and opacity are separated,
+F33/F38). I updated its numbers to the completed grid (Δln T = +0.28 median,
+a_2c positive at 17 of 18) before inserting.
+
+## 9as. The grid completed, and the chain cap measured (2026-09-03)
+
+*The redo.* Nine cells, one process each, budget 5400 s: every one came
+back `reduced_n` at 20 000-23 071 packets in 35-70 min, 1.5-2x faster
+than the stored probe projected (the sublinear-cost note holds).
+`run_grid.py --merge-redo` replaced the rows, tagging each with
+`redo = {budget_s, git, file, previous_status}` and leaving the header at
+1500 s so the resume check never sees a foreign budget. A pre-merge copy
+of `grid/*.json` sits in the session scratchpad. `grid_table.py` printed
+blank columns for the tagged rows because the status suffix was appended
+before the `in RAN` test -- fixed with a `raw` status.
+
+*What changed.* Everything was rerun: six sensitivity variants,
+`grid_table`, Figs. 2-4 and 6, `observe.py`. The redo's value is not the
+nine cells (A_redist floor 0.13-0.53 mag at 2e4 packets -- the noisiest in
+the grid, and F43's floor sentence is quoted from n_used >= 1e5 only) but
+the X-derivative they supply: the central point went from underdetermined
+(N = 6) to N = 17, dof 14, R 0.83, C-B under every space, and the three
+empty-mask X = 0.1 points became analysable. Gate 2: 27 of 27 C-B, median
+R 0.83, chi2_res/dof 118. T1: C-A at 8/9, 3/9, 0/9 by X -- the statement
+about lanthanides sharpened. Gate 3: 26/26, 18/18, 25/25 under T0; T1
+survives at 18 of 26 dense points, 16 of the 17 with X >= 1e-2. All 17 new
+live NIR colour errors negative; 195 of 199 on the grid. I could not
+reproduce §4.40's "166 of 170" under any current rule (it was counted with
+the dead mask), so §4.44 states the current count and rule instead.
+
+*The chain cap, two cells of four.* (0.03, 0.05, 0.1) at 2 and 3 d, trapped
+13.6-13.8 % at chain 2000: chain 2000 reproduced every stored leg to 0.0 mag
+and B_opacity was identical at every cap (the determinism check I wanted).
+Chain 8000 costs 1.7-2.0x, not 4x, and still traps 3 %. Colour errors move
+by 0.1-0.25 mag: J-K (the F43 colour) by 21-24 % with sign kept; g-r and
+i-J, which are 0.1-0.3 mag at these cells, by more than 25 %, one sign
+flip. The criterion I pre-declared fails on the small colours and passes on
+the large one, and the per-band changes (<= 0.15 mag) equal the reference's
+own shift between caps and the cells' noise floor -- moving the cap
+re-simulates the trapped seventh of the packets, so it is also a new noise
+draw. Substituting both cells at 8000 (`sensitivity.py --override`): the
+point stays C-B, R 0.70 -> 0.66, neighbours unchanged. I wrote it as
+"sharpened, not reversed", with the failed half of the criterion in the
+text; the two remaining cells ((0.01, 0.05, 0.1) @ 2 d, (0.03, 0.1, 0.1) @
+1 d) land in the next commit.
+
+*Loose ends carried.* F45's register row now points to §4.44.3; the T-scale
+validation is one point and a finite difference; the §4.40 robustness
+variants (sigma x2, one-sided, 3 % cut) were not rerun on the completed grid.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

@@ -64,20 +64,20 @@ def cells(models):
              "|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
     for (m, v, x), d in models:
         for r in d["rows"]:
-            s = r["status"]
-            if s in RAN and sens.row_floored(r, d):
+            s = raw = r["status"]
+            if raw in RAN and sens.row_floored(r, d):
                 s += " (floored)"
             if "redo" in r:
                 s += f" (redo {r['redo']['budget_s']:g} s)"
             base = f"| {m:g} | {v:g} | {x:g} | {r['t_d']:g} | {s} | {r.get('n_used', '')} | {r.get('band_S_band', float('nan')):.1e} |"
-            if s in RAN:
+            if raw in RAN:
                 lv = live_bands(r, d)
                 fa, _ = worst(masked(r["legs"]["A_redist"]["dm"], lv))
                 wb, kb = worst(masked(r["legs"]["C_both"]["dcolor"], lv)); wn, kn = worst(masked(r["legs"]["C_binned"]["dcolor"], lv))
                 lines.append(base + f" {r['ref']['f_return']:.2f} | {r['ref']['f_dep']:+.2f} | {fa:.3f} | "
                              f"{wb:.2f} ({kb}) | {wn:.2f} ({kn}) | {r['legs']['C_both']['dm_bol_absorbing']:+.2f} |")
             else:
-                extra = f"projected {r['projected_s']/3600:.1f} h" if s == "over_budget" else r.get("error", "")[:40]
+                extra = f"projected {r['projected_s']/3600:.1f} h" if raw == "over_budget" else r.get("error", "")[:40]
                 lines.append(base + f" {r.get('probe_f_return', float('nan')):.2f} | {r.get('probe_f_dep', float('nan')):+.2f} | | {extra} | | |")
     return "\n".join(lines)
 

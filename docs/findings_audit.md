@@ -229,3 +229,21 @@ Not classifications, but the same kind of problem the audit exists to catch:
   function of NIR coverage (9/18, 3/8, 1/15). The expectation "NIR is the
   leverage" was written before the run and is confirmed in a sharper form
   (detection is optical, distinctness is NIR).
+- **F47 (§4.43)**: the T_eff validation, pre-declared (cosine threshold
+  0.8 written before the runs). Driver `paper3/phase12_grid/tscale.py`,
+  data `tscale.json` + `grid/tscale/*.json`, Fig. 7. Classification:
+  **decision-grade for the proxy, and one unplanned physics result** — the
+  illumination temperature does not reach the observer at the grid's
+  saturation (norm 0.06 of the proxy, within the noise floor), which was
+  not predicted and is reported as such; the gas-temperature response has
+  the proxy's shape (0.92) and 1.35× its size. Two harness bugs in
+  `tscale.py` (row-level `T_gas`, partial JSONs) were found and fixed
+  before any number was quoted. One grid point only.
+- **F48 (§4.44)**: the grid completed; every downstream number regenerated
+  and the §4.40–§4.42 counts superseded with pointers, not overwritten.
+  Classification: **bookkeeping with one honest failure** — the chain-cap
+  criterion, as pre-declared, fails for the sub-0.3-mag colours at the
+  worst-trapped cells and passes for J−K and for the class; the report
+  prints the failed half. §4.40's "166 of 170" NIR count could not be
+  reproduced under any current rule (it was counted with the dead mask);
+  §4.44 states the rule it uses. Two of four chain cells at this commit.

@@ -85,7 +85,9 @@ does not work).
 | F43 | **On a heating-powered kilonova the grouped-opacity closure's colour error is 1–3 mag at every point of a 27-model (M_ej, v_ej, X_lan) grid, and its sign is uniform: too blue.** Worst live colour error per model 0.96–2.84 mag (C_both) against an A_redist floor of 0.02–0.13 mag; the closure's g is 0.2–2.1 mag too bright and its K up to 3.6 mag too faint. Every leg has the same L_bol by construction; the harness makes no bolometric statement at S ≳ 10⁴. | [§4.40](docs/results_report.md) |
 | F44 | **Gate 2: the closure error is not degenerate with (M_ej, v_ej, X_lan) — class C-B (distinct residual) at all 24 analysable grid points, every opacity closure, every robustness variant.** χ²_RT/N = 28–549; residual fraction R = 0.46–1.00 after the best three-parameter shift; A_redist is undetectable (C-C) at 23 of 24. A fit measures a residual, not a bias. | [§4.40](docs/results_report.md) |
 | F45 | **F43/F44 survive the floor mask and the core convention (chain cap: §4.44); a free luminosity history absorbs the residual as a *class* but not as a *misfit*.** Erratum: the §4.40 floor mask was a no-op (27 floored rows); re-baselined, Gate 2 is C-B at 20 of 21 analysable points. One free grey magnitude per epoch takes median R to 0.28 and 12 of 19 points to C-A — with 1–7 mag luminosity offsets and a leftover χ²_res/dof of 23. | [§4.41](docs/results_report.md) |
-| F46 | **Gate 3: every scenario detects the closure error at every eligible point (χ²_RT,obs/N = 41–1005; 30–40σ in single bands at real errors) and it survives the ejecta parameters everywhere (18/18 dense, 11/11 sparse, 16/16 optical); under a free luminosity history its survival is set by the NIR — 9/18 with six-epoch JHK (all four X = 0.1 points), 3/8 with two NIR epochs, 1/15 without NIR.** | [§4.42](docs/results_report.md) |
+| F46 | **Gate 3: every scenario detects the closure error at every eligible point (χ²_RT,obs/N = 41–1005; 30–40σ in single bands at real errors) and it survives the ejecta parameters everywhere (18/18 dense, 11/11 sparse, 16/16 optical); under a free luminosity history its survival is set by the NIR — 9/18 with six-epoch JHK (all four X = 0.1 points), 3/8 with two NIR epochs, 1/15 without NIR.** Counts on the complete grid: §4.44. | [§4.42](docs/results_report.md) |
+| F47 | **The Planck temperature proxy is validated as a *gas*-temperature direction (cosine 0.92 with the measured transport response, lever arm 1.35× larger), the illumination temperature alone does not reach the observer (‖d_T^MC‖ = 0.06 of the proxy, every band within the 0.13 mag noise floor), and the central point stays C-B with the measured direction (R 0.37).** The closure residual is not a photospheric-temperature error. | [§4.43](docs/results_report.md) |
+| F48 | **With the grid complete (162 of 162 cells), Gate 2 is C-B at 27 of 27 points (median R 0.83, χ²_res/dof 118) and Gate 3 at 26/26, 18/18, 25/25 eligible points; a free luminosity history absorbs the residual at 8 of 9 lanthanide-poor points and 0 of 9 lanthanide-rich ones, and at real errors the residual survives it at 16 of 17 `dense` X ≥ 10⁻² points.** The chain cap is a ≤ 0.15 mag per-band effect at the worst-trapped cells; class and NIR signs kept. | [§4.44](docs/results_report.md) |
 
 Full write-up with figures and numbers:
 **[docs/results_report.md](docs/results_report.md)**.
@@ -104,7 +106,7 @@ paper2/        Paper II: Phase 0 (SEDONA audit, TARDIS record, three-level
                with fluorescence, the La II measurement)
 paper3/        Paper III: the reduced redistribution closure (kernel,
                frozen reference, compression sweep, T and epoch transfer)
-tests/         304 tests pinning the physics of every module
+tests/         306 tests pinning the physics of every module
 docs/          results report, lab notebook, planning inputs, paper/
 data/          raw atomic data (gitignored; provenance in data/README.md)
 outputs/       working figures (gitignored; committed copies in docs/figures/)
@@ -117,7 +119,7 @@ Needs Python >= 3.10 and numpy >= 2, so a distro 3.8/3.9 will not do.
 ```bash
 python3 -m venv .venv              # or: conda create -p .venv python=3.12
 .venv/bin/python -m pip install -e ".[dev]" h5py
-.venv/bin/python -m pytest         # 283 passed (2026-09-02)
+.venv/bin/python -m pytest         # 306 passed (2026-09-03)
 ```
 
 Atomic data is not committed — see [data/README.md](data/README.md) for the

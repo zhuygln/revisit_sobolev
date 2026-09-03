@@ -2788,7 +2788,7 @@ finished the 162 cells in 3.6 h wall (28.5 h of worker time). Outcome:
 |---|---|---|
 | `ok` | 61 | full 3×10⁵ packets per leg |
 | `reduced_n` | 92 | n scaled to the budget; median n_used 1.8×10⁵, 23 cells at the 2×10⁴ floor |
-| `over_budget` | 9 | the floor would cost 1.3–1.9 h: **all nine at X_lan = 0.1, at 0.5–2 d** |
+| `over_budget` | 9 | the floor would cost 1.3–1.9 h: **all nine at X_lan = 0.1, at 0.5–2 d** | *Redone at a 5400 s budget, §4.44: the grid is 162 of 162.*
 | failed | 0 | no `wall`, `chain` or `max_steps` abort |
 
 The 88 cells with n_trapped > 0 thermalized at most 14 % of their packets in
@@ -2909,6 +2909,11 @@ neighbours (which include the `over_budget` epochs and the X = 10⁻³
 neighbours' faint NIR) are intersected. Twenty of the 24 are well sampled
 (N = 9–34, median 19).
 
+*Superseded twice: §4.41.1 makes the floor mask real (20 of 21 analysable
+points C-B, one underdetermined), and §4.44 completes the grid (27 of 27
+C-B, median R 0.83). The numbers of this section are the committed
+`31327c7` state and are kept for the record.*
+
 **F44 — Gate 2 verdict: C-B, distinct residual, at every analysable point,
 for every opacity closure, under every robustness variant.** The closure
 error is detectable (χ²_RT/N = 28–549, never near 4) and no parameter shift
@@ -2982,7 +2987,7 @@ mask, the *conserving* core normalization (Δm_bol ≡ 0 by construction), and
 chain thermalization (`chain_max = 2000`, up to 14 % of the reference's
 packets). And its classes are computed against three parameters of a
 one-zone model. This section checks the first two conventions on the
-committed grid (no packets re-run), sets up the chain check (running; §4.44) and then asks
+committed grid (no packets re-run), sets up the chain check (reported in §4.44.3) and then asks
 the question §4.40 explicitly left open — what a fit with *more* freedom than
 (M, v, X_lan) could absorb — with the most generous nuisance directions that
 can be written down without a second transport model. The nine `over_budget`
@@ -3248,13 +3253,13 @@ outnumber the physical ones (p = 8–11 against N = 6–34) and four points are
 underdetermined; T1 (p = 5–9) is the headline space and T3 the bound.
 
 **F45 — F43/F44 survive the floor mask and the core convention (the chain
-cap is pending, §4.44); they do not survive a free luminosity history, at the grid's σ, as a
+cap: ≤ 0.15 mag per band at the worst-trapped cells, class kept, §4.44.3); they do not survive a free luminosity history, at the grid's σ, as a
 *class* — but the residual survives as a *misfit*.** With the floor mask
 real, Gate 2 is C-B at 20 of 21 analysable points (was 24 of 24 with the
 mask dead), median R 0.77. The colour errors of F43 are exactly
 convention-invariant; the absorbing-core magnitudes move the class at three
 faint, few-band points through a grey per-epoch term that the T1 space
-absorbs by construction. The chain-cap check is running and is reported in §4.44 (the probe cannot resolve it, part 3). Granting the fit one
+absorbs by construction. The chain-cap check is reported in §4.44.3 (the probe cannot resolve it; the full runs put it at ≤ 0.15 mag per band, inside the worst cells' noise floor, with the class kept). Granting the fit one
 free grey magnitude per epoch (T1) — a freedom no physical source model has —
 absorbs the closure error to R = 0.28 (median) and makes 12 of 19 points
 C-A by the pre-declared rule, at the price of luminosity offsets of 1–7 mag
@@ -3366,6 +3371,356 @@ eligible points fall below the depth — the scenario table is not rerun at
 other distances here). The redo of the nine X = 0.1 early epochs raises N_obs where the
 T1–T3 spaces are underdetermined; §4.44.
 
+### 4.43 Phase 3B: is the photospheric-temperature direction real? The T_eff validation (F47)
+
+**Question.** §4.41's T2 tangent space adds ∂m_b/∂lnT of a Planck spectrum
+at fixed L — a *proxy*, chosen because it costs nothing. Two things can be
+wrong with it: the emergent response of the forest to a temperature change
+need not be Planck-shaped (line blanketing, fluorescence), and "the
+temperature" is two quantities in the source model — the temperature of the
+launched spectrum (`t_core`, the illumination) and the gas temperature that
+sets the level populations and hence the opacity forest (`T_gas`). The
+proxy does not distinguish them. Four transport runs of the central model
+measure the direction directly.
+
+**Design (pre-declared in the plan).** `grid.py --t-scale 0.8` and `1.25`
+(`SourceModel(t_scale=)`, §4.41 harness) scale `t_core` only, keeping `L`,
+`R_ph`, `v_ph` and the ejecta state unchanged; a second pair adds
+`--t-scale-gas`, which scales `T_gas` with it (the atom is rebuilt at the
+scaled temperature; §4.24's kernel state space says this is the axis that
+matters). Same packet budget as the grid (300 000 × 3 seeds under the
+1500 s wall budget), same seeds, same legs. The measured direction is
+
+d_T^MC(b, t) = [m_ref(1.25) − m_ref(0.8) + 2.5 log10(L_bol(1.25)/L_bol(0.8))] / ln 1.5625,
+
+the grey term removed so that, like the proxy, it is the response at fixed
+luminosity (the conserving core is grey per leg, §4.41; the launch window's
+Planck luminosity scales as ≈ t_scale⁴ — the measured L_bol ratio is
+5.99–8.67 against 1.5625⁴ = 5.96, the excess being the window fraction at
+1500–2300 K). The two directions are compared on the live observables of the
+central point (N = 31 over the six epochs) by the 1/σ²-weighted cosine and
+norm ratio, and the point is reclassified under T2 and T3 with d_T^MC in
+place of the proxy column (`sensitivity.analyse_point(column_override=)`).
+Driver `paper3/phase12_grid/tscale.py` → `tscale.json`, figure
+`paper3/figures/fig7_tscale.{png,pdf}`.
+
+Checks passed on all four runs: `L`, `R_ph`, `v_ph` identical to the base
+model at every epoch; `T_eff` = 0.8 × and 1.25 × the base (7730 / 12 079 K at
+0.5 d down to 1473 / 2302 K at 7 d); `T_gas` unchanged (9663 → 1842 K) in
+the illumination-only pair and scaled in the other; n_used 20 000–130 000
+at 0.5–3 d (`reduced_n`, as the base model), 300 000 at 5–7 d.
+
+#### 4.43.1 The launched spectrum's temperature does not reach the observer
+
+| pair | cos(d_T^MC, proxy) | ‖d_T^MC‖ / ‖proxy‖ | per epoch (0.5, 1, 2, 3, 5, 7 d) | cos(d_RT, d_T^MC) | cos(d_RT, proxy) |
+|---|---|---|---|---|---|
+| illumination only (`t_core` × 0.8 / 1.25, `T_gas` fixed) | 0.34 | **0.06** | ratio 0.06, 0.07, 0.14, 0.06, 0.02, 0.37 | 0.10 | 0.55 |
+| with `T_gas` scaled | **0.92** | **1.35** | cos 1.00, 0.96, 0.98, 0.99, 1.00, 1.00; ratio 2.01, 2.28, 0.83, 1.04, 0.99, 0.85 | 0.25 | 0.55 |
+
+Weights 1/σ² with the §4.40 σ; d_RT is C_both's closure error (C_binned
+gives the same cosines to 0.01).
+
+Scaling the launch temperature by 1.5625 — a 2-magnitude change in the
+bolometric luminosity of the launched spectrum, removed — changes no live
+magnitude by more than 0.12 mag (g: +0.02, −0.07, +0.10, −0.12 mag at
+0.5–3 d; K: +0.10, 0.00, −0.02, −0.03, −0.05 mag at 1–7 d), against the
+central point's A_redist noise floor of 0.13 mag: the response is
+consistent with zero at every epoch. The emergent colours of a kilonova at
+S ~ 10⁵–3 × 10⁵ (τ_max 5 × 10⁴ at 0.5 d, 5 × 10² at 7 d) are a property of
+the gas, not of the illumination: every packet is absorbed and re-emitted
+by the forest enough times that the spectrum it was launched with is
+erased. This is the emergent-side form of F26/F28 (the kernel transfers
+across T_src at the ≤ 1.4 % level for La II): here the *whole* light curve
+transfers. It also settles what the T2 column means physically. A
+"photospheric temperature" nuisance that leaves the gas alone is not
+available to a modeller using this transport — there is nothing to fit — so
+the proxy is, and can only be, a gas-temperature direction.
+
+#### 4.43.2 The gas-temperature response is Planck-shaped and larger
+
+With `T_gas` scaled, the cosine with the Planck proxy is 0.92 overall and
+0.96–1.00 at every epoch (fig7): the *shape* of the response across bands
+is what a blackbody at fixed L does — at 0.5–1 d all optical–NIR bands get
+fainter when the gas is hotter (the flux moves blueward of g), at 3–5 d g
+brightens by ∼2 mag per unit ln T while K fades by ∼0.5 — but the *size* is
+1.35 × the proxy over all observables and 2.0–2.3 × at 0.5–1 d (0.8–1.0 ×
+at 2–7 d). The excess at early epochs is the line-blanketing response: at
+T_gas ≳ 6000 K a hotter gas both shifts the emission blueward and changes
+the ionization–excitation balance that sets which lines are saturated, so
+every band loses more than the Planck shift alone predicts (for 0.8 → 1.25
+at 1 d: g +0.56 mag measured against −0.08 for the proxy, K +2.31 against
++1.20; at 3–5 d the two agree to 0.1–0.4 mag: g at 3 d −2.00 vs −1.92, i at
+5 d −2.05 vs −2.07). The
+temperature direction is validated as a direction, and the proxy
+*underestimates* its lever arm early — the fit under T2 is, if anything,
+conservative about how much a temperature offset could absorb.
+
+#### 4.43.3 Reclassification with the measured direction
+
+| space / leg | proxy: N / dof / R / χ²_res/dof / class / a_T | MC, illumination only | MC, with T_gas |
+|---|---|---|---|
+| T2 / C_both | 17 / 9 / 0.39 / 54 / C-B / −0.23 | 17 / 9 / 0.37 / 48 / C-B / (+1.01)* | 17 / 9 / 0.37 / 49 / C-B / −0.53 |
+| T2 / C_binned | 17 / 9 / 0.36 / 54 / C-B / −0.18 | 17 / 9 / 0.34 / 48 / C-B / (+1.00)* | 17 / 9 / 0.34 / 49 / C-B / −0.48 |
+| T3 / C_both | 17 / 8 / 0.36 / 52 / C-B / −0.35 | 17 / 8 / 0.35 / 50 / C-B / (+0.78)* | 17 / 8 / 0.34 / 46 / C-B / −0.57 |
+| T3 / C_binned | 17 / 8 / 0.33 / 52 / C-B / −0.31 | 17 / 8 / 0.32 / 49 / C-B / (+0.77)* | 17 / 8 / 0.31 / 47 / C-B / −0.51 |
+
+a_T is the fitted Δln T. *The illumination-only column has norm 0.06 of the
+proxy, so its amplitude is a fit to noise and is bracketed; it is listed
+to show the class does not depend on it. T1 at this point: R 0.39,
+χ²_res/dof 50 (§4.41).
+
+Nothing moves. The central point is C-B under every space and either
+direction; R changes by 0.02 and χ²_res/dof by ≤ 6 when the proxy is
+replaced by the measured direction, and the fitted amplitude keeps its sign
+(the fit asks for a *cooler* gas by Δln T = −0.5 at this point, one of the
+two negative-a_T points of the grid, whose median is +0.28 hotter; §4.44).
+Beyond T1 — the free luminosity history, which already takes R from 0.83
+to 0.39 here — the temperature direction absorbs nothing: the residual of
+the grouped-opacity closure at the central point is not a temperature
+error of the photosphere, measured or proxied.
+
+**F47.** *The Planck proxy is validated as a gas-temperature direction
+(cosine 0.92 with the measured transport response, 0.96–1.00 per epoch),
+with a lever arm 1.35 × (2 × at ≤ 1 d) larger than assumed; the
+illumination temperature by itself has no effect on the emergent light
+curve at the grid's saturation (‖d_T^MC‖ = 0.06 of the proxy, every band
+within the 0.13 mag noise floor); and the central point stays C-B with the
+measured direction (R 0.37, χ²_res/dof 46–49). The closure residual is not
+a photospheric-temperature error.*
+
+Caveats: one point of the grid (the central one), a finite difference
+across ×1.5625 rather than a derivative, and n_used of 20 000–130 000 at
+the early epochs (noise floor 0.13 mag on single magnitudes, which is why
+the illumination-only norm is quoted as "consistent with zero" rather than
+as a number). The `T_gas` scaling scales everything the source model's
+temperature touches — populations, ionization, the atom's saturation
+structure — which is the physical content of "a hotter photosphere" in this
+model, not a partial derivative at fixed ionization.
+
+#### 4.43.4 Where this sits against the literature
+
+**Where this sits against the published AT2017gfo tensions (prose only; no
+new data ingested).** Three things in the literature have the same *shape*
+as F43's residual, and one has the opposite sign, and the paper should say
+both. (i) The AT2017gfo light curves were not reproduced by a single ejecta
+component: Kasen et al. (2017, `kasen2017`) needed a fast lanthanide-poor
+component for the first days' blue emission and a slower lanthanide-rich one
+for the NIR at ≥ 3 d. (ii) The photospheric-epoch spectra tell the same story
+in composition space: Gillanders et al. (2022, `gillanders2022`) fit +1.4 d
+with X_lan ≲ 5 × 10⁻³ and +2.4–6.4 d with X_lan ≃ 0.05, and read the
+disjoint as stratification or two components; their NIR excess is the
+lanthanide blue-flux deficit. (iii) Self-consistent 3D models with
+line-by-line opacities (Shingles et al. 2023, `shingles2023`; Collins et al.
+2023, `collins2023`) reach a blue-to-red evolution like AT2017gfo's but
+evolve faster and need an additional secular component after ~1 d. In every
+case the *data* are redder and NIR-brighter than a single lanthanide-poor
+model, and the remedy is more lanthanide-rich mass. F43 says the
+grouped-opacity closure errs in exactly that direction — its g is 0.2–2.1 mag
+too bright and its K up to 3.6 mag too faint relative to the resolved
+transport of the *same* ejecta — and §4.41's T2 fit quantifies the
+mimicry: the closure looks like a photosphere ~30 % hotter (Δln T = +0.28
+median, positive at 25 of 27 points; the direction validated in
+§4.43.2), and T3's blue second component has positive amplitude at 17 of
+the 18 points where it can be fitted (0.16–2.6 in units of the X = 10⁻³
+light curve, beyond its linearization at 16; §4.44). So a modeller fitting the data with
+this closure would be pushed toward *more* lanthanide-rich mass than the
+ejecta hold, or toward an extra red component, to compensate a transport
+error whose sign happens to match the astrophysical one. That is a
+consistency statement, not evidence that any published inference is
+affected: none of these papers used this closure (ARTIS and TARDIS resolve
+lines; Kasen et al. used SEDONA's expansion opacity with
+thermal re-emission), and the grid's source model is a one-zone grey photosphere
+with frozen ionization. (iv) The opposite sign: Fontes et al. (2020,
+`fontes2020`) report that line-binned opacities agree well with a continuous
+Monte Carlo Sobolev treatment and with expansion opacities in their setup.
+That is not in tension with F43 once the two questions are separated — their
+comparison is between opacity *tabulations* under thermal re-emission, where
+the redistribution kernel is a Planck function and carries no memory of
+which line absorbed; F43's leg B_opacity replaces the resolved kernel's
+*opacity* while keeping fluorescent redistribution, and the closure errors
+of §4.29–§4.36 are controlled by band-local saturation and are not
+additive across the redistribution and opacity legs (F33, F38). The regime statement of F40
+(the boundary at S ~ 10⁴–10⁵ crossed at 1.2 d) is what distinguishes the two;
+a direct test would run the grid's closure inside a thermal-re-emission
+harness, which this repository does not have. The comparison therefore
+supports the paper's framing — the closure error has the sign and size of
+the effects the community attributes to composition — and does not support
+any stronger claim.
+
+### 4.44 The grid completed: the nine redone cells, and what changes in F43–F46 (F48)
+
+Nine early X_lan = 0.1 epochs were `over_budget` at the grid's 1500 s
+budget (§4.40): (0.003, 0.1, 0.1) at 1 d, (0.003, 0.2, 0.1) at 0.5 d,
+(0.01, 0.1, 0.1) at 1 and 2 d, (0.01, 0.2, 0.1) at 0.5 and 1 d, (0.03, 0.1,
+0.1) at 2 d, (0.03, 0.2, 0.1) at 1 and 2 d. They were redone at a 5400 s
+budget, one process per cell (`run_grid.py --redo over_budget --budget 5400
+--workers 8`, then `--merge-redo`; the merged row carries `redo = {budget_s:
+5400, git, file, previous_status}` and the model header keeps `budget_s =
+1500`). Every cell returned `reduced_n` at n_used = 20 000–23 071 packets
+per seed in 35–70 min — the stored probe had projected 1.3–2.0 h, so the
+probe overestimates by 1.5–2× as the memory note on sublinear cost says.
+Drivers unchanged; `sensitivity.py` (all variants), `grid_table.py`,
+`figures.py` and `observe.py` were rerun on the 162-cell grid, and the
+numbers below supersede those of §4.40–§4.42 where they differ.
+
+| (M, v, X) | t (d) | n_used | wall (min) | trapped (ref) | S | live bands | floor (A) | worst live \|Δcol\| (C_both) | Δ(i−J) / Δ(J−K) |
+|---|---|---|---|---|---|---|---|---|---|
+| (0.003, 0.1, 0.1) | 1 | 20000 | 63 | 8.2 % | 2.6e+05 | 7 | 0.406 | 1.29 (J−K) | −0.15 / −1.29 |
+| (0.003, 0.2, 0.1) | 0.5 | 20000 | 70 | 5.6 % | 1.3e+05 | 7 | 0.530 | 0.58 (g−r) | −0.40 / −0.24 |
+| (0.01, 0.1, 0.1) | 1 | 23071 | 51 | 9.0 % | 8.4e+05 | 7 | 0.282 | 0.43 (J−K) | −0.31 / −0.43 |
+| (0.01, 0.1, 0.1) | 2 | 20000 | 49 | 6.1 % | 2.4e+05 | 7 | 0.205 | 0.93 (J−K) | −0.62 / −0.93 |
+| (0.01, 0.2, 0.1) | 0.5 | 20260 | 57 | 6.6 % | 4.1e+05 | 6 | 0.317 | 0.19 (g−r) | −0.04 / −0.69 |
+| (0.01, 0.2, 0.1) | 1 | 20000 | 67 | 5.8 % | 1.1e+05 | 7 | 0.249 | 1.04 (J−K) | −0.22 / −1.04 |
+| (0.03, 0.1, 0.1) | 2 | 20000 | 44 | 9.6 % | 6.9e+05 | 7 | 0.134 | 0.43 (J−K) | −0.35 / −0.43 |
+| (0.03, 0.2, 0.1) | 1 | 20000 | 59 | 8.4 % | 3.3e+05 | 7 | 0.302 | 0.71 (J−K) | −0.53 / −0.71 |
+| (0.03, 0.2, 0.1) | 2 | 21503 | 35 | 2.4 % | 9.3e+04 | 7 | 0.206 | 1.30 (J−K) | −0.49 / −1.30 |
+
+These are the noisiest cells of the grid (A_redist floor 0.13–0.53 mag at
+2×10⁴ packets, against 0.02 mag at the well-sampled cells; the F43 floor
+sentence is unchanged because it is quoted from n_used ≥ 10⁵ only), and at
+two of them — (0.003, 0.2, 0.1) and (0.01, 0.2, 0.1) at 0.5 d — the worst
+live colour error is inside the floor. The sign is not: all 17 new live
+Δ(i−J) and Δ(J−K) are negative (−0.04 to −1.30 mag), and over the completed
+grid with the floor mask real, 195 of the 199 live NIR colour errors of
+C_both are negative. The per-model worst colour errors (0.96–2.84 mag) and
+the g/K offsets (g brighter by 0.24–2.12 mag, K fainter by up to 3.64) of
+F43 are unchanged, since the new cells are not the worst ones.
+
+#### 1. Gate 2 on the complete grid
+
+The redo matters for Gate 2 not because the nine cells are analysable
+themselves but because every X = 0.01 point's X-derivative uses the X = 0.1
+neighbour: the central point (0.01, 0.1, 0.01) was `underdetermined` (N = 6)
+because its neighbour had no 1 and 2 d rows, and three X_lan = 0.1 points had
+an empty mask intersection for the same reason. With the mask real (§4.41)
+and the grid complete:
+
+| tangent | leg | analysable | C-A | C-B | underdet. | median dof | median R | R range | median χ²_RT/N | median χ²_res/dof | leftover > 4 | C-A by X (10⁻³/10⁻²/10⁻¹) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| T0 | C_both | 27 | 0 | **27** | 0 | 17 | 0.83 | 0.49–1.00 | 148 | 118 | 27/27 | 0/9 / 0/9 / 0/9 |
+| T0 | C_binned | 27 | 0 | 27 | 0 | 17 | 0.78 | | 191 | 130 | 27/27 | |
+| T0 floored incl. | C_both | 27 | 0 | 27 | 0 | 17 | 0.83 | | 175 | 118 | 27/27 | |
+| T0 absorbing | C_both | 16 | 4 | 11 | 1 | 9 | 0.38 | 0.12–1.00 | 703 | 88 | 15/15 | 1/9 / 3/4 / 0/3 |
+| T1 | C_both | 27 | 11 | 16 | 0 | 13 | 0.32 | 0.16–0.78 | 148 | 25 | 25/27 | **8/9 / 3/9 / 0/9** |
+| T1 | C_binned | 27 | 11 | 16 | 0 | 13 | 0.33 | | 191 | 29 | 26/27 | |
+| T2 | C_both | 27 | 11 | 15 | 1 | 12 | 0.27 | 0.14–0.59 | 147 | 22 | 24/26 | 5/9 / 4/9 / 2/9 |
+| T3 | C_both | 27 | 16 | 10 | 1 | 11 | 0.24 | 0.07–0.52 | 147 | 14 | 24/26 | 5/9 / 6/9 / 5/9 |
+
+Gate 2 (F44) is now **C-B at 27 of 27** grid points, median R 0.83, χ²_res/dof
+118 (range 18–213), no point low-N-only or underdetermined; the three
+robustness variants of §4.40 were not rerun (they are variants of the same
+27 fits and the plan's F44 statement is already the conservative one). The
+central point, the model the paper's figures are built on, is C-B with
+N = 17, dof 14, R = 0.83 under T0, and stays C-B under T1 (R 0.39, χ²_res/dof
+50), T2 (0.39, 54) and T3 (0.36, 52) — the redo turned it from
+"underdetermined" into the clearest single case in the grid.
+
+The T1 result sharpens into a statement about lanthanides. A free grey
+magnitude per epoch absorbs the closure error (C-A) at **8 of 9 lanthanide-poor
+points (X = 10⁻³), 3 of 9 at X = 10⁻², and 0 of 9 at X = 0.1**; it needed
+1–7 mag single-epoch offsets to do so (per-point max |a_L| 0.5–6.5, median
+2.0). Where the closure would be used — lanthanide-rich ejecta — no
+luminosity history hides it; where the ejecta are lanthanide-poor, the
+closure error is small enough in the NIR that a wrong L(t) can. The
+absorbed-and-leftover count (R ≤ 0.3 and χ²_res/dof > 4 at the same point)
+is 10 of 27 under T1; the leftover misfit after every space is χ²_res/dof
+= 14–25 (median), detectable at 24–25 of 26–27 points. T2's fitted
+temperature is Δln T = +0.28 (median; positive at 25 of 27: the closure
+looks hotter); T3's blue-component amplitude is −0.3 to +2.6 in units of the
+X = 10⁻³ light curve at the 18 points where it is fitted, beyond its
+linearization (lin_2c > 1) at 16 of them, so T3's C-A count of 16 is a
+bound, not a fit.
+
+#### 2. Gate 3 on the complete grid
+
+`observe.py` rerun (§4.42's scenarios and thresholds; C_both):
+
+| scenario | tangent | eligible | survives | by X (10⁻³/10⁻²/10⁻¹) | median N_obs | median χ²_RT,obs/N | median R | median χ²_res/dof | NIR share |
+|---|---|---|---|---|---|---|---|---|---|
+| dense | T0 | 26 | **26** | 9/9 / 9/9 / 8/8 | 20 | 334 | 0.88 | 290 | 0.33 |
+| dense | T1 | 26 | **18** | 2/9 / 8/9 / 8/8 | 20 | 334 | 0.36 | 61 | 0.33 |
+| dense | T2 | 26 | 14 | 2/9 / 6/9 / 6/8 | 20 | 334 | 0.29 | 46 | 0.33 |
+| dense | T3 | 26 | 10 | 2/9 / 3/9 / 5/8 | 20 | 334 | 0.25 | 33 | 0.33 |
+| sparse | T0 | 18 | **18** | 6/6 / 6/6 / 6/6 | 10 | 149 | 0.84 | 139 | 0.25 |
+| sparse | T1 | 12 | 5 | 2/4 / 2/4 / 1/4 | 12 | 150 | 0.17 | 19 | 0.28 |
+| sparse | T2 | 12 | 5 (4 underdet.) | 2/4 / 0/4 / 3/4 | 12 | 150 | 0.18 | 15 | 0.28 |
+| sparse | T3 | 12 | 4 (6 underdet.) | 2/4 / 1/4 / 1/4 | 12 | 150 | 0.13 | 9 | 0.28 |
+| optical | T0 | 25 | **25** | 9/9 / 8/8 / 8/8 | 13 | 302 | 0.59 | 142 | 0 |
+| optical | T1 | 25 | **2** (5 underdet.) | 1/9 / 0/8 / 1/8 | 12 | 302 | 0.14 | 12 | 0 |
+| optical | T2 | 25 | 5 (6 underdet.) | 2/9 / 1/8 / 2/8 | 12 | 302 | 0.13 | 12 | 0 |
+| optical | T3 | 25 | 6 (8 underdet.) | 2/9 / 1/8 / 3/8 | 12 | 302 | 0.11 | 6.5 | 0 |
+
+F46 is unchanged in every statement and larger in every count: the closure
+error is detected at every eligible point in every scenario (26, 18, 25 of
+26, 18, 25), survives the ejecta parameters everywhere, and under a free
+luminosity history survives at **18 of 26 `dense` points — 16 of the 17
+eligible X ≥ 10⁻² points and 2 of 9 lanthanide-poor ones** — at 5 of 12
+`sparse` points and at 2 of 25 `optical` points. The split by X is the same
+one §4.44.1 found on the full grid, now at real errors: distinctness lives
+in the NIR of lanthanide-rich ejecta.
+
+#### 3. The chain cap
+
+The §4.41 harness (`robustness.py chain`) reran the reference and all four
+legs at chain_max = 2000 / 4000 / 8000 for the four cells with the largest
+reference trapped fraction, at the stored n_used = 20 000 and seeds. Two of
+the four — (0.03, 0.05, 0.1) at 2 d and 3 d, trapped 13.6 % and 13.8 % at
+the cap of 2000 — are complete at this commit; (0.01, 0.05, 0.1) at 2 d and
+(0.03, 0.1, 0.1) at 1 d are running and are added to this table in the next
+commit. Provenance held at both cells: chain 2000 reproduces every stored
+leg's magnitudes to 0.0 mag, and B_opacity is identical (0.0 mag) at every
+cap, as it must be since it does not use the reference's event stream.
+
+| cell | cap | trapped (ref) | ref wall (s) | Δ(g−r) / Δ(i−J) / Δ(J−K), C_both | same, C_binned | max \|Δm_ref\| vs cap 2000 | max \|Δ(Δm_b)\| C_both vs cap 2000 |
+|---|---|---|---|---|---|---|---|
+| (0.03, 0.05, 0.1) @ 2 d | 2000 | 13.6 % | 842 | +0.13 / −0.16 / −0.67 | +0.30 / −0.08 / −0.69 | – | – |
+| | 4000 | 6.7 % | 1197 | +0.23 / −0.14 / −0.62 | +0.40 / −0.03 / −0.65 | 0.06 | 0.09 |
+| | 8000 | 3.0 % | 1641 | +0.26 / −0.41 / −0.53 | +0.44 / −0.34 / −0.54 | 0.14 | 0.13 |
+| (0.03, 0.05, 0.1) @ 3 d | 2000 | 13.8 % | 1348 | −0.21 / −0.29 / −0.76 | −0.02 / −0.20 / −0.85 | – | – |
+| | 4000 | 6.6 % | 1669 | +0.04 / −0.33 / −0.59 | +0.23 / −0.24 / −0.67 | 0.14 | 0.18 |
+| | 8000 | 3.2 % | 2352 | −0.04 / −0.33 / −0.58 | +0.17 / −0.26 / −0.66 | 0.15 | 0.15 |
+
+Δm_ref is the reference magnitude itself; Δ(Δm_b) is the per-band closure
+error of C_both (−0.8 to +0.75 mag at these cells). Raising the cap from
+2000 to 8000 costs 1.7–2.0× in wall time (not 4×: the chain loop's cost is
+per surviving packet) and leaves 3 % of the reference packets still
+trapped.
+
+Against the pre-declared criterion the result is mixed, and the mixture
+is informative. The J−K error — the largest colour error at these cells
+and the one F43 is about — changes by 21–24 % and keeps its sign (−0.67 →
+−0.53, −0.76 → −0.58): inside the criterion, barely. The g−r and i−J
+errors, which are 0.1–0.3 mag at these two cells, change by more than
+25 % and g−r at 3 d changes sign (−0.21 → −0.04); the criterion, read
+literally, fails for them. But every change is 0.09–0.18 mag in a single
+band — the same size as the reference's own shift between caps (0.06–0.15
+mag) and as these cells' A_redist noise floor (0.13–0.25 mag at 2 × 10⁴
+packets; the trapped 14 % of packets are re-simulated when the cap moves, so
+the two caps are also two noise realizations of a seventh of the packets).
+The chain cap is, at the worst-trapped cells of the grid, a ≤ 0.15 mag
+effect on single-band closure errors and a ≤ 0.25 mag effect on colours,
+and it does not reach the 1–3 mag colour errors of F43 nor the sign of
+the NIR colours. What the class test says: with both cells substituted at
+cap 8000, the point (0.03, 0.05, 0.1) stays C-B under T0 with R 0.70 → 0.66
+and χ²_res/dof 78 → 72 (C_binned 0.62 → 0.58, 79 → 74); its neighbours
+(0.03, 0.05, 0.01) and (0.01, 0.05, 0.1), whose derivatives use these rows,
+are unchanged to two decimals in R. The F45 statement is therefore
+sharpened rather than reversed: F43/F44 survive the chain cap at the level
+of the class and of the NIR colour signs; the sub-0.3-mag colour errors at
+the worst-trapped cells are not individually robust to it, which is the
+same thing as saying they are inside those cells' noise floor.
+
+**F48 — With the grid complete (162 of 162 cells), Gate 2 is C-B at 27 of 27
+points (median R 0.83, χ²_res/dof 118) and Gate 3 at 26/26, 18/18, 25/25
+eligible points under the ejecta parameters; a free luminosity history
+absorbs the residual at 8 of 9 lanthanide-poor points and 0 of 9
+lanthanide-rich ones, and at real errors the residual survives that
+history at 16 of 17 `dense` X ≥ 10⁻² points.** The nine redone cells are the
+noisiest in the grid (A_redist floor 0.13–0.53 mag) and change no F43
+number; their value is the X-derivative they supply to the X = 10⁻² points,
+which turned the central point from underdetermined into the clearest
+single case (N = 17, C-B under every space).
+
 ## 5. Findings register
 
 | # | Finding | Where |
@@ -3414,8 +3769,10 @@ T1–T3 spaces are underdetermined; §4.44.
 | F42 | **The chromatic closure error survives real filter curves, and the three notebook-only findings reproduce.** Re-photometering the committed F41 spectra through SVO DECam g r i z + 2MASS J H Ks (no packets re-run) keeps every ≥ 0.6 mag top-hat colour error at 0.65–0.77 mag (Ce II and the blend, g−r at 0.5 d) and the blue kilonova's binned leg at 0.69 mag — moving *which* colour is worst (g−r → i−J) but not its size — while the A_redist floor stays ≤ 0.009 mag. Gate 1 passes. Separately: the Ce II density scan reproduces with three seeds (crossing S = 55.7, five of six points within 7 points of the single-seed numbers), the F38 table is generated from `survey.json` (Pr II interaction −6.4%), and the F39 exit-τ scan has a driver and a data file (crossings S = 179.6 / 689.0 at τ_x = 0.5 / 2.0; dlnlam is inert at delocalize = 1). | §4.38 |
 | F43 | **On a heating-powered kilonova the grouped-opacity closure's colour error is 1–3 mag at every point of a 27-model (M_ej, v_ej, X_lan) grid, and its sign is uniform: too blue.** Four-ion blend, worldline transport, DECam + 2MASS at 40 Mpc, 162 epochs (153 ran, 9 X_lan = 0.1 early epochs over budget). Worst live colour error per model 0.96–2.84 mag (C_both; C_binned 1.24–3.05) against an A_redist floor of 0.02–0.13 mag on the well-sampled models; the central model runs from Δ(J−K) = −0.6 mag at 0.5 d to −1.9 mag at 3 d with Δ(g−r) inside −0.4 mag. 166 of 170 live NIR colour errors are negative: the closure's g is 0.2–2.1 mag too bright and its K up to 3.6 mag too faint. Every leg has the same L_bol by construction (conserving core); the absorbing-core Δm_bol of −0.5 to −3.9 mag is inner-boundary bookkeeping, and the harness makes no bolometric statement at S ≳ 10⁴. | §4.40 |
 | F44 | **Gate 2: the closure error is not degenerate with (M_ej, v_ej, X_lan) — class C-B, distinct residual, at all 24 analysable grid points, for every opacity closure, under every robustness variant.** χ²_RT/N = 28–549 (detectable), weighted residual fraction R = 0.46–1.00 after the best three-parameter shift (0.60–1.00 on the 20 well-sampled points), χ²_res/N = 17–373; the same class with σ doubled, one-sided derivatives and a 3 % band cut. The fitted shifts are median \|Δln M\| = 0.25, \|Δln v\| = 0.25, \|Δln X_lan\| = 0.95, so the error has a component along every parameter, but it leaves most of itself behind. A_redist is C-C (undetectable) at 23 of 24. Three X_lan = 0.1 points are unanalysable (mask intersection empty); R is against a one-zone model's three parameters, so C-B is an upper bound on distinctness. | §4.40 |
-| F45 | **F43/F44 survive the floor mask and the core convention (chain cap: §4.44); a free luminosity history absorbs the residual as a *class* but not as a *misfit*.** Erratum: the §4.40 floor mask was a no-op (27 floored rows in 12 models); with it real, Gate 2 is C-B at 20 of 21 analysable points (median R 0.77, χ²_res/dof 105), no class changed where both rules apply. Colours are exactly convention-invariant; the absorbing core moves three faint, few-band points to C-A through a grey per-epoch term. The chain-cap check (4 cells × chain_max 2000/4000/8000 at the stored n_used) is running; its 5000-packet probe passed the determinism check (B_opacity identical) and shows the cap moving the reference by up to 0.26 mag at 5000 packets, within that probe's own noise. One free grey magnitude per epoch (T1) takes median R to 0.28 and 12 of 19 points to C-A by the pre-declared rule — at the cost of 1–7 mag luminosity offsets, parameter shifts at or beyond the grid spacing, and a leftover χ²_res/dof of 23 (median; 17 of 19 above 4); a free photospheric temperature (Δln T = +0.33 median: the closure looks 40 % hotter) and a linearized blue component (T3) take R to 0.21 with χ²_res/dof 8. The A_redist floor from cells with n_used ≥ 10⁵ is 0.021 mag (median), 0.044 (90 %). | §4.41 |
-| F46 | **Gate 3: every scenario detects the closure error at every eligible point (χ²_RT,obs/N = 41–1005; 30–40σ in single bands at real errors) and it survives the ejecta parameters everywhere (18/18 dense, 11/11 sparse, 16/16 optical); under a free luminosity history its survival is set by the NIR — 9/18 with six-epoch JHK (all four X = 0.1 points), 3/8 with two NIR epochs, 1/15 without NIR.** The NIR carries only 31 % of χ²_RT,obs (g and r the most): detection is optical, distinctness is NIR. After the T1 fit the leftover is still χ²_res/dof > 4 at 18/18 dense points. | §4.42 |
+| F45 | **F43/F44 survive the floor mask and the core convention (chain cap: §4.44); a free luminosity history absorbs the residual as a *class* but not as a *misfit*.** Erratum: the §4.40 floor mask was a no-op (27 floored rows in 12 models); with it real, Gate 2 is C-B at 20 of 21 analysable points (median R 0.77, χ²_res/dof 105), no class changed where both rules apply. Colours are exactly convention-invariant; the absorbing core moves three faint, few-band points to C-A through a grey per-epoch term. The chain-cap check (4 cells × chain_max 2000/4000/8000 at the stored n_used; §4.44.3) passes the determinism check (B_opacity identical, chain 2000 reproduces the stored magnitudes exactly) and moves single-band closure errors by ≤ 0.15 mag at the worst-trapped cells — inside those cells' noise floor, class kept, J−K sign and size kept; the sub-0.3-mag colours there are not individually robust. One free grey magnitude per epoch (T1) takes median R to 0.28 and 12 of 19 points to C-A by the pre-declared rule — at the cost of 1–7 mag luminosity offsets, parameter shifts at or beyond the grid spacing, and a leftover χ²_res/dof of 23 (median; 17 of 19 above 4); a free photospheric temperature (Δln T = +0.33 median: the closure looks 40 % hotter) and a linearized blue component (T3) take R to 0.21 with χ²_res/dof 8. The A_redist floor from cells with n_used ≥ 10⁵ is 0.021 mag (median), 0.044 (90 %). | §4.41 |
+| F46 | **Gate 3: every scenario detects the closure error at every eligible point (χ²_RT,obs/N = 41–1005; 30–40σ in single bands at real errors) and it survives the ejecta parameters everywhere (18/18 dense, 11/11 sparse, 16/16 optical); under a free luminosity history its survival is set by the NIR — 9/18 with six-epoch JHK (all four X = 0.1 points), 3/8 with two NIR epochs, 1/15 without NIR.** The NIR carries only 31 % of χ²_RT,obs (g and r the most): detection is optical, distinctness is NIR. After the T1 fit the leftover is still χ²_res/dof > 4 at 18/18 dense points. Counts on the complete grid: §4.44 (26/26, 18/18, 25/25; T1 18/26 dense). | §4.42, §4.44 |
+| F47 | **The Planck temperature proxy of T2 is validated as a *gas*-temperature direction (cosine 0.92 with the measured transport response at the central point, 0.96–1.00 per epoch) with a lever arm 1.35× (2× at ≤ 1 d) larger than assumed; the illumination temperature alone does not reach the observer (a ×1.5625 change in the launch temperature moves no live band by more than the 0.13 mag noise floor, ‖d_T^MC‖ = 0.06 of the proxy); and the central point stays C-B with the measured direction (R 0.37, χ²_res/dof 46–49).** The closure residual is not a photospheric-temperature error. Four model runs (`--t-scale 0.8/1.25`, with and without `--t-scale-gas`), `tscale.py`, fig7. | §4.43 |
+| F48 | **With the grid complete (162 of 162 cells; nine early X = 0.1 epochs redone at a 5400 s budget), Gate 2 is C-B at 27 of 27 points (median R 0.83, χ²_res/dof 118) and Gate 3 at 26/26, 18/18, 25/25 eligible points under the ejecta parameters; a free luminosity history absorbs the residual at 8 of 9 lanthanide-poor points and 0 of 9 lanthanide-rich ones, and at real errors the residual survives that history at 16 of 17 `dense` X ≥ 10⁻² points.** The redone cells are the noisiest in the grid (A_redist floor 0.13–0.53 mag) and change no F43 number; 195 of 199 live NIR colour errors are negative. Chain cap at the two worst-trapped cells done so far: ≤ 0.15 mag per band, ≤ 0.25 mag per colour, J−K sign and size kept, class C-B kept (R 0.70 → 0.66); the sub-0.3-mag colours there are inside the cells' noise floor and not individually robust. Supersedes the counts of F44–F46. | §4.44 |
 
 ## 6. Caveats and limitations
 
@@ -3461,8 +3818,13 @@ T1–T3 spaces are underdetermined; §4.44.
   model's three parameters; one free grey magnitude per epoch (T1) already
   absorbs the closure error to R ≈ 0.3 at most points, and the Planck
   temperature column is a proxy (§4.43 measures the MC direction at one
-  point). The chain-cap check is pending (§4.44). The nuisance spaces are
-  underdetermined at the sparse points (dof < 4 under T3 at 4 of 21).
+  point: cosine 0.92, lever arm 1.35× — the proxy is conservative). The
+  chain cap is a ≤ 0.15 mag per-band effect at the worst-trapped cells,
+  inside those cells' noise floor, so the sub-0.3-mag colour errors there are
+  not individually robust to it (§4.44.3; two of four cells so far). The
+  T-scale validation is one grid point and a finite difference. The nuisance
+  spaces are underdetermined at the sparse points (dof < 4 under T3 at 1 of
+  27 on the complete grid, more under the `sparse`/`optical` scenarios).
 
 ## 7. Reproduction
 
@@ -3470,7 +3832,7 @@ T1–T3 spaces are underdetermined; §4.44.
 # environment
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]" h5py
-pytest                    # 304 passed (2026-09-02)
+pytest                    # 306 passed (2026-09-03)
 
 # data (once): Zenodo 19335084 -> data/, see data/README.md
 # SEDONA (once): see lab_notebook.md "SEDONA build" entry
@@ -3525,9 +3887,21 @@ python paper3/phase12_grid/figures.py --which 6                    # fig6_tangen
 python paper3/phase12_grid/robustness.py chain --model model_M0.03_v0.05_X0.1 --t 3 --chain-max 2000 8000 --probe
 paper3/phase12_grid/robustness/run_chain.sh robustness/chain.log model_M0.03_v0.05_X0.1:3 ...   # the four cells, ~2 h each
 python paper3/phase12_grid/robustness.py table
+python paper3/phase12_grid/sensitivity.py --override paper3/phase12_grid/robustness/chain_model_M0.03_v0.05_X0.1_t{2,3}.json --override-chain 8000 --out /tmp/sens_chain8000.json
 
 # Paper III phase 13, observability / Gate 3 (section 4.42)
-python paper3/phase13_observability/observe.py --table --fig         # observability.json, fig5_observability
+python paper3/phase13_observability/observe.py && python paper3/phase13_observability/observe.py --table --fig   # observability.json, fig5
+
+# Paper III phase 12, the T_eff validation (section 4.43); 4 model runs, ~1 h each, in parallel
+for a in "0.8" "1.25" "0.8 --t-scale-gas" "1.25 --t-scale-gas"; do
+  OMP_NUM_THREADS=1 python -u paper3/phase12_grid/grid.py --mass 0.01 --v 0.1 --xlan 0.01 --t-scale $a \
+    --out paper3/phase12_grid/grid/tscale/model_M0.01_v0.1_X0.01_T${a// --t-scale-gas/_gas}.json &
+done; wait
+python paper3/phase12_grid/tscale.py --fig                           # tscale.json, fig7_tscale
+
+# Paper III phase 12, completing the grid (section 4.44); nine cells, 35-70 min each
+OMP_NUM_THREADS=1 python paper3/phase12_grid/run_grid.py --redo over_budget --budget 5400 --workers 8
+python paper3/phase12_grid/run_grid.py --merge-redo                  # then rerun sensitivity/grid_table/figures/observe above
 ```
 
 Long jobs: launch in the background with `python -u` and an **absolute** path
