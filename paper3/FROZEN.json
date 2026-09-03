@@ -1,0 +1,536 @@
+{
+ "tag": "paper3-freeze",
+ "utc": "2026-09-03T15:21:29+00:00",
+ "git": {
+  "head": "e86dc4c26430a8ad52d280ef900b18e3259f8ba1",
+  "inputs_dirty": false,
+  "dirty_inputs": [],
+  "tree_dirty": true,
+  "trees": {
+   "grid": "820bd7b6ee9b9f23d0a86a3155986f3e81846788",
+   "grid/tscale": "af23eda44f757b5cd6d4ba9bc85a1d7c3ef1d7d7",
+   "robustness": "c508a7c9c82b55b939132ff40c2659e0696fb1af",
+   "data/filters": "4575e49675da0a5bf8941ab3b4efd4e680edf106"
+  },
+  "tag": "paper3-freeze"
+ },
+ "versions": {
+  "python": "3.12.14",
+  "numpy": "2.5.2",
+  "matplotlib": "3.11.1"
+ },
+ "source_date_epoch": "1700000000",
+ "inputs": {
+  "paper3/phase12_grid/grid/model_M0.003_v0.05_X0.001.json": "fe3e578e08fcbefa5bc6fce154c5e36e75669ad68870476ee21cb182b2129d2f",
+  "paper3/phase12_grid/grid/model_M0.003_v0.05_X0.01.json": "ca4d679d4c1240ac26a2b352900d664957179550f828454dd522970a517a15f3",
+  "paper3/phase12_grid/grid/model_M0.003_v0.05_X0.1.json": "d4cc967cc5d1e2851ae32e2a5ad5fa560192418923966ab7279c7db9a3f9c530",
+  "paper3/phase12_grid/grid/model_M0.003_v0.1_X0.001.json": "bd5389d53698b14dc29b481ffd824b3cf0e884f32be18187bd7e75079945cdbc",
+  "paper3/phase12_grid/grid/model_M0.003_v0.1_X0.01.json": "66fa5136748ddfb3a7305fc430b13bf656d2637496019bbccf75f50d8deee7ad",
+  "paper3/phase12_grid/grid/model_M0.003_v0.1_X0.1.json": "23565c1b70df2185a3784a4002fc34eb86f99d89f123b32e8e3bb1a0f640dd1d",
+  "paper3/phase12_grid/grid/model_M0.003_v0.2_X0.001.json": "2b73d7ee1d704ca2838dd60b6b4eba53b093a077eab6cc08c0eb085bc3b8a5d0",
+  "paper3/phase12_grid/grid/model_M0.003_v0.2_X0.01.json": "d45f3e823c2d122afb005714e8a5b3b413d8b55dafe2c9b7945ec32872472bab",
+  "paper3/phase12_grid/grid/model_M0.003_v0.2_X0.1.json": "d9c9bf5adf20fd98186785b915703ece2b8b533fbb74a1b4899632a99d6581f0",
+  "paper3/phase12_grid/grid/model_M0.01_v0.05_X0.001.json": "33e433cf5306f614a414ce2a9901a2349e41ad3f30483cbd05ebd88de73cf390",
+  "paper3/phase12_grid/grid/model_M0.01_v0.05_X0.01.json": "7278c5737eb16329310b1877a7738bb349e6a446e612d5619f6adcfbfffe2326",
+  "paper3/phase12_grid/grid/model_M0.01_v0.05_X0.1.json": "58eb34a10bb6680ddac827a559260ab0e36f22ea682beaebf4055c9d16d3401e",
+  "paper3/phase12_grid/grid/model_M0.01_v0.1_X0.001.json": "2756ab8e67b3fc2a60e7273ac7f3ee246786af4da9bffc92a8fd58a3b27f03db",
+  "paper3/phase12_grid/grid/model_M0.01_v0.1_X0.01.json": "b6dca3a25b3c8dd02532efddd043888c8933ad195f718e13eb0eed85210697f0",
+  "paper3/phase12_grid/grid/model_M0.01_v0.1_X0.1.json": "3a6775372f4ee4e25c1dd79890afa27502ecb9ae09652f92455b0e7a13f2b942",
+  "paper3/phase12_grid/grid/model_M0.01_v0.2_X0.001.json": "2338dc69ae9b82b22a77085f1e5216aa16d560b8df81feb1fd60e3f512433078",
+  "paper3/phase12_grid/grid/model_M0.01_v0.2_X0.01.json": "b96a05ed3bb43b139d9142182abb669b825c07f59a6400ad2cfbbb8ccdbe149f",
+  "paper3/phase12_grid/grid/model_M0.01_v0.2_X0.1.json": "fd3a13e30170f04f4d74e3373fd8357ae4f6279c1b7e19b5460e99c9aa5bc2b5",
+  "paper3/phase12_grid/grid/model_M0.03_v0.05_X0.001.json": "676d087ca828de13081ebaea3359f89e256d43a90b6762fa433af3e59bf96437",
+  "paper3/phase12_grid/grid/model_M0.03_v0.05_X0.01.json": "c8fba1ad502d0bafbeade50b7bd59d8684369a50f565620f84b98aa1d8ac04ce",
+  "paper3/phase12_grid/grid/model_M0.03_v0.05_X0.1.json": "dbc70da0afa44e37969e98ff56006154bf51559f0f9794898bff167627f3e6eb",
+  "paper3/phase12_grid/grid/model_M0.03_v0.1_X0.001.json": "687fe0664e1e12dfc5b2227d7cd9b7df1bcfce463e3b41a9276ad064ef2d51b5",
+  "paper3/phase12_grid/grid/model_M0.03_v0.1_X0.01.json": "eb866ea911b7dbeaf1c5bfd192f8fe53d40e5d5fb51588d3f998e380075682de",
+  "paper3/phase12_grid/grid/model_M0.03_v0.1_X0.1.json": "1ee41392751f0e933640a09e91f12d73c41697f66a01bce1eee221a87b4c82f0",
+  "paper3/phase12_grid/grid/model_M0.03_v0.2_X0.001.json": "380966fc98fafa44cb7a9d0d41e2abd698a5a47a9d7438d9b705d734a0670382",
+  "paper3/phase12_grid/grid/model_M0.03_v0.2_X0.01.json": "fbf0daee970f4b0c7cccb17e440dc520e00cd68b5bba13c94d3501b0cd8332fc",
+  "paper3/phase12_grid/grid/model_M0.03_v0.2_X0.1.json": "826634040fbd714c5cc82e736dafe1eb524c1b265f40ffd5117d7f778c5fcd3f",
+  "paper3/phase12_grid/grid/tscale/model_M0.01_v0.1_X0.01_T0.8.json": "a918948de84268f10fd078749f32643eff854374062f8a7bea49e490fc8e490f",
+  "paper3/phase12_grid/grid/tscale/model_M0.01_v0.1_X0.01_T0.8_gas.json": "89e2c350c54e5b5bcdf9eb6b05885ef49795a396da2c074c901d8caff7cea831",
+  "paper3/phase12_grid/grid/tscale/model_M0.01_v0.1_X0.01_T1.25.json": "cf13b25f6b2026669598699bf8b9845e725ba445b0dd4a281415214b2417c4b8",
+  "paper3/phase12_grid/grid/tscale/model_M0.01_v0.1_X0.01_T1.25_gas.json": "0c091ae877852498d3943731d3335f5c56e3f5fd45c734eed007bc13bbb91fab",
+  "paper3/phase12_grid/robustness/chain_model_M0.01_v0.05_X0.1_t2.json": "f1e022d6772d93a06738fe97cfcf45d5c24333b692d87e26e1509a31829183bb",
+  "paper3/phase12_grid/robustness/chain_model_M0.03_v0.05_X0.1_t2.json": "3a64ed7e7d637f219ce077dd83881444af0b40b9c83df4bf3f44ced8a9fba395",
+  "paper3/phase12_grid/robustness/chain_model_M0.03_v0.05_X0.1_t3.json": "1cbe3c50f14ad65d05e685285f90c0427b8702e4fbb0d2e607f33bf1992fdc76",
+  "paper3/phase12_grid/robustness/chain_model_M0.03_v0.05_X0.1_t3_probe.json": "e3c8e8e8458d16876afb4735872a99703a00ea1c0a99cd688053a41ccd6bebdb",
+  "paper3/phase12_grid/robustness/chain_model_M0.03_v0.1_X0.1_t1.json": "70a94686e17821086e2b30570f9a5b0577c4d819f1674f398f18b667eb3796f4",
+  "data/filters/2mass_H.dat": "f6c6074ba5dae4937127c67a6c90adad84e8a1f724eb1fcf17d353ba6b0cc70d",
+  "data/filters/2mass_J.dat": "9d0c86e1279f17ff0041ab89d3e31f1eb80ba8293c1ef93638fc308d4a5cdb9c",
+  "data/filters/2mass_Ks.dat": "58969bfd998b9080dff12f9cd7f8678424e6ce2f7e1a7e22545ccf6237fd71e5",
+  "data/filters/decam_g.dat": "35936fc027e8e88576c863ac9fe329fb13d0422c57552120dcee0543bf9bca3f",
+  "data/filters/decam_i.dat": "f975476f14a3ef227a351b481576bd0d2d713dc9c113080e992a7a525c2bc97f",
+  "data/filters/decam_r.dat": "15c0d56823563a9829233a70d19a229593d7eb516560177dabbfd8a93d083956",
+  "data/filters/decam_z.dat": "c5e6ab3c3806b0a058bfb97bd4758a4b30ade19096e3085231edf1a2ddbba96e",
+  "paper3/phase12_grid/sensitivity.py": "2ecc70557ab76b5c805b502c726866a1aed9334f5d4be41f2d3641d56db680e6",
+  "paper3/phase12_grid/robustness.py": "6287635502fef46ea38eb0b1f16cef284c538907eb7ff94965291daa67deec67",
+  "paper3/phase12_grid/grid_table.py": "cd0c7b041ac88efc0aff9bed43fb2564a8ebedcb2964a03cd5e921fb53f9d2b0",
+  "paper3/phase12_grid/syserr.py": "35087eb5fa71dd84949e02e2c4624b8877535067e20ab5dbd019dd6235ace622",
+  "paper3/phase12_grid/tscale.py": "c074bc4c82c18c19289175af28098a32a99c3e362121eedb33121f1f50bb9ba5",
+  "paper3/phase12_grid/figures.py": "f0f4b724e0716c013dd26f4276251fa629509e6796ca9a56b6cc66651ad03f52",
+  "paper3/phase12_grid/grid.py": "2656d9da52dedbe09915496c2ad910ea3bb0601b0ff13b51cc9f456ab9271f6b",
+  "paper3/phase12_grid/run_grid.py": "ecb723d49762a014ed4f3d759c117198c9a75f5dc0cf7229fbf887d7af4f9bc7",
+  "paper3/phase13_observability/observe.py": "a953459d0dae4a5bd3cf90546244a4d91b33e2e8a3b4e407a073a576be5b909f",
+  "sobolev/photometry.py": "ae4bce5f20b0bbee5fc4787efbf598b47545e00a29d3b83ee74b88c36c98e799"
+ },
+ "outputs": {
+  "paper3/phase12_grid/sensitivity.json": "9b91f8135877195703952baedb73abaa11fb0a55c330e35d19c2ccde53639818",
+  "paper3/phase12_grid/sensitivity_floored_incl.json": "95e9b972d4fb2756e3f4eea9ca6e781b132302979b6089b5a12a669e9ad4694a",
+  "paper3/phase12_grid/sensitivity_absorbing.json": "e5bfe4b418c487b9880f9cacd718e2ad8333a36f4ac092e31cb84fa3d07f8eaa",
+  "paper3/phase12_grid/sensitivity_T1.json": "4ea55d86a2985ea54a6722b3812eb45ae662abb995b09d21f694eabd3be98414",
+  "paper3/phase12_grid/sensitivity_T2.json": "a8b930952a1655b810a35ef134fe417cf5fddf41a7aa6b4fddcdb91b809bf39b",
+  "paper3/phase12_grid/sensitivity_T3.json": "b523183dd0bdbc34a5155802f965ff6fba6de729d845a2f89b1d7cd67e580b90",
+  "paper3/phase12_grid/sensitivity_chain8000.json": "c045c49340939396095b0a4ae92b555ba4e265f4d2769f911505184294f0c0c6",
+  "paper3/phase12_grid/robustness/chain_table.json": "37f2adf9d50de3143281315e7537b60c8a2381cb6caceefaba01182e4d32a5bc",
+  "paper3/phase12_grid/grid_table.json": "4f98ab9da95ab5b05e41b9e0d2b53b56e5dff22c13ffc56b7af665ea3137e9e9",
+  "paper3/phase12_grid/tscale.json": "9314e181a92e2f793d557f43daf73e4b99f9370c490f6f90c90706125512546a",
+  "paper3/phase12_grid/syserr.json": "c69fef4297d778248279000c7b574ba1842ec09d1a00537973076abf029bf3d6",
+  "paper3/phase13_observability/observability.json": "8d0fc391864b3b32a0e56543fd69d25568875ad2e75f7cabcfd998e95fce4c50",
+  "paper3/figures/fig2_bol_vs_colour.png": "858a33e767f24a3b88c910de896e7664440d67d4e2cfe6b12e15cb46397db4d9",
+  "paper3/figures/fig2_bol_vs_colour.pdf": "20819e23a24025dc4e424d82c10b2bb0b14704558fc0c42cc8dbd187fb16b6eb",
+  "paper3/figures/fig4_vectors.png": "3533ac54b3e654e182be2baffb5f3915882767314141a715c98d0adf624fe84e",
+  "paper3/figures/fig4_vectors.pdf": "34afb76519fcc553d6ba7b25ca97ab37e3fb3a01779e9424c8d5bbc0b2db45bc",
+  "paper3/figures/fig5_observability.png": "4885b9491c9c5dcbfde19f81d53f45aa1c869a8d85a4b120b648ff6f86bf9a6d",
+  "paper3/figures/fig5_observability.pdf": "7a21039d7008e00299c7f16f52ba740ef2734bb7ed9cd5886bb7c47050f1710d",
+  "paper3/figures/fig6_tangent.png": "de2b878fbc0e9ce61f639d2e680d431a49fead06c126d1613cf6355b7e0c6c04",
+  "paper3/figures/fig6_tangent.pdf": "52c50f909a5cad915a0e9cfaf7e2e3d9b49c510c06c29c57a27a519f13d07712",
+  "paper3/figures/fig7_tscale.png": "8d09fcd851ae491d9107a98e5f0731ed265bf1f9af917da318a5e798cfec492c",
+  "paper3/figures/fig7_tscale.pdf": "05349513e408838b951eeb90cffe230f22b4a28a8110db70eabb390db8a0c636"
+ },
+ "headline": {
+  "gate2.T0.cb": 27,
+  "gate2.T0.n": 27,
+  "gate2.T0.median_R": 0.8268564462697721,
+  "gate2.T0.median_chi2_res_dof": 117.9603802821962,
+  "gate2.T0.cb_by_X": {
+   "0.001": [
+    9,
+    9
+   ],
+   "0.01": [
+    9,
+    9
+   ],
+   "0.1": [
+    9,
+    9
+   ]
+  },
+  "gate2.T0.C_binned.cb": 27,
+  "gate2.T1.cb": 16,
+  "gate2.T1.cb_by_X": {
+   "0.001": [
+    1,
+    9
+   ],
+   "0.01": [
+    6,
+    9
+   ],
+   "0.1": [
+    9,
+    9
+   ]
+  },
+  "gate2.T1.median_chi2_res_dof": 25.357016789990052,
+  "gate2.T1.leftover_gt4": 25,
+  "gate2.T1.n_determined": 27,
+  "gate2.T1.abs_aL_median": 0.9307537295796623,
+  "gate2.T1.abs_aL_max": 6.531434778242881,
+  "gate2.T2.cb": 15,
+  "gate2.T2.cb_by_X": {
+   "0.001": [
+    4,
+    9
+   ],
+   "0.01": [
+    5,
+    9
+   ],
+   "0.1": [
+    6,
+    8
+   ]
+  },
+  "gate2.T2.median_chi2_res_dof": 21.691246453984864,
+  "gate2.T2.leftover_gt4": 24,
+  "gate2.T2.n_determined": 26,
+  "gate2.T2.aT_median": 0.28439150373167726,
+  "gate2.T3.cb": 10,
+  "gate2.T3.cb_by_X": {
+   "0.001": [
+    4,
+    9
+   ],
+   "0.01": [
+    3,
+    9
+   ],
+   "0.1": [
+    3,
+    8
+   ]
+  },
+  "gate2.T3.median_chi2_res_dof": 14.235810174881507,
+  "gate2.T3.leftover_gt4": 24,
+  "gate2.T3.n_determined": 26,
+  "gate2.T3.underdetermined": 1,
+  "gate2.T3.lin2c_gt1": [
+   16,
+   18
+  ],
+  "control.A_redist.cc": 21,
+  "control.A_redist.n": 27,
+  "control.B_opacity.cb": 27,
+  "thresholds.chi2_small": 4.0,
+  "thresholds.R_max": 0.3,
+  "thresholds.signif_min": 3.0,
+  "grid.n_models": 27,
+  "grid.n_cells": 162,
+  "grid.n_cells_ran": 162,
+  "grid.n_redone_cells": 9,
+  "colour.worst_per_model_range": [
+   0.9622583190485763,
+   2.8353916807739807
+  ],
+  "colour.g_dm_range": [
+   -2.1227713735887654,
+   -0.2386863211697019
+  ],
+  "colour.g_n": 102,
+  "colour.K_dm_max": 3.6382767747591878,
+  "colour.K_n": 106,
+  "colour.nir_negative": [
+   195,
+   199
+  ],
+  "floor.n_well": 62,
+  "floor.n_min": 100000,
+  "floor.median": 0.02095379309765022,
+  "floor.p90": 0.043711690298784946,
+  "floor.max": 0.17842392472533675,
+  "floor.redone_range": [
+   0.13427808406900255,
+   0.5299826960896752
+  ],
+  "gate3.dense.T0.survives": 26,
+  "gate3.dense.T0.eligible": 26,
+  "gate3.dense.T0.by_X": {
+   "0.001": [
+    9,
+    9
+   ],
+   "0.01": [
+    9,
+    9
+   ],
+   "0.1": [
+    8,
+    8
+   ]
+  },
+  "gate3.dense.T1.survives": 18,
+  "gate3.dense.T1.eligible": 26,
+  "gate3.dense.T1.by_X": {
+   "0.001": [
+    2,
+    9
+   ],
+   "0.01": [
+    8,
+    9
+   ],
+   "0.1": [
+    8,
+    8
+   ]
+  },
+  "gate3.dense.T2.survives": 14,
+  "gate3.dense.T2.eligible": 26,
+  "gate3.dense.T2.by_X": {
+   "0.001": [
+    2,
+    9
+   ],
+   "0.01": [
+    6,
+    9
+   ],
+   "0.1": [
+    6,
+    8
+   ]
+  },
+  "gate3.dense.T3.survives": 10,
+  "gate3.dense.T3.eligible": 26,
+  "gate3.dense.T3.by_X": {
+   "0.001": [
+    2,
+    9
+   ],
+   "0.01": [
+    3,
+    9
+   ],
+   "0.1": [
+    5,
+    8
+   ]
+  },
+  "gate3.sparse.T0.survives": 18,
+  "gate3.sparse.T0.eligible": 18,
+  "gate3.sparse.T0.by_X": {
+   "0.001": [
+    6,
+    6
+   ],
+   "0.01": [
+    6,
+    6
+   ],
+   "0.1": [
+    6,
+    6
+   ]
+  },
+  "gate3.sparse.T1.survives": 5,
+  "gate3.sparse.T1.eligible": 12,
+  "gate3.sparse.T1.by_X": {
+   "0.001": [
+    2,
+    4
+   ],
+   "0.01": [
+    2,
+    4
+   ],
+   "0.1": [
+    1,
+    4
+   ]
+  },
+  "gate3.sparse.T2.survives": 5,
+  "gate3.sparse.T2.eligible": 12,
+  "gate3.sparse.T2.by_X": {
+   "0.001": [
+    2,
+    4
+   ],
+   "0.01": [
+    0,
+    4
+   ],
+   "0.1": [
+    3,
+    4
+   ]
+  },
+  "gate3.sparse.T3.survives": 4,
+  "gate3.sparse.T3.eligible": 12,
+  "gate3.sparse.T3.by_X": {
+   "0.001": [
+    2,
+    4
+   ],
+   "0.01": [
+    1,
+    4
+   ],
+   "0.1": [
+    1,
+    4
+   ]
+  },
+  "gate3.optical.T0.survives": 25,
+  "gate3.optical.T0.eligible": 25,
+  "gate3.optical.T0.by_X": {
+   "0.001": [
+    9,
+    9
+   ],
+   "0.01": [
+    8,
+    8
+   ],
+   "0.1": [
+    8,
+    8
+   ]
+  },
+  "gate3.optical.T1.survives": 2,
+  "gate3.optical.T1.eligible": 25,
+  "gate3.optical.T1.by_X": {
+   "0.001": [
+    1,
+    9
+   ],
+   "0.01": [
+    0,
+    8
+   ],
+   "0.1": [
+    1,
+    8
+   ]
+  },
+  "gate3.optical.T2.survives": 5,
+  "gate3.optical.T2.eligible": 25,
+  "gate3.optical.T2.by_X": {
+   "0.001": [
+    2,
+    9
+   ],
+   "0.01": [
+    1,
+    8
+   ],
+   "0.1": [
+    2,
+    8
+   ]
+  },
+  "gate3.optical.T3.survives": 6,
+  "gate3.optical.T3.eligible": 25,
+  "gate3.optical.T3.by_X": {
+   "0.001": [
+    2,
+    9
+   ],
+   "0.01": [
+    1,
+    8
+   ],
+   "0.1": [
+    3,
+    8
+   ]
+  },
+  "gate3.dense.T0.median_nir_share": 0.3258734583853449,
+  "gate3.distance_Mpc": 40,
+  "tscale.illum.cos": 0.3389577107684265,
+  "tscale.illum.norm_ratio": 0.06240723530373733,
+  "tscale.gas.cos": 0.9204637685702981,
+  "tscale.gas.norm_ratio": 1.3522284333250936,
+  "chain.n_cells": 4,
+  "chain.base_cap": 2000,
+  "chain.top_cap": 8000,
+  "chain.trapped_range": [
+   0.10526666666666666,
+   0.13828333333333334
+  ],
+  "chain.trapped_range_top": [
+   0.027633333333333333,
+   0.0319
+  ],
+  "chain.dm_change_8000_range": [
+   0.13647966881142537,
+   0.2089949105310751
+  ],
+  "chain.dm_ref_change_8000_range": [
+   0.13995282562660094,
+   0.21449296162991516
+  ],
+  "chain.signs_kept": [
+   12,
+   12
+  ],
+  "chain.criterion_met": [
+   4,
+   12
+  ],
+  "chain.rel_max": 0.25,
+  "chain.C_binned.signs_kept": [
+   11,
+   12
+  ],
+  "chain.C_binned.criterion_met": [
+   5,
+   12
+  ],
+  "chain.cb_with_override": 27,
+  "chain.n_with_override": 27,
+  "chain.median_chi2_res_dof_override": 116.21225803408153,
+  "chain.median_R_override": 0.8268564462697721,
+  "syserr.one_mode.C_both": 0.7978183326334031,
+  "syserr.svd_filled.C_both": 0.8168227906381865,
+  "syserr.null_median.C_both": 0.32537947215683516,
+  "syserr.null_p95.C_both": 0.3646003101547096,
+  "syserr.frac_gt_0p5.C_both": [
+   292,
+   524
+  ],
+  "syserr.frac_gt_1.C_both": [
+   94,
+   524
+  ],
+  "syserr.sign_pattern.C_both": [
+   39,
+   39
+  ],
+  "syserr.chi2_equiv_1mag_median.C_both": 0.5638741199573666,
+  "syserr.chi2_equiv_1mag_range.C_both": [
+   0.12283554296568075,
+   1.7398979546707354
+  ],
+  "syserr.chi2_equiv_0p5mag_median.C_both": 2.2554964798294663,
+  "syserr.n_live.C_both": 524,
+  "syserr.one_mode.C_binned": 0.7727814533782489,
+  "syserr.svd_filled.C_binned": 0.8022022033824854,
+  "syserr.null_median.C_binned": 0.28417971736865527,
+  "syserr.null_p95.C_binned": 0.3173546828841465,
+  "syserr.frac_gt_0p5.C_binned": [
+   313,
+   524
+  ],
+  "syserr.frac_gt_1.C_binned": [
+   117,
+   524
+  ],
+  "syserr.sign_pattern.C_binned": [
+   38,
+   39
+  ],
+  "syserr.chi2_equiv_1mag_median.C_binned": 0.6708929856076854,
+  "syserr.chi2_equiv_1mag_range.C_binned": [
+   0.18181598242588654,
+   1.5887139680327957
+  ],
+  "syserr.chi2_equiv_0p5mag_median.C_binned": 2.6835719424307416,
+  "syserr.n_live.C_binned": 524,
+  "syserr.one_mode.A_redist": 0.3088344435344619,
+  "syserr.svd_filled.A_redist": 0.2170759500051955,
+  "syserr.null_median.A_redist": 0.333647305755148,
+  "syserr.null_p95.A_redist": 0.38430224365463234,
+  "syserr.frac_gt_0p5.A_redist": [
+   0,
+   524
+  ],
+  "syserr.frac_gt_1.A_redist": [
+   0,
+   524
+  ],
+  "syserr.sign_pattern.A_redist": [
+   12,
+   39
+  ],
+  "syserr.chi2_equiv_1mag_median.A_redist": 0.001700465261194031,
+  "syserr.chi2_equiv_1mag_range.A_redist": [
+   3.585803558483361e-05,
+   0.03976365405034945
+  ],
+  "syserr.chi2_equiv_0p5mag_median.A_redist": 0.006801861044776124,
+  "syserr.n_live.A_redist": 524,
+  "syserr.n_points": 27,
+  "syserr.n_keys": 38,
+  "syserr.mp_scale": 0.15727112383554231,
+  "syserr.svd_n_keys": 24,
+  "syserr.residual_T1.one_mode": 0.7618799424233764,
+  "syserr.residual_T1.frac_gt_0p5": [
+   51,
+   523
+  ],
+  "syserr.residual_T1.chi2_equiv_1mag_median": 0.10945796107157066
+ }
+}

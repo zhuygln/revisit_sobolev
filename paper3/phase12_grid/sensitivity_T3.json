@@ -34,7 +34,7 @@
   "2c"
  ],
  "override": null,
- "override_chain": 8000,
+ "override_chain": null,
  "points": {
   "(0.003, 0.05, 0.001)": {
    "noise_floor": 0.032393307438585595,
