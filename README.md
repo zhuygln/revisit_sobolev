@@ -119,12 +119,15 @@ notebooks/     Phase 0: single-line toy model, GSI line spacing
 paper2/        Paper II: Phase 0 (SEDONA audit, TARDIS record, three-level
                branching MC) and Phase 1 (whole-ion Sobolev/expansion MC
                with fluorescence, the La II measurement)
-paper3/        Paper III: the reduced redistribution closure (kernel,
-               frozen reference, compression sweep, T and epoch transfer),
-               the kilonova closure grid (phase12/13) and freeze.py +
-               FROZEN.json, the frozen analysis the manuscript quotes
+paper3/        Paper III campaign: the reduced redistribution closure
+               (kernel, frozen reference, compression sweep, T and epoch
+               transfer), the kilonova closure grid (phase12/13) and
+               freeze.py + FROZEN.json, the frozen analysis the manuscript
+               quotes -- see paper3/README.md
 tests/         350 tests pinning the physics of every module
-docs/          results report, lab notebook, planning inputs, paper/
+docs/          results report, lab notebook, planning inputs, and one
+               directory per manuscript: paper/ (Paper I), paper2/,
+               paper3/ (the write-up half of paper3/ above)
 data/          raw atomic data (gitignored; provenance in data/README.md)
 outputs/       working figures (gitignored; committed copies in docs/figures/)
 ```
