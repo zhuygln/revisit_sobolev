@@ -3,8 +3,11 @@
 # that the committed numbers.tex is that regeneration and that no literal
 # result number has crept into the prose.
 PY ?= ../../.venv/bin/python
+# Reproducible PDFs: pdflatex takes its dates (and the trailer /ID) from this.
+export SOURCE_DATE_EPOCH = 1788393600
+export SOURCE_DATE_EPOCH_TEX_PRIMITIVES = 1
 
-all: manuscript.pdf
+all: manuscript.pdf si.pdf
 	@$(MAKE) --no-print-directory check
 
 manuscript.pdf: manuscript.tex numbers.tex tab_verdict.tex tab_grid.tex tab_scenarios.tex references.bib
@@ -13,9 +16,8 @@ manuscript.pdf: manuscript.tex numbers.tex tab_verdict.tex tab_grid.tex tab_scen
 	pdflatex -interaction=nonstopmode manuscript.tex
 	pdflatex -interaction=nonstopmode manuscript.tex
 
-si.pdf: si.tex numbers.tex references.bib
+si.pdf: si.tex numbers.tex si_tab_robustness.tex si_tab_points.tex si_tab_chain.tex si_tab_tscale.tex si_tab_syserr.tex
 	pdflatex -interaction=nonstopmode si.tex
-	bibtex si
 	pdflatex -interaction=nonstopmode si.tex
 	pdflatex -interaction=nonstopmode si.tex
 

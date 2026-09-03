@@ -61,8 +61,31 @@ def test_regeneration_is_byte_identical(tmp_path):
     first = {Path(p).name: Path(p).read_bytes() for p in a}
     b = lt.main(h, freeze.canonical(), tmp_path)
     assert {Path(p).name: Path(p).read_bytes() for p in b} == first
-    for name in ("numbers.tex", "tab_verdict.tex", "tab_grid.tex", "tab_scenarios.tex"):
+    for name in ("numbers.tex", "tab_verdict.tex", "tab_grid.tex", "tab_scenarios.tex",
+                 *lt.SI_TABLES):
         assert first[name] == (DOCS3 / name).read_bytes(), f"committed {name} is stale"
+
+
+def _body_rows(tex):
+    body = tex.split(r"\midrule", 1)[1].split(r"\bottomrule", 1)[0]
+    return [l for l in body.splitlines() if l.strip().endswith(r"\\")]
+
+
+@needs_frozen
+def test_si_tables_have_the_expected_rows():
+    sys.path.insert(0, str(ROOT / "paper3"))
+    import freeze
+    lt = _load()
+    dest = freeze.canonical()
+    h = _headline()
+    assert len(_body_rows(lt.tab_si_robustness(dest))) == 7 * 4      # 7 variants x 4 legs
+    assert len(_body_rows(lt.tab_si_points(dest))) == 27              # the complete grid
+    assert len(_body_rows(lt.tab_si_chain(dest))) == 3 * h["chain.n_cells"]
+    assert len(_body_rows(lt.tab_si_syserr(dest))) == 38   # band-epoch keys live at >= 1 point
+    ts = _body_rows(lt.tab_si_tscale(dest))
+    assert "cosine with the proxy" in ts[-2] and "norm ratio" in ts[-1]
+    assert "-0.00" not in lt.tab_si_tscale(dest)
+    lt._check_columns(lt.tab_si_points(dest))
 
 
 @needs_frozen

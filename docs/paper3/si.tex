@@ -1,0 +1,102 @@
+% Paper III -- Supplementary Information. Same conventions as manuscript.tex:
+% every number is a macro from numbers.tex or a cell of a generated table.
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=22mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{xspace}
+\usepackage{xcolor}
+\usepackage{rotating}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
+\input{numbers}
+\newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
+\newcommand{\Cboth}{C\xspace}
+\newcommand{\Cbin}{C$_{\rm bin}$\xspace}
+\newcommand{\Aleg}{A\xspace}
+\newcommand{\Bleg}{B\xspace}
+\newcommand{\dRT}{d_{\rm RT}}
+\newcommand{\Xlan}{X_{\rm lan}}
+\newcommand{\Mej}{M_{\rm ej}}
+\newcommand{\vej}{v_{\rm ej}}
+\newcommand{\Teff}{T_{\rm eff}}
+\newcommand{\Tgas}{T_{\rm gas}}
+\newcommand{\chires}{\chi^2_{\rm res}/{\rm dof}}
+\newcommand{\Msun}{M_\odot}
+\newcommand{\sigsys}{\sigma_{\rm sys}}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\setlength{\parskip}{2pt}
+
+\title{Supplementary Information for\\ ``Coarse-grained line opacity leaves a detectable chromatic signature in kilonovae that ejecta parameters cannot mimic''}
+\author{Yonglin Zhu}
+\date{}
+
+\begin{document}
+\maketitle
+
+This Supplementary Information gives the full tables behind the display items of the main text: the classification of every grid point under every rule and tangent space (Tables~\ref{stab:robustness} and \ref{stab:points}), the chain-cap test per cell and cap (Table~\ref{stab:chain}), the temperature-direction validation per observable (Table~\ref{stab:tscale}) and the closure error per band and epoch (Table~\ref{stab:syserr}). Every entry is generated from \texttt{paper3/FROZEN.json} by \texttt{docs/paper3/latex\_tables.py}; nothing is transcribed by hand.
+
+\section{Gate 2 under every rule and tangent space}\label{ssec:robustness}
+
+Table~\ref{stab:robustness} repeats the parameter-fit classification of the main text (Methods) for all four closure legs under the baseline rule and under each variation of it. Two harness conventions are varied. \emph{Floored epochs included} restores to the derivative stencil the epochs at which the grey photosphere sits on the $v_{\rm ph}/\vej$ floor; the class of every point evaluable under both rules is the same, and the baseline excludes those epochs because on them the launch radius and temperature are the clamp's rather than the model's. \emph{Absorbing core} replaces the conserving normalization (escaped energy equal to the source luminosity) by one in which the injected energy is; colours are identical under the two to machine precision, since the normalization is a grey factor per leg, but the absorbing convention makes the reference fainter by a grey term that differs between the reference and the closure legs, removes observations through the magnitude limit, and lets a per-epoch grey offset be mimicked by a mass shift on the few-band vectors that remain. The tangent space T1, which adds a free grey magnitude per epoch, makes the class independent of any grey core convention by construction; it is the reason the main text reports T1 rather than a convention comparison. \emph{Chain cap 8000} replaces the four highest-trapped cells by their re-absorption-cap-\ChainTop\ runs. The nuisance spaces T1--T3 are defined in Methods. Leg \Bleg (expansion opacity with the exact fluorescence kernel) is classified like \Cboth under every rule, and leg \Aleg (exact opacity with the grouped kernel) is consistent with noise at \ControlCC\ of \ControlN\ points under the baseline: the classification tracks the opacity representation, not the redistribution rule.
+
+\begin{table}[h]
+\centering
+\caption{\textbf{Gate 2 summary for every leg, rule and tangent space.} $n$ is the number of grid points with an evaluable fit; C-C, C-A and C-B are the classes of Methods; \emph{underdet.} counts points with fewer than four residual degrees of freedom. Medians are over the evaluable, determined points.}
+\label{stab:robustness}
+\resizebox{\textwidth}{!}{\input{si_tab_robustness}}
+\end{table}
+
+\section{Every grid point}\label{ssec:points}
+
+Table~\ref{stab:points} lists, for leg \Cboth at every grid point, the number of live observables $N$, the noise floor (the largest per-band error of leg \Aleg over the point's live cells), and under each tangent space the residual fraction $R$, the residual $\chires$ and the class. The lanthanide-fraction split of the T1 count in the main text is read directly from the class column.
+
+\begin{sidewaystable}
+\centering
+\caption{\textbf{Leg \Cboth at every grid point under the four tangent spaces.} T0: $(\ln\Mej,\ln\vej,\ln\Xlan)$; T1: T0 with a free grey magnitude per epoch; T2: T0 with a free colour temperature; T3: T0 with a free blue second component. A dash marks a point with no evaluable fit.}
+\label{stab:points}
+\scriptsize
+\input{si_tab_points}
+\end{sidewaystable}
+
+\clearpage
+\section{The chain cap}\label{ssec:chain}
+
+A reference packet that has not escaped its emitting line after \ChainBase\ re-absorptions is thermalized in place (Methods). Table~\ref{stab:chain} gives, at the \ChainCells\ cells with the highest trapped fraction, the trapped fraction and the three colour errors of leg \Cboth at caps of \ChainBase, 4000 and \ChainTop, the largest change in the reference photometry and in the closure error relative to the base cap, and how many of the three colours met the pre-declared criterion that the change stay below \ChainRelMax\ of the colour error. The criterion was met at \ChainCriterion\ colours; the sign of every colour error is preserved at \ChainSigns; and the classification of every grid point is unchanged when the cap-\ChainTop\ results replace the base-cap ones (Table~\ref{stab:robustness}). The main text therefore quotes the closure amplitudes with the \ChainDmChange\ mag per-band uncertainty this test measured.
+
+\begin{table}[h]
+\centering
+\caption{\textbf{The chain-cap test.} Cells are $(\Mej/\Msun,\vej/c,\Xlan)$ at the epoch given, ordered by trapped fraction at the base cap. $\max|\delta m_{\rm ref}|$ is the largest per-band change of the reference photometry from the base cap; $\max|\delta\dRT|$ the largest per-band change of the closure error; the two agree to rounding because the closure legs do not chain and their photometry is independent of the cap, so the cap enters $\dRT$ only through the reference.}
+\label{stab:chain}
+\resizebox{\textwidth}{!}{\input{si_tab_chain}}
+\end{table}
+
+\section{The temperature direction}\label{ssec:tscale}
+
+The T2 tangent column is the Planck derivative $\partial m_b/\partial\ln T$ at the photospheric temperature. Table~\ref{stab:tscale} compares it, observable by observable at the central grid point, with the Monte Carlo derivative measured by re-running the reference with the launch temperature scaled by $0.8$ and $1.25$ at fixed luminosity: once scaling only the illuminating spectrum, once scaling the gas temperature of the shell with it. The illumination-only direction has a cosine of \IllumCos\ and a norm ratio of \IllumNorm\ with the proxy---the emergent photometry of these saturated models barely responds to the spectral temperature of the illuminating photosphere---whereas the direction with the gas temperature scaled has cosine \GasCos\ and norm ratio \GasNorm. The Planck proxy is therefore the right T2 column for a \emph{thermal} nuisance, and the main text words the result accordingly.
+
+\begin{table}[h]
+\centering
+\caption{\textbf{Monte Carlo temperature derivatives against the Planck proxy at the central point.} Derivatives are $\partial m/\partial\ln T$ in magnitudes per unit $\ln T$, at fixed luminosity, on the live observables of the point; the last two rows give the $1/\sigma^2$-weighted cosine and norm ratio of each Monte Carlo direction with the proxy.}
+\label{stab:tscale}
+\small
+\input{si_tab_tscale}
+\end{table}
+
+\clearpage
+\section{The closure error per band and epoch}\label{ssec:syserr}
+
+Table~\ref{stab:syserr} gives the grid statistics of $\dRT$ for every band--epoch key: the number of live points, the median and 16--84\% range for leg \Cboth, the median for \Cbin, and the shape of the single mode of the masked rank-one fit (Methods), normalized to unit length. The signs of the mode---negative in the optical, positive in the near-infrared at every epoch---are the coherent pattern of the main text; the one-mode fraction is \SysOneMode\ for \Cboth, \SysBinnedOneMode\ for \Cbin and \SysControlOneMode\ for the control, against \SysNullMedian\ for sign-scrambled entries.
+
+\begin{table}[h]
+\centering
+\caption{\textbf{The closure error of leg \Cboth per band--epoch key over the grid.} $n$ is the number of grid points at which the key is live; keys with $n<5$ are greyed in Fig.~4b of the main text.}
+\label{stab:syserr}
+\footnotesize
+\input{si_tab_syserr}
+\end{table}
+
+\end{document}

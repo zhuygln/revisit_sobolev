@@ -42,9 +42,13 @@ detectable chromatic signature in kilonovae that ejecta parameters cannot
 mimic.* Every number in it is a macro generated from
 [paper3/FROZEN.json](paper3/FROZEN.json) (`docs/paper3/latex_tables.py`),
 every figure from the frozen JSONs (`docs/paper3/display_items.py`); `cd
-docs/paper3 && make` rebuilds it and runs a structure check that bans literal
-result numbers in the prose. The affiliation and repository URL are still
-placeholders.
+docs/paper3 && make` rebuilds it, the Supplementary Information
+([si.pdf](docs/paper3/si.pdf): every grid point under every rule and tangent
+space, the chain-cap test per cell, the temperature-direction check per
+observable, the closure error per band and epoch) and runs a structure check
+that bans literal result numbers in the prose of both. The cover letter is
+[cover_letter.md](docs/paper3/cover_letter.md). The affiliation and
+repository URL are still placeholders.
 
 ## Findings
 

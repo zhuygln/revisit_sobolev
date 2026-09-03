@@ -2559,6 +2559,37 @@ Methods 1558/3500, 5 display items, 42 references. Figures render at ~150-
 outputs in the manifest; `--check --strict` 0 failures; 347 tests. Left as
 `\todo`: affiliation and repository URL -- the only two check failures.
 
+## 9av. The Supplementary Information, and what the table showed me (2026-09-03)
+
+Wrote `si.tex` around five generated fragments and read the built PDF page
+by page. Two things the tables taught me that the summaries had not:
+
+- In the chain-cap table the max|δm_ref| and max|δd_RT| columns are equal
+  to two decimals at every cell and cap. First reaction: a bug in the
+  generator. Not so — the closure legs do not chain (the cap is a reference
+  construct), `B_opacity_mags_identical` is true at every cap, so the cap
+  enters d_RT only through the reference and the two columns differ only by
+  the normalization. The caption now says so, because a referee will have
+  the same first reaction.
+- The T1 column of the per-point table at X = 10⁻³ is eight C-A and one C-B,
+  and the eight C-A points still have χ²_res/dof of 3–50. The class label
+  answers "is the residual small compared with the closure error", the
+  χ² answers "is it noise"; the main text sentence that carries both is the
+  right one.
+
+Craft notes: the SI has no `\begin{abstract}`, so `check_literals` falls
+back to the whole file — the preamble's `margin=22mm` and `11pt` do not
+match any pattern, but a future `0.5 mag` in a `\newcommand` would, which
+is the right failure. Three `% literal-ok` marks I had put on SI lines
+exempted nothing (the numbers were already macros); stripped them, as at
+9au. `\resizebox` on the two wide tables, `sidewaystable` for the 17-column
+one. `_f` printed "−0.00" for a derivative of −0.004: fixed by testing the
+rounded string, not the value.
+
+Cover letter written on Paper I's template. The paragraph I rewrote most is
+the one that says why the message is broader than kilonova codes; the
+version that survived says it once and stops.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

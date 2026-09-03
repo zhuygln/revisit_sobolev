@@ -355,10 +355,125 @@ def tab_scenarios(dest):
     return _check_columns(head + body + r"\bottomrule" "\n" r"\end{tabular}" "\n")
 
 
+# ------------------------------------------------------------------ SI tables
+LEGLAB = {"A_redist": "A", "B_opacity": "B", "C_both": "C", "C_binned": r"C$_{\rm bin}$"}
+
+
+def _tab(spec, header_rows, body_rows):
+    head = "\\begin{tabular}{" + spec + "}\n\\toprule\n" + "".join(r + " \\\\\n" for r in header_rows) + "\\midrule\n"
+    body = "".join(" & ".join(r) + " \\\\\n" for r in body_rows)
+    return _check_columns(head + body + "\\bottomrule\n\\end{tabular}\n")
+
+
+def _f(v, nd=2):
+    if v is None or v != v:
+        return "--"
+    s = f"{abs(v):.{nd}f}"
+    return f"$-{s}$" if v < 0 and float(s) != 0 else s  # no "-0.00"
+
+
+def tab_si_robustness(dest):
+    """SI Table 1: Gate 2 summary under every rule and tangent space, all four legs."""
+    variants = [("T0, conserving, floored excluded (baseline)", "sensitivity"),
+                ("T0, floored epochs included", "sensitivity_floored_incl"),
+                ("T0, absorbing core", "sensitivity_absorbing"),
+                ("T0, chain cap 8000 at the four cells", "sensitivity_chain8000"),
+                ("T1: + free $L$ per epoch", "sensitivity_T1"),
+                ("T2: + free colour temperature", "sensitivity_T2"),
+                ("T3: + free blue component", "sensitivity_T3")]
+    rows = []
+    for label, key in variants:
+        sm = _j(dest[key])["summary"]
+        for i, leg in enumerate(("C_both", "C_binned", "B_opacity", "A_redist")):
+            m = sm[leg]
+            rows.append([label if i == 0 else "", LEGLAB[leg], str(m["n"]), str(m["C-C"]), str(m["C-A"]), str(m["C-B"]),
+                         str(m["underdetermined"]), _f(m["median_R"]), _f(m["median_chi2_res_dof"], 1)])
+    return _tab("llrrrrrcc",
+                [r"rule / tangent space & leg & $n$ & C-C & C-A & C-B & underdet. & median $R$ & median $\chi^2_{\rm res}/{\rm dof}$"],
+                rows)
+
+
+def tab_si_points(dest):
+    """SI Table 2: every grid point under T0-T3: R, chi2_res/dof, class."""
+    S = {tg: _j(dest[f"sensitivity{s}"]) for tg, s in (("T0", ""), ("T1", "_T1"), ("T2", "_T2"), ("T3", "_T3"))}
+    rows = []
+    for key, p0 in S["T0"]["points"].items():
+        pt = ast.literal_eval(key)
+        cells = [f"{pt[0]:g}", f"{pt[1]:g}", XLAB[_xkey(pt[2])], str(p0["legs"]["C_both"].get("N", 0)), _f(p0["noise_floor"], 3)]
+        for tg in ("T0", "T1", "T2", "T3"):
+            r = S[tg]["points"][key]["legs"]["C_both"]
+            if r.get("status") != "ok":
+                cells += ["--", "--", "--"]; continue
+            cells += [_f(r["R"]), _f(r["chi2_res_dof"], 1), "underdet." if r.get("underdetermined") else r["cls"]]
+        rows.append(cells)
+    hdr1 = (r"$M_{\rm ej}$ & $v_{\rm ej}$ & $X_{\rm lan}$ & $N$ & floor & \multicolumn{3}{c}{T0} & \multicolumn{3}{c}{T1} & "
+            r"\multicolumn{3}{c}{T2} & \multicolumn{3}{c}{T3}")
+    sub = r"$R$ & $\chi^2_{\rm res}/{\rm dof}$ & class"
+    hdr2 = r"($M_\odot$) & ($c$) & & & (mag) & " + " & ".join([sub] * 4)
+    return _tab("ccc" + "r" * 2 + "ccc" * 4, [hdr1, hdr2], rows)
+
+
+def tab_si_chain(dest):
+    """SI Table 3: the chain-cap test at the four cells, per cap."""
+    c = _j(dest["chain_table"])
+    rows = []
+    for cell in sorted(c["cells"], key=lambda x: (-x["runs"]["2000"]["trapped_frac"])):
+        pt = cell["point"]
+        for i, cap in enumerate(("2000", "4000", "8000")):
+            run = cell["runs"][cap]
+            leg = run["legs"]["C_both"]
+            dc = leg["dcolor"]
+            crit = "--" if cap == "2000" else f"{sum(leg['criterion_met'].values())}/{len(leg['criterion_met'])}"
+            rows.append([f"({pt[0]:g}, {pt[1]:g}, {pt[2]:g}) at {cell['t_d']:g} d" if i == 0 else "",
+                         cap, f"{100 * run['trapped_frac']:.1f}", _f(dc["g-r"]), _f(dc["i-J"]), _f(dc["J-K"]),
+                         "--" if cap == "2000" else _f(run["max_dm_ref_change"]),
+                         "--" if cap == "2000" else _f(leg["max_dm_change"]), crit])
+    return _tab("llrrrrrrc",
+                [r"cell & cap & trapped & $\Delta(g-r)$ & $\Delta(i-J)$ & $\Delta(J-K)$ & $\max|\delta m_{\rm ref}|$ & $\max|\delta d_{\rm RT}|$ & criterion",
+                 r" & & (\%) & (mag) & (mag) & (mag) & (mag) & (mag) & met"],
+                rows)
+
+
+def tab_si_tscale(dest):
+    """SI Table 4: the Monte Carlo temperature direction against the Planck proxy, per live observable."""
+    t = _j(dest["tscale"])
+    il, gas = t["variants"]["illumination_only"]["compare"]["C_both"], t["variants"]["with_T_gas"]["compare"]["C_both"]
+    rows = []
+    for key in il["proxy"]:
+        b, td = key.split(",")
+        rows.append([b, f"{float(td):g}", _f(il["proxy"][key]), _f(il["mc"].get(key)), _f(gas["mc"].get(key))])
+    rows.append([r"\multicolumn{2}{l}{cosine with the proxy}", "", _f(il["cos"]), _f(gas["cos"])])
+    rows.append([r"\multicolumn{2}{l}{norm ratio MC / proxy}", "", _f(il["norm_ratio"]), _f(gas["norm_ratio"])])
+    return _tab("clrrr",
+                [r"band & $t$ (d) & Planck proxy & MC, illumination only & MC, with $T_{\rm gas}$"],
+                rows)
+
+
+def tab_si_syserr(dest):
+    """SI Table 5: the closure error per band-epoch key over the live points, and the one-mode shape."""
+    y = _j(dest["syserr"])["legs"]
+    L = y["C_both"]
+    mode = dict(zip([f"{b},{t:g}" for b, t in L["keys"]], L["one_mode"]["mode"])) if isinstance(L["one_mode"].get("mode"), list) else {}
+    rows = []
+    for e, eb in zip(L["per_key"], y["C_binned"]["per_key"]):
+        k = f"{e['band']},{e['t_d']:g}"
+        rows.append([e["band"], f"{e['t_d']:g}", str(e["n"]), _f(e["median"]), f"{_f(e['p16'])} to {_f(e['p84'])}",
+                     _f(eb["median"]), _f(mode.get(k))])
+    return _tab("clrrcrr",
+                [r"band & $t$ (d) & $n$ & median $d_{\rm RT}$ & 16--84\% & median, C$_{\rm bin}$ & mode shape",
+                 r" & & & (mag) & (mag) & (mag) & "],
+                rows)
+
+
+SI_TABLES = {"si_tab_robustness.tex": tab_si_robustness, "si_tab_points.tex": tab_si_points,
+             "si_tab_chain.tex": tab_si_chain, "si_tab_tscale.tex": tab_si_tscale, "si_tab_syserr.tex": tab_si_syserr}
+
+
 def main(h, dest, out_dir=HERE):
     out_dir = Path(out_dir); out_dir.mkdir(parents=True, exist_ok=True)
     files = {"numbers.tex": numbers_tex(h), "tab_verdict.tex": tab_verdict(h, dest),
              "tab_grid.tex": tab_grid(dest), "tab_scenarios.tex": tab_scenarios(dest)}
+    files.update({name: fn(dest) for name, fn in SI_TABLES.items()})
     written = []
     for name, text in files.items():
         (out_dir / name).write_text(text)

@@ -170,6 +170,25 @@ def check_budgets(text):
     return out, counts
 
 
+def check_si():
+    """The same literal, retracted, fragment and TODO rules on si.tex (if present)."""
+    if not SI.exists():
+        return [], []
+    raw = SI.read_text()
+    text = strip_comments(raw)
+    problems = []
+    for frag in re.findall(r"\\input\{([^}]+)\}", text):
+        if not (HERE / (frag + ".tex")).exists():
+            problems.append(f"missing \\input fragment {frag}.tex")
+    for l in raw.splitlines():
+        if "\\todo{" in l and "newcommand" not in l:
+            problems.append(f"unresolved TODO: {l.strip()[:70]}")
+    lit, exempt = check_literals(raw)
+    problems.extend(lit)
+    problems.extend(check_retracted(text))
+    return [f"si.tex: {p}" for p in problems], [(f"si.tex:{n}", s, w) for n, s, w in exempt]
+
+
 def main():
     raw = TEX.read_text()
     text = strip_comments(raw)
@@ -218,6 +237,9 @@ def main():
     problems.extend(check_retracted(text))
     budget_problems, counts = check_budgets(text)
     problems.extend(budget_problems)
+    si_problems, si_exempt = check_si()
+    problems.extend(si_problems)
+    exempt = exempt + si_exempt
 
     if exempt:
         print(f"{len(exempt)} literal(s) exempted with `{LITERAL_OK}`:")

@@ -63,3 +63,18 @@ def test_committed_manuscript_passes_everything_but_the_todos():
     problems = [l.strip("- ").strip() for l in err.getvalue().splitlines() if l.startswith("  - ")]
     assert all(p.startswith("unresolved TODO") for p in problems), problems
     assert rc == (1 if problems else 0)
+
+
+def test_si_is_checked_with_the_same_rules(tmp_path, monkeypatch):
+    cs = _load()
+    si = tmp_path / "si.tex"
+    si.write_text("\\input{si_tab_missing}\nC-B at 27 of 27 points.\n\\todo{x}\n")
+    monkeypatch.setattr(cs, "SI", si)
+    problems, exempt = cs.check_si()
+    assert all(p.startswith("si.tex: ") for p in problems)
+    assert any("si_tab_missing" in p for p in problems)
+    assert any("27 of 27" in p for p in problems)
+    assert any("TODO" in p for p in problems)
+    assert exempt == []
+    monkeypatch.setattr(cs, "SI", tmp_path / "absent.tex")
+    assert cs.check_si() == ([], [])
