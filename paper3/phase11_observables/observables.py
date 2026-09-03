@@ -141,15 +141,24 @@ def build_atom(ion, st, x_lan=X_LAN):
                                tau_min=1e-3), float(n)
 
 
-def observe(res_list, l_core):
-    """Seed-averaged L_nu, L_bol, magnitudes and colours for one leg."""
+def observe(res_list, l_core, core="absorbing"):
+    """Seed-averaged L_nu, L_bol, magnitudes and colours for one leg.
+
+    `core` selects the inner boundary the spectrum is normalized to
+    (`photometry._scale`); F40/F41 used the absorbing core, the §4.39 grid the
+    equilibrium one. `f_return` and `n_trapped` are diagnostics of the run.
+    """
     edges = phot.nu_edges(*LAM_WIN, N_SPEC)
     nu_c = np.sqrt(edges[1:] * edges[:-1])
-    lnu = np.mean([phot.emergent_lnu(r, edges, l_core) for r in res_list], axis=0)
-    lbol = float(np.mean([phot.bolometric(r, l_core) for r in res_list]))
+    lnu = np.mean([phot.emergent_lnu(r, edges, l_core, core) for r in res_list], axis=0)
+    lbol = float(np.mean([phot.bolometric(r, l_core, core) for r in res_list]))
     mags = phot.magnitudes(nu_c, lnu)
     return {"L_nu": lnu.tolist(), "L_bol": lbol, "mags": mags,
-            "colors": phot.colors(mags),
+            "colors": phot.colors(mags), "core": core,
+            "f_return": float(np.mean([phot.return_fraction(r) for r in res_list])),
+            "f_dep": float(np.mean([phot.deposited_fraction(r) for r in res_list])),
+            "n_trapped": int(sum(r.get("n_trapped", 0) for r in res_list)),
+            "L_bol_absorbing": float(np.mean([phot.bolometric(r, l_core) for r in res_list])),
             "b3800": float(np.mean([band_ratio(r, *nu_of(*BAND3800),
                                                weight="energy")[0] for r in res_list]))}
 

@@ -2709,6 +2709,269 @@ and no more is claimed: plausibility, not a fit.
   saturation S is 10⁴–10⁵ at 0.5–1 d. What that costs, and what it does to the
   harness's energy bookkeeping, is §4.40.
 
+### 4.40 The M–v–X_lan grid: the closure error on a physically powered kilonova (F43), and the Gate 2 verdict (F44)
+
+Drivers: `paper3/phase12_grid/grid.py` (one model), `run_grid.py` (the 27 in
+parallel), `sensitivity.py` (Gate 2), `grid_table.py` and `figures.py` (tables
+and Figs 2–4). Data: `paper3/phase12_grid/grid/model_M*_v*_X*.json` (27),
+`sensitivity.json`. Tests: `tests/test_equilibrium_core.py` (7),
+`tests/test_sensitivity.py` (6). Harness changes, all default-preserving:
+`forest_mc.run_mc(chain_max, chain_overflow, wall_s)`,
+`photometry._scale(core=)`, `observables.observe(core=)`.
+
+#### 1. What the physically normalized ejecta do to the harness
+
+§4.36–§4.37 ran at a density chosen so that the cancellation boundary falls in
+the window: n_ion ~ 10³ cm⁻³, band saturation S ~ 50. The grid's densities are
+derived from (M_ej, v_ej) and are three to seven orders of magnitude higher —
+n_ion(Ce) = 2.9×10⁶ at 1 d on the central model, 5.6×10⁹ at 0.5 d in the
+(0.03, 0.05, 0.1) corner — with S = 10⁴–10⁷ and τ_max = 10³–10⁷. Three things
+the imposed-core runs never showed appeared in the first probes, and each
+needed a declared change before the grid could be run:
+
+**Cost.** A packet at S ~ 10⁵ interacts ~400 times before it escapes and costs
+8–11 ms, a thousand times the S ~ 50 cost. `run_mc`'s step loop is vectorized
+over packets, so its `max_steps` caps the *slowest packet's history*, not the
+work: more packets means a longer tail, and the F41 setting (10⁵) tripped at
+1 d on the central model with 2×10⁴ packets. The grid uses 10⁶ and a wall
+clock (`wall_s`) as the work limit. The cost per packet is also sublinear in
+n (a per-step overhead that more packets amortize: 50–100 ms at 500 packets,
+2–9 ms at 5000, 1.8 ms at 1.25×10⁵), so a 5000-packet probe of the reference
+leg is a conservative cost estimate, and the grid scales n per epoch to a
+1500 s budget (floor 2×10⁴, status `reduced_n`), skips epochs whose floor
+would cost more than 3× that (`over_budget`, the projected cost recorded), and
+abandons a run that outlives 3× the budget (`wall`). The closure legs cost
+1–5 % of the reference (A_redist 35 s, B 3 s, C 1 s against ~600 s at 1 d),
+so the noise floor is the reference's and the budget buys reference packets.
+
+**The re-absorption chain.** At τ_max ~ 10⁴–10⁵ some packets are absorbed,
+re-emitted and re-absorbed more than the 10⁴ links `run_mc` allowed, and the
+run aborted ("re-absorption chain did not terminate"). The grid runs with
+`chain_overflow="absorb"`, `chain_max=2000`: a packet still in the chain after
+2000 links is thermalized in place (fate 3, counted as `n_trapped`). The
+fraction is small even in the densest cells that ran — 0.9 % at
+τ_max = 3.6×10⁵ — so the densest cells are expensive, not opaque. The default
+still raises.
+
+**Energy.** The branching Monte Carlo conserves photon number, not energy: a
+fluorescence step changes the packet's energy by the level-energy difference,
+and at hundreds of interactions per packet those differences do not average
+out. Under the absorbing core of F40/F41 the 3 d central reference returned
+75 % of its packets to the core and deposited 45 % of the injected energy in
+the gas (`E_dep_lab`), while the C_both leg, which interacts less, did
+neither — so its "bolometric error" was −1.9 mag of inner-boundary
+bookkeeping. An equilibrium core (the core re-emits what returns; a
+re-emitted packet is statistically a fresh launch, so the multi-pass spectrum
+is the single-pass one scaled by 1/(1 − f_return)) removes most of it and then
+exposes the rest: the B_opacity leg emerged at 1.8× the core luminosity
+because its E_dep_lab is *negative* (f_dep = −0.22 at 1 d; the reference's is
+−0.17 at 1 d and +0.45 at 3 d). There is no bolometric statement to be made in
+this harness at S ≳ 10⁴, and the grid's normalization says so explicitly:
+**`core="conserving"`** — the escaped synthetic energy `E_esc` is the core's
+window luminosity, every leg emerges with the same L_bol, Δm_bol ≡ 0 within
+the launch window, and the closure error is a colour. The absorbing-core
+Δm_bol, f_return and f_dep are stored per leg so the bookkeeping stays
+visible. Colours are unchanged by any of the three normalizations — each is a
+grey rescaling — which is F41's point and is what makes the grid usable.
+
+#### 2. The grid (F43)
+
+Twenty-seven models — M_ej ∈ {0.003, 0.01, 0.03} M☉, v_ej ∈ {0.05, 0.1,
+0.2} c, X_lan ∈ {10⁻³, 10⁻², 10⁻¹} — at six epochs (0.5, 1, 2, 3, 5, 7 d),
+the four-ion La/Ce/Pr/Nd blend with X_lan split equally, worldline transport,
+the reference and four closure legs, three seeds, n = 3×10⁵ packets scaled to
+a 1500 s budget per epoch; DECam g r i z + 2MASS J H Ks at 40 Mpc, top-hat
+magnitudes stored alongside. `run_grid.py --workers 8` (heaviest first)
+finished the 162 cells in 3.6 h wall (28.5 h of worker time). Outcome:
+
+| status | cells | meaning |
+|---|---|---|
+| `ok` | 61 | full 3×10⁵ packets per leg |
+| `reduced_n` | 92 | n scaled to the budget; median n_used 1.8×10⁵, 23 cells at the 2×10⁴ floor |
+| `over_budget` | 9 | the floor would cost 1.3–1.9 h: **all nine at X_lan = 0.1, at 0.5–2 d** |
+| failed | 0 | no `wall`, `chain` or `max_steps` abort |
+
+The 88 cells with n_trapped > 0 thermalized at most 14 % of their packets in
+the chain cap; 23 cells returned more energy to the core than was injected
+(f_return > 1) and f_dep ran from −0.37 to +0.24 — the bookkeeping of §1,
+stored, not used. No cell has a floored photosphere at these epochs.
+
+Per model, on the **masked** observables (band ≥ 1 % of L_bol, m ≤ 23.5
+optical / 21.5 NIR, the Gate 2 rule; the unmasked worst colours are
+dominated by 30th-magnitude bands and are in `grid_table.py --which cells`):
+
+| M | v | X | ran | over budget | failed | epochs run | live (band, epoch) | worst C_both \|Δcol\| | worst C_binned \|Δcol\| | max floor (A) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 0.003 | 0.05 | 0.001 | 6 | 0 | 0 | 0.5, 1, 2, 3, 5, 7 | 25 | 1.25 (i-J) | 1.57 (i-J) | 0.032 |
+| 0.003 | 0.05 | 0.01 | 6 | 0 | 0 | 0.5, 1, 2, 3, 5, 7 | 23 | 1.40 (J-K) | 1.62 (J-K) | 0.085 |
+| 0.003 | 0.05 | 0.1 | 6 | 0 | 0 | 0.5, 1, 2, 3, 5, 7 | 20 | 1.38 (J-K) | 1.25 (J-K) | 0.222 |
+| 0.003 | 0.1 | 0.001 | 6 | 0 | 0 | 0.5, 1, 2, 3, 5, 7 | 24 | 1.72 (i-J) | 2.11 (i-J) | 0.070 |
+| 0.003 | 0.1 | 0.01 | 6 | 0 | 0 | 0.5, 1, 2, 3, 5, 7 | 23 | 2.22 (J-K) | 2.12 (J-K) | 0.155 |
+| 0.003 | 0.1 | 0.1 | 5 | 1 | 0 | 0.5, 2, 3, 5, 7 | 14 | 1.60 (J-K) | 1.44 (J-K) | 0.413 |
+| 0.003 | 0.2 | 0.001 | 6 | 0 | 0 | 0.5, 1, 2, 3, 5, 7 | 21 | 1.65 (i-J) | 1.96 (i-J) | 0.033 |
+| 0.003 | 0.2 | 0.01 | 6 | 0 | 0 | 0.5, 1, 2, 3, 5, 7 | 20 | 2.84 (J-K) | 3.05 (J-K) | 0.088 |
+| 0.003 | 0.2 | 0.1 | 5 | 1 | 0 | 1, 2, 3, 5, 7 | 13 | 2.09 (J-K) | 1.89 (J-K) | 0.626 |
+| 0.01 | 0.05 | 0.001 | 6 | 0 | 0 | 0.5, 1, 2, 3, 5, 7 | 35 | 1.19 (i-J) | 1.51 (i-J) | 0.025 |
+| 0.01 | 0.05 | 0.01 | 6 | 0 | 0 | 0.5, 1, 2, 3, 5, 7 | 30 | 1.18 (J-K) | 1.44 (J-K) | 0.096 |
+| 0.01 | 0.05 | 0.1 | 6 | 0 | 0 | 0.5, 1, 2, 3, 5, 7 | 30 | 1.59 (J-K) | 1.41 (J-K) | 0.260 |
+| 0.01 | 0.1 | 0.001 | 6 | 0 | 0 | 0.5, 1, 2, 3, 5, 7 | 35 | 1.55 (i-J) | 2.24 (i-J) | 0.027 |
+| 0.01 | 0.1 | 0.01 | 6 | 0 | 0 | 0.5, 1, 2, 3, 5, 7 | 31 | 2.26 (i-J) | 2.53 (i-J) | 0.134 |
+| 0.01 | 0.1 | 0.1 | 4 | 2 | 0 | 0.5, 3, 5, 7 | 17 | 2.29 (J-K) | 2.41 (J-K) | 0.257 |
+| 0.01 | 0.2 | 0.001 | 6 | 0 | 0 | 0.5, 1, 2, 3, 5, 7 | 29 | 1.47 (i-J) | 1.83 (i-J) | 0.034 |
+| 0.01 | 0.2 | 0.01 | 6 | 0 | 0 | 0.5, 1, 2, 3, 5, 7 | 29 | 2.43 (i-J) | 2.65 (J-K) | 0.175 |
+| 0.01 | 0.2 | 0.1 | 4 | 2 | 0 | 2, 3, 5, 7 | 14 | 2.26 (J-K) | 1.98 (J-K) | 0.174 |
+| 0.03 | 0.05 | 0.001 | 6 | 0 | 0 | 0.5, 1, 2, 3, 5, 7 | 39 | 0.96 (i-J) | 1.24 (i-J) | 0.016 |
+| 0.03 | 0.05 | 0.01 | 6 | 0 | 0 | 0.5, 1, 2, 3, 5, 7 | 38 | 0.99 (J-K) | 1.26 (J-K) | 0.043 |
+| 0.03 | 0.05 | 0.1 | 6 | 0 | 0 | 0.5, 1, 2, 3, 5, 7 | 35 | 1.32 (J-K) | 1.30 (J-K) | 0.172 |
+| 0.03 | 0.1 | 0.001 | 6 | 0 | 0 | 0.5, 1, 2, 3, 5, 7 | 40 | 1.42 (i-J) | 1.88 (i-J) | 0.023 |
+| 0.03 | 0.1 | 0.01 | 6 | 0 | 0 | 0.5, 1, 2, 3, 5, 7 | 38 | 2.16 (i-J) | 2.30 (i-J) | 0.077 |
+| 0.03 | 0.1 | 0.1 | 5 | 1 | 0 | 0.5, 1, 3, 5, 7 | 30 | 2.10 (J-K) | 2.07 (J-K) | 0.377 |
+| 0.03 | 0.2 | 0.001 | 6 | 0 | 0 | 0.5, 1, 2, 3, 5, 7 | 37 | 1.42 (i-J) | 1.79 (i-J) | 0.034 |
+| 0.03 | 0.2 | 0.01 | 6 | 0 | 0 | 0.5, 1, 2, 3, 5, 7 | 37 | 2.60 (i-J) | 2.58 (i-J) | 0.096 |
+| 0.03 | 0.2 | 0.1 | 4 | 2 | 0 | 0.5, 3, 5, 7 | 22 | 2.24 (J-K) | 2.12 (J-K) | 0.323 |
+
+The central model (0.01 M☉, 0.1 c, X_lan = 0.01), all colours, live or not
+(at 5–7 d only H and K pass the magnitude cut, and at 0.5 d only g r i z):
+
+| t (d) | T_eff | S | n_used | f_ret | f_dep | floor (A) | leg | Δ(g−r) | Δ(r−i) | Δ(i−z) | Δ(i−J) | Δ(J−K) | Δm_bol abs |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 0.5 | 9663 | 3.0e+05 | 52966 | 1.09 | -0.32 | 0.074 | C_both | +0.13 | -0.07 | +0.06 | -0.23 | -0.60 | -1.18 |
+| 0.5 | 9663 | 3.0e+05 | 52966 | 1.09 | -0.32 | 0.074 | C_binned | +0.31 | -0.03 | +0.04 | -0.16 | -0.76 | -1.31 |
+| 1 | 7352 | 8.4e+04 | 24144 | 1.04 | -0.17 | 0.134 | C_both | -0.17 | -0.15 | -0.04 | -0.37 | -0.79 | -1.80 |
+| 1 | 7352 | 8.4e+04 | 24144 | 1.04 | -0.17 | 0.134 | C_binned | -0.02 | -0.14 | -0.06 | -0.41 | -0.88 | -1.94 |
+| 2 | 5082 | 2.4e+04 | 35501 | 0.82 | +0.07 | 0.104 | C_both | -0.18 | -0.14 | -0.10 | -0.59 | -1.62 | -2.13 |
+| 2 | 5082 | 2.4e+04 | 35501 | 0.82 | +0.07 | 0.104 | C_binned | -0.17 | -0.14 | -0.13 | -0.58 | -1.60 | -2.23 |
+| 3 | 3665 | 1.2e+04 | 103074 | 0.75 | +0.11 | 0.039 | C_both | -0.38 | -0.28 | -0.39 | -1.22 | -1.91 | -1.88 |
+| 3 | 3665 | 1.2e+04 | 103074 | 0.75 | +0.11 | 0.039 | C_binned | -0.32 | -0.24 | -0.40 | -1.19 | -1.96 | -1.96 |
+| 5 | 2201 | 5.2e+03 | 300000 | 0.59 | +0.14 | 0.033 | C_both | -1.00 | -0.42 | -1.16 | -2.26 | -1.43 | -0.86 |
+| 5 | 2201 | 5.2e+03 | 300000 | 0.59 | +0.14 | 0.033 | C_binned | -0.85 | -0.41 | -1.20 | -2.53 | -2.06 | -0.99 |
+| 7 | 1842 | 2.8e+03 | 300000 | 0.46 | +0.15 | 0.005 | C_both | -0.88 | -0.43 | -1.58 | -2.51 | -1.10 | -0.45 |
+| 7 | 1842 | 2.8e+03 | 300000 | 0.46 | +0.15 | 0.005 | C_binned | -0.85 | -0.43 | -1.55 | -2.75 | -1.83 | -0.55 |
+
+**F43.** On a heating-powered kilonova the grouped-opacity closure's colour
+error is **0.96–2.84 mag** (worst live colour per model, C_both; C_binned
+1.24–3.05 mag) at every one of the 27 grid points, against an A_redist floor
+of 0.02–0.13 mag on the well-sampled models and up to 0.6 mag at the
+2×10⁴-packet cells. On the central model the error grows from Δ(J−K) =
+−0.6 mag at 0.5 d to −1.9 mag at 3 d while Δ(g−r) stays within −0.4 mag —
+the optical colour of a blue kilonova is nearly right while its near-infrared
+colour is wrong by a factor of six in flux ratio. The sign is uniform: the
+grouped closure emits **too blue** — 166 of the 170 live Δ(i−J) and Δ(J−K)
+after 0.5 d are negative (the four exceptions are X = 10⁻³ points within
+0.4 mag of zero); over the live observables of the whole grid the closure's
+g is brighter than the reference's by 0.2–2.1 mag (median 0.7) and its K
+fainter by up to 3.6 mag (median 1.0). That is §4.36's "too bright above
+the boundary" outcome, now seen in colour: the grouped closure keeps in the
+optical the energy that line-by-line fluorescence moves to the NIR. F41's
+blue-kilonova row (La II, S ~ 200–400 at 2–3 d) had Δ(g−r) = −0.2,
+Δ(r−i) = −0.3, Δ(i−J) = −0.2; the central model at the same epochs (blend,
+S = 10⁴) has Δ(g−r) = −0.2 / −0.4, Δ(r−i) = −0.1 / −0.3, Δ(i−J) = −0.6 /
+−1.2 — the optical part is F41's, and the NIR part is what the four-ion
+blend at physical density adds. Within the launch window every leg has the
+same L_bol by construction (`core="conserving"`); the absorbing-core
+Δm_bol column, −0.5 to −3.9 mag, is the bookkeeping of §1 and is not a
+closure error.
+
+Fig. 2 (`paper3/figures/fig2_bol_vs_colour`) shows the central model: the
+bolometric panel (conserving ≡ 0 and the absorbing bookkeeping), the three
+colours against time, and the reference/C_both/C_binned spectra at 0.5 d,
+where Δ(g−r) is smallest (+0.13) and Δ(J−K) is already −0.6. Fig. 3
+(`fig3_velocity`) is the phase-11 velocity scan from §4.37 in one panel.
+
+#### 3. Gate 2: is the closure error a parameter shift? (F44)
+
+`sensitivity.py` asks, per grid point and closure leg, whether the error
+vector d_RT = m_leg − m_ref over the live (band, epoch) observables lies
+along the model's own parameter derivatives ∂m/∂lnθ, θ ∈ (M, v, X_lan),
+taken by central differences across the grid (one-sided at the edges) with
+the derivative masks intersected so N never changes between terms, weights
+σ = 0.05 mag optical / 0.10 mag NIR, and a derivative component below 3× the
+√2/Δlnθ-amplified A_redist floor set to zero. The pre-declared classes
+(plan §5): **C-C** if χ²_RT/N ≤ 4 (undetectable); **C-A** if R ≤ 0.3 and
+some |a_θ| ≥ 3σ_a (≥ 70 % absorbed by a significant parameter shift);
+**C-B** otherwise. Robustness: σ doubled, one-sided derivatives, 3 % band
+cut. `N < 8` is flagged `low_N` (six observables for three parameters make
+R a poor statistic) but not excluded; the flag was added after the first
+partial run showed N = 4 points classified C-A.
+
+| leg | analysable | C-A | C-B | C-C | unstable | low_N | median χ²_RT/N | median R | median χ²_res/N |
+|---|---|---|---|---|---|---|---|---|---|
+| A_redist | 24 | 0 | 1 | 23 | 1 | 4 | 0.3 | 0.93 | 0.2 |
+| B_opacity | 24 | 0 | 24 | 0 | 0 | 4 | 179 | 0.84 | 105 |
+| **C_both** | 24 | **0** | **24** | **0** | **0** | 4 | 178 | 0.81 | 98 |
+| C_binned | 24 | 0 | 24 | 0 | 0 | 4 | 209 | 0.80 | 109 |
+
+Three points are not analysable — (0.003, 0.1, 0.1), (0.01, 0.1, 0.1) and
+(0.01, 0.2, 0.1) have 0, 3 and 0 observables once the masks of their
+neighbours (which include the `over_budget` epochs and the X = 10⁻³
+neighbours' faint NIR) are intersected. Twenty of the 24 are well sampled
+(N = 9–34, median 19).
+
+**F44 — Gate 2 verdict: C-B, distinct residual, at every analysable point,
+for every opacity closure, under every robustness variant.** The closure
+error is detectable (χ²_RT/N = 28–549, never near 4) and no parameter shift
+absorbs it: the weighted residual fraction R is 0.46–1.00 (0.60–1.00 on the
+well-sampled points), the residual χ²/N is 17–373 (never near 4), and the
+same class is returned with σ doubled, one-sided derivatives and the 3 %
+band cut at all 20 well-sampled points. The largest cosines are
+|cos(d_RT, d_M)| ≤ 0.89, |cos(d_RT, d_v)| ≤ 0.72, |cos(d_RT, d_X)| ≤ 0.73,
+so the error has a component along every parameter — the fitted shifts
+have median |Δln M| = 0.25, |Δln v| = 0.25, |Δln X_lan| = 0.95 (a factor
+2.6 in X_lan), and reach Δln X = 9–11 at (0.003, 0.2, ·) where ∂m/∂lnX is
+nearly zero on the live bands — but the shift that best mimics the error
+still leaves most of it. Region by region, R is 0.89 (median) at X = 10⁻³,
+0.72 at 10⁻², 0.84 at 10⁻¹; χ²_RT/N 87, 193, 178. The redistribution
+closure is the control: A_redist is C-C at 23 of 24 (median χ²_RT/N 0.3),
+the one exception a low-N (N = 7) point at χ²_RT/N = 5.3.
+
+The Gram-matrix condition numbers are 200–1000 where all three derivatives
+are live and infinite at four points where the X derivative is zeroed
+entirely by the noise rule (X = 0.1 edges, where a 2×10⁴-packet floor of
+0.2–0.6 mag amplified by √2/ln 10 exceeds every component); the ratio of
+the two one-sided X secants disagrees by 0.4–1.3 (‖upper − lower‖/‖mean‖,
+median 0.85), i.e. ∂m/∂lnX is not a derivative but a decade-wide secant.
+Fig. 4 (`fig4_vectors`) shows the cosine matrix with the class per point
+and, for the central point, d_RT against the fitted Σa_θ ∂m/∂lnθ: N = 6
+(low_N), a = (+0.14, +0.34, −1.83), R = 0.73, χ²_res/N = 186.
+
+What Gate 2 does and does not settle. It settles the decision the action
+plan hung on it: **the transport systematic is not degenerate with
+(M_ej, v_ej, X_lan) on this source**, so a Phase 3 synthetic-inference
+study would measure a residual, not a bias, and the paper's claim is
+"a closure error that a fit cannot hide", not "a closure error that
+biases X_lan by N dex". It does not settle the size of the residual a real
+fit would leave, because R is computed against three parameters of a
+one-zone model; a fit with more freedom (two components, a free T_eff
+history, free κ) would absorb more, and the C-B verdict is an upper bound
+on distinctness. It does not settle anything about the *bolometric* light
+curve, which §1 shows this harness cannot address at S ≳ 10⁴.
+
+**What the classification does not mean.** Five pre-declared pitfalls, all
+stated before the grid ran (plan §5):
+
+1. *The X spacing is a secant.* ∂m/∂lnX is a finite difference across one
+   decade of a saturating variable (S ∝ X); the two one-sided secants and their
+   disagreement (`secants` in `sensitivity.json`; ‖upper − lower‖/‖mean‖ is
+   0.6–1.2 wherever both exist) are the nonlinearity metric, and a linear
+   projection on such a derivative is a scale estimate, not a fit.
+2. *Bands are correlated.* The seven bands at an epoch come from the same
+   packets and the same source; χ²/N is a scale, not a p-value, and N counts
+   correlated observables.
+3. *The derivatives inherit the reference closure's error.* Every leg's
+   d_θ is the reference's (all legs share it, by design), so the classification
+   asks whether the closure error looks like a parameter shift *of the same
+   model*, which is the inference question.
+4. *Ionization is frozen* (`ION_FRAC = 1`) and the source is Tier 1: T_eff
+   reaches 9000–10 000 K at 0.5 d, where a Saha population would move ions out
+   of the singly-ionized stage; κ_src = 1 cm² g⁻¹ is a lanthanide-poor opacity
+   applied to X_lan = 0.1 points by construction (the control that keeps X_lan
+   out of the diffusion time); v = 0.05 c clamps the Barnes table.
+5. *The noise floor is the A_redist leg, masked.* At S ≳ 10⁵ that leg is no
+   longer the 0.01 mag of F41: it is 0.03–0.13 mag on the central model and
+   0.2–0.4 mag at the reduced-n (2×10⁴ packets) dense cells, and it contains the
+   redistribution closure's own error as well as the MC noise, so the
+   derivative-zeroing rule is conservative in the right direction.
+
 ## 5. Findings register
 
 | # | Finding | Where |
@@ -2755,6 +3018,8 @@ and no more is claimed: plausibility, not a fit.
 | F40 | **A realistic kilonova crosses the cancellation boundary at 1.2 days.** Homologous ejecta (ρ ∝ t⁻³, T ∝ t⁻¹ᐟ², X_lan = 0.1) sweep band saturation across four orders of magnitude in n_ion, and the practical grouped closure runs **+64.6% too bright at 0.5 d → zero at 1.17 d → −28.4% too opaque at 1.5 d** — ninety points across a factor of three in time, straddling the epoch kilonova spectra are taken. The crossing occurs at **S = 47.5**, matching the boundary located independently at S ≈ 50 by a density scan, a 13-ion survey and a controlled synthetic forest: a fourth confirmation from a different construction. Stated carefully, the zero here is the *opacity* error changing sign (B crosses at 1.21 d) rather than two large errors cancelling, with |A| ≤ 2.1% throughout; the cancellation mechanism is separately visible at 2 d, where the binned closure reads −1.1% while its opacity piece alone reads −4.1%. Either way: **near-zero residual at one epoch is not evidence a closure is correct** **La II on the same history sharpens it**: at 0.75 d the expansion closure reads **+0.1%** while the binned closure reads **−55.7%** — same epoch, same ejecta, same atom, differing only in whether a bin carries Σ(1−e^−τ) or Στ. One looks exact, the other is wrong by more than half. | §4.36 |
 | F41 | **The closure error is chromatic, not bolometric, and the diagnostic band residual is a proxy for neither.** Converting §4.36's ejecta history into absolute L_ν, escaping luminosity and AB magnitudes: the grouped-**redistribution** approximation is invisible to an observer — worst \|Δm\| of **0.006 / 0.008 / 0.008 mag** on Ce II, La II and a four-ion blend — so F25/F27's kernel compression costs less than a photometric error bar. The grouped-**opacity** approximation is five times larger in colour than in luminosity: Ce II at 0.5 d is **0.14 mag too bright bolometrically and 0.74 mag wrong in g−r**, because the closure moves flux between bands rather than creating or destroying it. And the 3800–3955 Å residual carrying every result from §4.23 to §4.36 tracks neither — **−59.5% in band is +0.007 mag bolometric** (La II binned, 0.75 d), −26.0% is photometrically invisible (Ce II, 2 d), and +55% is 0.46 mag in g (Ce II, 0.5 d). Two defensible groupings give **opposite colour errors 0.15 mag apart at one epoch on one atom**. Every magnitude is a floor: at fixed saturation the photometric error grows **34× (La) to 67× (Ce) from Paper I's 0.01c to a kilonova's 0.3c** while Δm_bol stays under 0.011 mag, and it survives the worldline transport treatment, which changes the band residual by a factor of 4 and the magnitudes not at all. On a **physically normalized** kilonova — M_ej = 0.01 M⊙, v = 0.05–0.2c, X_lan = 10⁻³, ρ derived from the mass rather than tuned, worldline — the practical closure is **0.06 mag bolometric and 0.63–0.77 mag in a band or colour**, and at 3 d its binned variant is bolometrically **exact** while 0.74 mag wrong in r−i. The band diagnostic runs out of signal from 4 d on, exactly where the photometric error is still tenths of a magnitude | §4.37 |
 | F42 | **The chromatic closure error survives real filter curves, and the three notebook-only findings reproduce.** Re-photometering the committed F41 spectra through SVO DECam g r i z + 2MASS J H Ks (no packets re-run) keeps every ≥ 0.6 mag top-hat colour error at 0.65–0.77 mag (Ce II and the blend, g−r at 0.5 d) and the blue kilonova's binned leg at 0.69 mag — moving *which* colour is worst (g−r → i−J) but not its size — while the A_redist floor stays ≤ 0.009 mag. Gate 1 passes. Separately: the Ce II density scan reproduces with three seeds (crossing S = 55.7, five of six points within 7 points of the single-seed numbers), the F38 table is generated from `survey.json` (Pr II interaction −6.4%), and the F39 exit-τ scan has a driver and a data file (crossings S = 179.6 / 689.0 at τ_x = 0.5 / 2.0; dlnlam is inert at delocalize = 1). | §4.38 |
+| F43 | **On a heating-powered kilonova the grouped-opacity closure's colour error is 1–3 mag at every point of a 27-model (M_ej, v_ej, X_lan) grid, and its sign is uniform: too blue.** Four-ion blend, worldline transport, DECam + 2MASS at 40 Mpc, 162 epochs (153 ran, 9 X_lan = 0.1 early epochs over budget). Worst live colour error per model 0.96–2.84 mag (C_both; C_binned 1.24–3.05) against an A_redist floor of 0.02–0.13 mag on the well-sampled models; the central model runs from Δ(J−K) = −0.6 mag at 0.5 d to −1.9 mag at 3 d with Δ(g−r) inside −0.4 mag. 166 of 170 live NIR colour errors are negative: the closure's g is 0.2–2.1 mag too bright and its K up to 3.6 mag too faint. Every leg has the same L_bol by construction (conserving core); the absorbing-core Δm_bol of −0.5 to −3.9 mag is inner-boundary bookkeeping, and the harness makes no bolometric statement at S ≳ 10⁴. | §4.40 |
+| F44 | **Gate 2: the closure error is not degenerate with (M_ej, v_ej, X_lan) — class C-B, distinct residual, at all 24 analysable grid points, for every opacity closure, under every robustness variant.** χ²_RT/N = 28–549 (detectable), weighted residual fraction R = 0.46–1.00 after the best three-parameter shift (0.60–1.00 on the 20 well-sampled points), χ²_res/N = 17–373; the same class with σ doubled, one-sided derivatives and a 3 % band cut. The fitted shifts are median \|Δln M\| = 0.25, \|Δln v\| = 0.25, \|Δln X_lan\| = 0.95, so the error has a component along every parameter, but it leaves most of itself behind. A_redist is C-C (undetectable) at 23 of 24. Three X_lan = 0.1 points are unanalysable (mask intersection empty); R is against a one-zone model's three parameters, so C-B is an upper bound on distinctness. | §4.40 |
 
 ## 6. Caveats and limitations
 
@@ -2787,6 +3052,15 @@ and no more is claimed: plausibility, not a fit.
   (§4.11) — i.e. at the noise floor.
 - **Emission convention:** absolute SEDONA band fluxes quoted here are
   attenuation-only (F8). Δ values are same-code differentials and unaffected.
+
+- **Paper III phase 12 (§4.40):** the harness conserves photon number, not
+  energy, so at S ≳ 10⁴ it makes no bolometric statement (every leg is
+  normalized to the core's window luminosity; the absorbing-core Δm_bol and
+  f_dep are stored as bookkeeping). Ionization is frozen (`ION_FRAC = 1`) at
+  T_eff up to 10 000 K; κ_src = 1 cm² g⁻¹ is fixed across X_lan by design; the
+  A_redist "noise floor" reaches 0.2–0.6 mag at the 2×10⁴-packet cells; and
+  the Gate 2 classes rest on secant derivatives across a decade in X_lan and
+  on correlated bands (χ²/N is a scale, not a p-value).
 
 ## 7. Reproduction
 
@@ -2833,6 +3107,13 @@ python recompute.py && python fig11.py      # band fluxes + figure
 
 # the paper
 cd ../../docs/paper && make                 # pdflatex x2 + bibtex -> manuscript.pdf
+
+# Paper III phase 12: the heating-powered grid and Gate 2 (section 4.40)
+python sobolev/source.py --plot                                   # Source Model Gate figure
+OMP_NUM_THREADS=1 python paper3/phase12_grid/run_grid.py --workers 8   # 27 models, 3.6 h on 8 workers; restartable
+python paper3/phase12_grid/sensitivity.py                         # sensitivity.json, Gate 2 table
+python paper3/phase12_grid/grid_table.py --which all              # the section 4.40 tables
+python paper3/phase12_grid/figures.py                             # Figs 2-4 -> paper3/figures/
 ```
 
 Long jobs: launch in the background with `python -u` and an **absolute** path

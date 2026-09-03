@@ -92,6 +92,8 @@ where cross-code comparisons go wrong):
 import sys
 from pathlib import Path
 
+import time
+
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
@@ -403,8 +405,22 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
            seed=0, emit_window=None, dnu_over_nu=4.17e-5, max_steps=100000,
            t_core=None, beta_on_expansion=False, exp_emit="bin",
            launch_weight="photon", eps=1.0, relativity=None,
-           kernel=None, collect_events=False, line_memory=False):
-    """line_memory : MEMORY DEPTH m for the grouped legs (False/0 = none,
+           kernel=None, collect_events=False, line_memory=False,
+           chain_max=10000, chain_overflow="raise", wall_s=None):
+    """wall_s : optional wall-clock limit in seconds, checked every 50 steps;
+    exceeding it raises RuntimeError("wall ...") so a caller can abandon a
+    run that its own budget forbids (Paper III §4.39 grid).
+
+    chain_overflow : what to do with a packet whose re-absorption chain has
+    not escaped its emitting line after `chain_max` draws. "raise" (default,
+    every result before Paper III §4.39) aborts the run; "absorb" thermalizes
+    the packet at the interaction point (fate 3, energy booked in E_abs), the
+    physical outcome for a packet trapped in a level whose every radiative
+    exit is optically thick and the only one consistent with an inner boundary
+    in radiative equilibrium (`photometry.emergent_lnu(core="equilibrium")`).
+    The count is returned as `n_trapped`.
+
+    line_memory : MEMORY DEPTH m for the grouped legs (False/0 = none,
     True = 1). A grouped opacity cannot skip the line a packet was just emitted
     from, so the packet immediately re-absorbs on it -- the F30 residual. With
     memory a *_group leg carries the last m opacity-line indices it emitted at
@@ -543,6 +559,7 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
     e_lev = np.zeros(n_packets)       # branch mode: sum hc (E_l,exit - E_l,pump) per chain
     n_events = np.zeros(n_packets, np.int32)   # interaction events (chains)
     n_reabs = np.zeros(n_packets, np.int32)    # re-absorptions inside emitting lines
+    n_trapped = 0                               # chains cut by chain_overflow="absorb"
     nu_final = np.full(n_packets, np.nan)      # lab frequency at death (escape/core/absorb)
     first_line = np.full(n_packets, -1, np.int64)   # E7: first absorbing line (-1 expansion)
     last_line = np.full(n_packets, -1, np.int64)    # E7: last emitting line
@@ -565,10 +582,14 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
         ctime = np.full(n_packets, ct)
         b_core_v, b_out_v = r_core / ct, r_out / ct
 
+    t_wall0 = time.time() if wall_s is not None else None
     for step in range(max_steps):
         idx = np.flatnonzero(alive)
         if idx.size == 0:
             break
+        if t_wall0 is not None and step % 50 == 0 and time.time() - t_wall0 > wall_s:
+            raise RuntimeError(f"wall limit {wall_s:.0f}s exceeded at step {step} "
+                               f"with {idx.size} packets alive")
         ri, mi, ni = r[idx], mu[idx], nu[idx]
         z = ri * mi
         if wl:
@@ -749,8 +770,14 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
             cur_up = atom.op_upper[k_abs].copy()
         new_line = np.empty(hi.size, int)
         n_chain = 0
+        trapped = np.empty(0, int)
         while todo.size:
             n_chain += 1
+            if n_chain > chain_max:
+                if chain_overflow != "absorb":
+                    raise RuntimeError("re-absorption chain did not terminate")
+                trapped = todo
+                break
             if outcome == "branch":
                 if sobolev:
                     u = rng.uniform(size=todo.size)
@@ -805,8 +832,22 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
                 if outcome == "tla" and sobolev:
                     cur_line[stay] = new_line[stay]
             todo = stay
-            if n_chain > 10000:
-                raise RuntimeError("re-absorption chain did not terminate")
+        if trapped.size:
+            # thermalize the trapped packets and drop them from the re-emission
+            # bookkeeping below; their energy sits in E_abs at the lab frequency
+            # they were absorbed at, so the accounting identity still closes
+            fate[hi[trapped]] = 3; alive[hi[trapped]] = False
+            nu_final[hi[trapped]] = nu_lab_before[trapped]
+            n_trapped += trapped.size
+            keep = np.ones(hi.size, bool); keep[trapped] = False
+            hit = np.flatnonzero(hit)[keep]
+            hi, first, new_line = hi[keep], first[keep], new_line[keep]
+            is_bin, coherent = is_bin[keep], coherent[keep]
+            nu_abs_cm, nu_lab_before = nu_abs_cm[keep], nu_lab_before[keep]
+            if outcome == "branch" and not sobolev:
+                k_abs = k_abs[keep]
+            if hi.size == 0:
+                continue
         nu_rest = np.empty(hi.size)
         nu_rest[~is_bin & ~coherent] = atom.nu0_all[new_line[~is_bin & ~coherent]]
         if is_bin.any():
@@ -861,7 +902,8 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
                 n_interacted=int((n_inter > 0).sum()), first_branch=first_branch,
                 chain_exit=chain_exit, steps=step + 1, accounting=accounting,
                 e_dep_lab=e_dep_lab, e_dep_cm=e_dep_cm, e_lev=e_lev, n_events=n_events,
-                n_reabs=n_reabs, nu_final=nu_final, first_line=first_line, last_line=last_line,
+                n_reabs=n_reabs, n_trapped=n_trapped, nu_final=nu_final,
+                first_line=first_line, last_line=last_line,
                 events=((np.concatenate(ev_in) if ev_in else np.empty(0),
                          np.concatenate(ev_out) if ev_out else np.empty(0),
                          np.concatenate(ev_w) if ev_w else np.empty(0))

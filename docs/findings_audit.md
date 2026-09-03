@@ -177,3 +177,24 @@ Not classifications, but the same kind of problem the audit exists to catch:
   **a robustness check, not a new claim** — the F41 chromatic effect is a
   property of the spectra, not of the top-hat filters.
 
+### Addendum (2026-09-02, later): F43 and F44
+
+- **F43 (§4.40)**: a *new measurement* on a new source model — the closure's
+  colour error at physically normalized densities. Driver `grid.py` /
+  `run_grid.py`, data `grid/model_*.json` (27), tables `grid_table.py`,
+  Fig. 2. Provenance complete. Classification: **new claim, bounded** — the
+  statement is about colours within the launch window under a conserving
+  core normalization; the same JSONs record why no bolometric claim is made
+  (`dm_bol_absorbing`, `f_return`, `f_dep`).
+- **F44 (§4.40)**: the *Gate 2 verdict*, a pre-registered classification
+  (thresholds in the plan before the grid ran; `low_N` added as a flag
+  after a partial run, changing no class). Driver `sensitivity.py`, data
+  `sensitivity.json`, Fig. 4, tests `tests/test_sensitivity.py`.
+  Classification: **decision-grade for the action plan, upper bound as
+  physics** — C-B against three one-zone parameters does not bound what a
+  richer fit would absorb.
+- Deviations from the plan, all recorded in §4.39–§4.40: grey photosphere
+  instead of v_ej/2; chain thermalization, wall clock and the conserving
+  normalization added to the harness (defaults preserved); the pre-probe
+  removed; `low_N`.
+

@@ -2126,6 +2126,110 @@ and the harness has never been run there. That is the next entry.
 grey photosphere below a pure-line shell; uniform rho. All stated in section
 4.39.3, none fixed.
 
+## 9ao. The harness at S ~ 1e5: three things the imposed core never showed (2026-09-02)
+
+*The regime.* Central model, 1 d: n_ion(Ce) = 2.9e6, tau_max = 1.4e4,
+S = 8.4e4 in the diagnostic band, n_opacity = 1.8 M lines. F41's blue
+kilonova was at S ~ 50. A packet interacts ~400 times before it escapes and
+costs 8-11 ms; at S ~ 50 it costs 7 us. The first probe at 2000 packets
+took 20 s per packet-thousand and the second, at 20 000, tripped
+`max_steps` -- and that was the first lesson: the step loop is vectorized
+over packets, so `max_steps` caps the *slowest packet's history*, not the
+work. More packets means a longer tail, and the cap has to be a number that
+no physical packet reaches (1e6 in the grid) rather than a work limit. The
+work limit is a wall clock, added as `run_mc(wall_s=...)`.
+
+*The re-absorption chain.* At 0.5 d, and at 1 d with 1e4 packets, the
+reference raised "re-absorption chain did not terminate" -- the loop that
+follows a packet through consecutive line absorptions ran past 10 000
+iterations. Those packets are in the thermalized limit: absorbed, re-emitted,
+re-absorbed, in a shell of tau_max ~ 1e4-1e5. The grid runs with
+`chain_overflow="absorb"` and `chain_max=2000`: a packet still in the chain
+after 2000 links is thermalized in place (fate 3, counted in `n_trapped`)
+rather than aborting the run. The default still raises. `n_trapped` = 952 of
+3 x 35 337 at 1 d on the central model; zero at 3 d.
+
+*Energy.* This is the one that matters. With the absorbing core F40/F41 used,
+the 3 d central reference returned 75% of its packets to the core, and the
+C_both leg -- which interacts less -- returned fewer, so its "bolometric
+error" was -1.9 mag: 1.9 magnitudes of pure inner-boundary bookkeeping. An
+equilibrium core (the core re-emits what comes back; a re-emitted packet is
+statistically a fresh launch, so the multi-pass spectrum is the single-pass
+one scaled by 1/(1 - f_return)) removes most of it, and then the
+B_opacity leg emerged *brighter than the core*, L/L_core = 1.81, because
+its E_dep_lab is negative: the branching MC conserves photon number, not
+energy, and at 400 interactions per packet the level-energy differences of
+the fluorescence cascade do not average out. f_dep = +0.45 for the reference
+at 3 d, -0.17 at 1 d, -0.22 for B_opacity at 1 d. There is no bolometric
+statement to be made in this harness at S ~ 1e4-1e5, and the honest
+normalization is the one that says so: "conserving" -- E_esc synthetic ergs
+are the core's window luminosity, every leg emerges with the same L_bol,
+dm_bol is identically zero in the window, and the closure error is a
+colour. `dm_bol_absorbing`, `f_return` and `f_dep` are stored per leg so
+the bookkeeping is visible. Colours are unchanged by any of the three
+normalizations (each is a grey rescaling) -- which is the point of F41 and
+is what makes the grid usable at all.
+
+*The probe.* Central model, 1 d, budget 1500 s: n_used = 35 337 (from
+300 000), 743 s including the 60 s atom build, f_ret = 1.03 (the returned
+packets carry more energy than was injected), A_redist floor 0.05-0.12 mag
+(H worst), C_both d(g-r) = -0.28, d(i-J) = -0.39, d(J-K) = -0.69; dm from
+-0.69 (g) to +0.78 (K). The closure legs cost 1-5% of the reference
+(A_redist 35 s, B 3 s, C 1 s against ~600 s), so the noise floor is the
+reference's and the budget buys reference packets. At 3 d (n = 2e4 in the
+earlier probe): d(g-r) = -0.42, d(i-J) = -1.27, d(J-K) = -1.89, an order of
+magnitude beyond F41's blue kilonova.
+
+*The grid's guard, and a wrong turn.* Probe of 5000 reference packets, n
+scaled to the 1500 s budget with a 20 000 floor, `over_budget` when the
+floor would cost more than 3 x budget, `wall` at 3 x budget per run,
+`chain` / `max_steps` recorded; eight workers at 2.1 GB each. The first
+launch had a 500-packet pre-probe in front of that, meant to settle hopeless
+cells cheaply. It settled runnable ones: the pre-probe measured 50-100 ms
+per packet where the 5000-packet probe measures 2-9 ms and a 125 000-packet
+reference run 1.8 ms. The cost per packet is *sublinear* in n -- the
+vectorized step loop pays a per-step overhead (a Python loop over the
+distinct upper levels in the chain) that more packets amortize -- so a small
+probe overestimates and the pre-probe marked (0.01, 0.1, 0.1) at 3 d, a cell
+no harder than the central model at 1 d, as 2.8 h. Removed after twenty
+minutes; the 5000-packet probe is conservative in the right direction. The
+same run taught the other half: (0.01, 0.05, 0.01) at 0.5 d, tau_max =
+3.6e5, S = 2.2e6, ran at n = 125 000 in 1024 s with 0.9% of packets
+thermalized and f_ret = 0.90 -- the densest cells are expensive, not opaque.
+And a worker that prints nothing for twenty minutes is building a 4.3 M-line
+atom and running three reference seeds, not hung; `py-spy dump` says so in a
+second, which is faster than killing eight of them. Rows that completed
+transport are now resumed on restart. Gate 2 is evaluated on the cells that
+run, with masks intersected across the finite-difference neighbours so N
+never changes silently.
+
+*The grid, and Gate 2.* 162 cells in 3.6 h on eight workers: 61 at full n,
+92 reduced, nine over budget -- all nine at X_lan = 0.1 and 0.5-2 d, where
+the 20 000-packet floor projects to 1.3-1.9 h. Nothing aborted. The masked
+worst colour error is 0.96-2.84 mag per model for C_both and the sign is
+the same everywhere: the grouped closure is too blue (g up to 2.1 mag too
+bright, K up to 3.6 mag too faint; 166 of 170 live NIR colour errors
+negative). Then the question the whole plan was built to ask. Sensitivity
+on 24 analysable points (three X = 0.1 points lose every observable to the
+mask intersection with their over-budget and faint-NIR neighbours):
+**C-B at 24 of 24**, for B_opacity, C_both and C_binned alike, and the same
+answer with sigma doubled, one-sided derivatives and a 3% band cut. chi2_RT/N
+of 28-549, so the error is detectable at every point; R = 0.46-1.00 after
+the best (dlnM, dlnv, dlnX) shift, so no parameter shift hides it; A_redist
+C-C at 23 of 24, so the control is where it should be. The first partial
+run had four N = 4 points classified C-A with dlnX = 6 -- a three-parameter
+fit to four numbers -- which is why `low_N` (N < 8) is now a flag in the
+JSON; it changes no class among the 20 well-sampled points. What I did not
+expect: the fitted shifts are not small (median |dlnX| = 0.95, a factor
+2.6), so the error *does* have a component along X_lan; it is just that
+the component is a minority of the error. The paper's sentence is "a
+closure error a fit cannot hide", not "a closure error that biases X_lan by
+N dex" -- and R is against a one-zone model with three parameters, so C-B
+is an upper bound on distinctness, which the report says in as many words.
+Fig. 2's left panel now shows both normalizations: the conserving zero and
+the absorbing bookkeeping (-0.5 to -2.1 mag on the central model), because
+a figure that showed only the zero would be hiding the reason for it.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

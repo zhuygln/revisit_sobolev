@@ -136,7 +136,49 @@ def planck_luminosity(nu_lo, nu_hi, r_core, temperature, n=20001):
     return 4.0 * np.pi**2 * r_core**2 * float(np.trapezoid(planck_bnu(nu, temperature), nu))
 
 
-def emergent_lnu(res, edges, l_core_window):
+def _scale(res, l_core_window, core):
+    """Synthetic-erg to erg/s conversion for the two inner boundaries.
+
+    "absorbing": the core swallows what returns to it, so `E_inj` synthetic
+    ergs are `l_core_window` and the emergent luminosity is the escaped
+    fraction of that (every result up to F41).
+
+    "equilibrium": the core re-emits what it absorbs as the same blackbody it
+    launches, and packets thermalized in the ejecta (fate 3) are returned to
+    it. A re-emitted packet is statistically a fresh launch, so the multi-pass
+    emergent spectrum is the single-pass escaped spectrum scaled by the
+    geometric series 1/(1 - f_return): `E_inj - E_core - E_abs` synthetic
+    ergs are `l_core_window`. Emergent luminosity then equals the core's
+    window luminosity minus what the flow deposits, for every closure alike.
+
+    "conserving": additionally, the energy the packets leave in the gas
+    (`E_dep_lab`: the level-energy difference of every fluorescence, plus the
+    O(v/c) work) is re-radiated with the escaped spectrum's own shape, so
+    `E_esc` synthetic ergs are `l_core_window` and every leg emerges with the
+    core's window luminosity. This is the inner boundary AND the radiative
+    equilibrium a diffusion-powered source implies, in the crudest form that
+    needs no gas-temperature iteration. Paper III §4.39 needs it because the
+    photon-number-conserving branching of `run_mc` does not conserve energy:
+    at S ~ 10^4 a packet interacts ~300 times before it escapes, the
+    reference deposits 45% of the injected energy in the gas and returns 75%
+    of the packets to the core, while a grouped closure that interacts less
+    does neither -- so the absorbing-core "bolometric" error of 1.9 mag is
+    the harness's energy bookkeeping, not a property of the closure. Under
+    "conserving" the in-window Delta m_bol measures only leakage out of the
+    launch window; colours are unchanged by any of the three (each is a grey
+    rescaling).
+    """
+    a = res["accounting"]
+    if core == "absorbing":
+        return l_core_window / a["E_inj"]
+    if core == "equilibrium":
+        return l_core_window / (a["E_inj"] - a["E_core"] - a["E_abs"])
+    if core == "conserving":
+        return l_core_window / a["E_esc"]
+    raise ValueError(f"core must be 'absorbing', 'equilibrium' or 'conserving', got {core!r}")
+
+
+def emergent_lnu(res, edges, l_core_window, core="absorbing"):
     """Absolute emergent L_nu on `edges` (Hz), erg s^-1 Hz^-1.
 
     `forest_mc.spectrum()` returns escaped/launched, a ratio to the injected
@@ -144,7 +186,8 @@ def emergent_lnu(res, edges, l_core_window):
     The scale comes from the injection, not the escape: `E_inj` synthetic ergs
     correspond to `l_core_window`, so `L_nu = hist(w h nu) * l/E_inj / dnu`.
     Integrating the result recovers `l_core_window * E_esc/E_inj` by
-    construction, which the caller may use as L_bol.
+    construction, which the caller may use as L_bol. `core="equilibrium"`
+    replaces E_inj by the energy that leaves the core for good -- see `_scale`.
 
     Packets escaping outside `edges` are dropped, so `edges` should span the
     launch window.
@@ -153,8 +196,7 @@ def emergent_lnu(res, edges, l_core_window):
     w_esc = res["w"][esc]
     nu_out = res["nu_out"]
     e_bin, _ = np.histogram(nu_out, edges, weights=w_esc * H * nu_out)
-    scale = l_core_window / res["accounting"]["E_inj"]
-    return e_bin * scale / np.diff(edges)
+    return e_bin * _scale(res, l_core_window, core) / np.diff(edges)
 
 
 def band_flux_nu(nu_c, l_nu, band, distance_cm=D_40MPC, edges=None):
@@ -216,14 +258,29 @@ def delta_mag(mags_approx, mags_ref):
     return {b: mags_approx.get(b, np.nan) - mags_ref.get(b, np.nan) for b in mags_ref}
 
 
-def bolometric(res, l_core_window):
+def bolometric(res, l_core_window, core="absorbing"):
     """Escaping luminosity within the launch window, erg/s.
 
     Not the true bolometric luminosity: energy outside the launch window is
-    never injected, and there is no heating source in the ejecta.
+    never injected, and there is no heating source in the ejecta. With
+    `core="equilibrium"` it is the core's window luminosity less what the flow
+    absorbs adiabatically (`_scale`).
     """
+    return res["accounting"]["E_esc"] * _scale(res, l_core_window, core)
+
+
+def return_fraction(res):
+    """Fraction of injected energy that comes back to the core or is
+    thermalized in the ejecta -- what an equilibrium core recycles."""
     a = res["accounting"]
-    return l_core_window * a["E_esc"] / a["E_inj"]
+    return (a["E_core"] + a["E_abs"]) / a["E_inj"]
+
+
+def deposited_fraction(res):
+    """Fraction of injected energy left in the gas (lab frame): fluorescence
+    level-energy differences plus the O(v/c) work -- what "conserving" adds."""
+    a = res["accounting"]
+    return a["E_dep_lab"] / a["E_inj"]
 
 
 def bol_delta_mag(l_approx, l_ref):
