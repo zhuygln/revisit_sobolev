@@ -2430,21 +2430,34 @@ live NIR colour errors negative; 195 of 199 on the grid. I could not
 reproduce §4.40's "166 of 170" under any current rule (it was counted with
 the dead mask), so §4.44 states the current count and rule instead.
 
-*The chain cap, two cells of four.* (0.03, 0.05, 0.1) at 2 and 3 d, trapped
-13.6-13.8 % at chain 2000: chain 2000 reproduced every stored leg to 0.0 mag
-and B_opacity was identical at every cap (the determinism check I wanted).
-Chain 8000 costs 1.7-2.0x, not 4x, and still traps 3 %. Colour errors move
-by 0.1-0.25 mag: J-K (the F43 colour) by 21-24 % with sign kept; g-r and
-i-J, which are 0.1-0.3 mag at these cells, by more than 25 %, one sign
-flip. The criterion I pre-declared fails on the small colours and passes on
-the large one, and the per-band changes (<= 0.15 mag) equal the reference's
-own shift between caps and the cells' noise floor -- moving the cap
-re-simulates the trapped seventh of the packets, so it is also a new noise
-draw. Substituting both cells at 8000 (`sensitivity.py --override`): the
-point stays C-B, R 0.70 -> 0.66, neighbours unchanged. I wrote it as
-"sharpened, not reversed", with the failed half of the criterion in the
-text; the two remaining cells ((0.01, 0.05, 0.1) @ 2 d, (0.03, 0.1, 0.1) @
-1 d) land in the next commit.
+*The chain cap, two cells of four (written at commit 7).* (0.03, 0.05, 0.1)
+at 2 and 3 d, trapped 13.6-13.8 % at chain 2000: chain 2000 reproduced
+every stored leg to 0.0 mag and B_opacity was identical at every cap (the
+determinism check I wanted). Chain 8000 costs 1.7-2.0x, not 4x, and still
+traps 3 %. Colour errors moved by 0.1-0.25 mag: J-K by 21-24 % with sign
+kept; g-r and i-J, 0.1-0.3 mag at these cells, by more than 25 %. I wrote
+it as "sharpened, not reversed", with the failed half of the criterion in
+the text.
+
+*The chain cap, all four (03:00, commit 8).* The other two cells --
+(0.01, 0.05, 0.1) @ 2 d and (0.03, 0.1, 0.1) @ 1 d -- made the picture
+clearer, not better. Per-band changes 0.14-0.21 mag at cap 8000 (up to
+0.35 at 4000), equal to the reference's own shift between caps and to the
+cells' A_redist floor (0.14-0.25). The decisive observation is that the
+colour errors move *non-monotonically* while the trapped fraction halves
+at each step (J-K at (0.03, 0.1, 0.1): -0.26, -0.69, -0.13): a systematic
+from the cap would move one way; a re-simulated seventh of the packets
+would not. Tally against the pre-declared criterion at cap 8000: signs
+kept 12/12 (C_both), magnitude < 25 % met 4/12, class kept at every point
+-- so I report the criterion as failed on its magnitude half and say why
+it was the wrong criterion for 0.1-0.45 mag colours at 2e4-packet cells.
+`sensitivity.py --override` with all four files: the three owning points
+stay C-B; (0.01, 0.05, 0.1) is the largest move, R 0.82 -> 0.56 and
+chi2_res/dof 144 -> 64, because its own 2 d cell and both of its
+M-neighbour's cells were replaced -- still twice the R threshold and
+sixteen times the chi2 one. Grid: 27/27 C-B, medians 0.83 / 116 (was 118).
+F45's register row and the §4.41 pointers updated; §4.44.3 rewritten in
+full; F48 row restated.
 
 *Loose ends carried.* F45's register row now points to §4.44.3; the T-scale
 validation is one point and a finite difference; the §4.40 robustness

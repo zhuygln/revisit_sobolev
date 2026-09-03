@@ -246,4 +246,8 @@ Not classifications, but the same kind of problem the audit exists to catch:
   worst-trapped cells and passes for J−K and for the class; the report
   prints the failed half. §4.40's "166 of 170" NIR count could not be
   reproduced under any current rule (it was counted with the dead mask);
-  §4.44 states the rule it uses. Two of four chain cells at this commit.
+  §4.44 states the rule it uses. The chain-cap table is complete (four
+  cells × three caps, `robustness/chain_*.json`): the magnitude half of the
+  pre-declared criterion fails (4 of 12) and is reported as failed, with the
+  non-monotone cap dependence as the reason it does not indicate a
+  systematic; the class half passes at all 27 points.

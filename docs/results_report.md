@@ -3253,13 +3253,13 @@ outnumber the physical ones (p = 8–11 against N = 6–34) and four points are
 underdetermined; T1 (p = 5–9) is the headline space and T3 the bound.
 
 **F45 — F43/F44 survive the floor mask and the core convention (the chain
-cap: ≤ 0.15 mag per band at the worst-trapped cells, class kept, §4.44.3); they do not survive a free luminosity history, at the grid's σ, as a
+cap: 0.14–0.21 mag per band at the worst-trapped cells, class kept, §4.44.3); they do not survive a free luminosity history, at the grid's σ, as a
 *class* — but the residual survives as a *misfit*.** With the floor mask
 real, Gate 2 is C-B at 20 of 21 analysable points (was 24 of 24 with the
 mask dead), median R 0.77. The colour errors of F43 are exactly
 convention-invariant; the absorbing-core magnitudes move the class at three
 faint, few-band points through a grey per-epoch term that the T1 space
-absorbs by construction. The chain-cap check is reported in §4.44.3 (the probe cannot resolve it; the full runs put it at ≤ 0.15 mag per band, inside the worst cells' noise floor, with the class kept). Granting the fit one
+absorbs by construction. The chain-cap check is reported in §4.44.3 (the probe cannot resolve it; the full runs put it at 0.14–0.21 mag per band, inside the worst cells' noise floor, with the class kept at all 27 points). Granting the fit one
 free grey magnitude per epoch (T1) — a freedom no physical source model has —
 absorbs the closure error to R = 0.28 (median) and makes 12 of 19 points
 C-A by the pre-declared rule, at the price of luminosity offsets of 1–7 mag
@@ -3663,52 +3663,74 @@ in the NIR of lanthanide-rich ejecta.
 
 The §4.41 harness (`robustness.py chain`) reran the reference and all four
 legs at chain_max = 2000 / 4000 / 8000 for the four cells with the largest
-reference trapped fraction, at the stored n_used = 20 000 and seeds. Two of
-the four — (0.03, 0.05, 0.1) at 2 d and 3 d, trapped 13.6 % and 13.8 % at
-the cap of 2000 — are complete at this commit; (0.01, 0.05, 0.1) at 2 d and
-(0.03, 0.1, 0.1) at 1 d are running and are added to this table in the next
-commit. Provenance held at both cells: chain 2000 reproduces every stored
-leg's magnitudes to 0.0 mag, and B_opacity is identical (0.0 mag) at every
-cap, as it must be since it does not use the reference's event stream.
+reference trapped fraction — (0.03, 0.05, 0.1) at 2 d and 3 d, (0.01, 0.05,
+0.1) at 2 d, (0.03, 0.1, 0.1) at 1 d; 10.5–13.8 % trapped at the grid's cap
+of 2000 — at the stored n_used = 20 000 and seeds (two workers, 14–23 min
+per leg at 2000 rising to 27–39 min at 8000: 1.7–2.1×, not 4×, since the
+chain loop's cost is per surviving packet). Provenance held at every cell:
+chain 2000 reproduces every stored leg's magnitudes to 0.0 mag, and
+B_opacity is identical (0.0 mag) at every cap, as it must be since it does
+not use the reference's event stream. Output
+`robustness/chain_<model>_t<t>.json`; `robustness.py table`;
+`sensitivity.py --override <the four files> --override-chain 4000|8000`.
 
-| cell | cap | trapped (ref) | ref wall (s) | Δ(g−r) / Δ(i−J) / Δ(J−K), C_both | same, C_binned | max \|Δm_ref\| vs cap 2000 | max \|Δ(Δm_b)\| C_both vs cap 2000 |
+| cell | cap | trapped (ref) | Δ(g−r) / Δ(i−J) / Δ(J−K), C_both | same, C_binned | max \|Δm_ref\| vs cap 2000 | max \|Δ(Δm_b)\| C_both vs cap 2000 | A_redist floor |
 |---|---|---|---|---|---|---|---|
-| (0.03, 0.05, 0.1) @ 2 d | 2000 | 13.6 % | 842 | +0.13 / −0.16 / −0.67 | +0.30 / −0.08 / −0.69 | – | – |
-| | 4000 | 6.7 % | 1197 | +0.23 / −0.14 / −0.62 | +0.40 / −0.03 / −0.65 | 0.06 | 0.09 |
-| | 8000 | 3.0 % | 1641 | +0.26 / −0.41 / −0.53 | +0.44 / −0.34 / −0.54 | 0.14 | 0.13 |
-| (0.03, 0.05, 0.1) @ 3 d | 2000 | 13.8 % | 1348 | −0.21 / −0.29 / −0.76 | −0.02 / −0.20 / −0.85 | – | – |
-| | 4000 | 6.6 % | 1669 | +0.04 / −0.33 / −0.59 | +0.23 / −0.24 / −0.67 | 0.14 | 0.18 |
-| | 8000 | 3.2 % | 2352 | −0.04 / −0.33 / −0.58 | +0.17 / −0.26 / −0.66 | 0.15 | 0.15 |
+| (0.01, 0.05, 0.1) @ 2 d | 2000 | 12.0 % | +0.12 / −0.45 / −0.60 | +0.31 / −0.37 / −0.67 | – | – | 0.21 |
+| | 4000 | 6.3 % | +0.05 / −0.33 / −0.54 | +0.28 / −0.28 / −0.60 | 0.35 | 0.35 | |
+| | 8000 | 3.2 % | +0.15 / −0.23 / −0.62 | +0.35 / −0.18 / −0.69 | 0.14 | 0.15 | |
+| (0.03, 0.05, 0.1) @ 2 d | 2000 | 13.6 % | +0.13 / −0.16 / −0.67 | +0.30 / −0.08 / −0.69 | – | – | 0.14 |
+| | 4000 | 6.7 % | +0.23 / −0.14 / −0.62 | +0.40 / −0.03 / −0.65 | 0.06 | 0.05 | |
+| | 8000 | 3.0 % | +0.26 / −0.41 / −0.53 | +0.44 / −0.34 / −0.54 | 0.14 | 0.14 | |
+| (0.03, 0.05, 0.1) @ 3 d | 2000 | 13.8 % | −0.21 / −0.29 / −0.76 | −0.02 / −0.20 / −0.85 | – | – | 0.25 |
+| | 4000 | 6.6 % | +0.04 / −0.33 / −0.59 | +0.23 / −0.24 / −0.67 | 0.14 | 0.14 | |
+| | 8000 | 3.2 % | −0.04 / −0.33 / −0.58 | +0.17 / −0.26 / −0.66 | 0.15 | 0.15 | |
+| (0.03, 0.1, 0.1) @ 1 d | 2000 | 10.5 % | +0.23 / −0.26 / −0.26 | +0.41 / −0.14 / −0.28 | – | – | 0.20 |
+| | 4000 | 5.5 % | +0.20 / −0.04 / −0.69 | +0.37 / +0.07 / −0.72 | 0.30 | 0.30 | |
+| | 8000 | 2.8 % | +0.31 / −0.39 / −0.13 | +0.49 / −0.25 / −0.16 | 0.21 | 0.21 | |
 
 Δm_ref is the reference magnitude itself; Δ(Δm_b) is the per-band closure
-error of C_both (−0.8 to +0.75 mag at these cells). Raising the cap from
-2000 to 8000 costs 1.7–2.0× in wall time (not 4×: the chain loop's cost is
-per surviving packet) and leaves 3 % of the reference packets still
-trapped.
+error of C_both, which is −0.85 to +0.75 mag at these cells; the A_redist
+floor is the largest |Δcolour| of the redistribution-only leg at the cell
+(its noise floor at 2 × 10⁴ packets). Raising the cap to 8000 leaves 3 %
+of the reference packets trapped.
 
-Against the pre-declared criterion the result is mixed, and the mixture
-is informative. The J−K error — the largest colour error at these cells
-and the one F43 is about — changes by 21–24 % and keeps its sign (−0.67 →
-−0.53, −0.76 → −0.58): inside the criterion, barely. The g−r and i−J
-errors, which are 0.1–0.3 mag at these two cells, change by more than
-25 % and g−r at 3 d changes sign (−0.21 → −0.04); the criterion, read
-literally, fails for them. But every change is 0.09–0.18 mag in a single
-band — the same size as the reference's own shift between caps (0.06–0.15
-mag) and as these cells' A_redist noise floor (0.13–0.25 mag at 2 × 10⁴
-packets; the trapped 14 % of packets are re-simulated when the cap moves, so
-the two caps are also two noise realizations of a seventh of the packets).
-The chain cap is, at the worst-trapped cells of the grid, a ≤ 0.15 mag
-effect on single-band closure errors and a ≤ 0.25 mag effect on colours,
-and it does not reach the 1–3 mag colour errors of F43 nor the sign of
-the NIR colours. What the class test says: with both cells substituted at
-cap 8000, the point (0.03, 0.05, 0.1) stays C-B under T0 with R 0.70 → 0.66
-and χ²_res/dof 78 → 72 (C_binned 0.62 → 0.58, 79 → 74); its neighbours
-(0.03, 0.05, 0.01) and (0.01, 0.05, 0.1), whose derivatives use these rows,
-are unchanged to two decimals in R. The F45 statement is therefore
-sharpened rather than reversed: F43/F44 survive the chain cap at the level
-of the class and of the NIR colour signs; the sub-0.3-mag colour errors at
-the worst-trapped cells are not individually robust to it, which is the
-same thing as saying they are inside those cells' noise floor.
+Against the pre-declared criterion (each live colour error changes by
+< 25 % and keeps its sign, and the class stays C-B) the result is:
+**signs kept at 12 of 12 C_both colour errors at cap 8000** (one g−r and
+one i−J cross zero at the intermediate cap 4000), **the magnitude half met
+at 4 of 12** (J−K at three cells, i−J at one), and **the class kept
+everywhere**. The magnitude half fails, and the table shows why it was the
+wrong criterion for these cells. The colour errors that fail it are the
+0.1–0.45 mag ones — at cells whose own noise floor is 0.14–0.25 mag — and
+they move *non-monotonically* with the cap (J−K at (0.03, 0.1, 0.1): −0.26,
+−0.69, −0.13; i−J at (0.03, 0.05, 0.1) @ 2 d: −0.16, −0.14, −0.41) while
+the trapped fraction halves at each step; a systematic from the cap would
+move one way. Every per-band change is 0.05–0.35 mag (0.14–0.21 at cap
+8000), the same size as the reference's own shift between caps, because
+moving the cap re-simulates the trapped 10–14 % of the packets: the two
+caps are also two noise realizations of a seventh of the histogram. So
+the chain cap, at the four worst-trapped cells of the grid, is a
+≤ 0.2 mag effect on single-band closure errors, indistinguishable from
+those cells' Monte-Carlo noise, and it reaches neither the 1–3 mag colour
+errors of F43 nor the signs of the NIR colours.
+
+The class test is the one that matters for F44, and it is clean. With all
+four cells substituted at cap 8000 (4000 in parentheses), the three points
+that own them stay C-B under T0: (0.03, 0.05, 0.1) R 0.70 → 0.67 (0.65),
+χ²_res/dof 78 → 74 (68); (0.03, 0.1, 0.1) 0.77 → 0.76 (0.78), 97 → 97
+(94); (0.01, 0.05, 0.1) 0.82 → 0.56 (0.53), 144 → 64 (62) — the largest
+move in the grid, at the point whose 2 d cell *and* whose M-neighbour's 2
+and 3 d cells were all replaced, and still twice the C-A threshold on R
+and sixteen times it on χ²_res/dof. The three X = 10⁻² neighbours that use
+these rows through their X-derivative are unchanged to two decimals, the
+grid stays C-B at 27 of 27, and the medians move from R 0.83 / χ²_res/dof
+118 to 0.83 / 116. The F45 statement is therefore sharpened rather than
+reversed: F43/F44 survive the chain cap at the level of the class, of the
+NIR colour signs and of the magnitude-scale colour errors; the sub-0.5-mag
+colour errors at the worst-trapped cells are not individually robust to
+it, which is the same thing as saying they are inside those cells' noise
+floor.
 
 **F48 — With the grid complete (162 of 162 cells), Gate 2 is C-B at 27 of 27
 points (median R 0.83, χ²_res/dof 118) and Gate 3 at 26/26, 18/18, 25/25
@@ -3769,10 +3791,10 @@ single case (N = 17, C-B under every space).
 | F42 | **The chromatic closure error survives real filter curves, and the three notebook-only findings reproduce.** Re-photometering the committed F41 spectra through SVO DECam g r i z + 2MASS J H Ks (no packets re-run) keeps every ≥ 0.6 mag top-hat colour error at 0.65–0.77 mag (Ce II and the blend, g−r at 0.5 d) and the blue kilonova's binned leg at 0.69 mag — moving *which* colour is worst (g−r → i−J) but not its size — while the A_redist floor stays ≤ 0.009 mag. Gate 1 passes. Separately: the Ce II density scan reproduces with three seeds (crossing S = 55.7, five of six points within 7 points of the single-seed numbers), the F38 table is generated from `survey.json` (Pr II interaction −6.4%), and the F39 exit-τ scan has a driver and a data file (crossings S = 179.6 / 689.0 at τ_x = 0.5 / 2.0; dlnlam is inert at delocalize = 1). | §4.38 |
 | F43 | **On a heating-powered kilonova the grouped-opacity closure's colour error is 1–3 mag at every point of a 27-model (M_ej, v_ej, X_lan) grid, and its sign is uniform: too blue.** Four-ion blend, worldline transport, DECam + 2MASS at 40 Mpc, 162 epochs (153 ran, 9 X_lan = 0.1 early epochs over budget). Worst live colour error per model 0.96–2.84 mag (C_both; C_binned 1.24–3.05) against an A_redist floor of 0.02–0.13 mag on the well-sampled models; the central model runs from Δ(J−K) = −0.6 mag at 0.5 d to −1.9 mag at 3 d with Δ(g−r) inside −0.4 mag. 166 of 170 live NIR colour errors are negative: the closure's g is 0.2–2.1 mag too bright and its K up to 3.6 mag too faint. Every leg has the same L_bol by construction (conserving core); the absorbing-core Δm_bol of −0.5 to −3.9 mag is inner-boundary bookkeeping, and the harness makes no bolometric statement at S ≳ 10⁴. | §4.40 |
 | F44 | **Gate 2: the closure error is not degenerate with (M_ej, v_ej, X_lan) — class C-B, distinct residual, at all 24 analysable grid points, for every opacity closure, under every robustness variant.** χ²_RT/N = 28–549 (detectable), weighted residual fraction R = 0.46–1.00 after the best three-parameter shift (0.60–1.00 on the 20 well-sampled points), χ²_res/N = 17–373; the same class with σ doubled, one-sided derivatives and a 3 % band cut. The fitted shifts are median \|Δln M\| = 0.25, \|Δln v\| = 0.25, \|Δln X_lan\| = 0.95, so the error has a component along every parameter, but it leaves most of itself behind. A_redist is C-C (undetectable) at 23 of 24. Three X_lan = 0.1 points are unanalysable (mask intersection empty); R is against a one-zone model's three parameters, so C-B is an upper bound on distinctness. | §4.40 |
-| F45 | **F43/F44 survive the floor mask and the core convention (chain cap: §4.44); a free luminosity history absorbs the residual as a *class* but not as a *misfit*.** Erratum: the §4.40 floor mask was a no-op (27 floored rows in 12 models); with it real, Gate 2 is C-B at 20 of 21 analysable points (median R 0.77, χ²_res/dof 105), no class changed where both rules apply. Colours are exactly convention-invariant; the absorbing core moves three faint, few-band points to C-A through a grey per-epoch term. The chain-cap check (4 cells × chain_max 2000/4000/8000 at the stored n_used; §4.44.3) passes the determinism check (B_opacity identical, chain 2000 reproduces the stored magnitudes exactly) and moves single-band closure errors by ≤ 0.15 mag at the worst-trapped cells — inside those cells' noise floor, class kept, J−K sign and size kept; the sub-0.3-mag colours there are not individually robust. One free grey magnitude per epoch (T1) takes median R to 0.28 and 12 of 19 points to C-A by the pre-declared rule — at the cost of 1–7 mag luminosity offsets, parameter shifts at or beyond the grid spacing, and a leftover χ²_res/dof of 23 (median; 17 of 19 above 4); a free photospheric temperature (Δln T = +0.33 median: the closure looks 40 % hotter) and a linearized blue component (T3) take R to 0.21 with χ²_res/dof 8. The A_redist floor from cells with n_used ≥ 10⁵ is 0.021 mag (median), 0.044 (90 %). | §4.41 |
+| F45 | **F43/F44 survive the floor mask and the core convention (chain cap: §4.44); a free luminosity history absorbs the residual as a *class* but not as a *misfit*.** Erratum: the §4.40 floor mask was a no-op (27 floored rows in 12 models); with it real, Gate 2 is C-B at 20 of 21 analysable points (median R 0.77, χ²_res/dof 105), no class changed where both rules apply. Colours are exactly convention-invariant; the absorbing core moves three faint, few-band points to C-A through a grey per-epoch term. The chain-cap check (4 cells × chain_max 2000/4000/8000 at the stored n_used; §4.44.3) passes the determinism check (B_opacity identical, chain 2000 reproduces the stored magnitudes exactly) and moves single-band closure errors by 0.14–0.21 mag at the four worst-trapped cells — the reference's own shift, inside those cells' noise floor and non-monotone in the cap — with the class kept at all 27 points and the colour signs kept; the < 25 % magnitude criterion is met at only 4 of 12 colours there, so the sub-0.5-mag colour errors at those cells are not individually robust. One free grey magnitude per epoch (T1) takes median R to 0.28 and 12 of 19 points to C-A by the pre-declared rule — at the cost of 1–7 mag luminosity offsets, parameter shifts at or beyond the grid spacing, and a leftover χ²_res/dof of 23 (median; 17 of 19 above 4); a free photospheric temperature (Δln T = +0.33 median: the closure looks 40 % hotter) and a linearized blue component (T3) take R to 0.21 with χ²_res/dof 8. The A_redist floor from cells with n_used ≥ 10⁵ is 0.021 mag (median), 0.044 (90 %). | §4.41 |
 | F46 | **Gate 3: every scenario detects the closure error at every eligible point (χ²_RT,obs/N = 41–1005; 30–40σ in single bands at real errors) and it survives the ejecta parameters everywhere (18/18 dense, 11/11 sparse, 16/16 optical); under a free luminosity history its survival is set by the NIR — 9/18 with six-epoch JHK (all four X = 0.1 points), 3/8 with two NIR epochs, 1/15 without NIR.** The NIR carries only 31 % of χ²_RT,obs (g and r the most): detection is optical, distinctness is NIR. After the T1 fit the leftover is still χ²_res/dof > 4 at 18/18 dense points. Counts on the complete grid: §4.44 (26/26, 18/18, 25/25; T1 18/26 dense). | §4.42, §4.44 |
 | F47 | **The Planck temperature proxy of T2 is validated as a *gas*-temperature direction (cosine 0.92 with the measured transport response at the central point, 0.96–1.00 per epoch) with a lever arm 1.35× (2× at ≤ 1 d) larger than assumed; the illumination temperature alone does not reach the observer (a ×1.5625 change in the launch temperature moves no live band by more than the 0.13 mag noise floor, ‖d_T^MC‖ = 0.06 of the proxy); and the central point stays C-B with the measured direction (R 0.37, χ²_res/dof 46–49).** The closure residual is not a photospheric-temperature error. Four model runs (`--t-scale 0.8/1.25`, with and without `--t-scale-gas`), `tscale.py`, fig7. | §4.43 |
-| F48 | **With the grid complete (162 of 162 cells; nine early X = 0.1 epochs redone at a 5400 s budget), Gate 2 is C-B at 27 of 27 points (median R 0.83, χ²_res/dof 118) and Gate 3 at 26/26, 18/18, 25/25 eligible points under the ejecta parameters; a free luminosity history absorbs the residual at 8 of 9 lanthanide-poor points and 0 of 9 lanthanide-rich ones, and at real errors the residual survives that history at 16 of 17 `dense` X ≥ 10⁻² points.** The redone cells are the noisiest in the grid (A_redist floor 0.13–0.53 mag) and change no F43 number; 195 of 199 live NIR colour errors are negative. Chain cap at the two worst-trapped cells done so far: ≤ 0.15 mag per band, ≤ 0.25 mag per colour, J−K sign and size kept, class C-B kept (R 0.70 → 0.66); the sub-0.3-mag colours there are inside the cells' noise floor and not individually robust. Supersedes the counts of F44–F46. | §4.44 |
+| F48 | **With the grid complete (162 of 162 cells; nine early X = 0.1 epochs redone at a 5400 s budget), Gate 2 is C-B at 27 of 27 points (median R 0.83, χ²_res/dof 118) and Gate 3 at 26/26, 18/18, 25/25 eligible points under the ejecta parameters; a free luminosity history absorbs the residual at 8 of 9 lanthanide-poor points and 0 of 9 lanthanide-rich ones, and at real errors the residual survives that history at 16 of 17 `dense` X ≥ 10⁻² points.** The redone cells are the noisiest in the grid (A_redist floor 0.13–0.53 mag) and change no F43 number; 195 of 199 live NIR colour errors are negative. Chain cap (four worst-trapped cells, 2000 → 8000): per-band changes of 0.14–0.21 mag, equal to the reference's own shift and the cells' noise floor, non-monotone in the cap; signs kept at 12 of 12 C_both colours, the < 25 % magnitude criterion met at only 4 of 12 (the 0.1–0.45 mag colours fail it), class C-B kept at all 27 points (largest move R 0.82 → 0.56 at (0.01, 0.05, 0.1)); grid medians R 0.83, χ²_res/dof 116. Supersedes the counts of F44–F46. | §4.44 |
 
 ## 6. Caveats and limitations
 
@@ -3819,9 +3841,9 @@ single case (N = 17, C-B under every space).
   absorbs the closure error to R ≈ 0.3 at most points, and the Planck
   temperature column is a proxy (§4.43 measures the MC direction at one
   point: cosine 0.92, lever arm 1.35× — the proxy is conservative). The
-  chain cap is a ≤ 0.15 mag per-band effect at the worst-trapped cells,
-  inside those cells' noise floor, so the sub-0.3-mag colour errors there are
-  not individually robust to it (§4.44.3; two of four cells so far). The
+  chain cap is a 0.14–0.21 mag per-band effect at the four worst-trapped cells,
+  inside those cells' noise floor, so the sub-0.5-mag colour errors there are
+  not individually robust to it (§4.44.3; four cells, class kept at all 27). The
   T-scale validation is one grid point and a finite difference. The nuisance
   spaces are underdetermined at the sparse points (dof < 4 under T3 at 1 of
   27 on the complete grid, more under the `sparse`/`optical` scenarios).
@@ -3887,7 +3909,7 @@ python paper3/phase12_grid/figures.py --which 6                    # fig6_tangen
 python paper3/phase12_grid/robustness.py chain --model model_M0.03_v0.05_X0.1 --t 3 --chain-max 2000 8000 --probe
 paper3/phase12_grid/robustness/run_chain.sh robustness/chain.log model_M0.03_v0.05_X0.1:3 ...   # the four cells, ~2 h each
 python paper3/phase12_grid/robustness.py table
-python paper3/phase12_grid/sensitivity.py --override paper3/phase12_grid/robustness/chain_model_M0.03_v0.05_X0.1_t{2,3}.json --override-chain 8000 --out /tmp/sens_chain8000.json
+python paper3/phase12_grid/sensitivity.py --override paper3/phase12_grid/robustness/chain_*.json --override-chain 8000 --out /tmp/sens_chain8000.json
 
 # Paper III phase 13, observability / Gate 3 (section 4.42)
 python paper3/phase13_observability/observe.py && python paper3/phase13_observability/observe.py --table --fig   # observability.json, fig5
