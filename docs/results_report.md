@@ -4114,7 +4114,7 @@ the five SI fragments.
 # environment
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]" h5py
-pytest                    # 347 passed (2026-09-03)
+pytest                    # 349 passed (2026-09-03)
 
 # data (once): Zenodo 19335084 -> data/, see data/README.md
 # SEDONA (once): see lab_notebook.md "SEDONA build" entry
