@@ -78,3 +78,10 @@ def test_si_is_checked_with_the_same_rules(tmp_path, monkeypatch):
     assert exempt == []
     monkeypatch.setattr(cs, "SI", tmp_path / "absent.tex")
     assert cs.check_si() == ([], [])
+
+
+def test_literal_ok_must_end_the_line():
+    cs = _load()
+    text = "\\begin{abstract}\nfoo\n\\end{abstract}\nfine.  % literal-ok\nbad.  % literal-ok We do not claim.\n\\end{document}\n"
+    problems, exempt = cs.check_literals(text)
+    assert len(problems) == 1 and "must end the line" in problems[0] and "line 5" in problems[0]

@@ -125,6 +125,9 @@ def check_literals(text):
         if raw.lstrip().startswith("%"):
             continue
         ok = raw.rstrip().endswith(LITERAL_OK)
+        if LITERAL_OK in raw and not ok:
+            out.append(f"line {line_no}: `{LITERAL_OK}` must end the line -- text after "
+                       f"it is a LaTeX comment and is not typeset")
         line = re.sub(r"(?<!\\)%.*$", "", raw)
         line = re.sub(r"\\(cite|ref|label)\{[^}]*\}", "", line)
         for pat, why in LITERAL:

@@ -123,7 +123,7 @@ paper3/        Paper III: the reduced redistribution closure (kernel,
                frozen reference, compression sweep, T and epoch transfer),
                the kilonova closure grid (phase12/13) and freeze.py +
                FROZEN.json, the frozen analysis the manuscript quotes
-tests/         349 tests pinning the physics of every module
+tests/         350 tests pinning the physics of every module
 docs/          results report, lab notebook, planning inputs, paper/
 data/          raw atomic data (gitignored; provenance in data/README.md)
 outputs/       working figures (gitignored; committed copies in docs/figures/)
@@ -136,7 +136,7 @@ Needs Python >= 3.10 and numpy >= 2, so a distro 3.8/3.9 will not do.
 ```bash
 python3 -m venv .venv              # or: conda create -p .venv python=3.12
 .venv/bin/python -m pip install -e ".[dev]" h5py
-.venv/bin/python -m pytest         # 349 passed (2026-09-03)
+.venv/bin/python -m pytest         # 350 passed (2026-09-03)
 ```
 
 Atomic data is not committed — see [data/README.md](data/README.md) for the

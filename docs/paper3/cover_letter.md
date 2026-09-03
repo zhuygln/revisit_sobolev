@@ -9,11 +9,11 @@ mimic*, for publication in Nature Astronomy.
 Kilonova light curves are the main route from a gravitational-wave merger to
 the mass, velocity and lanthanide content of what it ejected, and the models
 that read them cannot resolve the millions of lanthanide lines that shape the
-spectrum. Every code in use therefore coarse-grains the line opacity into
-bins, and every inference made with those codes carries, implicitly, the
-assumption that this coarse-graining changes the observables by less than the
-model-error allowance of about half a magnitude to a magnitude that the fits
-add by hand.
+spectrum. Many production light-curve and inference calculations therefore
+coarse-grain the dense line opacity into bins, and inference frameworks often
+absorb unresolved model deficiencies into a generic 0.5–1 mag systematic
+term, without isolating how much comes from the line-transport closure
+itself.
 
 The manuscript tests that assumption directly. It runs one Monte Carlo
 transport code, with the same atomic data, level populations and source
@@ -25,7 +25,7 @@ can be compressed to a small matrix without observable consequence. The
 opacity coarse-graining cannot: across a complete grid of ejecta mass,
 velocity and lanthanide fraction, the closure makes a heating-powered
 kilonova too blue by one to three magnitudes in colour, with a coherent
-optical-faint, infrared-bright pattern at every epoch. A first-order
+optical-bright, near-infrared-faint pattern at every epoch. A first-order
 sensitivity analysis shows that no shift of the three ejecta parameters
 reproduces this pattern at any grid point, that a free luminosity history
 does not absorb it in lanthanide-rich ejecta, and that it remains detectable
@@ -34,14 +34,14 @@ sampling.
 
 I believe the work belongs in Nature Astronomy because its message reaches
 beyond kilonova codes. It shows, with a controlled measurement rather than an
-argument, that a transport approximation shared by an entire modelling
+argument, that a transport approximation used across much of the modelling
 community produces a structured, sign-predictable error in the very
 observables from which physical parameters are inferred, and that a
 substantial part of what those inferences represent as an unstructured
-model-error allowance can arise from a single, identifiable cause. That is a
-statement about how systematic error should be budgeted in any inference
-built on coarse-grained line transport, from kilonovae to supernovae and
-stellar atmospheres.
+model-error allowance can arise from a single, identifiable cause. The
+broader methodological point may apply to other line-rich radiative-transfer
+problems: a coarse-grained approximation can produce a coherent error that is
+poorly represented by an unstructured nuisance term.
 
 Three points may help in selecting referees and setting expectations.
 
@@ -52,7 +52,7 @@ the comparison to the model-error allowance is a consistency statement.
 
 Second, the experiment is deliberately restricted: a one-zone grey
 photosphere illuminating a homologous shell, frozen ionization, four
-lanthanide ions with calibrated synthetic level structures. The manuscript
+lanthanide ions using calibrated atomic data. The manuscript
 states what this licenses and what it does not, and names the extensions
 (independent atomic data, a second code, a fit to AT2017gfo) as future work
 rather than promising them.

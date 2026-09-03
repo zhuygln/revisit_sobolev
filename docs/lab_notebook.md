@@ -2590,6 +2590,29 @@ Cover letter written on Paper I's template. The paragraph I rewrote most is
 the one that says why the message is broader than kilonova codes; the
 version that survived says it once and stops.
 
+## 9aw. The review's edits, and the disclaimer that was a comment (2026-09-03)
+
+The user read the manuscript, cover letter and literature notes and sent
+seven wording changes. The two that matter most are corrections of meaning:
+the cover letter had the sign of the bias reversed (I had written
+"optical-faint, infrared-bright"; the closure is too *bright* in g), and
+"a bias a fit can absorb is harmless to the inference" contradicts the C-A
+class, whose whole point is that absorption *is* the harm. The rest restrain
+reach: "every code" → "many production calculations", "standard" →
+"widely used", the σ_sys lines named as comparison scales rather than
+validity thresholds, the Introduction's strongest sentence deferred to §8
+where the fractions and the rank-one result have been shown.
+
+While finding the passages I found something the review could not see from
+the source: the `% literal-ok` mark on the allowance paragraph was mid-line
+again, and everything after it — including "we do not claim that any
+published inference is affected", the sentence the user singled out as the
+one that must stay — was a comment. It was not in the PDF. Same failure as
+the six vanished citations at 9au; the word count could not catch it because
+the checker strips comments before counting. Now `check_literals` refuses
+any text after the mark, and I read the built PDF's extracted text for the
+edited sentences rather than trusting the `.tex`.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

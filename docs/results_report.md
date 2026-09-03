@@ -3990,6 +3990,30 @@ the frozen-number build. Tests: `test_si_tables_have_the_expected_rows`,
 `test_si_is_checked_with_the_same_rules`; the byte-identity test covers
 the five SI fragments.
 
+**The review's wording edits (2026-09-03, later still).** Seven targeted
+changes after the user's read of the manuscript, cover letter and
+literature notes: the cover letter had the closure's sign backwards
+("optical-faint, infrared-bright" → "optical-bright, near-infrared-faint";
+d_RT(g) < 0, d_RT(K) > 0); "every model / every code" coarse-grains →
+"practical calculations commonly" / "many production calculations"; "σ_sys
+= 1 mag is standard" → "widely used", with Pang (smaller values) and Jhawar
+(time- and filter-dependent discrepancies) cited for what each establishes;
+the 0.5 and 1 mag lines of Fig. 4b named as scales for aggregate model
+discrepancy, not validity thresholds; the Introduction's "substantial part"
+claim softened to "can contribute at the same scale … with a coherent
+wavelength-dependent signature" until §8 has shown the fractions and the
+rank-one result; "harmless to the inference" → "may masquerade as a shift
+in the inferred ejecta parameters" (the C-A definition); "bolometric offset"
+under T1 → "approximately grey over the live bands" (Δm_bol ≡ 0 by
+construction); the cover letter's reach trimmed to "may apply to other
+line-rich radiative-transfer problems". While locating the passages: the
+`% literal-ok` on the allowance paragraph sat mid-line, so the "In words"
+sentence and the "we do not claim that any published inference is
+affected" disclaimer were LaTeX comments and absent from the built PDF —
+the second occurrence of the commit-10 failure. Restored (main text 2981 →
+3093 words), and `check_literals` now fails any line with text after
+`% literal-ok`.
+
 ## 5. Findings register
 
 | # | Finding | Where |
@@ -4114,7 +4138,7 @@ the five SI fragments.
 # environment
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]" h5py
-pytest                    # 349 passed (2026-09-03)
+pytest                    # 350 passed (2026-09-03)
 
 # data (once): Zenodo 19335084 -> data/, see data/README.md
 # SEDONA (once): see lab_notebook.md "SEDONA build" entry
