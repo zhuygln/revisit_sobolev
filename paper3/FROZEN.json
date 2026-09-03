@@ -1,15 +1,15 @@
 {
  "tag": "paper3-freeze",
- "utc": "2026-09-03T15:21:29+00:00",
+ "utc": "2026-09-03T16:50:23+00:00",
  "git": {
-  "head": "e86dc4c26430a8ad52d280ef900b18e3259f8ba1",
+  "head": "381a3f49698743956cf7711bb755bc643d029cde",
   "inputs_dirty": false,
   "dirty_inputs": [],
   "tree_dirty": true,
   "trees": {
    "grid": "820bd7b6ee9b9f23d0a86a3155986f3e81846788",
    "grid/tscale": "af23eda44f757b5cd6d4ba9bc85a1d7c3ef1d7d7",
-   "robustness": "c508a7c9c82b55b939132ff40c2659e0696fb1af",
+   "robustness": "eb5d3ee827a065a5fba2ec7e1645dfb224491f75",
    "data/filters": "4575e49675da0a5bf8941ab3b4efd4e680edf106"
   },
   "tag": "paper3-freeze"
@@ -73,7 +73,9 @@
   "paper3/phase12_grid/grid.py": "2656d9da52dedbe09915496c2ad910ea3bb0601b0ff13b51cc9f456ab9271f6b",
   "paper3/phase12_grid/run_grid.py": "ecb723d49762a014ed4f3d759c117198c9a75f5dc0cf7229fbf887d7af4f9bc7",
   "paper3/phase13_observability/observe.py": "a953459d0dae4a5bd3cf90546244a4d91b33e2e8a3b4e407a073a576be5b909f",
-  "sobolev/photometry.py": "ae4bce5f20b0bbee5fc4787efbf598b47545e00a29d3b83ee74b88c36c98e799"
+  "sobolev/photometry.py": "ae4bce5f20b0bbee5fc4787efbf598b47545e00a29d3b83ee74b88c36c98e799",
+  "docs/paper3/latex_tables.py": "296e391161a614dd98e0a049a53f315ac581c4db9bf813b9b0ba830729127e72",
+  "docs/paper3/display_items.py": "e5a0fe151b6df9061163ff694898ff796e4f755245e1b2a1dc95c4b5c8e02197"
  },
  "outputs": {
   "paper3/phase12_grid/sensitivity.json": "9b91f8135877195703952baedb73abaa11fb0a55c330e35d19c2ccde53639818",
@@ -97,7 +99,27 @@
   "paper3/figures/fig6_tangent.png": "de2b878fbc0e9ce61f639d2e680d431a49fead06c126d1613cf6355b7e0c6c04",
   "paper3/figures/fig6_tangent.pdf": "52c50f909a5cad915a0e9cfaf7e2e3d9b49c510c06c29c57a27a519f13d07712",
   "paper3/figures/fig7_tscale.png": "8d09fcd851ae491d9107a98e5f0731ed265bf1f9af917da318a5e798cfec492c",
-  "paper3/figures/fig7_tscale.pdf": "05349513e408838b951eeb90cffe230f22b4a28a8110db70eabb390db8a0c636"
+  "paper3/figures/fig7_tscale.pdf": "05349513e408838b951eeb90cffe230f22b4a28a8110db70eabb390db8a0c636",
+  "docs/paper3/numbers.tex": "7c4ac91f0d85f3de72864912d12d230f62204f19646bee25140f0ee3d0bec472",
+  "docs/paper3/tab_verdict.tex": "b5f164714afb9de020262dcfa75f77ab27912b2ce8285bf9aa6659770edcc504",
+  "docs/paper3/tab_grid.tex": "78b5abbd26428ea6dc07e5ef48c7a7d3b651d045aa7bdf860488b0f219dce307",
+  "docs/paper3/tab_scenarios.tex": "419dcc5086df516fe47780894b91fafbe970c5d129f6f1f488540266c8bf5732",
+  "docs/paper3/figures/fig1_one_kilonova.pdf": "06588c4d895b6888a07fef9b44be792bf9c41803113228609dd35cfd0fa8ab8c",
+  "docs/paper3/figures/fig1_one_kilonova.png": "fa8c0b0a5adaef509805db2669c7af7f19d3811ecb97bad9252a56e3a3d6159c",
+  "docs/paper3/figures/fig2_grid.pdf": "00224c562df7ab3af1eb92ddc7c55fa9a36fc711b01cadfd8bc1ad67154e4ed0",
+  "docs/paper3/figures/fig2_grid.png": "a73c6fbb19dc9eac2481cb0157a84975e251d36f3ad24589768a00ddd9b32b30",
+  "docs/paper3/figures/fig3_not_parameters.pdf": "8585367b10fddad9bc2a2c6bd2bb6f8326e6f3e87c11480db959bec49d896ae9",
+  "docs/paper3/figures/fig3_not_parameters.png": "e0ca0ff84904509facfd14518dde123dbca5c5912434659642c027e61e50e4f3",
+  "docs/paper3/figures/fig4_observability_syserr.pdf": "54ee1c00fdab0efca8d7b474b141fb56206fb196d720d2150d886c4117ad040a",
+  "docs/paper3/figures/fig4_observability_syserr.png": "29824dd52a6c3141ee02ab5a09b7919237f800d491a832372e61670bfb2f51c4",
+  "docs/paper3/figures/edfig1_source.pdf": "c6a0810899cada6d99494900facb8b06f8887f39710327b39293850658ae8202",
+  "docs/paper3/figures/edfig1_source.png": "344dc1d55e33ab6eeefef6ae78971a0fe96f7ba5d729154b4b67e65cff0cad72",
+  "docs/paper3/figures/edfig2_tscale.pdf": "23dd32bc0fa3b652aa0f986e74388cf37db8bdee0fd58cc4b068746632b31f92",
+  "docs/paper3/figures/edfig2_tscale.png": "08ced677d446239fef4bc5c7aefbbb30725f5273ea0fd306771b689417e00012",
+  "docs/paper3/figures/edfig3_chain_cap.pdf": "3bfa975ec044e340e0c8e9c9e8228a803a409fdf09610e7c925b51216317e3f6",
+  "docs/paper3/figures/edfig3_chain_cap.png": "12ac226b0d31fe699604e90c78adff4a98ca55e46d92da357f515085b3eef892",
+  "docs/paper3/figures/edfig4_control_floor.pdf": "5b71337a8e17139f9720a41540efe1f33c14e5731b03a0ca214cfd012421977f",
+  "docs/paper3/figures/edfig4_control_floor.png": "6aedd03c190f2f4bd7ee6a379c1162550cfa0ace8bd4ba81c593a075d75c72b8"
  },
  "headline": {
   "gate2.T0.cb": 27,
