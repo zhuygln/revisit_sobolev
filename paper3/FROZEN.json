@@ -1,11 +1,11 @@
 {
  "tag": "paper3-freeze",
- "utc": "2026-09-03T16:50:23+00:00",
+ "utc": "2026-09-03T17:05:21+00:00",
  "git": {
-  "head": "381a3f49698743956cf7711bb755bc643d029cde",
+  "head": "1d78da428c2d5cc1c1bde4dfda560bea7174740f",
   "inputs_dirty": false,
   "dirty_inputs": [],
-  "tree_dirty": true,
+  "tree_dirty": false,
   "trees": {
    "grid": "820bd7b6ee9b9f23d0a86a3155986f3e81846788",
    "grid/tscale": "af23eda44f757b5cd6d4ba9bc85a1d7c3ef1d7d7",
@@ -74,7 +74,7 @@
   "paper3/phase12_grid/run_grid.py": "ecb723d49762a014ed4f3d759c117198c9a75f5dc0cf7229fbf887d7af4f9bc7",
   "paper3/phase13_observability/observe.py": "a953459d0dae4a5bd3cf90546244a4d91b33e2e8a3b4e407a073a576be5b909f",
   "sobolev/photometry.py": "ae4bce5f20b0bbee5fc4787efbf598b47545e00a29d3b83ee74b88c36c98e799",
-  "docs/paper3/latex_tables.py": "296e391161a614dd98e0a049a53f315ac581c4db9bf813b9b0ba830729127e72",
+  "docs/paper3/latex_tables.py": "6728e7cf03096fb5479d019052908baec85d4c0dc4b753334f75f89658126c63",
   "docs/paper3/display_items.py": "e5a0fe151b6df9061163ff694898ff796e4f755245e1b2a1dc95c4b5c8e02197"
  },
  "outputs": {
@@ -104,6 +104,11 @@
   "docs/paper3/tab_verdict.tex": "b5f164714afb9de020262dcfa75f77ab27912b2ce8285bf9aa6659770edcc504",
   "docs/paper3/tab_grid.tex": "78b5abbd26428ea6dc07e5ef48c7a7d3b651d045aa7bdf860488b0f219dce307",
   "docs/paper3/tab_scenarios.tex": "419dcc5086df516fe47780894b91fafbe970c5d129f6f1f488540266c8bf5732",
+  "docs/paper3/si_tab_robustness.tex": "4886f2df469fe9ff427ab4a7d942e36148fd64621ca6398fb83115c37db0ebd6",
+  "docs/paper3/si_tab_points.tex": "64e7a1cdd8d398e7d572785bd1bb03e1e22f2440c5e82de0b9dd2a7a005e1ee3",
+  "docs/paper3/si_tab_chain.tex": "aff35df9d4c1cd7f55285d2b33789eed20f33d7c29576cd8715a18fa7a25468b",
+  "docs/paper3/si_tab_tscale.tex": "a2c1debda610efa6938dbe93342f7d83adde93f86c35b2d9cd4653acf0027767",
+  "docs/paper3/si_tab_syserr.tex": "061b694d243b1578f373cfea1568e5acd7009191ebbc6de081310f0edee51fad",
   "docs/paper3/figures/fig1_one_kilonova.pdf": "06588c4d895b6888a07fef9b44be792bf9c41803113228609dd35cfd0fa8ab8c",
   "docs/paper3/figures/fig1_one_kilonova.png": "fa8c0b0a5adaef509805db2669c7af7f19d3811ecb97bad9252a56e3a3d6159c",
   "docs/paper3/figures/fig2_grid.pdf": "00224c562df7ab3af1eb92ddc7c55fa9a36fc711b01cadfd8bc1ad67154e4ed0",
