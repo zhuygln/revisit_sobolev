@@ -127,7 +127,7 @@ paper3/        Paper III campaign: the reduced redistribution closure
 paper4/        Paper IV campaign: does the closure error survive
                energy-conserving transport? plan, review and gates as
                received; phases appear as they run -- see paper4/README.md
-tests/         419 tests pinning the physics of every module
+tests/         493 tests pinning the physics of every module
 docs/          results report, lab notebook, planning inputs, and one
                directory per manuscript: paper/ (Paper I), paper2/,
                paper3/ (the write-up half of paper3/ above)
@@ -142,7 +142,7 @@ Needs Python >= 3.10 and numpy >= 2, so a distro 3.8/3.9 will not do.
 ```bash
 python3 -m venv .venv              # or: conda create -p .venv python=3.12
 .venv/bin/python -m pip install -e ".[dev]" h5py
-.venv/bin/python -m pytest         # 419 passed (2026-09-09)
+.venv/bin/python -m pytest         # 493 passed (2026-09-09)
 ```
 
 Atomic data is not committed — see [data/README.md](data/README.md) for the

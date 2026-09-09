@@ -4146,7 +4146,7 @@ the second occurrence of the commit-10 failure. Restored (main text 2981 →
 # environment
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]" h5py
-pytest                    # 419 passed (2026-09-09)
+pytest                    # 493 passed (2026-09-09)
 
 # data (once): Zenodo 19335084 -> data/, see data/README.md
 # SEDONA (once): see lab_notebook.md "SEDONA build" entry

@@ -2669,6 +2669,89 @@ same-length edit through a stash.
 
 Suite: 419 passed (was 350; 69 golden cases).
 
+## 9ay. Energy packets, the downward macroatom, and what Ce II does to photon-number branching (2026-09-09)
+
+*The contract first.* Before any fluorescence test, `sobolev/energy_packets.py`
+states what a packet is -- (E_cm, nu_cm, nu_lab, mu, r, t) -- and the two
+invariants: E_cm conserved at every atomic interaction, E_lab conserved in
+free flight, the two joined by the local Doppler factor. Test 2A.0
+(`tests/test_energy_frames.py`) checks the factors against the analytic
+transformations, classical and worldline, and free flight / coherent
+scattering in the transport. The switch itself, `run_mc(packets="energy")`,
+rescales `w` by nu_abs,cm/nu_rest at re-emission; because the step loop
+never reads `w`, every photon-probability mode keeps its histories bit for
+bit (pinned per mode, both transports) -- the R1 -> R1^E rung is
+bookkeeping alone. The comoving deposit is then zero *by construction* (I
+do not accumulate a difference that would round to 1e-16; it is not
+accumulated at all), and E_dep_lab is the Doppler work.
+
+*The atom.* `sobolev/macroatom.py::DownwardMacroAtom` is the Lucy downward
+set with fixed populations: de-activate ~ A beta (eps_u - eps_l), internal
+jump ~ A beta eps_l, one global searchsorted on a per-level CSR key with the
+same exact correction as the branching sampler. Beta enters once: exits go
+straight out, never through the chain (the populated-level cascade test
+separates A beta from A beta^2 by > 10 sigma and the MC sits on the first).
+Named `dmacro` everywhere: no internal upward transitions until estimators
+exist. The three-level cascade reproduces the table's energy fractions and
+the *inferred* photon numbers N ~ E/(h nu) of 3->2 and 2->1 come out equal,
+which is the whole point of an indivisible packet -- it does not split.
+
+*Dead ends are physics, and they are 10 %.* La II has 14 levels with no
+downward E1 line in the data -- the 13 lowest even-parity levels
+(1016-12364 cm^-1, the ground term and the metastables) and one odd level.
+A downward walk that lands there cannot de-activate radiatively; 7 % of
+walks from La II's pumped levels do, 10 % of activations at grid density on
+Ce II (26 dead-end levels of 2829). First version absorbed them and the
+escaped fraction dropped 3 %. They are the E_stored / thermal term of the
+plan: in a fixed LTE atmosphere the metastable energy goes to the thermal
+pool and comes back as LTE line emission, so they are k-packets re-emitted
+from A n_u h nu beta (built lazily, so toys without emissivity never need
+it). `n_dead_end`, `n_kpackets` and `E_thermal` are reported per run.
+
+*Ce II at the grid's central density, 5,000 packets, worldline.*
+
+    leg                       wall    events/pkt  esc    core   E_dep,cm  work
+    sobolev_branch  photon   106 s      171       0.030  1.000   -0.183   +0.152
+    sobolev_branch  energy   106 s      171       0.016  0.883    0       +0.101
+    sobolev_dmacro  energy   1.9 s       32       0.080  0.838    0       +0.082
+    expansion_branch photon  0.1 s      2.4       0.826  0.638   -0.496   +0.032
+    expansion_dmacro energy  0.1 s      2.5       0.524  0.442    0       +0.034
+
+Photon-number branching *creates* energy here: the reference returns more
+to the core than it received (f_ret = 1.00 plus 3 % escaping), the
+expansion leg deposits minus half the injected energy. That is the number
+the PI's question is about. The downward macroatom closes the identity to
+1e-16, and is 56x cheaper than the chained reference because it never
+re-absorbs (171 -> 32 events per packet, 1991 -> 0 re-absorptions).
+
+*The re-emitting core.* `core="reemit"` relaunches returning packets with
+the energy-weighted Planck draw and the same lab energy; per band it agrees
+with `photometry._scale("equilibrium")` to the 4 sigma + 1 % criterion,
+classical and worldline. So the exact normalisation of an energy-conserving
+run is the geometric series already in the frozen photometry module,
+wrapped in `sobolev/energy_balance.py`, not edited. What Paper III's grey
+"conserving" scale would add on top is exactly W/E_esc -- the adiabatic
+loss -- which is physical and must not be re-radiated; I had first written
+the test to demand it be < 2 % and it failed at 2.4 % on a worldline shell
+at beta = 0.05 with many passes, correctly.
+
+*Two smaller lessons.* A launch band widened by 2 % on each side is not a
+small change on a shell whose beta is 0.3 %: most packets then never meet
+the line, and the "return fraction" I was trying to test was 1 %. And a
+deposited k-packet has no exit line; the first-branch tally must skip it
+(it indexed uninitialised memory -- an IndexError on the toy, silence on a
+real atom).
+
+*The cache.* `sobolev/atomic_cache.py` streams the six numbers the
+transport needs per line straight from the zip members in chunks (Tb II's
+1.08 GB of text never touches the disk), 36 B/line, and
+`ForestAtom.from_cached` is bit-identical to `from_gsi` on La II. The full
+La-Yb pattern is now loadable; whether it fits as an atom is the WP1
+memory gate.
+
+Suite: 493 passed (69 golden, 62 Paper IV energy/macroatom/core tests, 3
+cache tests).
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,
