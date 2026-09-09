@@ -152,6 +152,10 @@ def run_legs(zone, atom, n, legs=LADDER, seeds=SEEDS, ng=NG, relativity="worldli
         res = [mc(spec, s, collect_events=collect, **kw) for s in seeds]
         results[tag] = res
         o = photometer(observe(res, l_core, spec["scale"]), edges, nu_c, phot.D_40MPC)
+        # per-seed magnitudes: the Monte Carlo noise floor of this leg
+        per_seed = [photometer(observe([r], l_core, spec["scale"]), edges, nu_c, phot.D_40MPC)["mags"] for r in res]
+        o["mags_seed_std"] = {b: float(np.std([m[b] for m in per_seed], ddof=1)) if len(per_seed) > 1 else np.nan
+                              for b in o["mags"]}
         acc = [energy_accounting(r) for r in res]
         o["energy"] = {k: float(np.mean([a[k] for a in acc])) for k in acc[0] if k != "packets"}
         o["energy"]["packets"] = spec["packets"]

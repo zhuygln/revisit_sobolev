@@ -2807,6 +2807,45 @@ it cannot be re-read later.
 *Running.* All legs on P1 (2 d, shell 28, neighbours 27/29) and P2 (shell
 0, neighbours 1/2), 30k packets x 3 seeds, wall budget 5400 s per run.
 
+## 9ba. Gate 2: Green on the lanthanide-rich state, Red on the thin one, and the reference moved 2.5 mag (2026-09-09)
+
+*The ladder.* P1 at 2 d, shell 28, 3 x 3e5 packets, worldline. R1 -> R1E
+moves z by +1.43 mag and K by +0.50 -- pure bookkeeping, identical
+histories -- and R1E -> R2 by another +1.03 / +0.32 (the transition
+probabilities and the cascade). So photon-number branching had the
+*reference* 2.5 mag too bright in z. Then B2 - R2 = -2.88 (z), +1.27 (K):
+the closure error against the energy-conserving reference is as large as
+Paper III's or larger, same signs, and the kernel control A2 sits at 0.03
+with C2 within 0.05 of B2. Bolometrically B2 is 0.34 mag too bright under
+the exact scale: the resolved leg loses 10.5 % of the injected energy to
+adiabatic work, the grouped leg 5.6 %, and Paper III's common-L_bol
+harness had hidden exactly that. The verdict script says GREEN on the
+three P1 epochs with two live bands (1 d has only K above the depth mask;
+the model is faint at 40 Mpc, g = 26).
+
+*P2 says something different, and both are right.* The published 3.4-d
+line-forming region at X_LN = 2.5e-3 is thin -- 6322 opacity lines, tau_max
+2.2, S_band 8.6, 92 % escapes -- and there B2 - R2 is +0.19 mag in g, +0.12
+in r, nothing elsewhere, with the noise at 0.01 and A2 at 0.01. Opposite
+sign, one fifth the amplitude: the pre-declared rule reads RED (and the
+R1 - R2 norm is comparable to R1 - B1). This is F35/F40's boundary -- too
+opaque at low saturation, too transparent at high -- on published states
+rather than on a density scan. The combined verdict is GRAY by the letter,
+because the sign flips between states, and I have written it that way: the
+outcome is benchmark-dependent, and which side of the boundary AT2017gfo's
+line-forming region sits on is now a Phase 7 (ionization) question.
+
+*Flags I owe the record.* The adequacy trigger fired on P1: S_band in the
+neighbouring shells is 1.95x and 0.40x the zone's, so shells are a required
+check, not deferred forever. The 1/3/5 d rows are 3e4-packet runs (the
+signal is 50-100 sigma of the seed scatter, so the verdict stands); the 3e5
+reruns are running and will replace the files. And two inputs are still
+provisional.
+
+*Costs, for planning.* R1 (chained) 399 s per 3 x 3e5 packets on the
+375k-line zone; R2 66 s; every grouped leg < 10 s. The full pattern is not
+the problem the plan feared; the chain was.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

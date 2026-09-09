@@ -4022,6 +4022,155 @@ the second occurrence of the commit-10 failure. Restored (main text 2981 →
 3093 words), and `check_literals` now fails any line with text after
 `% literal-ok`.
 
+### 4.47 Paper IV, Phases 0–3: energy-conserving downward fluorescence on two published ejecta states, and Gate 2 (F50, F51, F52)
+
+Program: `paper4/plan.md` (as received 2026-09-09) and the PI's review
+`paper4/plan_review.md`; design decisions and the pre-declared gates in
+`paper4/README.md`. Code: `sobolev/energy_packets.py`, `sobolev/macroatom.py`,
+`sobolev/energy_balance.py`, `sobolev/atomic_cache.py`, `sobolev/ejecta.py`,
+`sobolev/abundances.py`; hooks in `paper2/phase1/forest_mc.py`
+(`packets`, `core`, the `*_dmacro` modes). Drivers:
+`paper4/phase1_benchmarks/build.py`, `paper4/phase2_energy/legs.py`,
+`paper4/phase3_legs/verdict.py`. Data: `paper4/phase1_benchmarks/P?_t*.json`,
+`paper4/phase2_energy/legs_*.json`, `paper4/phase3_legs/gate2_*.json`. Tests:
+`tests/test_golden_run_mc.py` (69), `test_energy_frames.py`,
+`test_energy_packets.py`, `test_macroatom.py`, `test_reemit_core.py`,
+`test_atomic_cache.py`, `test_ejecta.py`, `test_benchmarks.py`,
+`test_legs_driver.py`. Notebook §9ax–§9ba.
+
+#### 1. The question
+
+Every result from §4.19 to §4.45 was obtained with **photon-number-
+conserving branching**: a packet is one photon, a fluorescence 3800 → 8000 Å
+keeps its count and loses 52 % of its energy to a deposit that is never
+re-radiated, and each leg is then rescaled grey to the core's window
+luminosity (§4.39, `core="conserving"`). The closure legs interact less
+than the reference, so an unknown part of the 1–3 mag colour error of F43
+could be that bookkeeping. Paper IV asks whether the grouped-opacity error
+survives when both the resolved and the grouped calculation use the same
+energy-conserving atomic transport, in a coherent published ejecta state
+(**B₂ − R₂**, the PI's Gate 2 primary), before anything else is built.
+
+#### 2. The instrument (Phase 2)
+
+*Energy packets.* A packet is (E_cm, ν_cm, ν_lab, μ, r, t); its comoving
+energy w·hν_cm is conserved at every atomic interaction, its lab energy in
+free flight, the two joined by the local Doppler factor
+(`sobolev/energy_packets.py`, test 2A.0 analytic and in transport, classical
+and worldline). `run_mc(packets="energy")` rescales w by ν_abs,cm/ν_rest at
+re-emission. The step loop never reads w, so every photon-probability mode
+keeps its histories bit for bit (pinned per mode) — the **R₁ → R₁ᴱ** rung is
+bookkeeping alone. The comoving deposit is zero by construction; E_dep,lab
+is the Doppler work W.
+
+*The downward macroatom* (`sobolev/macroatom.py`, modes `*_dmacro`): Lucy's
+downward set with fixed LTE populations, de-activation ∝ A β (ε_u − ε_l),
+internal jump ∝ A β ε_l, per-level CSR tables with one exact global
+`searchsorted`; β enters once and exits never re-enter the chain (the
+populated-level cascade test separates A β from A β² by > 10 σ). No internal
+upward transitions until radiation-field estimators exist (WP8–10), and it
+is named for what it omits. Toy tests: two-level (coherent, energy
+conserved, no trapping at τ = 10³ with `chain_max = 1`), the 3 → 2 → 1
+cascade (energy fractions, **equal inferred photon numbers** N ∝ E/hν of the
+two cascade lines), the thermal channel. **Dead ends** — levels with no
+downward E1 line in the data: 14 of La II's 472 (the ground term and the
+metastables), 400 of the 83 018 levels of the 13-ion blend — are 7–10 % of
+activations; they are k-packets re-emitted from the net LTE emissivity
+A n_u hν β (the plan's stored/thermal term), counted per run.
+
+*Normalisation.* The geometric series `photometry._scale(core="equilibrium")`
+is exact for i.i.d. relaunches; `run_mc(core="reemit")` performs the
+relaunches and agrees with it per band to the 4 σ + 1 % criterion, classical
+and worldline. It is wrapped in `sobolev/energy_balance.py`; the frozen
+photometry module is untouched. What Paper III's grey "conserving" scale
+adds on top of it is exactly W/E_esc — the adiabatic loss, physical, not
+re-radiated.
+
+*Provenance.* SHA-256 of every `run_mc` mode's histories on two toy atoms,
+both transports (`tests/data/golden_run_mc.json`), taken at e858f6d before
+any transport edit and green after each; the CSR branching sampler (one
+global `searchsorted` in place of the per-level Python loop) is bit-identical
+on Ce II over 5×10⁵ interactions and 1.8× faster.
+
+#### 3. The states (Phase 1)
+
+`EjectaState` (`sobolev/ejecta.py`) carries a state per homologous shell;
+`check()` is Gate 1 (mass integral, composition and ion-stage sums);
+`local_zone()` is the PI's single-zone reduction — the shell containing
+τ_grey = 2/3, its own state, never a mass-weighted mean.
+
+| | P1 | P2 |
+|---|---|---|
+| source | xkn RT-comparison **secular** component, Ricigliano et al. 2024 §5.2, eq. 25 | Gillanders et al. 2026 3.4-d AT2017gfo model, Table 3 |
+| pinned | M = 2.64×10⁻² M☉, v_rms = 0.06c → v_max = 0.1149c of ρ ∝ (1 − x²)³, Y_e = 0.20, s = 10, τ ≈ 17 ms | t = 3.4 d, 0.15–0.35c, ρ₀ = 4×10⁻¹⁵ at t₀ = 2 d, v₀ = 14 000 km s⁻¹, ρ ∝ v⁻³, T = 3200 K, X_LN = 2.5×10⁻³ |
+| zone | shell with τ_grey = 2/3 at κ = 10: v = 0.094–0.104c, T = 4411/3401/2987/2341 K at 1/2/3/5 d | the published inner boundary |
+| provisional | X_lan = 0.10, pattern `solar_r` | pattern `solar_r` (Ye−0.29a list in the 2022 supplement) |
+
+The lanthanide pattern is the solar r-process residual by mass (Prantzos et
+al. 2020 Table 4): Dy, Nd and Gd carry 46 % of the mass, Ce 7 %, La 4 %.
+All 13 La–Yb II ions (19.8 M lines) come from `sobolev/atomic_cache.py`; the
+blend atom with its macroatom tables is 4.7 GB and builds in 10 s (memory
+gate passed, no table cut needed). Gate 1: `tests/test_benchmarks.py`.
+
+#### 4. The ladder on P1 at 2 d (3 × 3×10⁵ packets, worldline, exact scale for the energy legs)
+
+**F50 — Photon-number branching mis-states the energy-conserving reference by 1–2.5 mag, and at grid density it creates energy.** On P1's zone (375k opacity lines, τ_max = 7200, band saturation S = 2.9×10⁴):
+
+| leg | mode | dm − R₂ (z) | dm − R₂ (K) | E_dep,cm/E_inj | W/E_inj | cost |
+|---|---|---|---|---|---|---|
+| R₁ | sobolev_branch, photon, grey | −2.47 | −0.81 | +0.003 | 0.124 | 399 s |
+| R₁ᴱ | sobolev_branch, energy | −1.03 | −0.32 | 0 | 0.118 | 422 s |
+| **R₂** | sobolev_dmacro, energy | 0 | 0 | 0 | 0.105 | 66 s |
+| B₁ | expansion_branch, photon, grey | −2.96 | +1.61 | −0.50 (Ce II at grid density) | | 9 s |
+| B₂ | expansion_dmacro, energy | **−2.88** | **+1.27** | 0 | 0.056 | 9 s |
+
+The ladder per band — bookkeeping (R₁ᴱ − R₁) / probabilities (R₂ − R₁ᴱ) /
+opacity (B₂ − R₂): z +1.43 / +1.03 / −2.88; K +0.50 / +0.32 / +1.27. The
+energy treatment moves the *reference* by 2.5 mag in z; the closure error
+measured against the energy-conserving reference is larger than Paper
+III's, not smaller. On Ce II alone at the grid's central density the photon
+legs' comoving deposit is **−0.18** (resolved) and **−0.50** (expansion) of
+the injected energy: they create it. The downward macroatom closes the
+identity to 10⁻¹⁶ and, having no re-absorption chain, costs 6× less than the
+chained reference here and 56× less on Ce II (171 → 32 events per packet).
+
+#### 5. Gate 2 (Phase 3)
+
+**Gate 2, pre-declared** (`paper4/README.md`): primary B₂ − R₂, controls
+A₂ − R₂ and C₂ − R₂, live bands by the Paper III mask on R₂ at 40 Mpc;
+Green needs |Δm_B₂| ≥ 0.5 mag in ≥ 2 live bands at ≥ 2 epochs, |Δm_A₂| ≤ 0.1
+everywhere and the blue-brighter / red-fainter pattern on the bluest and
+reddest live bands; Red needs max |Δm_B₂| < 0.2 mag and ‖R₁ − R₂‖ > ½ ‖R₁ − B₁‖;
+Gray is anything else.
+
+| state | live bands | Δm_B₂ (live) | max Δm_A₂ | max |C₂ − B₂| | verdict |
+|---|---|---|---|---|---|
+| P1, 1 d | K | K +1.13 | 0.015 | 0.04 | |
+| P1, 2 d | z, K | z −2.88, K +1.27 | 0.035 | 0.05 | |
+| P1, 3 d | z, K | z −2.71, K +0.94 | 0.043 | 0.07 | |
+| P1, 5 d | z, H, K | z −2.24, H −0.33, K +0.92 | 0.058 | 0.08 | |
+| **P1** | | | | | **Green** (3 epochs) |
+| P2, 3.4 d | g r i z J H K | g +0.19, r +0.12, rest ≤ 0.01 | 0.010 | 0.01 | **Red** |
+| P1 + P2 | | | | | Gray (the sign flips between states) |
+
+**F51 — Gate 2 is Green on the lanthanide-rich published state: the grouped-opacity error survives energy-conserving downward fluorescence, larger than before, and redistribution still compresses.** At every P1 epoch B₂ is 2.2–2.9 mag too bright in z and 0.9–1.3 mag too faint in K (all bands at 2 d: g −4.65, r −3.77, i −3.41, z −2.88, J −1.79, H −0.47, K +1.27), against a redistribution control ≤ 0.06 mag (seed scatter 0.02–0.04) and C₂ within 0.08 mag of B₂: **opacity coarse-graining is the culprit, the kernel is not**. Under the exact scale the closure is also 0.34 mag too bright bolometrically, because the resolved leg loses 10.5 % of the injected energy to adiabatic work against the grouped leg's 5.6 % — a difference Paper III's common-L_bol harness could not show. P1 is faint at 40 Mpc (R₂: g 26.1, z 23.2, K 20.5 at 2 d), so only z and K (and H at 5 d) pass the depth mask.
+
+**F52 — On the published AT2017gfo 3.4-d state the closure error is 0.19 mag with the opposite sign, and Gate 2 reads Red there: the sign change of F35/F40 is re-found on published states.** P2's line-forming region at X_LN = 2.5×10⁻³, ρ = 2.4×10⁻¹⁷ g cm⁻³ and 3200 K with every lanthanide singly ionised has 6322 opacity lines, τ_max = 2.2, S_band = 8.6, and lets 92 % of the injected energy out: B₂ − R₂ = +0.19 (g), +0.12 (r), ≤ 0.01 elsewhere (noise 0.01), A₂ 0.01, and ‖R₁ − R₂‖ = 0.17 against ‖R₁ − B₁‖ = 0.28. The verdict is therefore **benchmark-dependent** — Green where the ejecta are lanthanide-rich, Red where the published state is line-thin — which is Paper III's saturation boundary (too opaque at low S, too transparent at high S) and not a contradiction of it; the combined run reads Gray by the letter of the rule because of that sign flip. Whether P2's thinness is the published model's physics or our II-only LTE populations is Phase 7's question.
+
+*Pre-declared flags.* The single-zone **adequacy trigger fires on P1**: band saturation in the neighbouring shells is 1.95× (inner) and 0.40× (outer) the zone's, outside 0.5–2 on the outer side, so the deferred shell-resolved transport is now a required robustness check, not an option. The 1, 3 and 5 d P1 rows are 3 × 3×10⁴ packets (their B₂ − R₂ is 50–100 σ of the seed scatter); 3×10⁵ reruns are in progress and replace the files when done. Two inputs are provisional (P1's X_lan, both patterns).
+
+#### 6. What Gate 2 settles, and does not
+
+Settles: the Paper III closure error is not an artefact of photon-number
+bookkeeping — under energy-conserving fluorescence on a coherent
+lanthanide-rich state it is as large or larger, with the same sign pattern
+and the same compressibility of redistribution. Does not settle: the
+amplitude on an observed kilonova, which P2 says depends on where the
+line-forming region sits in saturation; the ionization state (II only);
+the shell structure (single zone, adequacy trigger fired); the thermal
+state (fixed atmosphere). Phases 4–7 proceed on the Green; Phases 8–10 are
+now justified by the plan's own rule.
+
 ## 5. Findings register
 
 | # | Finding | Where |
@@ -4075,6 +4224,9 @@ the second occurrence of the commit-10 failure. Restored (main text 2981 →
 | F47 | **The Planck temperature proxy of T2 is validated as a *gas*-temperature direction (cosine 0.92 with the measured transport response at the central point, 0.96–1.00 per epoch) with a lever arm 1.35× (2× at ≤ 1 d) larger than assumed; the illumination temperature alone does not reach the observer (a ×1.5625 change in the launch temperature moves no live band by more than the 0.13 mag noise floor, ‖d_T^MC‖ = 0.06 of the proxy); and the central point stays C-B with the measured direction (R 0.37, χ²_res/dof 46–49).** The closure residual is not a photospheric-temperature error. Four model runs (`--t-scale 0.8/1.25`, with and without `--t-scale-gas`), `tscale.py`, fig7. | §4.43 |
 | F48 | **With the grid complete (162 of 162 cells; nine early X = 0.1 epochs redone at a 5400 s budget), Gate 2 is C-B at 27 of 27 points (median R 0.83, χ²_res/dof 118) and Gate 3 at 26/26, 18/18, 25/25 eligible points under the ejecta parameters; a free luminosity history absorbs the residual at 8 of 9 lanthanide-poor points and 0 of 9 lanthanide-rich ones, and at real errors the residual survives that history at 16 of 17 `dense` X ≥ 10⁻² points.** The redone cells are the noisiest in the grid (A_redist floor 0.13–0.53 mag) and change no F43 number; 195 of 199 live NIR colour errors are negative. Chain cap (four worst-trapped cells, 2000 → 8000): per-band changes of 0.14–0.21 mag, equal to the reference's own shift and the cells' noise floor, non-monotone in the cap; signs kept at 12 of 12 C_both colours, the < 25 % magnitude criterion met at only 4 of 12 (the 0.1–0.45 mag colours fail it), class C-B kept at all 27 points (largest move R 0.82 → 0.56 at (0.01, 0.05, 0.1)); grid medians R 0.83, χ²_res/dof 116. Supersedes the counts of F44–F46. | §4.44 |
 | F49 | **The closure error is a coherent, signed, one-mode pattern the size of the σ_sys allowance:** C_both exceeds 0.5 mag at 56 % of 524 live observables (18 % beyond 1 mag), (g < 0, K > 0) at 39/39 coepochal pairs, 0.80 of its squared norm in one band-epoch mode against a 0.33 sign-scrambled null and 0.31 for A_redist; median χ²/N 0.56 against a 1 mag allowance, 2.26 against 0.5 mag. A consistency statement about the closure experiment, not a claim about any published fit | §4.45 |
+| F50 | **Photon-number branching mis-states the energy-conserving reference by 1–2.5 mag, and at grid density it creates energy.** On P1 at 2 d the ladder R₁ → R₁ᴱ → R₂ moves z by +1.43 (bookkeeping) + 1.03 (transition probabilities) mag and K by +0.50 + 0.32; on Ce II at the grid's central density the photon legs' comoving deposit is −0.18 (resolved) and −0.50 (expansion) of the injected energy. The downward macroatom closes the identity to 10⁻¹⁶ and costs 6–56× less than the chained reference | §4.47 |
+| F51 | **Gate 2 Green on the lanthanide-rich published state (P1, xkn secular component): the grouped-opacity error survives energy-conserving downward fluorescence.** B₂ − R₂ = −2.2 to −2.9 mag in z and +0.9 to +1.3 in K at 1–5 d (all bands at 2 d: g −4.65 … K +1.27), the redistribution control ≤ 0.06 mag, C₂ within 0.08 mag of B₂ — opacity is the culprit, the kernel compresses; the closure is also 0.34 mag too bright bolometrically because the resolved leg loses twice the adiabatic work | §4.47 |
+| F52 | **On the published AT2017gfo 3.4-d state (P2, X_LN = 2.5×10⁻³, S_band = 8.6) the closure error is +0.19 mag in g with the opposite sign and Gate 2 reads Red; the F35/F40 sign change is re-found on published states.** The verdict is benchmark-dependent; the single-zone adequacy trigger fires on P1 (neighbour saturation 0.40–1.95×), so shell-resolved transport is a required check | §4.47 |
 
 ## 6. Caveats and limitations
 
@@ -4139,6 +4291,17 @@ the second occurrence of the commit-10 failure. Restored (main text 2981 →
   T-scale validation is one grid point and a finite difference. The nuisance
   spaces are underdetermined at the sparse points (dof < 4 under T3 at 1 of
   27 on the complete grid, more under the `sparse`/`optical` scenarios).
+
+
+*Paper IV (2026-09-09).* F50–F52 stand on a fixed atmosphere (LTE at the
+shell's T, every lanthanide singly ionised), a single zone (the local
+τ_grey = 2/3 shell; the adequacy trigger fired on P1), a downward macroatom
+without internal upward transitions, and two provisional inputs — P1's
+lanthanide fraction (0.10) and the solar r-process pattern standing in for
+both models' own lanthanide lists. P1's luminosity is `SourceModel`'s
+diffusion solution at κ = 10, not the xkn light curve, which is why the
+model is faint at 40 Mpc and only z/K pass the depth mask. The 1, 3 and 5 d
+P1 rows are 3×10⁴-packet runs until the 3×10⁵ reruns land.
 
 ## 7. Reproduction
 
@@ -4220,6 +4383,12 @@ python paper3/phase12_grid/run_grid.py --merge-redo                  # then reru
 # Paper III, the freeze (section 4.45): every derived JSON, table and figure from the committed transport outputs
 python paper3/freeze.py                        # ~75 s; writes paper3/FROZEN.json (hashes + the 146 headline numbers)
 python paper3/freeze.py --check --strict       # four tiers: inputs, outputs, numeric regeneration, headline; exit 0 on the tag paper3-freeze
+
+# Paper IV (sec 4.47): states, ladder + legs, Gate 2 -- ~10 min for P2, ~20 min per P1 epoch at 3e5 packets
+python paper4/phase1_benchmarks/build.py                       # P1_t{1,2,3,5}.json, P2_t3.4.json, gate1_*.png
+python paper4/phase2_energy/legs.py paper4/phase1_benchmarks/P1_t2.json --legs all --n 300000 --neighbours 27,29 --out paper4/phase2_energy/legs_P1_t2_s28_n300k.json
+python paper4/phase2_energy/legs.py paper4/phase1_benchmarks/P2_t3.4.json --legs all --n 300000 --neighbours 1,2 --out paper4/phase2_energy/legs_P2_t3.4_s0_n300k.json
+python paper4/phase3_legs/verdict.py paper4/phase2_energy/legs_P1_*.json --out paper4/phase3_legs/gate2_P1.json
 python paper3/phase12_grid/syserr.py           # syserr.json and the section 4.45.3 table
 python paper3/phase12_grid/grid_table.py --which all   # tables with value ± floor and the trapped fraction
 python paper3/phase12_grid/robustness.py table          # chain-cap table from robustness/chain_table.json
@@ -4236,6 +4405,14 @@ directory, which silently breaks relative `../../.venv/bin/python`
 invocations (exit 127) and kills in-flight runs.
 
 ## 8. Next steps (in rough order of value)
+
+**Paper IV (after §4.47, Gate 2 Green on P1):** the 3×10⁵ reruns of P1 at
+1/3/5 d; the neighbouring-shell robustness runs the adequacy trigger
+demands; Phase 4 (the Fontes-like thermal limit with the binned leg), Phase
+5 (the dual-role Morag-type closure), Phase 6 (convergence in τ_min, bin
+width, packets, table cut), Phase 7 (Saha II/III — the P2 question); then
+shells, estimators, the full macroatom and **B_eq − R_eq** (Phases 8–10).
+PI decisions pending: P1's X_lan and both lanthanide patterns.
 
 Completed since the first draft of this report: the T sweep and thermal-width
 frontier (§4.9), multi-ion overlap (§4.10), the per-line Sobolev leg (§4.12)

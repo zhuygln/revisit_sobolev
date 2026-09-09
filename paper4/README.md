@@ -29,6 +29,19 @@ and, only if that survives, after radiative equilibrium,
 > Does that difference survive when each transport treatment establishes
 > its own self-consistent thermal and ionization structure?  **(B_eq − R_eq)**
 
+## Where it stands (2026-09-09)
+
+Phases 0–3 ran the day the plan arrived (`docs/results_report.md` §4.47,
+F50–F52; notebook §9ax–§9ba). Gate 2 on P1, the xkn secular component,
+is **Green**: B₂ − R₂ = −2.2 to −2.9 mag in z and +0.9 to +1.3 mag in K at
+1–5 d, the redistribution control ≤ 0.06 mag, C₂ within 0.08 mag of B₂.
+On P2, the published AT2017gfo 3.4-d state, it is **Red** — +0.19 mag in g
+with the opposite sign — which is Paper III's saturation boundary
+re-found on published states, not a contradiction; the combined verdict
+is Gray by the letter of the rule. The single-zone adequacy trigger fired
+on P1, so shell-resolved transport is a required check. Photon-number
+branching moved the *reference* by 2.5 mag in z (F50). Phases 4–7 proceed.
+
 ## Design decisions taken in implementation
 
 (Recorded here because the plan and its review leave them to the

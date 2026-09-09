@@ -78,7 +78,14 @@ def analyse(rows):
         if "B2" in L:
             d["max_B2"] = max((abs(v) for v in d["dm_B2"].values()), default=np.nan)
             d["n_B2_big"] = sum(abs(v) >= THRESH["green_mag"] for v in d["dm_B2"].values())
-            d["sign_ok"] = (d["dm_B2"].get("g", 0.0) < 0) and (d["dm_B2"].get("K", 0.0) > 0) if {"g", "K"} <= set(live) else None
+            # the sign pattern on the bluest and reddest LIVE bands: blue
+            # brighter (dm < 0), red fainter (dm > 0) -- Paper III's g/K pattern
+            # read on whatever bands the depth limit leaves
+            if len(live) >= 2:
+                d["sign_bands"] = (live[0], live[-1])
+                d["sign_ok"] = bool(d["dm_B2"][live[0]] < 0 and d["dm_B2"][live[-1]] > 0)
+            else:
+                d["sign_ok"] = None
         if "A2" in L:
             d["max_A2"] = max((abs(v) for v in d["dm_A2"].values()), default=np.nan)
         if "C2" in L and "B2" in L:
@@ -135,7 +142,7 @@ def main():
             print("   ladder (bookkeeping / probabilities / opacity):")
             for b, l in d["ladder"].items():
                 print(f"     {b}: {l['bookkeeping']:+.2f} / {l['probabilities']:+.2f} / {l['opacity']:+.2f}")
-        for k in ("max_B2", "max_A2", "C2_minus_B2_max", "norm_R1_R2", "norm_R1_B1", "sign_ok"):
+        for k in ("max_B2", "max_A2", "C2_minus_B2_max", "norm_R1_R2", "norm_R1_B1", "sign_bands", "sign_ok"):
             if k in d:
                 print(f"   {k} = {d[k]}")
     v, why = verdict(per)
