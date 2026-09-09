@@ -172,18 +172,29 @@ class ForestAtom:
         self.op_p = -np.expm1(-self.op_tau)       # interaction probability
 
         # branching tables: for every upper level that any opacity line feeds,
-        # the downward lines (ALL of them) and cumulative A
+        # the downward lines (ALL of them) and cumulative A. Stored CSR by
+        # level (Paper IV WP0): `br_perm` lists the lines grouped by upper
+        # level in ascending line order, `br_off` the segment offsets, and
+        # `br_cum_A` the within-segment cumulative A. The per-level dicts
+        # `branch_lines` / `branch_cum` / `exit_cum` are lazy views of these.
         self.nu0_all = nu0; self.A_all = A; self.upper_all = upper; self.lower_all = lower
         self.level_energy_cm = None   # set by from_gsi (or by hand) for the level-energy identity
-        self.branch_lines = {}
-        self.branch_cum = {}
-        for u in np.unique(self.op_upper):
-            idx = np.flatnonzero(upper == u)
-            a = A[idx]
+        levels = np.unique(self.op_upper)
+        order_u = np.argsort(upper, kind="stable")     # groups by upper, line order kept
+        u_sorted = upper[order_u]
+        fed = np.isin(u_sorted, levels)
+        self.br_levels = levels
+        self.br_perm = order_u[fed]
+        self.br_off = np.searchsorted(u_sorted[fed], np.concatenate([levels, [levels[-1] + 1]]) if levels.size
+                                      else np.array([0]))
+        self.br_cum_A = np.empty(self.br_perm.size)
+        for k in range(levels.size):
+            a = A[self.br_perm[self.br_off[k]:self.br_off[k + 1]]]
             if a.sum() <= 0:
-                raise ValueError(f"upper level {u} has no downward rate")
-            self.branch_lines[u] = idx
-            self.branch_cum[u] = np.cumsum(a / a.sum())
+                raise ValueError(f"upper level {levels[k]} has no downward rate")
+            self.br_cum_A[self.br_off[k]:self.br_off[k + 1]] = np.cumsum(a / a.sum())
+        self._br_rank = np.repeat(np.arange(levels.size, dtype=float), np.diff(self.br_off))
+        self.br_key_A = self._br_rank + self.br_cum_A
 
         # thermal (LTE) line emissivity, photon-number weighted: A n_u
         w = A * n_upper
@@ -200,10 +211,64 @@ class ForestAtom:
         # Exit kernel (E8): the chain of A-branching draws with re-absorption
         # by the emitting line exits through j with probability
         # A_uj beta_uj / sum_m A_um beta_um -- the closed form of the loop.
-        self.exit_cum = {}
-        for u, idx in self.branch_lines.items():
-            w_exit = A[idx] * self.beta_all[idx]
-            self.exit_cum[u] = np.cumsum(w_exit / w_exit.sum())
+        self.br_cum_Ab = np.empty(self.br_perm.size)
+        for k in range(levels.size):
+            seg = self.br_perm[self.br_off[k]:self.br_off[k + 1]]
+            w_exit = A[seg] * self.beta_all[seg]
+            self.br_cum_Ab[self.br_off[k]:self.br_off[k + 1]] = np.cumsum(w_exit / w_exit.sum())
+        self.br_key_Ab = self._br_rank + self.br_cum_Ab
+        self._branch_views = {}
+
+    # ---- branching tables ------------------------------------------------
+    def _view(self, name, cum=None):
+        if name not in self._branch_views:
+            d = {}
+            for k, u in enumerate(self.br_levels):
+                seg = slice(self.br_off[k], self.br_off[k + 1])
+                d[int(u)] = self.br_perm[seg] if cum is None else cum[seg]
+            self._branch_views[name] = d
+        return self._branch_views[name]
+
+    @property
+    def branch_lines(self):
+        """{upper level: downward line indices} (view of the CSR tables)."""
+        return self._view("lines")
+
+    @property
+    def branch_cum(self):
+        """{upper level: cumulative A / sum A} (view of the CSR tables)."""
+        return self._view("cum_A", self.br_cum_A)
+
+    @property
+    def exit_cum(self):
+        """{upper level: cumulative A beta / sum A beta} (view)."""
+        return self._view("cum_Ab", self.br_cum_Ab)
+
+    def sample_branch(self, u_levels, v, key="A"):
+        """Downward line for each packet sitting in upper level `u_levels[i]`
+        with uniform draw `v[i]`: the first line in the level's segment whose
+        cumulative weight is >= v (searchsorted 'left'), exactly what the
+        per-level `np.searchsorted(branch_cum[u], v)` returned.
+
+        One global searchsorted on the monotone key `rank(u) + cum` replaces
+        the Python loop over unique levels (Paper IV WP0: that loop was the
+        per-step cost driver, ~10 us per level). Adding the rank can round
+        `cum` and `v` onto the same double, so the global answer is corrected
+        against the within-segment cumulative afterwards -- the result is
+        bit-identical to the per-level draw, not just statistically equal.
+        """
+        cum, keyarr = (self.br_cum_A, self.br_key_A) if key == "A" else (self.br_cum_Ab, self.br_key_Ab)
+        rank = np.searchsorted(self.br_levels, u_levels)
+        lo = self.br_off[rank]; hi = self.br_off[rank + 1] - 1
+        i = np.clip(np.searchsorted(keyarr, rank + v, side="left"), lo, hi)
+        for _ in range(8):
+            down = (i > lo) & (cum[np.maximum(i - 1, 0)] >= v)
+            i = np.where(down, i - 1, i)
+            up = (i < hi) & (cum[i] < v)
+            i = np.where(up, i + 1, i)
+            if not (down.any() or up.any()):
+                break
+        return self.br_perm[i]
 
     @classmethod
     def from_gsi(cls, levels_path, transitions_path, temperature, n_ion, t_exp,
@@ -780,18 +845,10 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
                 break
             if outcome == "branch":
                 if sobolev:
-                    u = rng.uniform(size=todo.size)
-                    for uval in np.unique(cur_up[todo]):
-                        m = cur_up[todo] == uval; sel = todo[m]
-                        lines_u = atom.branch_lines[uval]; cum_u = atom.branch_cum[uval]
-                        new_line[sel] = lines_u[np.searchsorted(cum_u, u[m])]
+                    new_line[todo] = atom.sample_branch(cur_up[todo], rng.uniform(size=todo.size), "A")
                 else:
                     # exit by the A*beta kernel: the chain in closed form
-                    u = rng.uniform(size=todo.size)
-                    for uval in np.unique(cur_up[todo]):
-                        m = cur_up[todo] == uval; sel = todo[m]
-                        lines_u = atom.branch_lines[uval]; cum_u = atom.exit_cum[uval]
-                        new_line[sel] = lines_u[np.searchsorted(cum_u, u[m])]
+                    new_line[todo] = atom.sample_branch(cur_up[todo], rng.uniform(size=todo.size), "Ab")
             elif outcome == "tla":
                 th = rng.uniform(size=todo.size) < eps
                 if sobolev:
