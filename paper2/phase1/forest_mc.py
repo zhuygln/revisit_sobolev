@@ -555,7 +555,7 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
            kernel=None, collect_events=False, line_memory=False,
            chain_max=10000, chain_overflow="raise", wall_s=None,
            packets="photon", core="absorb", core_max_passes=200,
-           eps_k=0.0, thermal_k="reemit", a_cut=None):
+           eps_k=0.0, thermal_k="reemit", a_cut=None, reprocess=None, tau_cap=None):
     """Paper IV keywords (all inert at their defaults; the histories of every
     Paper II/III mode are pinned bit-for-bit by tests/test_golden_run_mc.py):
 
@@ -582,6 +582,16 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
         booked as deposit ("deposit": fate 3, E_abs) or re-emitted with the
         same energy from the net energy emissivity A n_u h nu beta ("reemit").
     a_cut : the macroatom table cut (sobolev/macroatom.py).
+    reprocess : None (every leg so far) or "capped" -- Paper IV's dual-role
+        closure D on the bin legs (Morag 2026, MNRAS 549, stag938, our
+        reading: sobolev/energy_balance.py::capped_reprocessing). The bin
+        grid keeps deciding WHERE a packet interacts (EP93's mean free path);
+        at an interaction the packet exchanges energy with the atom (the
+        outcome: macroatom, thermal) only with the bin's probability
+        p_b = min(1, sum_l min(tau_l, tau_cap) / sum_l w_l), w_l the bin's
+        survival weight, and otherwise scatters coherently. tau_cap defaults
+        to the bin width dnu/nu, Morag's 1/(rho c t_exp) in the bin's tau
+        units (eq. 3). Draws one uniform per interaction; inert when None.
 
     wall_s : optional wall-clock limit in seconds, checked every 50 steps;
     exceeding it raises RuntimeError("wall ...") so a caller can abandon a
@@ -665,6 +675,8 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
     outcome = mode.split("_")[1]
     if outcome == "dmacro" and not energy:
         raise ValueError("the downward macroatom carries indivisible energy packets: packets='energy'")
+    if reprocess is not None and (sobolev or outcome not in ("dmacro", "thermal")):
+        raise ValueError("reprocess='capped' is a bin-leg closure for the dmacro/thermal outcomes")
     dm = atom.dmacro(a_cut) if outcome == "dmacro" else None
     # the k-packet sampler (thermal channel and dead-end levels) is built on
     # first use, so a toy atom with no emissivity and no dead ends never needs it
@@ -685,6 +697,11 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
         # G is piecewise linear in nu inside each bin.
         G_edges = np.concatenate([[0.0], np.cumsum(E[::-1])])[::-1]   # G at each edge, top = 0
         width = np.diff(edges)
+        if reprocess is not None:
+            if reprocess != "capped":
+                raise ValueError(f"reprocess must be None or 'capped', got {reprocess!r}")
+            from sobolev.energy_balance import capped_reprocessing
+            p_rep = capped_reprocessing(atom, edges, E, dnu_over_nu if tau_cap is None else tau_cap)
         if needs_thermal and exp_emit == "bin":
             # Kirchhoff for the closure's OWN opacity: emissivity per bin is
             # kappa_exp(b) B_nu(T) -- photon-number weight E_b * B_nu/(h nu) --
@@ -997,6 +1014,11 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
         bin_emit = not sobolev and exp_emit == "bin"   # expansion legs: thermal draws are bins
         is_bin = np.zeros(hi.size, bool)               # which entries of new_line are bin ids
         coherent = np.zeros(hi.size, bool)             # expansion tla: coherent scatter
+        if reprocess is not None:
+            # dual-role closure: exchange energy with the atom only with the
+            # bin's capped net-absorption probability, else scatter coherently
+            b_rep = np.clip(np.searchsorted(edges, nu_abs_cm, side="right") - 1, 0, E.size - 1)
+            coherent[:] = rng.uniform(size=hi.size) >= p_rep[b_rep]
         if outcome in ("branch", "dmacro") and sobolev:
             cur_up = atom.op_upper[kc[hit]].copy()
         if outcome == "tla" and sobolev:
@@ -1027,12 +1049,13 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
             elif outcome == "dmacro":
                 # the downward macroatom: one walk per activation, exits by
                 # the A beta eps tables (beta inside), no chain afterwards
-                kp = (rng.uniform(size=todo.size) < eps_k) if eps_k > 0 else np.zeros(todo.size, bool)
-                walkers = todo[~kp]
+                act = todo[~coherent[todo]]            # coherent scatterers skip the atom
+                kp = (rng.uniform(size=act.size) < eps_k) if eps_k > 0 else np.zeros(act.size, bool)
+                walkers = act[~kp]
                 ex, _nj, dead = dm.walk(cur_up[walkers], rng)
                 new_line[walkers] = ex
                 n_dead_end += int(dead.sum())
-                kp_idx = np.concatenate([todo[kp], walkers[dead]])
+                kp_idx = np.concatenate([act[kp], walkers[dead]])
                 if kp_idx.size:
                     n_kpackets += kp_idx.size
                     e_thermal += float(np.sum(w_before[kp_idx] * H * nu_abs_cm[kp_idx]))
@@ -1058,9 +1081,11 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
                         else:
                             new_line[todo[th]] = thermal(rng.uniform(size=th.sum()))
             elif thermal is not None:  # thermal, line-based (Sobolev legs, or exp_emit="line")
-                new_line[todo] = thermal(rng.uniform(size=todo.size))
+                act = todo[~coherent[todo]]
+                new_line[act] = thermal(rng.uniform(size=act.size))
             else:  # expansion + thermal, bin-based
-                new_line[todo] = thermal_bin(rng.uniform(size=todo.size)); is_bin[todo] = True
+                act = todo[~coherent[todo]]
+                new_line[act] = thermal_bin(rng.uniform(size=act.size)); is_bin[act] = True
             if n_chain == 1:
                 ok = first & ~is_bin & ~coherent & (new_line >= 0)
                 np.add.at(first_branch, new_line[ok], 1)

@@ -4134,7 +4134,7 @@ the injected energy: they create it. The downward macroatom closes the
 identity to 10⁻¹⁶ and, having no re-absorption chain, costs 6× less than the
 chained reference here and 56× less on Ce II (171 → 32 events per packet).
 
-#### 5. Gate 2 (Phase 3)
+#### 5. Gate 2 (Phase 3; every row 3 × 3×10⁵ packets)
 
 **Gate 2, pre-declared** (`paper4/README.md`): primary B₂ − R₂, controls
 A₂ − R₂ and C₂ − R₂, live bands by the Paper III mask on R₂ at 40 Mpc;
@@ -4145,19 +4145,19 @@ Gray is anything else.
 
 | state | live bands | Δm_B₂ (live) | max Δm_A₂ | max |C₂ − B₂| | verdict |
 |---|---|---|---|---|---|
-| P1, 1 d | K | K +1.13 | 0.015 | 0.04 | |
+| P1, 1 d | K | K +1.22 | 0.002 | 0.01 | |
 | P1, 2 d | z, K | z −2.88, K +1.27 | 0.035 | 0.05 | |
-| P1, 3 d | z, K | z −2.71, K +0.94 | 0.043 | 0.07 | |
-| P1, 5 d | z, H, K | z −2.24, H −0.33, K +0.92 | 0.058 | 0.08 | |
+| P1, 3 d | z, K | z −2.74, K +1.02 | 0.055 | 0.07 | |
+| P1, 5 d | z, H, K | z −2.24, H −0.36, K +0.95 | 0.020 | 0.10 | |
 | **P1** | | | | | **Green** (3 epochs) |
 | P2, 3.4 d | g r i z J H K | g +0.19, r +0.12, rest ≤ 0.01 | 0.010 | 0.01 | **Red** |
 | P1 + P2 | | | | | Gray (the sign flips between states) |
 
-**F51 — Gate 2 is Green on the lanthanide-rich published state: the grouped-opacity error survives energy-conserving downward fluorescence, larger than before, and redistribution still compresses.** At every P1 epoch B₂ is 2.2–2.9 mag too bright in z and 0.9–1.3 mag too faint in K (all bands at 2 d: g −4.65, r −3.77, i −3.41, z −2.88, J −1.79, H −0.47, K +1.27), against a redistribution control ≤ 0.06 mag (seed scatter 0.02–0.04) and C₂ within 0.08 mag of B₂: **opacity coarse-graining is the culprit, the kernel is not**. Under the exact scale the closure is also 0.34 mag too bright bolometrically, because the resolved leg loses 10.5 % of the injected energy to adiabatic work against the grouped leg's 5.6 % — a difference Paper III's common-L_bol harness could not show. P1 is faint at 40 Mpc (R₂: g 26.1, z 23.2, K 20.5 at 2 d), so only z and K (and H at 5 d) pass the depth mask.
+**F51 — Gate 2 is Green on the lanthanide-rich published state: the grouped-opacity error survives energy-conserving downward fluorescence, larger than before, and redistribution still compresses.** At every P1 epoch B₂ is 2.2–2.9 mag too bright in z and 1.0–1.3 mag too faint in K (all bands at 2 d: g −4.65, r −3.77, i −3.41, z −2.88, J −1.79, H −0.47, K +1.27; g runs −4.5 to −5.0 at 1–5 d), against a redistribution control ≤ 0.06 mag (seed scatter 0.02–0.04) and C₂ within 0.10 mag of B₂: **opacity coarse-graining is the culprit, the kernel is not**. Under the exact scale the closure is also 0.14–0.51 mag too bright bolometrically (0.34 at 2 d), because the resolved leg loses 10.5 % of the injected energy to adiabatic work against the grouped leg's 5.6 % — a difference Paper III's common-L_bol harness could not show. P1 is faint at 40 Mpc (R₂: g 26.1, z 23.2, K 20.5 at 2 d), so only z and K (and H at 5 d) pass the depth mask.
 
 **F52 — On the published AT2017gfo 3.4-d state the closure error is 0.19 mag with the opposite sign, and Gate 2 reads Red there: the sign change of F35/F40 is re-found on published states.** P2's line-forming region at X_LN = 2.5×10⁻³, ρ = 2.4×10⁻¹⁷ g cm⁻³ and 3200 K with every lanthanide singly ionised has 6322 opacity lines, τ_max = 2.2, S_band = 8.6, and lets 92 % of the injected energy out: B₂ − R₂ = +0.19 (g), +0.12 (r), ≤ 0.01 elsewhere (noise 0.01), A₂ 0.01, and ‖R₁ − R₂‖ = 0.17 against ‖R₁ − B₁‖ = 0.28. The verdict is therefore **benchmark-dependent** — Green where the ejecta are lanthanide-rich, Red where the published state is line-thin — which is Paper III's saturation boundary (too opaque at low S, too transparent at high S) and not a contradiction of it; the combined run reads Gray by the letter of the rule because of that sign flip. Whether P2's thinness is the published model's physics or our II-only LTE populations is Phase 7's question.
 
-*Pre-declared flags.* The single-zone **adequacy trigger fires on P1**: band saturation in the neighbouring shells is 1.95× (inner) and 0.40× (outer) the zone's, outside 0.5–2 on the outer side, so the deferred shell-resolved transport is now a required robustness check, not an option. The 1, 3 and 5 d P1 rows are 3 × 3×10⁴ packets (their B₂ − R₂ is 50–100 σ of the seed scatter); 3×10⁵ reruns are in progress and replace the files when done. Two inputs are provisional (P1's X_lan, both patterns).
+*Pre-declared flags.* The single-zone **adequacy trigger fires on P1**: band saturation in the neighbouring shells is 1.95× (inner) and 0.40× (outer) the zone's, outside 0.5–2 on the outer side, so the deferred shell-resolved transport is now a required robustness check, not an option. Two inputs are provisional (P1's X_lan, both patterns).
 
 #### 6. What Gate 2 settles, and does not
 
@@ -4170,6 +4170,48 @@ line-forming region sits in saturation; the ionization state (II only);
 the shell structure (single zone, adequacy trigger fired); the thermal
 state (fixed atmosphere). Phases 4–7 proceed on the Green; Phases 8–10 are
 now justified by the plan's own rule.
+
+### 4.48 Paper IV, Phase 4: the Fontes-like limit — coarse opacity looks adequate under thermal redistribution only where the forest is thin (F53)
+
+Driver: `paper4/phase2_energy/legs.py --legs thermal` (legs `Rth`, `Bth`,
+`Bbinth` = `sobolev_thermal`, `expansion_thermal`, `binned_thermal` with the
+energy-weighted LTE emissivity and the exact scale; then the single swap of
+redistribution to the downward macroatom, `R2`, `B2`, `Bbin2`). Data:
+`paper4/phase4_thermal_bridge/thermal_P1_t2_s28.json`,
+`thermal_P2_t3.4_s0.json` (3 × 10⁵ packets each). The question (plan Phase 4):
+why did line-binned opacity look adequate in earlier kilonova work? The
+plan's hypothesis was that coarse opacity survives complete thermal
+redistribution and fails only when the fluorescence network is kept.
+
+| | Bth − Rth (g … K) | Bbinth − Rth | B₂ − R₂ (g … K) | R₂ − Rth |
+|---|---|---|---|---|
+| P2, 3.4 d (S_band 8.6) | g −0.03, r +0.07, i–K ≤ 0.02 | g −0.04, r +0.08 | g +0.21, r +0.11, rest ≤ 0.02 | g +0.30 |
+| P1, 2 d (S_band 2.9×10⁴) | g −2.96, r −2.15, i −1.71, z −1.15, J −0.12, H +1.05, K +1.83 | g −2.93 … K +1.69 | g −4.56, r −3.81, i −3.39, z −2.90, J −1.78, H −0.48, K +1.26 | g +1.92 … K +0.02 |
+
+(Seed scatter 0.02–0.04 mag on P1, ≤ 0.02 on P2.)
+
+**F53 — The hypothesis holds on the thin state and fails on the saturated one.** On P2, the published AT2017gfo line-forming region, the expansion and exact-sum bins reproduce the resolved calculation under complete thermal redistribution to ≤ 0.08 mag in every band; swapping thermal redistribution for the downward macroatom — and nothing else — opens the +0.21 mag gap in g of F52. That is the causal statement the plan asked for: there, coarse opacity is adequate until the fluorescence network is retained. On P1, the lanthanide-rich state, the coarse opacity is already 3 mag too bright in g and 1.8 mag too faint in K under thermal redistribution, and fluorescence makes the blue error larger (−4.6 mag in g) while flattening the near-infrared one (K +1.3). The historical adequacy of line-binned opacity is therefore a property of the thin regime (band saturation of order 10), not of thermal redistribution as such; at S ~ 10⁴ no redistribution assumption rescues the coarse opacity. The redistribution swap on its own moves the resolved reference by +1.9 mag in g on P1 (fluorescence drains the blue) and +0.30 on P2.
+
+### 4.49 Paper IV, Phase 5: the dual-role closure D does not recover the resolved fluorescent spectrum (F54)
+
+Instrument: `run_mc(reprocess="capped")` (`sobolev/energy_balance.py::capped_reprocessing`,
+`tests/test_dual_role.py`), Morag's (2026, MNRAS 549, stag938) two
+quantities in one Monte Carlo leg, our reading stated in the docstring: the
+EP93 grid still decides where a packet interacts (his mean free path, eq.
+1); at an interaction the packet exchanges energy with the atom only with
+the bin's capped net-absorption probability p_b = min(1, Σ_l min(τ_l, Δν/ν) /
+Σ_l w_l) — his κ_l,exp = min[κ_l, (ρct)⁻¹] (eq. 3) in the bin's τ units — and
+otherwise scatters coherently. He states no consistent coarse-frequency
+scheme exists and gives no Monte Carlo combination. Legs `D2`
+(`expansion_dmacro` + cap) and `Dbin2` (`binned_dmacro` + cap) against R₂,
+B₂, Bbin₂; data `paper4/phase5_dual_role/dual_*.json`, 3 × 3×10⁵ packets.
+
+| | B₂ − R₂ | D₂ − R₂ | Dbin₂ − R₂ |
+|---|---|---|---|
+| P1, 2 d (g r i z J H K) | −4.65 −3.77 −3.41 −2.88 −1.79 −0.47 +1.27 | −3.62 −3.32 −3.19 −2.91 −2.29 −1.70 −0.16 | −3.70 −3.37 −3.24 −2.91 −2.34 −1.73 −0.14 |
+| P2, 3.4 d (g r) | +0.19 +0.12 | +0.39 +0.10 | +0.41 +0.11 |
+
+**F54 — Capping the net absorption at the expansion rate moves the closure error around; it does not remove it.** On P1 the cap takes 1 mag off the g excess and turns the K deficit into a small excess, but z is unchanged at −2.9 and J and H get worse (−2.3, −1.7): the coarse closure with a physically motivated reprocessing rate is still 2–3.6 mag too bright from g to J. On the thin P2 state it doubles the g error (+0.19 → +0.39). This is the plan's second outcome: fixing the emissivity-rate problem alone is insufficient, because the fluorescence network carries non-local wavelength information that no per-bin quantity holds (F30/F32). Not claimed: that this is Morag's intended combination — the paper defines the two quantities and the cap, not the Monte Carlo rule.
 
 ## 5. Findings register
 
@@ -4227,6 +4269,8 @@ now justified by the plan's own rule.
 | F50 | **Photon-number branching mis-states the energy-conserving reference by 1–2.5 mag, and at grid density it creates energy.** On P1 at 2 d the ladder R₁ → R₁ᴱ → R₂ moves z by +1.43 (bookkeeping) + 1.03 (transition probabilities) mag and K by +0.50 + 0.32; on Ce II at the grid's central density the photon legs' comoving deposit is −0.18 (resolved) and −0.50 (expansion) of the injected energy. The downward macroatom closes the identity to 10⁻¹⁶ and costs 6–56× less than the chained reference | §4.47 |
 | F51 | **Gate 2 Green on the lanthanide-rich published state (P1, xkn secular component): the grouped-opacity error survives energy-conserving downward fluorescence.** B₂ − R₂ = −2.2 to −2.9 mag in z and +0.9 to +1.3 in K at 1–5 d (all bands at 2 d: g −4.65 … K +1.27), the redistribution control ≤ 0.06 mag, C₂ within 0.08 mag of B₂ — opacity is the culprit, the kernel compresses; the closure is also 0.34 mag too bright bolometrically because the resolved leg loses twice the adiabatic work | §4.47 |
 | F52 | **On the published AT2017gfo 3.4-d state (P2, X_LN = 2.5×10⁻³, S_band = 8.6) the closure error is +0.19 mag in g with the opposite sign and Gate 2 reads Red; the F35/F40 sign change is re-found on published states.** The verdict is benchmark-dependent; the single-zone adequacy trigger fires on P1 (neighbour saturation 0.40–1.95×), so shell-resolved transport is a required check | §4.47 |
+| F53 | **The Fontes-like limit holds on the thin state and fails on the saturated one.** On P2 the expansion/binned opacities reproduce the resolved calculation under complete thermal redistribution to ≤ 0.08 mag and the single swap to the downward macroatom opens F52's +0.21 mag gap in g; on P1 the coarse opacity is already 3 mag wrong in g and 1.8 in K under thermal redistribution, and fluorescence widens the blue error to −4.6 mag. Line-binned adequacy is a property of the thin regime, not of thermal redistribution | §4.48 |
+| F54 | **The dual-role closure (EP93 mean free path, net absorption capped at the expansion rate) does not recover the resolved spectrum.** On P1 it trims g from −4.65 to −3.62 mag and flips K, leaves z at −2.9 and worsens J/H; on P2 it doubles the g error. Fixing the emissivity rate alone is insufficient; fluorescence carries non-local wavelength information | §4.49 |
 
 ## 6. Caveats and limitations
 
@@ -4300,8 +4344,7 @@ without internal upward transitions, and two provisional inputs — P1's
 lanthanide fraction (0.10) and the solar r-process pattern standing in for
 both models' own lanthanide lists. P1's luminosity is `SourceModel`'s
 diffusion solution at κ = 10, not the xkn light curve, which is why the
-model is faint at 40 Mpc and only z/K pass the depth mask. The 1, 3 and 5 d
-P1 rows are 3×10⁴-packet runs until the 3×10⁵ reruns land.
+model is faint at 40 Mpc and only z/K pass the depth mask.
 
 ## 7. Reproduction
 
@@ -4389,6 +4432,7 @@ python paper4/phase1_benchmarks/build.py                       # P1_t{1,2,3,5}.j
 python paper4/phase2_energy/legs.py paper4/phase1_benchmarks/P1_t2.json --legs all --n 300000 --neighbours 27,29 --out paper4/phase2_energy/legs_P1_t2_s28_n300k.json
 python paper4/phase2_energy/legs.py paper4/phase1_benchmarks/P2_t3.4.json --legs all --n 300000 --neighbours 1,2 --out paper4/phase2_energy/legs_P2_t3.4_s0_n300k.json
 python paper4/phase3_legs/verdict.py paper4/phase2_energy/legs_P1_*.json --out paper4/phase3_legs/gate2_P1.json
+python paper4/phase2_energy/legs.py paper4/phase1_benchmarks/P1_t2.json --legs thermal --n 100000 --out paper4/phase4_thermal_bridge/thermal_P1_t2_s28.json   # sec 4.48
 python paper3/phase12_grid/syserr.py           # syserr.json and the section 4.45.3 table
 python paper3/phase12_grid/grid_table.py --which all   # tables with value ± floor and the trapped fraction
 python paper3/phase12_grid/robustness.py table          # chain-cap table from robustness/chain_table.json
@@ -4406,10 +4450,9 @@ invocations (exit 127) and kills in-flight runs.
 
 ## 8. Next steps (in rough order of value)
 
-**Paper IV (after §4.47, Gate 2 Green on P1):** the 3×10⁵ reruns of P1 at
-1/3/5 d; the neighbouring-shell robustness runs the adequacy trigger
-demands; Phase 4 (the Fontes-like thermal limit with the binned leg), Phase
-5 (the dual-role Morag-type closure), Phase 6 (convergence in τ_min, bin
+**Paper IV (after §4.47–4.48, Gate 2 Green on P1):** the neighbouring-shell
+robustness runs the adequacy trigger demands; Phase 5 (the dual-role
+Morag-type closure), Phase 6 (convergence in τ_min, bin
 width, packets, table cut), Phase 7 (Saha II/III — the P2 question); then
 shells, estimators, the full macroatom and **B_eq − R_eq** (Phases 8–10).
 PI decisions pending: P1's X_lan and both lanthanide patterns.

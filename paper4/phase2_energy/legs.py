@@ -69,7 +69,16 @@ LEGS = {
     "C2": dict(mode="expansion_group", packets="energy", scale="equilibrium", kernel="R2"),
     "Cbin2": dict(mode="binned_group", packets="energy", scale="equilibrium", kernel="R2"),
     "C1": dict(mode="expansion_group", packets="photon", scale="conserving", kernel="R1"),
+    # Phase 4, the Fontes-like limit: complete thermal redistribution (LTE line
+    # emissivity, energy-weighted) on the resolved, expansion and exact-sum grids
+    "Rth": dict(mode="sobolev_thermal", packets="energy", scale="equilibrium"),
+    "Bth": dict(mode="expansion_thermal", packets="energy", scale="equilibrium"),
+    "Bbinth": dict(mode="binned_thermal", packets="energy", scale="equilibrium"),
 }
+THERMAL = ("Rth", "Bth", "Bbinth", "R2", "B2", "Bbin2")
+LEGS["D2"] = dict(mode="expansion_dmacro", packets="energy", scale="equilibrium", reprocess="capped")
+LEGS["Dbin2"] = dict(mode="binned_dmacro", packets="energy", scale="equilibrium", reprocess="capped")
+DUAL = ("R2", "B2", "Bbin2", "D2", "Dbin2")
 LADDER = ("R1", "R1E", "R2", "B1", "B1E", "B2")
 PHASE3 = ("R2", "A2", "B2", "Bbin2", "C2", "Cbin2")
 
@@ -106,7 +115,7 @@ def atom_for_zone(state, shell, stages=("II",), tau_min=1e-3, n_ion_min=1e-30):
 
 
 def run_legs(zone, atom, n, legs=LADDER, seeds=SEEDS, ng=NG, relativity="worldline",
-             chain_max=CHAIN_MAX, budget_s=None, a_cut=None, verbose=True):
+             chain_max=CHAIN_MAX, budget_s=None, a_cut=None, verbose=True, dnu_over_nu=4.17e-5):
     """All `legs` on one zone dict (from `EjectaState.local_zone`) with one atom."""
     t0 = time.time()
     lo, hi = (float(x) for x in phot.nu_edges(*LAM_WIN, 1))
@@ -115,7 +124,7 @@ def run_legs(zone, atom, n, legs=LADDER, seeds=SEEDS, ng=NG, relativity="worldli
     nu_c = np.sqrt(edges[1:] * edges[:-1])
     row = dict(zone={k: v for k, v in zone.items() if k not in ("X", "f_ion")},
                n=n, seeds=list(seeds), ng=ng, relativity=relativity, chain_max=chain_max,
-               a_cut=a_cut, lam_window=list(LAM_WIN), n_spec=N_SPEC, L_core_window=l_core,
+               a_cut=a_cut, dnu_over_nu=dnu_over_nu, lam_window=list(LAM_WIN), n_spec=N_SPEC, L_core_window=l_core,
                n_opacity=int(atom.n_opacity), n_lines=int(atom.n_lines_total),
                tau_max=float(atom.op_tau.max()) if atom.n_opacity else 0.0, rss_mb_atom=rss_mb(),
                git=git_sha(), legs={}, timing={})
@@ -127,7 +136,8 @@ def run_legs(zone, atom, n, legs=LADDER, seeds=SEEDS, ng=NG, relativity="worldli
         return run_mc(atom, zone["r_core"], zone["r_out"], zone["t_exp"], lo, hi, n, spec["mode"],
                       seed=seed, t_core=zone["t_core"], relativity=relativity, max_steps=MAX_STEPS,
                       chain_max=chain_max, chain_overflow="absorb", packets=spec["packets"],
-                      launch_weight="energy", wall_s=budget_s, a_cut=a_cut, **kw)
+                      launch_weight="energy", wall_s=budget_s, a_cut=a_cut, dnu_over_nu=dnu_over_nu,
+                      reprocess=spec.get("reprocess"), **kw)
 
     kernels, results = {}, {}
     order = [l for l in legs if "kernel" not in LEGS[l]] + [l for l in legs if "kernel" in LEGS[l]]
@@ -210,23 +220,26 @@ def main():
     ap.add_argument("--a-cut", type=float, default=None)
     ap.add_argument("--tau-min", type=float, default=1e-3)
     ap.add_argument("--neighbours", default="", help="comma list of shells for the adequacy ratio")
+    ap.add_argument("--stages", default="II", help="ion stages to carry opacity, e.g. II,III (Phase 7)")
     ap.add_argument("--out", default=None)
     a = ap.parse_args()
     state = EjectaState.from_json(a.state)
     shell = state.meta.get("photospheric_shell", 0) if a.shell is None else a.shell
-    legs = {"ladder": LADDER, "phase3": PHASE3, "all": tuple(LEGS)}.get(a.legs, tuple(a.legs.split(",")))
+    legs = {"ladder": LADDER, "phase3": PHASE3, "thermal": THERMAL, "dual": DUAL, "all": tuple(LEGS)}.get(a.legs, tuple(a.legs.split(",")))
     seeds = tuple(int(s) for s in a.seeds.split(","))
     zone = state.local_zone(shell)
     t0 = time.time()
-    atom, n_ion = atom_for_zone(state, shell, tau_min=a.tau_min)
+    stages = tuple(a.stages.split(","))
+    atom, n_ion = atom_for_zone(state, shell, stages=stages, tau_min=a.tau_min)
     print(f"{state.meta.get('name')} t={state.t / DAY:g} d shell {shell}: v={zone['v_core'] / C:.4f}c rho={zone['rho']:.3e} "
           f"T={zone['T_gas']:.0f} K; {len(n_ion)} ions, {atom.n_lines_total} lines, {atom.n_opacity} opacity, "
           f"atom {time.time() - t0:.1f}s, rss {rss_mb():.0f} MB", flush=True)
     row = run_legs(zone, atom, a.n, legs, seeds, a.ng, a.relativity or None, a.chain_max, a.budget, a.a_cut)
     row.update(state=str(a.state), name=state.meta.get("name"), t_d=state.t / DAY, shell=shell, n_ion=n_ion,
-               tau_min=a.tau_min, ions=sorted(n_ion))
+               tau_min=a.tau_min, ions=sorted(n_ion), stages=list(stages),
+               f_ion_zone={k: v for k, v in zone["f_ion"].items()})
     if a.neighbours:
-        row["adequacy"] = adequacy(state, shell, [int(s) for s in a.neighbours.split(",")], tau_min=a.tau_min)
+        row["adequacy"] = adequacy(state, shell, [int(s) for s in a.neighbours.split(",")], stages=stages, tau_min=a.tau_min)
     out = a.out or HERE / f"legs_{state.meta.get('name')}_t{state.t / DAY:g}_s{shell}.json"
     Path(out).write_text(json.dumps(row, indent=1, default=float) + "\n")
     print(f"wrote {out} in {row['t_wall']:.0f}s")

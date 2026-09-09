@@ -71,3 +71,34 @@ def band_luminosities(res, edges, l_core_window, core):
     convention ("absorbing" | "equilibrium" | "conserving"), erg/s."""
     l_nu = photometry.emergent_lnu(res, edges, l_core_window, core=core)
     return l_nu * np.diff(edges)
+
+
+def capped_reprocessing(atom, edges, E, tau_cap):
+    """Per-bin probability that an interaction exchanges energy with the atom
+    under the dual-role closure D (Paper IV Phase 5; Morag 2026, MNRAS 549,
+    stag938, our reading).
+
+    Morag separates two quantities. EP93's expansion opacity,
+    chi_exp = (nu/dnu)(c t)^-1 sum_l (1 - e^-tau_l), is the photon's mean
+    free path in the forest -- WHERE it interacts. The net absorption /
+    emission term is the bin-averaged static opacity with each line capped
+    by kappa_l,exp = min[kappa_l, (rho c t)^-1] (his eq. 3): net photons are
+    produced or destroyed in a line at most as fast as the expansion sweeps
+    photons across it. In the bin's tau units, kappa_l = (nu/dnu) tau_l/(rho c t)
+    and the cap (rho c t)^-1 is tau = dnu/nu, so
+
+        p_b = min(1, sum_l min(tau_l, tau_cap) / sum_l w_l),   tau_cap = dnu/nu,
+
+    with w_l the bin's survival weight (1 - e^-tau_l on the EP93 grid, tau_l
+    on the exact-sum grid). He states that no consistent coarse-frequency
+    scheme exists and gives no Monte Carlo combination; combining the two as
+    "encounter with the transport quantity, exchange energy with the capped
+    one, else scatter coherently" is this project's reading, stated here so
+    it can be judged."""
+    n = E.size
+    b = np.clip(np.searchsorted(edges, atom.op_nu, side="right") - 1, 0, n - 1)
+    cap = np.zeros(n)
+    np.add.at(cap, b, np.minimum(atom.op_tau, tau_cap))
+    with np.errstate(invalid="ignore", divide="ignore"):
+        p = np.where(E > 0, np.minimum(1.0, cap / np.where(E > 0, E, 1.0)), 0.0)
+    return p
