@@ -4229,6 +4229,23 @@ this is the robustness check it demanded.
 
 **F55 — The closure error is the same sign and the same class on every shell around the photosphere; its amplitude in a given band is set by where the band sits relative to the saturation front.** From shell 29 to 27 (a factor 5 in saturation) the blue error stays at −4 to −5 mag in g, the near-infrared crossover moves outward (H changes sign between shells 28 and 29, K stays +0.6 to +1.3), and z runs −1.4 to −3.7. The control stays ≤ 0.07 mag. The single-zone amplitude in one band is therefore uncertain by ~1 mag across the line-forming region — the shell-resolved transport of Phases 8–10 is where that number becomes a prediction — while Gate 2's class, signs and magnitude scale are not in question.
 
+### 4.51 Paper IV, Phase 6: the reference is converged; the closure's error is a function of the closure's own grid (F56)
+
+Driver: `paper4/phase6_convergence/converge.py` on P1 at 2 d, shell 28,
+3 seeds; data `converge_P1_t2_s28.json`. One axis at a time about the
+production settings (τ_min = 10⁻³, Δv = 12.5 km s⁻¹, n = 3×10⁵, no table cut).
+
+| axis | values | R₂ shift to the finest (g / z / K) | B₂ − R₂ shift to the finest (z / K) |
+|---|---|---|---|
+| τ_min | 10⁻², 10⁻³, 10⁻⁴ | +0.07 / +0.02 / 0.00; +0.08 / +0.01 / +0.03 | +0.80 / +0.97; +0.12 / +0.57 |
+| Δv (km s⁻¹) | 1.25, 12.5, 125 | R₂ unchanged (it has no bins) | −1.12 / +0.05; −1.10 / −1.39 |
+| n per seed | 10⁵, 2×10⁵, 4×10⁵ | −0.06 / −0.02 / −0.01; +0.06 / −0.01 / −0.03 | +0.01 / −0.04; +0.01 / 0.00 |
+| a_cut | 10⁻³, 10⁻⁴, 10⁻⁵ | −0.01 / 0.00 / 0.00; +0.06 / −0.01 / −0.01 | 0.00 / 0.00; +0.01 / 0.00 |
+
+(R₂ seed scatter 0.01–0.04 mag in z and K, 0.03–0.07 in g at 26th magnitude.)
+
+**F56 — The energy-conserving reference meets the plan's convergence criterion in the headline bands; the closure's error does not converge because the grid is the closure.** R₂ moves by ≤ 0.03 mag in z and K (≤ 0.10 in g, at the noise) across a factor 100 in τ_min, a factor 4 in packets and three decades of table cut. B₂ − R₂ moves by 0.8–1.0 mag with τ_min and by 1.1 mag in z between 1.25 and 12.5 km s⁻¹ bins (K flips sign only at 125 km s⁻¹): which lines count as opacity and how wide the bins are are part of the grouped closure's definition, so different defensible groupings differ by a magnitude — F41's 0.15 mag on La II, here 1 mag on the full pattern at S ~ 10⁴. The headline B₂ − R₂ is therefore quoted at SEDONA's production width (12.5 km s⁻¹, τ_min = 10⁻³) with its range: z −1.8 to −3.0, K +0.7 to +1.3 over the settings above. Gate 2's class and signs hold at every setting except the coarsest bins' K.
+
 ### 4.52 Paper IV, Phase 7 and Gate 3: LTE Saha ionization (F57)
 
 Instrument: `sobolev/ionization.py` (§4.48's commit), `paper4/phase7_ionization/saha_states.py`
@@ -4311,6 +4328,7 @@ the `scale` policy — the transport carries no neutral opacity.)
 | F53 | **The Fontes-like limit holds on the thin state and fails on the saturated one.** On P2 the expansion/binned opacities reproduce the resolved calculation under complete thermal redistribution to ≤ 0.08 mag and the single swap to the downward macroatom opens F52's +0.21 mag gap in g; on P1 the coarse opacity is already 3 mag wrong in g and 1.8 in K under thermal redistribution, and fluorescence widens the blue error to −4.6 mag. Line-binned adequacy is a property of the thin regime, not of thermal redistribution | §4.48 |
 | F54 | **The dual-role closure (EP93 mean free path, net absorption capped at the expansion rate) does not recover the resolved spectrum.** On P1 it trims g from −4.65 to −3.62 mag and flips K, leaves z at −2.9 and worsens J/H; on P2 it doubles the g error. Fixing the emissivity rate alone is insufficient; fluorescence carries non-local wavelength information | §4.49 |
 | F55 | **The closure error keeps its sign and class on every shell around P1's photosphere (saturation 1.1×10⁴–5.6×10⁴): g −4 to −5 mag, K +0.6 to +1.3, z −1.4 to −3.7; the crossover band moves with the saturation front.** The single-zone amplitude in one band is uncertain by ~1 mag; the class is not | §4.50 |
+| F56 | **The energy-conserving reference is converged (≤ 0.03 mag in z/K across τ_min, packets and table cut); the closure's error is not, because the grid is the closure:** B₂ − R₂ moves 0.8–1.0 mag with τ_min and 1.1 mag in z between 1.25 and 12.5 km s⁻¹ bins. Headline quoted at 12.5 km s⁻¹ with the range z −1.8 to −3.0, K +0.7 to +1.3 | §4.51 |
 | F57 | **Gate 3 passes: LTE Saha ionization leaves the closure error's class and signs intact.** 99 % II at the 2–3 d zones and on P2 (≤ 0.05 mag change); at P1's 1 d zone 60 % of Ce is III and the error is −2.7 (z), +1.9 (K) with the control ≤ 0.04 | §4.52 |
 
 ## 6. Caveats and limitations
@@ -4491,12 +4509,12 @@ invocations (exit 127) and kills in-flight runs.
 
 ## 8. Next steps (in rough order of value)
 
-**Paper IV (after §4.47–4.48, Gate 2 Green on P1):** the neighbouring-shell
-robustness runs the adequacy trigger demands; Phase 5 (the dual-role
-Morag-type closure), Phase 6 (convergence in τ_min, bin
-width, packets, table cut), Phase 7 (Saha II/III — the P2 question); then
-shells, estimators, the full macroatom and **B_eq − R_eq** (Phases 8–10).
-PI decisions pending: P1's X_lan and both lanthanide patterns.
+**Paper IV (after §4.47–4.52, Gates 2 and 3 passed on P1):** shells,
+estimators, internal upward transitions (the full macroatom) and radiative
+equilibrium — **B_eq − R_eq** (Phases 8–10), now justified by the plan's own
+rule; the Phase 7 sensitivity table (bulk proxy, neutral-stage policy);
+Phase 11 (global recovery on the paper3 grid); Phase 12 (TARDIS, to be
+installed). PI decisions pending: P1's X_lan and both lanthanide patterns.
 
 Completed since the first draft of this report: the T sweep and thermal-width
 frontier (§4.9), multi-ion overlap (§4.10), the per-line Sobolev leg (§4.12)

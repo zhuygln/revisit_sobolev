@@ -2846,6 +2846,53 @@ provisional.
 375k-line zone; R2 66 s; every grouped leg < 10 s. The full pattern is not
 the problem the plan feared; the chain was.
 
+## 9bb. Phases 4-7 in one afternoon: the thin/saturated split, a closure that only moves the error, and a reference that converges (2026-09-09)
+
+*Fontes.* The plan's conceptual centre -- coarse opacity looks adequate
+under thermal redistribution and fails once fluorescence is kept -- is
+true on P2 and false on P1. On the thin published AT2017gfo zone the
+expansion and exact-sum bins sit within 0.08 mag of the resolved leg under
+complete thermal redistribution, and swapping only the redistribution to
+the downward macroatom opens the +0.21 mag g gap of F52. On the
+lanthanide-rich zone the coarse opacity is 3 mag wrong in g and 1.8 in K
+before any fluorescence is allowed. So the historical adequacy of
+line-binned opacity is a statement about band saturation of order 10, not
+about thermal redistribution (F53).
+
+*Morag.* I fetched the paper before coding: EP93 is the mean free path
+(eq. 1), the net absorption/emission term is the bin-averaged static
+opacity with each line capped at (rho c t)^-1 (eq. 3), no consistent
+coarse-frequency scheme exists, and no Monte Carlo combination is given.
+Our reading -- encounter with EP93, exchange energy with probability
+sum min(tau, dnu/nu) / sum(1 - e^-tau), else scatter coherently -- is in
+the docstring so it can be judged. It trims g on P1 from -4.65 to -3.62,
+flips K, leaves z at -2.9 and worsens J/H; on P2 it doubles the g error.
+The plan's second outcome (F54).
+
+*Convergence, and what it is not.* R2 moves <= 0.03 mag in z and K
+across two decades of tau_min, a factor 4 in packets and three decades of
+table cut -- the reference is converged. B2 - R2 moves 0.8-1.0 mag with
+tau_min and 1.1 mag in z between 1.25 and 12.5 km/s bins, and that is not
+a convergence failure: the bins and the line cut ARE the grouped closure.
+Different defensible groupings differ by a magnitude at S ~ 1e4 where
+F41 found 0.15 mag on La II. The headline carries its range (F56).
+
+*Ionization.* NIST ASD 5.12 energies, GSI partition functions for II and
+III, a declared neutral policy and one bulk proxy. At the Gate 2 zones the
+lanthanides are 99 % II, so the fixed-II assumption cost <= 0.05 mag; at
+1 d (4411 K) 60 % of Ce is III, the 26-ion blend (27.6 M lines, 5.2 GB)
+brightens the reference by half a magnitude and the error keeps its class
+and signs at z -2.7, K +1.9. Gate 3 passes (F57). P2 is thin in II as in
+II + III: its thinness is its composition, in LTE.
+
+*Neighbours.* Shells 27/28/29 (S = 5.6e4 / 2.9e4 / 1.1e4): g -4 to -5,
+K +0.6 to +1.3, z -1.4 to -3.7, controls <= 0.07. The class is robust;
+the single-zone amplitude in one band is not better than ~1 mag until
+shells are resolved (F55). That is the plan's Phase 8-10 and it is now
+justified by the plan's own rule.
+
+Suite: 509 (+ the ionization and dual-role tests).
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

@@ -46,7 +46,13 @@ under thermal redistribution, the fluorescence swap opens the gap — and
 fails on P1, where coarse opacity is 3 mag wrong in g already. Phase 5
 (F54): the dual-role closure moves the error around, not away. Phase 7
 instrument in place (Saha: 99 % II at the 2–3 d zones, 41 % III at 1 d).
-Phases 6 and 7 runs and the neighbour-shell check are the open items.
+Phase 6 (F56): the reference is converged to ≤ 0.03 mag in z/K; the
+closure's error moves ~1 mag with its own bin width and line cut, quoted
+as a range. Phase 7 (F57): Gate 3 passes; 99 % II at the Gate 2 zones,
+60 % Ce III at 1 d with the class kept. The neighbour shells (F55) keep
+the class with a ~1 mag amplitude spread. Open: Phases 8–10 (shells,
+estimators, full macroatom, **B_eq − R_eq**), the Phase 7 sensitivity
+table, Phase 11, Phase 12, and the PI's two provisional inputs.
 
 ## Design decisions taken in implementation
 
