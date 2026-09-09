@@ -2752,6 +2752,61 @@ memory gate.
 Suite: 493 passed (69 golden, 62 Paper IV energy/macroatom/core tests, 3
 cache tests).
 
+## 9az. Two published ejecta states, and the full lanthanide pattern fits in memory (2026-09-09)
+
+*The benchmarks.* The PI replaced my "Y_e ~ 0.2 yield plus Kasen-style
+density" with exact published anchors, and Gate 1 became numerical. P1 is
+the secular component of the xkn radiative-transfer comparison (Ricigliano
+et al. 2024, sec. 5.2): 2.64e-2 Msun, v_rms = 0.06c, Y_e = 0.20, s = 10,
+tau ~ 17 ms, rho ~ (1 - x^2)^3 (their eq. 25) -- which fixes v_max =
+0.1149c for that rms velocity -- L(t) and the grey photosphere from
+`SourceModel`, the Eddington T(v). P2 is the Gillanders et al. 2026 3.4-d
+AT2017gfo model, Table 3 verbatim: 0.15-0.35c, rho0 = 4e-15 at t0 = 2 d
+and v0 = 14000 km/s, v^-3, 3200 K, X_LN = 2.5e-3 (their Ye-0.29a profile
+with the lanthanides reduced 20x; the 2022 paper's Table 2 gives 4.99e-2
+before the cut). `EjectaState` (sobolev/ejecta.py) carries the shells,
+`check()` is the mass integral and the composition sums, and
+`local_zone()` is the PI's single-zone reduction -- the shell holding
+tau_grey = 2/3, its own state, never a mass-weighted mean. P1's
+photosphere at kappa = 10 sits at 0.10c (shell 28 of 32) with T = 3400 K
+at 2 d; P2's zone is the published inner boundary; its line-forming
+region holds 3.0e-4 Msun.
+
+*What I could not source, said so.* Neither the xkn paper (tracer-based
+yields) nor Lippuner & Roberts 2015 (figures only; their fit places
+(0.20, 10, 17 ms) inside the lanthanide-rich region) tabulates a lanthanide
+fraction for P1: it is 0.10, marked provisional. Both lanthanide *patterns*
+are the solar r-process residuals by mass -- Prantzos et al. 2020 Table 4
+(Lodders 2009 mass fractions times their r-fractions), transcribed by text
+extraction and checked row by row -- because the Ye-0.29a element list is in
+the 2022 supplement I could not reach. All of it is in the ledger and in
+each state's `meta["provisional"]`; the PI confirms or replaces at Gate 1.
+The pattern itself is instructive: Dy, Nd and Gd carry 46 % of the
+lanthanide mass, Ce 7 %, La 4 % -- the Paper III blend had La at 25 %.
+
+*The cache and the memory gate.* `sobolev/atomic_cache.py` streams the six
+numbers per line straight from the zip members (Tb II: 5.2 M lines, 29 s,
+never 1 GB of text on disk); the 13 La-Yb II ions are 19.8 M lines in
+636 MB of `.npz`, and `from_cached` is bit-identical to `from_gsi`. The
+gate that decided whether the full pattern is usable at all: the 13-ion
+blend at P1's shell 28 (375k opacity lines, tau_max = 7200) is a 3.9 GB
+atom, 4.7 GB with the macroatom tables (39.7 M entries, 400 dead-end
+levels of 83k), built in 10 s. Two workers fit on 24 GB; no A-cut needed
+yet. And the downward macroatom is cheap where the chain was not: 0.6 ms
+per packet on that shell, 12.9 events per packet, versus ~20 ms per packet
+for the chained reference on Ce II alone at grid density.
+
+*P2 is thin.* At X_LN = 2.5e-3, rho = 2.4e-17 and 3200 K with every
+lanthanide singly ionised, the published line-forming region has 6322
+opacity lines with tau_max = 2.2 and lets 92 % of the injected energy
+straight out. The closure test there will be a low-saturation case by
+construction; whether that is the published model's physics or our II-only
+LTE populations is a Phase 7 question, and the number is recorded now so
+it cannot be re-read later.
+
+*Running.* All legs on P1 (2 d, shell 28, neighbours 27/29) and P2 (shell
+0, neighbours 1/2), 30k packets x 3 seeds, wall budget 5400 s per run.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

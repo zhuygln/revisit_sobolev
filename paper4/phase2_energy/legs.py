@@ -215,7 +215,7 @@ def main():
     zone = state.local_zone(shell)
     t0 = time.time()
     atom, n_ion = atom_for_zone(state, shell, tau_min=a.tau_min)
-    print(f"{state.meta.get('name')} t={state.t / DAY:g} d shell {shell}: v={zone['v_core']:.4f}c rho={zone['rho']:.3e} "
+    print(f"{state.meta.get('name')} t={state.t / DAY:g} d shell {shell}: v={zone['v_core'] / C:.4f}c rho={zone['rho']:.3e} "
           f"T={zone['T_gas']:.0f} K; {len(n_ion)} ions, {atom.n_lines_total} lines, {atom.n_opacity} opacity, "
           f"atom {time.time() - t0:.1f}s, rss {rss_mb():.0f} MB", flush=True)
     row = run_legs(zone, atom, a.n, legs, seeds, a.ng, a.relativity or None, a.chain_max, a.budget, a.a_cut)

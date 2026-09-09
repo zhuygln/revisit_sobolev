@@ -130,7 +130,7 @@ phase1_benchmarks/        build.py -> P1_t{1,2,3,5}.json, P2_t3.4.json,
                           gate1_*.png; Gate 1 in tests/test_benchmarks.py  Phase 1
 phase2_energy/            frame tests, toy atoms, the R1/R1E/R2/B1/B1E/B2
                           ladder                                          Phases 2, 2A, 2B
-phase3_legs/              R2/A2/B2/C2 on P1 and P2, the Gate 2 verdict    Phase 3
+phase3_legs/              verdict.py: the pre-declared Gate 2 on legs_*.json  Phase 3
 phase4_thermal_bridge/    the Fontes-like thermal limit, incl. binned     Phase 4
 phase5_dual_role/         the dual-role (Morag-type) closure D            Phase 5
 phase6_convergence/       tau_min, bin width, packets, table cut          Phase 6
