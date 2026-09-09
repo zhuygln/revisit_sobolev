@@ -21,7 +21,7 @@ class RedistributionKernel:
     Empty rows sample to nan (transport scatters those coherently)."""
 
     def __init__(self, edges, R, N_cum, q_dep, sub_cum, counts, metadata=None,
-                 disc_vals=None, disc_cum=None, disc_off=None):
+                 disc_vals=None, disc_cum=None, disc_off=None, disc_cum_E=None):
         self.edges = np.asarray(edges, float)
         self.R = np.asarray(R, float)
         self.N_cum = np.asarray(N_cum, float)
@@ -40,17 +40,33 @@ class RedistributionKernel:
         self.disc_vals = None if disc_vals is None else np.asarray(disc_vals, float)
         self.disc_cum = None if disc_cum is None else np.asarray(disc_cum, float)
         self.disc_off = None if disc_off is None else np.asarray(disc_off, int)
+        # Paper IV: the ENERGY rows, row-normalised cumulatives of R^E -- what
+        # an indivisible energy packet samples (rows="energy"); and the
+        # energy-weighted discrete exit tables (None -> photon tables reused)
+        rs = self.R.sum(axis=1)
+        with np.errstate(invalid="ignore", divide="ignore"):
+            self.E_cum = np.where(rs[:, None] > 0,
+                                  np.cumsum(self.R, axis=1) / np.where(rs[:, None] > 0, rs[:, None], 1.0), 0.0)
+        self.disc_cum_E = None if disc_cum_E is None else np.asarray(disc_cum_E, float)
 
     # ---- construction --------------------------------------------------
     @classmethod
     def from_branching_mc(cls, nu_in, nu_out, w, n_groups, nu_lo=None, nu_hi=None,
-                          n_sub=16, metadata=None):
+                          n_sub=16, metadata=None, w_out=None):
         """Build from event arrays (absorbed comoving frequency, exit rest
         frequency, packet weight). Groups are log-spaced over [nu_lo, nu_hi]
         (default: the events' own extent with a 0.1% margin); events outside
-        are clipped into the edge groups."""
+        are clipped into the edge groups.
+
+        w_out (Paper IV): the packet weight AFTER the event, for energy-packet
+        references (w_out nu_out == w nu_in when energy is conserved). The
+        photon rows then count w_out photons, the energy flow is w_out nu_out
+        (so q_dep = 0 for a radiative downward macroatom), and an
+        energy-weighted discrete exit table is built alongside the photon
+        one. None (every Paper III kernel) means w_out = w."""
         nu_in = np.asarray(nu_in, float); nu_out = np.asarray(nu_out, float)
         w = np.asarray(w, float)
+        w_o = w if w_out is None else np.asarray(w_out, float)
         lo = (min(nu_in.min(), nu_out.min()) * 0.999) if nu_lo is None else nu_lo
         hi = (max(nu_in.max(), nu_out.max()) * 1.001) if nu_hi is None else nu_hi
         edges = np.geomspace(lo, hi, n_groups + 1)
@@ -58,9 +74,9 @@ class RedistributionKernel:
         gj = np.clip(np.searchsorted(edges, nu_out, side="right") - 1, 0, n_groups - 1)
         E_in = np.bincount(gi, weights=w * nu_in, minlength=n_groups)
         flow = np.zeros((n_groups, n_groups))
-        np.add.at(flow, (gi, gj), w * nu_out)
+        np.add.at(flow, (gi, gj), w_o * nu_out)
         Ncnt = np.zeros((n_groups, n_groups))
-        np.add.at(Ncnt, (gi, gj), w)
+        np.add.at(Ncnt, (gi, gj), w_o)
         counts = Ncnt.sum(axis=1)
         with np.errstate(invalid="ignore", divide="ignore"):
             R = np.where(E_in[:, None] > 0, flow / np.where(E_in[:, None] > 0, E_in[:, None], 1.0), 0.0)
@@ -75,33 +91,46 @@ class RedistributionKernel:
             if not m.any():
                 continue
             se = np.geomspace(edges[j], edges[j + 1], n_sub + 1)
-            h, _ = np.histogram(nu_out[m], se, weights=w[m])
+            h, _ = np.histogram(nu_out[m], se, weights=w_o[m])
             tot = h.sum()
             sub_cum[j] = np.cumsum(h / tot) if tot > 0 else np.linspace(1 / n_sub, 1, n_sub)
         # discrete tables: the distinct exit frequencies per output group with
         # cumulative photon weights
         vals_u, inv = np.unique(nu_out, return_inverse=True)
-        w_u = np.bincount(inv, weights=w)
+        w_u = np.bincount(inv, weights=w_o)
+        e_u = np.bincount(inv, weights=w_o * nu_out)
         g_u = np.clip(np.searchsorted(edges, vals_u, side="right") - 1, 0, n_groups - 1)
         order = np.argsort(g_u, kind="stable")
-        vals_s, w_s, g_s = vals_u[order], w_u[order], g_u[order]
+        vals_s, w_s, g_s, e_s = vals_u[order], w_u[order], g_u[order], e_u[order]
         disc_off = np.searchsorted(g_s, np.arange(n_groups + 1))
         disc_cum = np.empty_like(w_s)
+        disc_cum_E = np.empty_like(w_s)
         for j in range(n_groups):
             a, b = disc_off[j], disc_off[j + 1]
             if b > a:
                 c = np.cumsum(w_s[a:b]); disc_cum[a:b] = c / c[-1]
+                ce = np.cumsum(e_s[a:b]); disc_cum_E[a:b] = ce / ce[-1]
         md = dict(metadata or {}); md.setdefault("n_events", int(nu_in.size)); md["n_sub"] = n_sub
+        md["energy_events"] = w_out is not None
         return cls(edges, R, N_cum, q_dep, sub_cum, counts, md,
-                   disc_vals=vals_s, disc_cum=disc_cum, disc_off=disc_off)
+                   disc_vals=vals_s, disc_cum=disc_cum, disc_off=disc_off, disc_cum_E=disc_cum_E)
 
     # ---- use -----------------------------------------------------------
     def group_index(self, nu):
         return np.clip(np.searchsorted(self.edges, nu, side="right") - 1, 0, self.n_groups - 1)
 
-    def sample_nu_out(self, nu_abs, rng, within="discrete"):
+    def sample_nu_out(self, nu_abs, rng, within="discrete", rows="photon"):
         """One output frequency per absorbed frequency; nan where the row was
-        never populated in the reference (caller scatters those coherently)."""
+        never populated in the reference (caller scatters those coherently).
+
+        rows="photon" (Paper III) draws the output group from the photon-count
+        rows N_cum and the exit line from the photon-weighted discrete table;
+        rows="energy" (Paper IV energy packets) from the energy rows R^E and
+        the energy-weighted table -- the same draws, the same RNG order."""
+        if rows not in ("photon", "energy"):
+            raise ValueError(f"rows must be 'photon' or 'energy', got {rows!r}")
+        row_cum = self.N_cum if rows == "photon" else self.E_cum
+        dcum = self.disc_cum if (rows == "photon" or self.disc_cum_E is None) else self.disc_cum_E
         gi = self.group_index(np.asarray(nu_abs, float))
         out = np.full(gi.size, np.nan)
         u = rng.uniform(size=gi.size)
@@ -109,7 +138,7 @@ class RedistributionKernel:
             m = gi == i
             if self.empty_rows[i]:
                 continue
-            gj = np.searchsorted(self.N_cum[i], u[m])
+            gj = np.searchsorted(row_cum[i], u[m])
             gj = np.minimum(gj, self.n_groups - 1)
             v = rng.uniform(size=gj.size)
             if within == "discrete" and self.disc_vals is not None:
@@ -120,7 +149,7 @@ class RedistributionKernel:
                     if b <= a:      # no exits recorded in this output group
                         nu_j[mm] = np.nan
                         continue
-                    k = np.minimum(np.searchsorted(self.disc_cum[a:b], v[mm]), b - a - 1)
+                    k = np.minimum(np.searchsorted(dcum[a:b], v[mm]), b - a - 1)
                     nu_j[mm] = self.disc_vals[a + k]
                 out[m] = nu_j
             elif within == "pdf":
@@ -251,14 +280,16 @@ class RedistributionKernel:
         extra = {}
         if self.disc_vals is not None:
             extra = dict(disc_vals=self.disc_vals, disc_cum=self.disc_cum, disc_off=self.disc_off)
+            if self.disc_cum_E is not None:
+                extra["disc_cum_E"] = self.disc_cum_E
         np.savez(path, edges=self.edges, R=self.R, N_cum=self.N_cum, q_dep=self.q_dep,
                  sub_cum=self.sub_cum, counts=self.counts, metadata=json.dumps(self.metadata), **extra)
 
     @classmethod
     def load(cls, path):
         d = np.load(path, allow_pickle=False)
-        disc = {k: d[k] for k in ("disc_vals", "disc_cum", "disc_off") if k in d.files}
+        disc = {k: d[k] for k in ("disc_vals", "disc_cum", "disc_off", "disc_cum_E") if k in d.files}
         return cls(d["edges"], d["R"], d["N_cum"], d["q_dep"], d["sub_cum"], d["counts"],
                    json.loads(str(d["metadata"])),
                    disc_vals=disc.get("disc_vals"), disc_cum=disc.get("disc_cum"),
-                   disc_off=disc.get("disc_off"))
+                   disc_off=disc.get("disc_off"), disc_cum_E=disc.get("disc_cum_E"))

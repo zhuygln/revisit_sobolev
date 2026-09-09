@@ -66,10 +66,14 @@ def _toy_kernel():
 def test_photon_number_is_conserved_in_every_mode(mode):
     fa, _ = three_level(1.0)
     lo, hi = pump_band()
-    if "thermal" in mode or "tla" in mode:
+    if "thermal" in mode or "tla" in mode or "dmacro" in mode:
         # give the upper level a population so the thermal sampler has weight
         fa.emis_w = np.array([1.0, 1.0]); fa.temperature = 3000.0
     kw = {"kernel": _toy_kernel()} if mode.endswith("_group") else {}
+    if mode.endswith("_dmacro"):
+        # Paper IV: indivisible energy packets; packet COUNT is still conserved
+        kw["packets"] = "energy"
+        fa.level_energy_cm = np.array([0.0, 0.0, (NU_13 - NU_32) / C, NU_13 / C])
     res = run_mc(fa, R_CORE, R_OUT, T_EXP, lo, hi, 20000, mode, seed=1, eps=0.5, **kw)
     assert res["n_escaped"] + res["n_core"] + res["n_absorbed"] == res["n_packets"]
     if mode.endswith("absorb"):
@@ -215,10 +219,13 @@ def test_energy_identity_holds_to_roundoff_in_every_mode(mode):
     term reported separately."""
     fa, _ = three_level(1.5)
     fa.temperature = 3000.0
-    if "thermal" in mode or "tla" in mode:
+    if "thermal" in mode or "tla" in mode or "dmacro" in mode:
         fa.emis_w = np.array([1.0, 1.0])   # the toy atom's upper level is unpopulated
     lo, hi = pump_band()
     kw = {"kernel": _toy_kernel()} if mode.endswith("_group") else {}
+    if mode.endswith("_dmacro"):
+        kw["packets"] = "energy"
+        fa.level_energy_cm = np.array([0.0, 0.0, (NU_13 - NU_32) / C, NU_13 / C])
     res = run_mc(fa, R_CORE, R_OUT, T_EXP, lo, hi, 30000, mode, seed=2, eps=0.5, **kw)
     a = res["accounting"]
     assert abs(a["identity_residual"]) < 1e-12

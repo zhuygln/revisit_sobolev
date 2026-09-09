@@ -49,9 +49,10 @@ implementation; each names what it omits.)
   deactivation ∝ A β (ε_u − ε_l), internal downward jumps ∝ A β ε_l, no
   internal upward transitions (they need a radiation-field estimator, which
   arrives with WP8–10). Exits use the closed-form A β tables and never
-  re-enter the β chain; a chain-on variant exists only to show it fails the
-  cascade test. It is energy-conserving downward fluorescence, not a full
-  Lucy macroatom, and is named accordingly everywhere.
+  re-enter the β chain; the populated-level cascade test pins the single
+  application of β against the A β² prediction a second pass would give.
+  It is energy-conserving downward fluorescence, not a full Lucy macroatom,
+  and is named accordingly everywhere.
 - **Normalisation.** The geometric-series scale `core="equilibrium"` in
   `sobolev/photometry.py` is exact for i.i.d. relaunches, so it is the
   energy-conserving normalisation; it is wrapped in
@@ -107,8 +108,10 @@ ionization; the amplitude may move; a sensitivity table over the neutral-
 stage policy and the bulk species accompanies the number.
 
 Energy gates in every production row: identity residual < 10⁻¹²;
-`E_dep_cm/E_inj = 0` for `dmacro` legs; conserving/equilibrium scale ratio
-within 1 %; re-emitting core vs scale < 1 % once per benchmark.
+`E_dep_cm/E_inj = 0` for `dmacro` legs; the conserving/equilibrium scale
+ratio equals the Doppler work W/E_esc (a physical O(v/c) loss, reported,
+not re-radiated); re-emitting core vs the exact scale < 1 % per band once
+per benchmark.
 
 ## Layout
 

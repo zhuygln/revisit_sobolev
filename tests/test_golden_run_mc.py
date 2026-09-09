@@ -31,6 +31,14 @@ for p in (ROOT, ROOT / "tests", ROOT / "paper2/phase1", ROOT / "paper2/phase0/th
 
 from forest import synthetic_forest            # noqa: E402
 from forest_mc import MODES, run_mc            # noqa: E402
+
+# The Paper II/III modes whose histories are pinned. Paper IV modes (dmacro,
+# binned/dual thermal) are tested in their own files; they never enter here.
+PAPER3_MODES = ("sobolev_group", "sobolev_absorb", "expansion_absorb", "sobolev_thermal",
+                "expansion_thermal", "sobolev_branch", "sobolev_tla", "expansion_tla",
+                "expansion_branch", "binned_group", "binned_absorb", "expansion_group",
+                "dual_branch", "dual_group", "dual_absorb")
+assert set(PAPER3_MODES) <= set(MODES)
 from redistribution import RedistributionKernel  # noqa: E402
 import test_forest_mc as tfm                   # noqa: E402
 
@@ -68,7 +76,7 @@ def variants():
     """(case, mode, relativity, line_memory) for every pinned run."""
     out = []
     for case in CASES:
-        for mode in MODES:
+        for mode in PAPER3_MODES:
             for rel in (None, "worldline"):
                 out.append((case, mode, rel, False))
                 if mode.endswith("_group") and rel is None:
