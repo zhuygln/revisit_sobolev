@@ -40,7 +40,13 @@ with the opposite sign — which is Paper III's saturation boundary
 re-found on published states, not a contradiction; the combined verdict
 is Gray by the letter of the rule. The single-zone adequacy trigger fired
 on P1, so shell-resolved transport is a required check. Photon-number
-branching moved the *reference* by 2.5 mag in z (F50). Phases 4–7 proceed.
+branching moved the *reference* by 2.5 mag in z (F50). Phase 4 (F53): the
+Fontes-like limit holds on P2 — coarse opacity within 0.08 mag of resolved
+under thermal redistribution, the fluorescence swap opens the gap — and
+fails on P1, where coarse opacity is 3 mag wrong in g already. Phase 5
+(F54): the dual-role closure moves the error around, not away. Phase 7
+instrument in place (Saha: 99 % II at the 2–3 d zones, 41 % III at 1 d).
+Phases 6 and 7 runs and the neighbour-shell check are the open items.
 
 ## Design decisions taken in implementation
 
