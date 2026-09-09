@@ -1,0 +1,21 @@
+# solar_r: the solar-system r-process residual pattern, by MASS, for the lanthanides.
+# Source: Prantzos, Abia, Cristallo, Limongi & Chieffi 2020, MNRAS 491, 1832, Table 4
+# (solar elemental abundances from Lodders et al. 2009 as mass fractions, with the
+# s-, r- and p-process fractions of that study). w_mass = X_solar(mass fraction) x f_r.
+# Transcribed 2026-09-09 from arXiv:1911.02545 (pypdf text extraction, checked by eye).
+# Columns: Z, symbol, w_mass (unnormalised), X_solar_mass, f_r
+57,La,3.480e-10,1.74e-09,0.200
+58,Ce,6.704e-10,4.53e-09,0.148
+59,Pr,3.088e-10,6.64e-10,0.465
+60,Nd,1.301e-09,3.38e-09,0.385
+61,Pm,0.0,0.0,0.0
+62,Sm,7.117e-10,1.10e-09,0.647
+63,Eu,3.899e-10,4.10e-10,0.951
+64,Gd,1.294e-09,1.55e-09,0.835
+65,Tb,2.561e-10,2.76e-10,0.928
+66,Dy,1.525e-09,1.80e-09,0.847
+67,Ho,3.806e-10,4.11e-10,0.926
+68,Er,9.588e-10,1.20e-09,0.799
+69,Tm,1.639e-10,1.88e-10,0.872
+70,Yb,6.954e-10,1.22e-09,0.570
+71,Lu,1.457e-10,1.83e-10,0.796

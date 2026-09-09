@@ -30,6 +30,7 @@ __pycache__/
 data/*
 !data/README.md
 !data/filters/
+!data/abundances/
 data/filters/__pycache__/
 outputs/
 *.log
