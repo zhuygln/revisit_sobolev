@@ -2711,6 +2711,14 @@ and no more is claimed: plausibility, not a fit.
 
 ### 4.40 The M–v–X_lan grid: the closure error on a physically powered kilonova (F43), and the Gate 2 verdict (F44)
 
+*Relabelled 2026-09-09 (Paper IV Phase 0): the composition parameter of this
+grid is the equal four-ion fraction X_4Ln = X_La + X_Ce + X_Pr + X_Nd, and the
+grid is a controlled fixed-atmosphere closure experiment (one zone, frozen
+LTE populations, photon-number branching). The manuscript, tables and
+figures write X_4Ln; the prose below, the JSON key `x_lan` and the file
+names keep the original spelling as part of the frozen record. Tag
+`paper3-freeze-x4ln`; `paper3-freeze` is the original freeze.*
+
 Drivers: `paper3/phase12_grid/grid.py` (one model), `run_grid.py` (the 27 in
 parallel), `sensitivity.py` (Gate 2), `grid_table.py` and `figures.py` (tables
 and Figs 2–4). Data: `paper3/phase12_grid/grid/model_M*_v*_X*.json` (27),
@@ -4138,7 +4146,7 @@ the second occurrence of the commit-10 failure. Restored (main text 2981 →
 # environment
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]" h5py
-pytest                    # 350 passed (2026-09-03)
+pytest                    # 419 passed (2026-09-09)
 
 # data (once): Zenodo 19335084 -> data/, see data/README.md
 # SEDONA (once): see lab_notebook.md "SEDONA build" entry

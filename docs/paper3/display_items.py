@@ -58,7 +58,7 @@ LEGC = {"ref": OI["black"], "A_redist": OI["green"], "B_opacity": OI["sky"],
 LEGN = {"ref": "reference", "A_redist": "A (grouped $R_{ij}$)", "B_opacity": "B (expansion opacity)",
         "C_both": "C (both)", "C_binned": "C$_{\\rm bin}$ (binned $\\Sigma\\tau$)"}
 XC = {0.001: OI["blue"], 0.01: OI["purple"], 0.1: OI["red"]}
-XN = {0.001: r"$X_{\rm lan}=10^{-3}$", 0.01: r"$X_{\rm lan}=10^{-2}$", 0.1: r"$X_{\rm lan}=10^{-1}$"}
+XN = {0.001: r"$X_{\rm 4Ln}=10^{-3}$", 0.01: r"$X_{\rm 4Ln}=10^{-2}$", 0.1: r"$X_{\rm 4Ln}=10^{-1}$"}
 VMK = {0.05: "v", 0.1: "o", 0.2: "^"}
 MSZ = {0.003: 10, 0.01: 18, 0.03: 30}
 BANDC = dict(zip(BANDS, [OI["purple"], OI["blue"], OI["sky"], OI["green"], OI["yellow"], OI["orange"], OI["red"]]))
@@ -215,7 +215,7 @@ def fig2(dest, out_dir):
                             mfc=XC[x] if m != 0.003 else "white", mew=0.7, ecolor="0.4", elinewidth=0.6, capsize=1.5)
                 ax.plot(k + jit, pts[(m, v, x)]["C_binned"]["worst_dcolor"], marker="_", color=LEGC["C_binned"], ms=5, mew=0.9)
     ax.set_xticks(range(3)); ax.set_xticklabels([r"$10^{-3}$", r"$10^{-2}$", r"$10^{-1}$"])
-    ax.set_xlabel(r"$X_{\rm lan}$"); ax.set_ylabel(r"largest live $|\Delta$colour$|$ (mag)")
+    ax.set_xlabel(r"$X_{\rm 4Ln}$"); ax.set_ylabel(r"largest live $|\Delta$colour$|$ (mag)")
     ax.set_ylim(0, None)
     h = [Line2D([], [], marker=VMK[v], color="k", ls="", ms=3.5, label=f"$v={v:g}c$") for v in VS]
     h += [Line2D([], [], marker="o", color="k", ls="", ms=np.sqrt(MSZ[m]) * 1.1, mfc="white" if m == 0.003 else "k", label=f"$M={m:g}$") for m in MS]
@@ -237,10 +237,10 @@ def fig2(dest, out_dir):
     for k in range(3):
         bx.axvspan(9 * k - 0.5, 9 * k + 8.5, color=XC[XS[k]], alpha=0.07, lw=0)
     bx.axhline(0, color="k", lw=0.4)
-    bx.set_xticks([4, 13, 22]); bx.set_xticklabels([r"$X_{\rm lan}=10^{-3}$", r"$10^{-2}$", r"$10^{-1}$"])
+    bx.set_xticks([4, 13, 22]); bx.set_xticklabels([r"$X_{\rm 4Ln}=10^{-3}$", r"$10^{-2}$", r"$10^{-1}$"])
     bx.set_xlim(-0.7, 26.7)
     bx.set_ylabel(r"$\Delta$colour (C $-$ reference, mag)")
-    bx.set_xlabel(r"grid point (within each $X_{\rm lan}$: $M$ outer, $v$ inner, ascending)")
+    bx.set_xlabel(r"grid point (within each $X_{\rm 4Ln}$: $M$ outer, $v$ inner, ascending)")
     bx.legend(loc="lower left", ncol=2)
     letter(bx, "b", dx=-0.13)
 

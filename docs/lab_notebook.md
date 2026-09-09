@@ -2613,6 +2613,62 @@ the checker strips comments before counting. Now `check_literals` refuses
 any text after the mark, and I read the built PDF's extracted text for the
 edited sentences rather than trusting the `.tex`.
 
+## 9ax. Paper IV opens: golden histories, a bit-identical sampler, and a relabel that moved no number (2026-09-09)
+
+The PI reorganised the project around one question -- does the closure
+error survive energy-conserving transport in a coherent ejecta state? --
+and sent the program as a thirteen-phase plan, then reviewed the
+implementation plan I drafted from it with ten corrections. Both are in
+`paper4/` verbatim; the corrections are design decisions in its README.
+The two that changed the most: the clean causal gate is B2 - R2 (grouped
+opacity with the *same* detailed transport), not the kernel leg; and the
+Phase 2 atom is a *downward* macroatom, to be named as such until
+radiation-field estimators exist.
+
+*Golden hashes before any edit.* `paper3/freeze.py --check` never re-runs
+transport, so nothing guarded `run_mc` numerically except statistical
+physics tests. `tests/test_golden_run_mc.py` now pins SHA-256 of the packet
+histories (escape frequencies, fates, weights, event and first-line
+counters) for all 17 modes on the three-level atom and a 60-line synthetic
+forest, classical and worldline, plus the line-memory variants: 68 runs,
+4.5 s. Taken at e858f6d, before the sampler change below.
+
+*The CSR sampler.* The chain loop drew each packet's downward line inside
+`for uval in np.unique(cur_up[todo])` -- one Python iteration per distinct
+upper level per chain step, ~10 us each. Ce II reaches ~2000 distinct
+uppers per step; a full La-Yb pattern would reach ~20k, i.e. 0.2 s per step
+before any physics. The tables are now flat CSR arrays grouped by upper
+level with one global `searchsorted` on the key `rank(u) + cum`. Adding the
+integer rank can round `cum` and `v` onto the same double, so the global
+answer is corrected against the within-segment cumulative afterwards; the
+result is bit-identical to the per-level draw, not statistically equal.
+Measured on Ce II at the grid's central density (n_op = 171,409; 5,000
+packets; 496,584 interactions): reference leg 3.1 s -> 1.7 s, identical
+hashes. The per-level dicts survive as lazy views for the tests that read
+them.
+
+*The relabel.* The grid's composition parameter is now written X_4Ln =
+X_La + X_Ce + X_Pr + X_Nd in the manuscript, SI, tables and figures, with
+one Methods sentence calling the grid a controlled fixed-atmosphere closure
+experiment. The JSON key `x_lan`, the file names and the point keys stay:
+renaming them breaks the harness test, the freeze manifest and every stored
+sensitivity file. Zero of 146 headline numbers moved; `freeze.py --check
+--strict` exits 0. Per the PI, the tag is *not* moved: `paper3-freeze`
+stays on the original, `paper3-freeze-x4ln` marks this one.
+
+*Two things that bit.* (1) The manuscript's structure check fails at HEAD
+too -- the affiliation and repository-URL placeholders are unresolved
+`\todo`s -- so `make` has ended in that failure since 2026-09-03; the PDFs
+still build. Not mine to resolve; noted. (2) After a `git stash` /
+`stash pop` round trip the relabelled `latex_tables.py` regenerated the
+*old* header: the stash had restored the HEAD file (same byte length),
+`check_structure.py` imported it and wrote a `.pyc`, and the pop landed in
+the same second, so the cache validated against the new source by mtime
+and size. `rm -rf docs/paper3/__pycache__` fixed it. Never trust a
+same-length edit through a stash.
+
+Suite: 419 passed (was 350; 69 golden cases).
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,
