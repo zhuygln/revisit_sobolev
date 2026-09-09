@@ -108,6 +108,8 @@ repository URL are still placeholders.
 | F52 | **On the published AT2017gfo 3.4-d state the error is +0.19 mag in g with the opposite sign (Red): the saturation sign change is re-found on published states; the verdict is benchmark-dependent.** The single-zone adequacy trigger fires on P1 | [§4.47](docs/results_report.md) |
 | F53 | **The Fontes-like limit holds only where the forest is thin.** On the published AT2017gfo state coarse opacity matches the resolved one under thermal redistribution to ≤ 0.08 mag and the fluorescence swap alone opens the 0.2 mag gap; on the lanthanide-rich state coarse opacity is 3 mag wrong in g under thermal redistribution already | [§4.48](docs/results_report.md) |
 | F54 | **A Morag-type dual-role closure (EP93 mean free path, net absorption capped at the expansion rate) moves the closure error around but does not remove it:** g −4.65 → −3.62 mag on the lanthanide-rich state with z unchanged at −2.9, and a doubled g error on the thin state | [§4.49](docs/results_report.md) |
+| F55 | **Sign and class of the closure error hold on every shell around the photosphere; the single-zone amplitude in one band is uncertain by ~1 mag** (z −1.4 to −3.7 across a factor 5 in saturation, g −4 to −5, K +0.6 to +1.3, controls ≤ 0.07) | [§4.50](docs/results_report.md) |
+| F57 | **Gate 3 passes: LTE Saha ionization (NIST energies, GSI partition functions) leaves the class and signs intact;** the II-only assumption was right at the Gate 2 zones (99 % II) and at 1 d, with 60 % Ce III, the error is z −2.7 / K +1.9 | [§4.52](docs/results_report.md) |
 
 Full write-up with figures and numbers:
 **[docs/results_report.md](docs/results_report.md)**.

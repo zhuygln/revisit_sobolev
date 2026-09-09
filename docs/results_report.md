@@ -4213,6 +4213,45 @@ B₂, Bbin₂; data `paper4/phase5_dual_role/dual_*.json`, 3 × 3×10⁵ packets
 
 **F54 — Capping the net absorption at the expansion rate moves the closure error around; it does not remove it.** On P1 the cap takes 1 mag off the g excess and turns the K deficit into a small excess, but z is unchanged at −2.9 and J and H get worse (−2.3, −1.7): the coarse closure with a physically motivated reprocessing rate is still 2–3.6 mag too bright from g to J. On the thin P2 state it doubles the g error (+0.19 → +0.39). This is the plan's second outcome: fixing the emissivity-rate problem alone is insufficient, because the fluorescence network carries non-local wavelength information that no per-bin quantity holds (F30/F32). Not claimed: that this is Morag's intended combination — the paper defines the two quantities and the cap, not the Monte Carlo rule.
 
+### 4.50 Paper IV, the adequacy check: the closure error on the neighbouring shells of P1 (F55)
+
+Driver: `paper4/phase2_energy/legs.py --shell 27|29`; data
+`paper4/phase3_legs/neighbour_P1_t2_s{27,29}.json` (3 × 3×10⁵ packets),
+against the zone's `legs_P1_t2_s28_n300k.json`. The single-zone adequacy
+trigger fired at 2 d (neighbour saturation 1.95× and 0.40× the zone's);
+this is the robustness check it demanded.
+
+| shell | v (c) | T (K) | ρ (g cm⁻³) | n_op | S_band | B₂ − R₂ (g r i z J H K) | max |A₂ − R₂| |
+|---|---|---|---|---|---|---|---|
+| 27 | 0.097 | 3894 | 6.6×10⁻¹⁵ | 629 898 | 55 924 | −4.91 −4.37 −4.07 −3.73 −2.75 −1.64 +0.56 | 0.07 |
+| 28 (zone) | 0.101 | 3401 | 3.3×10⁻¹⁵ | 374 989 | 28 732 | −4.65 −3.77 −3.41 −2.88 −1.79 −0.47 +1.27 | 0.05 |
+| 29 | 0.104 | 3076 | 1.3×10⁻¹⁵ | 222 522 | 11 404 | −4.02 −2.92 −2.49 −1.43 −0.21 +0.37 +1.03 | 0.05 |
+
+**F55 — The closure error is the same sign and the same class on every shell around the photosphere; its amplitude in a given band is set by where the band sits relative to the saturation front.** From shell 29 to 27 (a factor 5 in saturation) the blue error stays at −4 to −5 mag in g, the near-infrared crossover moves outward (H changes sign between shells 28 and 29, K stays +0.6 to +1.3), and z runs −1.4 to −3.7. The control stays ≤ 0.07 mag. The single-zone amplitude in one band is therefore uncertain by ~1 mag across the line-forming region — the shell-resolved transport of Phases 8–10 is where that number becomes a prediction — while Gate 2's class, signs and magnitude scale are not in question.
+
+### 4.52 Paper IV, Phase 7 and Gate 3: LTE Saha ionization (F57)
+
+Instrument: `sobolev/ionization.py` (§4.48's commit), `paper4/phase7_ionization/saha_states.py`
+(the Phase 1 states re-ionized shell by shell: NIST ASD 5.12 ionization
+energies, GSI partition functions for II and III, the neutral stage by the
+`scale` policy, the non-lanthanide bulk as one proxy species, charge
+neutrality by bisection), then `legs.py --stages II,III` on the 26-ion
+blend (27.6 M lines, 5.2 GB). Data: `paper4/phase1_benchmarks/*_saha.json`,
+`paper4/phase7_ionization/saha_*.json` (3 × 3×10⁵ packets).
+
+| state | T (K) | n_e (cm⁻³) | ⟨f_II⟩ / ⟨f_III⟩ (Ce) | B₂ − R₂ II+III (z, K) | II only (z, K) | max |A₂ − R₂| |
+|---|---|---|---|---|---|---|
+| P1, 1 d, shell 29 | 4411 | 7.6×10⁷ | 0.40 / 0.60 | −2.69, +1.91 (g −4.20 … H −0.12) | −3.21, +1.22 | 0.04 |
+| P1, 2 d, shell 28 | 3401 | 1.9×10⁷ | 0.999 / 0.001 | −2.83, +1.32 | −2.88, +1.27 | 0.08 |
+| P2, 3.4 d | 3200 | 1.4×10⁵ | 0.989 / 0.011 | g +0.21, r +0.14 | g +0.19, r +0.12 | 0.01 |
+
+(P1 at 3 d: 100 % II; at 5 d, 2341 K, a 5 % neutral fraction appears under
+the `scale` policy — the transport carries no neutral opacity.)
+
+**Gate 3, pre-declared** (`paper4/README.md`): the B-vs-R class and colour signs survive the ionization change; the amplitude may move.
+
+**F57 — Gate 3 passes: the closure error survives LTE ionization, and the fixed-II assumption was right where Gate 2 was decided.** At the 2–3 d P1 zones and on P2 the lanthanides are 99 % singly ionised, so the Phase 3 numbers move by ≤ 0.05 mag. At P1's 1 d zone 60 % of the cerium (41 % of the lanthanides by number) is doubly ionised: the opacity-line count falls from 744k to 594k, the reference brightens by 0.4–0.5 mag in every band, and the closure error keeps its class and signs at −2.7 mag in z and +1.9 in K. The controls stay ≤ 0.08 mag. Not tested: the bulk proxy and the neutral-stage policy (a sensitivity table is the open item), and the P2 question of §4.47 — whether AT2017gfo's line-forming region is thin because of its composition or its ionization — is answered for LTE: it is thin at 3200 K in II as in II + III.
+
 ## 5. Findings register
 
 | # | Finding | Where |
@@ -4271,6 +4310,8 @@ B₂, Bbin₂; data `paper4/phase5_dual_role/dual_*.json`, 3 × 3×10⁵ packets
 | F52 | **On the published AT2017gfo 3.4-d state (P2, X_LN = 2.5×10⁻³, S_band = 8.6) the closure error is +0.19 mag in g with the opposite sign and Gate 2 reads Red; the F35/F40 sign change is re-found on published states.** The verdict is benchmark-dependent; the single-zone adequacy trigger fires on P1 (neighbour saturation 0.40–1.95×), so shell-resolved transport is a required check | §4.47 |
 | F53 | **The Fontes-like limit holds on the thin state and fails on the saturated one.** On P2 the expansion/binned opacities reproduce the resolved calculation under complete thermal redistribution to ≤ 0.08 mag and the single swap to the downward macroatom opens F52's +0.21 mag gap in g; on P1 the coarse opacity is already 3 mag wrong in g and 1.8 in K under thermal redistribution, and fluorescence widens the blue error to −4.6 mag. Line-binned adequacy is a property of the thin regime, not of thermal redistribution | §4.48 |
 | F54 | **The dual-role closure (EP93 mean free path, net absorption capped at the expansion rate) does not recover the resolved spectrum.** On P1 it trims g from −4.65 to −3.62 mag and flips K, leaves z at −2.9 and worsens J/H; on P2 it doubles the g error. Fixing the emissivity rate alone is insufficient; fluorescence carries non-local wavelength information | §4.49 |
+| F55 | **The closure error keeps its sign and class on every shell around P1's photosphere (saturation 1.1×10⁴–5.6×10⁴): g −4 to −5 mag, K +0.6 to +1.3, z −1.4 to −3.7; the crossover band moves with the saturation front.** The single-zone amplitude in one band is uncertain by ~1 mag; the class is not | §4.50 |
+| F57 | **Gate 3 passes: LTE Saha ionization leaves the closure error's class and signs intact.** 99 % II at the 2–3 d zones and on P2 (≤ 0.05 mag change); at P1's 1 d zone 60 % of Ce is III and the error is −2.7 (z), +1.9 (K) with the control ≤ 0.04 | §4.52 |
 
 ## 6. Caveats and limitations
 
