@@ -72,7 +72,12 @@ implementation; each names what it omits.)
   2026 3.4-d model (MNRAS 548, stag748: v_in = 0.15c, v_out = 0.35c,
   ρ₀ = 4×10⁻¹⁵ g cm⁻³, ρ ∝ v⁻³, T = 3200 K, X_LN ≈ 2.5×10⁻³). Every value is
   ledgered in `data/README.md` before use; figures are a sanity check, not
-  the acceptance criterion.
+  the acceptance criterion. Two inputs are **provisional** and marked so in
+  the ledger and the state metadata until the PI confirms them at Gate 1:
+  P1's lanthanide fraction (0.10; neither the xkn paper nor Lippuner &
+  Roberts 2015 tabulates it) and both lanthanide patterns (the solar
+  r-process residuals of Prantzos et al. 2020; the Ye−0.29a element list
+  is in the 2022 paper's supplement).
 - **The Morag-type treatment (D) is a dual-role closure**: the transport
   quantity (EP93 or Στ per bin) sets where encounters happen, the capped
   quantity `min[κ_l, 1/(ρct)]` limits net energy reprocessing at an
@@ -121,7 +126,8 @@ phases. Directories appear when their phase starts.
 ```
 plan.md                   the program as received, kept unedited         --
 plan_review.md            the PI's review of the implementation plan       --
-phase1_benchmarks/        EjectaState builders, P1/P2 states, Gate 1     Phase 1
+phase1_benchmarks/        build.py -> P1_t{1,2,3,5}.json, P2_t3.4.json,
+                          gate1_*.png; Gate 1 in tests/test_benchmarks.py  Phase 1
 phase2_energy/            frame tests, toy atoms, the R1/R1E/R2/B1/B1E/B2
                           ladder                                          Phases 2, 2A, 2B
 phase3_legs/              R2/A2/B2/C2 on P1 and P2, the Gate 2 verdict    Phase 3
