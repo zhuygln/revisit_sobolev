@@ -298,3 +298,19 @@ def test_zoned_from_state_dataset_tag_selects_an_independent_line_list():
     jplt = ZonedAtom.from_state(st, [1], stages=("III",), tau_min=1e-3, dataset="jplt")
     assert jplt.ions == ["60NdIII@jplt"] and gsi.ions == ["60NdIII"] and jplt.n_lines_total != gsi.n_lines_total
     assert jplt.n_opacity > 0 and jplt.dataset == "jplt"
+
+
+def test_reflecting_core_keeps_frequency_and_energy():
+    """core='reflect' (Phase 10): a packet that returns to the inner boundary
+    leaves it again with the same frequency and weight; the identity holds
+    and nothing is booked to the core."""
+    fa, a = forest()
+    z2 = zoned(a, 2, np.array([R_CORE, 2.0 * R_CORE, R_OUT]))
+    lo, hi = tfm.pump_band()
+    kw = dict(seed=4, packets="energy", t_core=6000.0, launch_weight="energy")
+    r = run_mc(z2, R_CORE, R_OUT, T_EXP, lo, hi, 20000, "sobolev_dmacro", core="reflect", **kw)
+    a_ = r["accounting"]
+    assert abs(a_["identity_residual"]) < 1e-10 and r["n_core"] == 0 and r["n_core_passes_total"] > 0
+    assert abs(a_["E_esc"] + a_["E_abs"] + a_["E_dep_lab"] - a_["E_inj"]) / a_["E_inj"] < 1e-10
+    r_ab = run_mc(z2, R_CORE, R_OUT, T_EXP, lo, hi, 20000, "sobolev_dmacro", core="absorb", **kw)
+    assert r["accounting"]["E_esc"] > r_ab["accounting"]["E_esc"]      # the mirror returns energy outward

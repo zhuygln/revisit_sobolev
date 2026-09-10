@@ -630,7 +630,10 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
         absorbs it. A VALIDATION mode for the geometric-series normalisation
         (`photometry._scale(core="equilibrium")` is exact for i.i.d.
         relaunches); it costs x1/(1 - f_return) and is not for production.
-        Requires packets="energy".
+        Requires packets="energy". "reflect" -- a lossless mirror: the packet
+        keeps its frequency and weight and leaves radially outward (Phase 10,
+        the "no thermalisation inside" bracket for an interior the transport
+        does not contain; "reemit" is the "complete thermalisation" bracket).
     eps_k, thermal_k : the downward macroatom's thermal channel -- with
         probability eps_k an activation becomes a k-packet, which is either
         booked as deposit ("deposit": fate 3, E_abs) or re-emitted with the
@@ -726,9 +729,10 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
     if packets not in ("photon", "energy"):
         raise ValueError(f"packets must be 'photon' or 'energy', got {packets!r}")
     energy = packets == "energy"
-    if core not in ("absorb", "reemit"):
-        raise ValueError(f"core must be 'absorb' or 'reemit', got {core!r}")
-    reemit = core == "reemit"
+    if core not in ("absorb", "reemit", "reflect"):
+        raise ValueError(f"core must be 'absorb', 'reemit' or 'reflect', got {core!r}")
+    reemit = core in ("reemit", "reflect")
+    reflect = core == "reflect"
     if reemit and (not energy or t_core is None):
         raise ValueError("core='reemit' needs packets='energy' and a Planck core (t_core)")
     if thermal_k not in ("deposit", "reemit"):
@@ -1161,10 +1165,18 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
                     r[rl] = float(r_core)
                 if zoned:
                     shell_of[rl] = 0; s_acc[rl] = 0.0
-                mu[rl] = np.sqrt(rng.uniform(0.0, 1.0, rl.size))
-                nu_new = sample_launch_energy(rng, nu_min, nu_max, rl.size, t_core)
-                w[rl] = w[rl] * (nu_old / nu_new)
-                nu[rl] = nu_new
+                if reflect:
+                    # a lossless mirror at the inner boundary: the packet keeps
+                    # its frequency and weight and leaves radially outward
+                    # with the direction it arrived at, mirrored (Phase 10:
+                    # the "no thermalisation inside" bracket of an interior
+                    # the transport does not contain)
+                    mu[rl] = np.abs(mu[rl])
+                else:
+                    mu[rl] = np.sqrt(rng.uniform(0.0, 1.0, rl.size))
+                    nu_new = sample_launch_energy(rng, nu_min, nu_max, rl.size, t_core)
+                    w[rl] = w[rl] * (nu_old / nu_new)
+                    nu[rl] = nu_new
                 if not sobolev:
                     tau_r[rl] = rng.exponential(1.0, rl.size)
                     if mem_k is not None:
