@@ -4521,9 +4521,10 @@ bookkeeping correction ‖R₁ − R₂‖ exceeds half the closure's own
 | P1, 3 d (shell 27) | z, H, K | −0.15, −0.16, −0.09 | +0.45, +0.61, +0.30 | +0.04, 0.00, +0.02 | | Red |
 | P1, 5 d (shell 26) | z, H, K | −0.19, −0.19, −0.06 | +0.38, +0.49, +0.16 | −0.03, −0.02, 0.00 | | Red |
 | P2, 3.4 d | g … K | +0.11 (g) … −0.02 (K) | +0.15 (g) | ≤ 0.02 | 0.26 / 0.31 | Red |
-| P1r1 (Ye-0.21a at X_LN = 0.30), P1r2 (solar_r at 0.11), 2 d | ROBUST_ROW |
+| P1r1 (Ye-0.21a at X_LN = 0.30), 2 d | K | −0.14 | +0.55 | 0.00 | | Red |
+| P1r2 (solar_r at 0.11), 2 d | z, K | −0.19, −0.12 | +0.29, +0.30 | −0.02, −0.01 | | Red |
 
-**Gate 2 is Red on every state and epoch: the grouped-opacity closure is
+**Gate 2 is Red on every state, epoch and composition pattern: the grouped-opacity closure is
 within 0.2 mag of the energy-conserving reference wherever it was tried,
 and the bookkeeping correction R₁ → R₂ (0.9–2.5 mag on P1) is 12–60 times
 the closure's own error.** The binned closure keeps a +0.2 to +0.6 mag

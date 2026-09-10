@@ -58,7 +58,7 @@ transport is Red on every state and epoch** (F61, §4.56): P1 1–5 d
 B₂ − R₂ z −0.14 to −0.19, K −0.06 to −0.14; P2 g +0.11; 4/6/12/23 shells
 and P2's 32 agree; the closure's error moves ≤ 0.05 mag with its own bin
 width and line cut (F58). The program's question is answered in the
-negative. Running: the two robustness patterns at 2 d. Open, at the PI's
+negative. The two robustness patterns at 2 d (Ye-0.21a at 0.30, solar_r at 0.11) are Red too (K −0.14; z −0.19, K −0.12). Open, at the PI's
 discretion now that the effect is 0.2 mag: Phases 9–10 (estimators, full
 macroatom, B_eq − R_eq), the Phase 7 sensitivity table, Phase 11, Phase 12;
 and the Paper III erratum. Photon-number branching still moves
