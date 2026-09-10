@@ -63,11 +63,16 @@ FONTES = dict(name="Fontes2020C", m_msun=1.4e-2, v_max_c=0.25, t0_d=4.0, rho0=2.
 LEGS = ("Rth", "Bth", "Bbinth", "R2", "B2", "Bbin2")
 
 
-def build_fontes(t_d=4.0, n_shell=64, saha=True):
+def build_fontes(t_d=4.0, n_shell=64, saha=True, t_s=None, T_override=None):
     """The Appendix C ejecta at epoch t_d as an EjectaState (uniform shells in
     v from 0 to v_max; the profile evaluated as cell volume averages for rho
-    and at cell centres for T, as SuperNu does), pure Nd, LTE Saha."""
-    t = t_d * DAY
+    and at cell centres for T, as SuperNu does), pure Nd, LTE Saha.
+    `t_s` (s) sets the epoch exactly (the light-curve driver's grid floats;
+    t_d * DAY can differ by an ulp and would move r_edges); `T_override`
+    (per-shell K) replaces the prescribed profile before Saha (the
+    radiation-temperature rule of Phase 10b)."""
+    t = float(t_s) if t_s is not None else t_d * DAY
+    t_d = t / DAY
     v_max = FONTES["v_max_c"] * C
     scale_rho = (t / (FONTES["t0_d"] * DAY)) ** -3
     scale_T = (t / (FONTES["t0_d"] * DAY)) ** -1
@@ -80,6 +85,8 @@ def build_fontes(t_d=4.0, n_shell=64, saha=True):
         vc = 0.5 * (v_edges[i] + v_edges[i + 1])
         T[i] = FONTES["T0"] * scale_T * (1.0 - (vc / v_max) ** 2)
     rho = np.maximum(rho, 1e-30); T = np.maximum(T, 300.0)
+    if T_override is not None:
+        T = np.maximum(np.asarray(T_override, float), 300.0)
     X = {"Nd": np.ones(n_shell)}
     f_ion = {"Nd II": np.ones(n_shell), "Nd III": np.zeros(n_shell)}
     st = ej.EjectaState(t=t, v_edges=v_edges, rho=rho, T_gas=T, T_rad=T.copy(), X=X, f_ion=f_ion, Y_e=None,

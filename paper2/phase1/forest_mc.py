@@ -607,6 +607,7 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
            t_core=None, beta_on_expansion=False, exp_emit="bin",
            launch_weight="photon", eps=1.0, relativity=None,
            kernel=None, collect_events=False, line_memory=False, launch="core", launch_core_frac=0.0, macro_kw=None,
+           t_stop=None, resume=None, launch_energy=None, max_events=None,
            chain_max=10000, chain_overflow="raise", wall_s=None,
            packets="photon", core="absorb", core_max_passes=200,
            eps_k=0.0, thermal_k="reemit", a_cut=None, reprocess=None, tau_cap=None):
@@ -692,6 +693,24 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
     """Propagate packets from the core through the shell, in lockstep.
 
     mode : one of MODES.
+    t_stop, resume, launch_energy, max_events : the TIME-SLAB contract
+        (Paper IV Phase 10b, worldline only). `t_stop` (s): every packet whose
+        clock reaches C*t_stop is paused exactly there (fate 4; r, mu advanced
+        along the ray, ctime = C*t_stop assigned, s_acc = 0, shell_of = the
+        shell at the pause) and returned with its state. `resume`: a dict of
+        per-packet arrays (r, mu, nu, w, ctime[, shell_of, n_core_passes])
+        carried in from a previous call, prepended to the n_packets NEW
+        packets; carried packets keep w and nu (E_inj = E_carried_in +
+        E_inj_new); the bin legs redraw tau_r (memoryless). `launch_energy`
+        (erg, comoving): the new packets are equal-energy packets summing to
+        it; with launch='volume' under worldline their injection time is
+        uniform in [t_exp, t_stop] (or t_exp when no t_stop), the position
+        drawn at the packet's own epoch, the direction isotropic in the
+        comoving frame and aberrated to the lab. `max_events`: a packet with
+        that many events in this call is booked as fate 5 "capped" (E_capped,
+        reported, never silent). Escapes record ct_esc (light-time at the
+        outer boundary) and mu_esc under worldline. At the defaults every
+        branch is skipped and the histories are unchanged.
     launch : "core" (packets start on the inner boundary with the core's
         Planck spectrum, the default of every Paper II-IV leg) or "volume"
         (zoned atoms only: packets start inside the shells in proportion
@@ -726,6 +745,16 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
     if relativity not in (None, "worldline"):
         raise ValueError(f"relativity must be None or 'worldline', got {relativity!r}")
     wl = relativity == "worldline"
+    pausing = t_stop is not None
+    if (pausing or resume is not None or launch_energy is not None) and not wl:
+        raise ValueError("time slabs (t_stop / resume / launch_energy) need relativity='worldline'")
+    if pausing and t_stop <= t_exp:
+        raise ValueError(f"t_stop must exceed t_exp: {t_stop} <= {t_exp}")
+    if launch_energy is not None and launch_weight != "energy":
+        raise ValueError("launch_energy needs launch_weight='energy'")
+    if resume is not None and packets != "energy":
+        raise ValueError("resume carries energy packets: packets='energy'")
+    ct_stop = C * t_stop if pausing else None
     if packets not in ("photon", "energy"):
         raise ValueError(f"packets must be 'photon' or 'energy', got {packets!r}")
     energy = packets == "energy"
@@ -877,7 +906,9 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
         # launch in proportion to B_nu (energy); each packet then stands for
         # w ~ 1/nu photons, normalized to n_packets photons in total
         nu_launch = sample_launch_energy(rng, nu_min, nu_max, n_packets, t_core)
-        w = 1.0 / nu_launch; w *= n_packets / w.sum()
+        w = 1.0 / nu_launch
+        if n_packets > 0:
+            w *= n_packets / w.sum()
     else:
         raise ValueError("launch_weight must be 'photon' or 'energy'")
     if launch == "core":
@@ -913,9 +944,55 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
         w = 1.0 / nu_launch
         # equal-energy packets carrying the shells' shares of the heating: the
         # total energy is n_packets photons' worth at the mean launch frequency
-        w *= n_packets / w.sum()
+        if n_packets > 0:
+            w *= n_packets / w.sum()
+        if wl:
+            # the injection epoch: uniform in the slab (or the epoch itself),
+            # the shell's radii at that epoch, the comoving Planck draw
+            # emitted isotropically in the comoving frame and aberrated to the
+            # lab (the re-emission formula of every worldline leg)
+            ctime_new = (ct + rng.uniform(0.0, 1.0, n_packets) * (ct_stop - ct)) if pausing else np.full(n_packets, ct)
+            r = r * (ctime_new / ct)
+            bl_ = r / ctime_new
+            gl_ = 1.0 / np.sqrt(1.0 - bl_ * bl_)
+            mu_c_ = mu.copy()
+            den_ = 1.0 + bl_ * mu_c_
+            mu = (mu_c_ + bl_) / den_
+            nu_launch_cm = nu_launch.copy()
+            nu_launch = nu_launch_cm * gl_ * den_
     else:
         raise ValueError(f"launch must be 'core' or 'volume', got {launch!r}")
+    if launch_energy is not None:
+        # equal-energy packets: sum(w h nu_cm) == launch_energy to roundoff
+        nu_ref = nu_launch_cm if (wl and launch == "volume") else nu_launch
+        w = (launch_energy / max(n_packets, 1)) / (H * nu_ref)
+    if not (wl and launch == "volume"):
+        nu_launch_cm = nu_launch.copy()
+        ctime_new = np.full(n_packets, ct) if wl else None
+    n_new = n_packets
+    if resume is not None:
+        # carried packets first: they keep w and nu, and their "launch"
+        # values are (w, nu) at resume so E_inj = E_carried_in + E_inj_new
+        rc = resume
+        n_res = int(np.asarray(rc["r"]).size)
+        if n_res:
+            ct_res = np.asarray(rc["ctime"], float)
+            if np.any(ct_res < ct * (1.0 - 1e-12)):
+                raise ValueError("resume: carried packets are older than t_exp")
+        r = np.concatenate([np.asarray(rc["r"], float), r]); mu = np.concatenate([np.asarray(rc["mu"], float), mu])
+        nu_res = np.asarray(rc["nu"], float); w_res = np.asarray(rc["w"], float)
+        nu_launch = np.concatenate([nu_res, nu_launch]); nu_launch_cm = np.concatenate([nu_res, nu_launch_cm])
+        w = np.concatenate([w_res, w])
+        ctime_new = np.concatenate([np.asarray(rc["ctime"], float), ctime_new])
+        if zoned:
+            sh_res = np.asarray(rc.get("shell_of", np.zeros(n_res)), np.int32)
+            shell_launch = np.concatenate([sh_res, (shell_launch if shell_launch is not None else np.zeros(n_new, np.int32))]).astype(np.int32)
+        ncp_res = np.asarray(rc.get("n_core_passes", np.zeros(n_res)), np.int32)
+        n_packets = n_res + n_new
+        carried = np.concatenate([np.ones(n_res, bool), np.zeros(n_new, bool)])
+    else:
+        n_res = 0; ncp_res = None
+        carried = np.zeros(n_packets, bool)
     w_launch = w.copy()          # the launch weights; `w` changes under energy packets
     nu = nu_launch.copy()
     alive = np.ones(n_packets, bool)
@@ -943,6 +1020,10 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
     # (w h nu_rest, comoving), core relaunches, k-packets and dead ends
     exit_energy = np.zeros(atom.n_lines_total)
     n_core_passes = np.zeros(n_packets, np.int32)
+    if ncp_res is not None and ncp_res.size:
+        n_core_passes[:n_res] = ncp_res
+    ct_esc = np.full(n_packets, np.nan)          # light-time at the outer boundary (worldline)
+    mu_esc = np.full(n_packets, np.nan)          # direction cosine there
     e_thermal = 0.0
     n_kpackets = 0
     n_dead_end = 0
@@ -972,12 +1053,18 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
     ev_in, ev_out, ev_w, ev_wout = ([], [], [], []) if collect_events else (None, None, None, None)
     # worldline transport: per-packet light-time clock and velocity boundaries
     if wl:
-        ctime = np.full(n_packets, ct)
+        ctime = ctime_new.astype(float) if ctime_new is not None else np.full(n_packets, ct)
         b_core_v, b_out_v = r_core / ct, r_out / ct
 
     t_wall0 = time.time() if wall_s is not None else None
     for step in range(max_steps):
         idx = np.flatnonzero(alive)
+        if max_events is not None and idx.size:
+            over = n_events[idx] >= max_events
+            if over.any():
+                ci_ = idx[over]
+                fate[ci_] = 5; alive[ci_] = False; nu_final[ci_] = nu[ci_]
+                idx = idx[~over]
         if idx.size == 0:
             break
         if t_wall0 is not None and step % 50 == 0 and time.time() - t_wall0 > wall_s:
@@ -1004,6 +1091,8 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
             s_res = np.full(n_i, np.inf); interact_candidate = np.zeros(n_i, bool)
             kk = np.zeros(n_i, np.int64); nu_target = np.empty(n_i)
             todo_c = np.arange(n_i)
+            s_stop_i = (ct_stop - cti) if pausing else None
+            paused_i = np.zeros(n_i, bool) if pausing else None
             for _cross in range(2 * n_sh + 2):
                 if todo_c.size == 0:
                     break
@@ -1029,15 +1118,17 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
                 if sobolev:
                     kq = key * (1.0 - 1e-12) if wl else np.where(fresh, key, key * (1.0 - 1e-12))
                     k = np.searchsorted(atom.op_nu, kq, side="left") - 1
-                    k = np.where(k >= 0, atom.op_nxt[sh[t], np.maximum(k, 0)], -1)
+                    k = (np.where(k >= 0, atom.op_nxt[sh[t], np.maximum(k, 0)], -1) if atom.n_opacity
+                         else np.full(t.size, -1))
                     has = k >= 0
                     kk_t = np.where(has, k, 0)
+                    nu_k = atom.op_nu[kk_t] if atom.n_opacity else np.full(t.size, np.inf)   # no lines: no resonance
                     if wl:
-                        y = ni[t] / atom.op_nu[kk_t]
+                        y = ni[t] / nu_k
                         z_res = 0.5 * Z0[t] * (y * y - 1.0) + p2[t] / (2.0 * Z0[t])
                         sr_t = np.where(has, z_res - z[t], np.inf)
                     else:
-                        sr_t = np.where(has, ct * (1.0 - atom.op_nu[kk_t] / ni[t]) - z[t], np.inf)
+                        sr_t = np.where(has, ct * (1.0 - nu_k / ni[t]) - z[t], np.inf)
                     sr_t = np.where(sr_t > _S_MIN, sr_t, np.inf)
                     nt_t = np.empty(t.size)
                 else:
@@ -1054,12 +1145,17 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
                     sr_t = np.where(sr_t > _S_MIN, sr_t, np.inf)
                     kk_t = np.zeros(t.size, np.int64)
                 cand = sr_t < sb_t
+                if pausing:
+                    pz = (s_stop_i[t] < sb_t) & (s_stop_i[t] < sr_t)   # the slab ends first: pause here
+                    cand = cand & ~pz
                 interior = np.where(in_t, sh[t] > 0, sh[t] < n_sh - 1)
-                cross = ~cand & interior
+                cross = ~cand & interior if not pausing else ~cand & ~pz & interior
                 done = ~cross
                 d = t[done]
                 s_b[d] = sb_t[done]; core_first[d] = in_t[done]; s_res[d] = sr_t[done]
                 interact_candidate[d] = cand[done]; kk[d] = kk_t[done]; nu_target[d] = nt_t[done]
+                if pausing:
+                    paused_i[d] = pz[done]
                 if cross.any():
                     cidx_ = t[cross]
                     sb_c = sb_t[cross]
@@ -1139,14 +1235,24 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
             s_res = np.where(s_res > _S_MIN, s_res, np.inf)
             interact_candidate = s_res < s_b
 
+        if pausing and not zoned:
+            s_stop_i = ct_stop - cti
+            paused_i = s_stop_i < np.minimum(s_res, s_b)
+            interact_candidate = interact_candidate & ~paused_i
+        elif not pausing:
+            paused_i = None
+
         # --- packets that reach a boundary first
-        esc = ~interact_candidate
+        esc = ~interact_candidate if paused_i is None else (~interact_candidate & ~paused_i)
         e_idx = idx[esc]
         if reemit:
             hit_core = core_first[esc]
             out_idx = e_idx[~hit_core]
             nu_out[out_idx] = ni[esc][~hit_core]
             fate[out_idx] = 1
+            if wl:
+                ct_esc[out_idx] = (cti[esc] + s_b[esc])[~hit_core]
+                mu_esc[out_idx] = advance(ri[esc], mi[esc], s_b[esc])[1][~hit_core]
             nu_final[out_idx] = ni[esc][~hit_core]
             alive[out_idx] = False
             cidx = e_idx[hit_core]
@@ -1185,9 +1291,23 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
         else:
             nu_out[e_idx[~core_first[esc]]] = ni[esc][~core_first[esc]]
             fate[e_idx[~core_first[esc]]] = 1
+            if wl:
+                o_ = e_idx[~core_first[esc]]
+                ct_esc[o_] = (cti[esc] + s_b[esc])[~core_first[esc]]
+                mu_esc[o_] = advance(ri[esc], mi[esc], s_b[esc])[1][~core_first[esc]]
             fate[e_idx[core_first[esc]]] = 2
             nu_final[e_idx] = ni[esc]
             alive[e_idx] = False
+
+        # --- packets paused at the end of the time slab (Phase 10b)
+        if paused_i is not None and paused_i.any():
+            pi_ = idx[paused_i]
+            rn_, mn_ = advance(ri[paused_i], mi[paused_i], s_stop_i[paused_i])
+            r[pi_], mu[pi_] = rn_, mn_
+            ctime[pi_] = ct_stop                 # exact, assigned
+            fate[pi_] = 4; alive[pi_] = False; nu_final[pi_] = nu[pi_]
+            if zoned:
+                s_acc[pi_] = 0.0
 
         # --- packets that reach a resonance / interaction point
         c = interact_candidate
@@ -1515,6 +1635,10 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
     E_esc = float(np.sum(w[fate == 1] * H * nu_final[fate == 1]))
     E_core = float(np.sum(w[fate == 2] * H * nu_final[fate == 2]))
     E_abs = float(np.sum(w[fate == 3] * H * nu_final[fate == 3]))
+    E_carried_out = float(np.sum(w[fate == 4] * H * nu_final[fate == 4]))
+    E_capped = float(np.sum(w[fate == 5] * H * nu_final[fate == 5]))
+    E_carried_in = float(np.sum(w_launch[carried] * H * nu_launch[carried]))
+    E_inj_cm = float(np.sum(w_launch[~carried] * H * nu_launch_cm[~carried]))
     if energy:
         # deposits are energy-valued under energy packets (w applied per event)
         E_dep_lab = float(np.sum(e_dep_lab)); E_dep_cm = float(np.sum(e_dep_cm))
@@ -1523,7 +1647,9 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
     accounting = dict(E_inj=E_inj, E_esc=E_esc, E_core=E_core, E_abs=E_abs,
                       E_dep_lab=E_dep_lab, E_dep_cm=E_dep_cm, W=E_dep_lab - E_dep_cm,
                       E_interacting=float(np.sum(w_launch[n_events > 0] * H * nu_launch[n_events > 0])),
-                      identity_residual=(E_esc + E_core + E_abs + E_dep_lab - E_inj) / E_inj,
+                      identity_residual=(E_esc + E_core + E_abs + E_capped + E_dep_lab + E_carried_out - E_inj) / E_inj,
+                      E_carried_in=E_carried_in, E_inj_new=E_inj - E_carried_in, E_inj_cm=E_inj_cm,
+                      E_carried_out=E_carried_out, E_capped=E_capped,
                       E_thermal=e_thermal,
                       N_inj=float(w_launch.sum()), N_esc=float(w[fate == 1].sum()),
                       N_core=float(w[fate == 2].sum()), N_abs=float(w[fate == 3].sum()))
@@ -1540,7 +1666,10 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
                 n_core_passes=n_core_passes, n_core_passes_total=int(n_core_passes.sum()),
                 n_kpackets=n_kpackets, n_dead_end=n_dead_end,
                 zoned=zoned,
-                **(dict(shell_of=shell_of, last_shell=last_shell, n_cross_in=n_cross_in, n_cross_out=n_cross_out,
+                ct_esc=ct_esc, mu_esc=mu_esc, carried=carried, n_new=n_new,
+                n_paused=int(np.sum(fate == 4)), n_capped=int(np.sum(fate == 5)), t_stop=t_stop,
+                b_out=float(r_out) / ct, ctime=(ctime if wl else None), r=r, mu=mu,
+                **(dict(shell_of=shell_of, last_shell=last_shell, s_acc=s_acc, n_cross_in=n_cross_in, n_cross_out=n_cross_out,
                         n_events_shell=n_events_shell, n_kpackets_shell=n_kpackets_shell,
                         n_dead_end_shell=n_dead_end_shell, e_thermal_shell=e_thermal_shell) if zoned else {}),
                 events=((np.concatenate(ev_in) if ev_in else np.empty(0),
