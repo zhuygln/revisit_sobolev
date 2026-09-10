@@ -4463,9 +4463,15 @@ published zone and grid tried so far, the binned closure within +0.2 to
 above the photosphere is divided into shells.** Multi-shell transport is
 what found it: the same physical state gave different answers with
 different numbers of boundaries, which no single-zone test could see.
-The epochs, P2, the 6- and 24-shell grids, the Phase 6 convergence axes
-and the Gate 2 verdict on the final compositions follow in §4.56 as the
-reruns complete.
+On the corrected P1 2 d ladder (`paper4/phase9_final/legs_P1_t2.json`)
+the photon-number closure B₁ sits 0.04 mag from its own reference R₁
+(‖R₁ − B₁‖ over the live bands), so Paper III's grouped-opacity error at
+this class of zone was the bug in its entirety; what R₁ → R₂ moves (2.4 mag
+in z) is bookkeeping, unaffected. Gate 2 on P1 at 2 d is now **Red**
+(max |B₂ − R₂| = 0.19 mag). The thermal bridge closes on P1 as on P2 (Rth
+vs Bth within 0.1 mag). The epochs, P2, the 6- and 24-shell grids, the
+Phase 6 convergence axes and the Gate 2 verdict on the final compositions
+at every epoch follow in §4.56 as the reruns complete.
 
 ## 5. Findings register
 
