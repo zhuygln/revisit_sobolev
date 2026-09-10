@@ -153,6 +153,85 @@ class EjectaState:
                     f_ion={k: float(v[s]) for k, v in self.f_ion.items()},
                     n_e=None if self.n_e is None else float(self.n_e[s]))
 
+    def transport_zone(self, shells, t_core=None):
+        """The multi-shell transport contract: the innermost transported
+        shell's inner edge is the core, the outermost's outer edge the
+        boundary; `shells` is a contiguous list of shell indices."""
+        shells = list(shells)
+        if shells != list(range(shells[0], shells[-1] + 1)):
+            raise ValueError("transported shells must be contiguous")
+        s0, s1 = shells[0], shells[-1]
+        return dict(t_exp=float(self.t), r_core=float(self.r_edges[s0]), r_out=float(self.r_edges[s1 + 1]),
+                    t_core=float(self.T_rad[s0] if t_core is None else t_core), core_law="local_shell",
+                    shells=shells, v_edges=[float(v) for v in self.v_edges[s0:s1 + 2]],
+                    rho=[float(x) for x in self.rho[s0:s1 + 1]], T_gas=[float(x) for x in self.T_gas[s0:s1 + 1]],
+                    v_core=float(self.v_edges[s0]), v_out=float(self.v_edges[s1 + 1]))
+
+    def regrid(self, v_edges_new, profile=None, T_of_v=None):
+        """A new state on `v_edges_new`, which must contain every old edge it
+        keeps (refine inside old shells, or coarsen across whole old shells).
+        Refined sub-shells take rho from `profile` (the model's f(v), exact
+        volume averages) when given, else the parent's constant rho; T, X and
+        ion fractions are inherited (or T from `T_of_v`). Coarsened shells
+        take mass-weighted rho, T and X and ion-mass-weighted f_ion, so the
+        mass and the sums stay exact."""
+        new = np.asarray(v_edges_new, float)
+        old = self.v_edges
+        if not (np.isclose(new[0], old[0]) and np.isclose(new[-1], old[-1])):
+            raise ValueError("regrid keeps the inner and outer edges")
+        n_new = new.size - 1
+        parent = np.clip(np.searchsorted(old, 0.5 * (new[1:] + new[:-1]), side="right") - 1, 0, self.n_shell - 1)
+        r_new = new * self.t
+        vol_new = 4.0 * np.pi / 3.0 * (r_new[1:] ** 3 - r_new[:-1] ** 3)
+        rho = np.empty(n_new); T_gas = np.empty(n_new); T_rad = np.empty(n_new)
+        X = {k: np.empty(n_new) for k in self.X}; f_ion = {k: np.empty(n_new) for k in self.f_ion}
+        n_e = None if self.n_e is None else np.empty(n_new)
+        m_old = self.shell_mass()
+        for i in range(n_new):
+            inside = np.flatnonzero((old[:-1] >= new[i] - 1e-9 * new[i]) & (old[1:] <= new[i + 1] + 1e-9 * new[i + 1]))
+            if inside.size >= 1 and np.isclose(old[inside[0]], new[i]) and np.isclose(old[inside[-1] + 1], new[i + 1]):
+                w = m_old[inside]; tot = w.sum()
+                rho[i] = tot / vol_new[i]
+                T_gas[i] = np.sum(w * self.T_gas[inside]) / tot; T_rad[i] = np.sum(w * self.T_rad[inside]) / tot
+                for k in X:
+                    X[k][i] = np.sum(w * self.X[k][inside]) / tot
+                for k in f_ion:
+                    el = k.split()[0]
+                    wm = w * self.X[el][inside]
+                    f_ion[k][i] = np.sum(wm * self.f_ion[k][inside]) / wm.sum() if wm.sum() > 0 else self.f_ion[k][inside[0]]
+                if n_e is not None:
+                    n_e[i] = np.sum(w * self.n_e[inside]) / tot
+            else:
+                pj = parent[i]
+                if profile is not None:
+                    vv = np.linspace(new[i], new[i + 1], 401)
+                    f_avg = np.trapezoid(profile(vv) * vv ** 2, vv) / np.trapezoid(vv ** 2, vv)
+                    vo = np.linspace(old[pj], old[pj + 1], 401)
+                    f_par = np.trapezoid(profile(vo) * vo ** 2, vo) / np.trapezoid(vo ** 2, vo)
+                    rho[i] = self.rho[pj] * f_avg / f_par
+                else:
+                    rho[i] = self.rho[pj]
+                T_gas[i] = self.T_gas[pj] if T_of_v is None else T_of_v(0.5 * (new[i] + new[i + 1]))
+                T_rad[i] = self.T_rad[pj]
+                for k in X:
+                    X[k][i] = self.X[k][pj]
+                for k in f_ion:
+                    f_ion[k][i] = self.f_ion[k][pj]
+                if n_e is not None:
+                    n_e[i] = self.n_e[pj]
+        out = EjectaState(t=self.t, v_edges=new, rho=rho, T_gas=T_gas, T_rad=T_rad, X=X, f_ion=f_ion,
+                          n_e=n_e, Y_e=self.Y_e, meta=dict(self.meta, parent_grid=self.v_edges.tolist(),
+                                                           parent_n_shell=self.n_shell))
+        # profile-refined sub-shells reproduce the parent mass only up to the
+        # quadrature; rescale each parent's children so the mass is exact
+        if profile is not None:
+            for pj in np.unique(parent):
+                kids = np.flatnonzero(parent == pj)
+                m_kids = (out.rho[kids] * vol_new[kids]).sum()
+                if m_kids > 0:
+                    out.rho[kids] *= m_old[pj] / m_kids
+        return out
+
     # ---- io ------------------------------------------------------------
     def to_dict(self):
         return dict(t=self.t, v_edges=self.v_edges.tolist(), rho=self.rho.tolist(),

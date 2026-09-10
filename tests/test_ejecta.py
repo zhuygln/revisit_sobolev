@@ -115,3 +115,29 @@ def test_plot_writes_a_figure(tmp_path):
     st = _state()
     out = st.plot(tmp_path / "g.png", kappa=1.0, atomic_mass={"Ce": 140.1, "Nd": 144.2})
     assert Path(out).stat().st_size > 1000
+
+
+def test_regrid_refine_and_coarsen_keep_the_mass_and_the_checks():
+    st = _state(n_shell=8, profile="xkn", m=0.0264 * MSUN)
+    m0 = st.mass()
+    # refine the two outermost shells into 6 each with the parent's constant rho
+    v = st.v_edges
+    new = np.concatenate([v[:-2], np.linspace(v[-3], v[-1], 13)[1:]])
+    fine = st.regrid(new)
+    assert fine.n_shell == 6 + 12 and abs(fine.mass() - m0) / m0 < 1e-12
+    fine.check(m_target=m0)
+    assert np.allclose(fine.rho[:6], st.rho[:6]) and np.allclose(fine.rho[6:12], st.rho[6])
+    # refine with the model's profile: the children follow f(v) and sum to the parent mass
+    v_max = st.v_edges[-1]
+    prof = st.regrid(new, profile=lambda vv: (1.0 - (vv / v_max) ** 2) ** 3)
+    assert abs(prof.mass() - m0) / m0 < 1e-12
+    assert prof.rho[6] > prof.rho[11] > 0                     # falling outward inside the old shell
+    # coarsen back
+    back = prof.regrid(v)
+    assert back.n_shell == 8 and abs(back.mass() - m0) / m0 < 1e-12
+    assert np.allclose(back.rho, st.rho) and np.allclose(back.X["Ce"], st.X["Ce"])
+    back.check(m_target=m0)
+    z = back.transport_zone([5, 6, 7])
+    assert z["r_core"] == back.r_edges[5] and z["r_out"] == back.r_edges[-1] and z["shells"] == [5, 6, 7]
+    with pytest.raises(ValueError):
+        back.transport_zone([5, 7])

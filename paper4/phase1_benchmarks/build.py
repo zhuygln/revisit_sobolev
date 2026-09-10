@@ -97,6 +97,24 @@ def build_p1(t_d, n_shell=N_SHELL, variant=None):
     return st
 
 
+def refine_above_photosphere(state, n_fine):
+    """P1's grid with `n_fine` linear sub-shells between the photosphere and
+    v_max, the model's profile inside them (Phase 8's fine grid); the coarse
+    shells below stay for tau_grey and mass; T from the grey run recomputed."""
+    s0 = state.meta["photospheric_shell"]
+    v = state.v_edges
+    v_max = state.meta["v_max_c"] * C
+    new = np.concatenate([v[:s0 + 1], np.linspace(v[s0], v[-1], n_fine + 1)[1:]])
+    prof = lambda vv: (1.0 - (vv / v_max) ** 2) ** 3
+    fine = state.regrid(new, profile=prof)
+    T, s, t_eff = ej.grey_temperature(fine, state.meta["kappa"], state.meta["L"])
+    fine.T_gas = T; fine.T_rad = T
+    fine.meta.update(photospheric_shell=s, n_fine=n_fine, T_ph=float(T[s]), v_ph_c=float(fine.v_edges[s] / C),
+                     rho_ph=float(fine.rho[s]))
+    fine.check(m_target=state.mass())
+    return fine
+
+
 def build_p2(n_shell=N_SHELL):
     t = P2["t_d"] * DAY
     v_in, v_out = P2["v_in_c"] * C, P2["v_out_c"] * C
