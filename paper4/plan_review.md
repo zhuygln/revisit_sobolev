@@ -297,3 +297,43 @@ If both survive, I would have much more confidence that the effect is genuinely 
 [4]: https://tardis-sn.github.io/tardis/io/configuration/components/plasma.html?utm_source=chatgpt.com "Plasma Configuration — tardis"
 [5]: https://arxiv.org/abs/astro-ph/0409249?utm_source=chatgpt.com "Monte Carlo techniques for time-dependent radiative transfer in 3-D supernovae"
 [6]: https://academic.oup.com/mnras/article/549/3/stag938/8684954 "oup.silverchair-cdn.com"
+
+---
+
+## PI decision after Phase 8 and the inversion fix (2026-09-10, verbatim)
+
+Here’s the combined takeaway from my last two responses.
+
+The old Paper III story is finished. The 1–3 mag grouped-opacity failure was caused by the bin-indexing bug, and once corrected, the expansion-opacity closure is much closer to the resolved Sobolev result: typically within about 0.2 mag on the realistic P1/P2 states, while the line-binned treatment shows somewhat larger, opposite-sign deviations of roughly 0.2–0.6 mag. Paper III should therefore stay as a frozen research record with a prominent repository correction, not as a publication target.
+
+The original Paper IV hypothesis—“coarse opacity produces a very large chromatic failure”—has also been falsified, so I would not continue the full Phases 9–10 program just to refine that old claim. The preregistered Red gate should be honored. Full radiative equilibrium is no longer justified merely to chase a 0.1–0.2 mag residual.
+
+However, the corrected result suggests a new, cleaner research question:
+
+**When, and how accurately, can dense r-process line forests be coarse-grained when fluorescence is treated explicitly and energy is conserved?**
+
+The literature suggests this exact kilonova benchmark may still be relatively unexplored. Fontes et al. compared resolved Sobolev, expansion, and line-binned opacity, but under complete thermal redistribution (ε=1), without explicit fluorescence. ARTIS/Shingles treat line-by-line fluorescence realistically, but do not perform the controlled same-physics comparison against coarse-opacity closures. The older SEDONA/SN-Ia work is an important precedent and prevents us from claiming the broad idea is new, but it is not the same modern r-process/lanthanide benchmark.
+
+So the most promising publication direction is no longer “expansion opacity fails.” It is closer to:
+
+Expansion opacity remains surprisingly accurate for broadband kilonova observables under explicit energy-conserving fluorescence, while line-binned opacity shows larger chromatic deviations.
+
+The key next experiment is to reproduce the Fontes benchmark with the corrected code:
+
+1. resolved Sobolev + complete thermal redistribution;
+2. expansion opacity + complete thermal redistribution;
+3. line-binned opacity + complete thermal redistribution.
+
+We should first recover their known result that all three agree fairly well. Then change only:
+
+ε=1 → energy-conserving fluorescence.
+
+If fluorescence makes expansion remain close to resolved while line-binned drifts more, that is a strong and interpretable result: previous coarse-opacity validation depended partly on how post-absorption redistribution was treated.
+
+I would also do one limited full-macroatom comparison on a representative P1 state if the engineering cost is reasonable, and use an independent opacity dataset as a cheap external check. I would not yet build the entire self-consistent equilibrium machinery.
+
+So the practical recommendation is:
+
+**Pivot Paper IV into a controlled opacity-validity benchmark rather than end it or continue the old failure story.**
+
+The next three tasks are: reproduce Fontes, repeat with explicit energy-conserving fluorescence, and run one stronger macroatom check. If those show a meaningful difference between expansion and line-binned treatments, there is likely a solid MNRAS/ApJ/A&A methods paper. If they do not, then the scientifically correct outcome is that modern expansion opacity is already quite adequate for the broadband problem tested, and the project can close cleanly.
