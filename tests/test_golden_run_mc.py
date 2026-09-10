@@ -13,6 +13,11 @@ worldline, plus the line-memory variants of the grouped legs.
 
 Regenerate ONLY when a change is meant to move the histories (state why in
 the commit):
+  2026-09-10  the bin legs (expansion_*, binned_*, dual_*) re-pinned after
+              the off-by-one in `nu_of_G` was fixed (Paper IV Phase 8,
+              results_report 4.55); the Sobolev legs did not move. The
+              pre-fix digests are kept in golden_run_mc_prefix_2026-09-10.json
+              for provenance and are tested by nothing.
 
     .venv/bin/python tests/test_golden_run_mc.py --regen
 """

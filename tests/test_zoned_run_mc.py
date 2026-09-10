@@ -199,3 +199,46 @@ def test_zoned_rejects_what_it_does_not_support():
         run_mc(za, R_CORE, R_OUT, T_EXP, lo, hi, 100, "sobolev_branch", packets="energy")
     with pytest.raises(ValueError):
         run_mc(za, 0.5 * R_CORE, R_OUT, T_EXP, lo, hi, 100, "sobolev_dmacro", packets="energy")
+
+
+SPIKY_BAND = (0.85 * NU_13, 1.15 * NU_13)
+
+
+def spiky_forest(n_lines=4000, seed=3):
+    """A dense forest whose bin-to-bin expansion opacity varies by orders of
+    magnitude: lines clustered in frequency with log-uniform strengths. On a
+    smooth forest the cumulative-opacity inversion of the bin legs cannot
+    be told apart from a wrong one; on this one it can."""
+    rng = np.random.default_rng(seed)
+    lo, hi = SPIKY_BAND
+    centres = rng.uniform(lo * 1.02, hi * 0.98, 40)
+    nu0 = np.sort(np.concatenate([c * (1.0 + 2e-4 * rng.standard_normal(n_lines // 40)) for c in centres]))
+    tau = 10.0 ** rng.uniform(-3.0, 1.0, nu0.size)
+    n_low = tau / tau_sobolev(F_OSC, 1.0, C / nu0, T_EXP)
+    return dict(nu0=nu0, f_osc=np.full(nu0.size, F_OSC), n_lower=n_low, n_upper=np.zeros(nu0.size),
+                A=np.ones(nu0.size), lower=np.zeros(nu0.size, int), upper=np.ones(nu0.size, int))
+
+
+@pytest.mark.parametrize("mode", ("expansion_absorb", "binned_absorb"))
+def test_bin_legs_are_invariant_under_splitting_a_shell_on_a_spiky_forest(mode):
+    """Paper IV Phase 8 regression: the same physical state as one shell and
+    as three identical shells must escape the same energy. The bin legs'
+    inversion of the cumulative opacity (nu_of_G) was off by one bin until
+    2026-09-10: next to a thinner bin the target overshot above the packet's
+    own frequency and the packet skipped the rest of the forest, so the
+    error depended on how often a packet's leg was interrupted by a
+    boundary (results_report 4.55). Before the fix one shell escaped 0.227 of the injected
+    energy and three identical shells 0.161; fixed, both give 0.142."""
+    a = spiky_forest()
+    z1 = ZonedAtom(a["nu0"], a["f_osc"], [a["n_lower"]], [a["n_upper"]], a["A"], a["lower"], a["upper"],
+                   np.array([R_CORE, R_OUT]), T_EXP, tau_min=1e-6, stim=False, emis_cut=None)
+    edges3 = np.array([R_CORE, 1.4 * R_CORE, 2.2 * R_CORE, R_OUT])
+    z3 = ZonedAtom(a["nu0"], a["f_osc"], [a["n_lower"]] * 3, [a["n_upper"]] * 3, a["A"], a["lower"], a["upper"],
+                   edges3, T_EXP, tau_min=1e-6, stim=False, emis_cut=None)
+    lo, hi = SPIKY_BAND
+    kw = dict(packets="energy", t_core=6000.0, launch_weight="energy")
+    f1 = [run_mc(z1, R_CORE, R_OUT, T_EXP, lo, hi, 20000, mode, seed=s, **kw)["accounting"] for s in (1, 2)]
+    f3 = [run_mc(z3, R_CORE, R_OUT, T_EXP, lo, hi, 20000, mode, seed=s, **kw)["accounting"] for s in (1, 2)]
+    e1 = np.array([f["E_esc"] / f["E_inj"] for f in f1]); e3 = np.array([f["E_esc"] / f["E_inj"] for f in f3])
+    assert abs(e1.mean() - e3.mean()) < 0.01, (e1, e3)
+    assert 0.05 < e1.mean() < 0.95                      # the forest actually absorbs

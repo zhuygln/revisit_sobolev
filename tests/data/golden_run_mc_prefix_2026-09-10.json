@@ -1,5 +1,5 @@
 {
- "git_head": "4a5c7eec0d3ef8c29619fb969754b6c67f7d61bc",
+ "git_head": "e858f6d983aec55089b2507a8e5b13ab24049633",
  "n_packets": 10000,
  "hashed": [
   "nu_out_all",
@@ -102,24 +102,24 @@
    "E_dep_lab_over_inj": 0.1745414752763798
   },
   "three_level|expansion_thermal|classical|mem=0": {
-   "sha256": "5e92bf4743cdf5cfac494650b1fa289a2e1b0bb056b4dc8b6a3e5e4d46974117",
+   "sha256": "73f2a18ee3fb4dd3194b52cc773ce695bf0855535c2b77e42d84505f21b2277f",
    "steps": 11,
-   "n_escaped": 9726,
-   "n_core": 274,
+   "n_escaped": 9727,
+   "n_core": 273,
    "n_absorbed": 0,
    "n_interactions": 7782,
-   "E_esc_over_inj": 0.9684406815485056,
-   "E_dep_lab_over_inj": 0.004580871038791027
+   "E_esc_over_inj": 0.9685399568335223,
+   "E_dep_lab_over_inj": 0.004580733966679231
   },
   "three_level|expansion_thermal|worldline|mem=0": {
-   "sha256": "907f815a7a6df2ef88336dee1149ceccaf1150c4a1122ef1a87c82b642d071fb",
+   "sha256": "523753276d6de9728c4b3927da4ab70e741df09881b8555d431f5c6824a7a3aa",
    "steps": 10,
-   "n_escaped": 9719,
-   "n_core": 281,
+   "n_escaped": 9723,
+   "n_core": 277,
    "n_absorbed": 0,
    "n_interactions": 7753,
-   "E_esc_over_inj": 0.9677383199071119,
-   "E_dep_lab_over_inj": 0.004601291942111972
+   "E_esc_over_inj": 0.9681330834578405,
+   "E_dep_lab_over_inj": 0.004601208177816968
   },
   "three_level|sobolev_branch|classical|mem=0": {
    "sha256": "c5e7e346d18e6a004bd0afa46d4c90a7d69c5d8ecbff0dee0d7407ffd14e0415",
@@ -162,74 +162,74 @@
    "E_dep_lab_over_inj": 0.10664929445072684
   },
   "three_level|expansion_tla|classical|mem=0": {
-   "sha256": "ba1742846849a6b47b0125706b02bf1c0c76033a130b777258aa0ea3b3bc0d67",
-   "steps": 10,
-   "n_escaped": 9734,
-   "n_core": 266,
+   "sha256": "cef8b4f2c604cb291b8483d8a0bcf89b7a7995aab8631de3ac499f39526df7a9",
+   "steps": 7,
+   "n_escaped": 9725,
+   "n_core": 275,
    "n_absorbed": 0,
-   "n_interactions": 7774,
-   "E_esc_over_inj": 0.969218917075273,
-   "E_dep_lab_over_inj": 0.0045885638151078635
+   "n_interactions": 6441,
+   "E_esc_over_inj": 0.968311515400707,
+   "E_dep_lab_over_inj": 0.004611339908009647
   },
   "three_level|expansion_tla|worldline|mem=0": {
-   "sha256": "0aab77b0b1c36e524b8842422e8ac740697370ef43183c1e96dbd705fd88351a",
+   "sha256": "05977ba003ebb684413ec3da3d4aed1890f0f1ea59ca6bd6a7f8874882049fcc",
    "steps": 9,
-   "n_escaped": 9733,
-   "n_core": 267,
+   "n_escaped": 9729,
+   "n_core": 271,
    "n_absorbed": 0,
-   "n_interactions": 7699,
-   "E_esc_over_inj": 0.9691545193014012,
-   "E_dep_lab_over_inj": 0.004557088560397921
+   "n_interactions": 6414,
+   "E_esc_over_inj": 0.9687339834278712,
+   "E_dep_lab_over_inj": 0.0045865076115398475
   },
   "three_level|expansion_branch|classical|mem=0": {
-   "sha256": "ac060046f7439eafd318f6291a796ce2e36bb0ef33961e21c8aa8ff6af2332c0",
+   "sha256": "18b0cc3e3b722797443137dcc7e70e9bffd92cdf3d0f915daf1d99a82cdfef9a",
    "steps": 7,
-   "n_escaped": 9720,
-   "n_core": 280,
+   "n_escaped": 9721,
+   "n_core": 279,
    "n_absorbed": 0,
    "n_interactions": 6150,
-   "E_esc_over_inj": 0.8404160420890393,
-   "E_dep_lab_over_inj": 0.13884221441932704
+   "E_esc_over_inj": 0.8404823406580871,
+   "E_dep_lab_over_inj": 0.138842072142382
   },
   "three_level|expansion_branch|worldline|mem=0": {
-   "sha256": "554c0935f158418cae832b9a61861003c013eb0aa96c31731c70229bf34418f9",
+   "sha256": "71ec53bd72681a1c1ce50ac23fd0271226a117c5acf4c313795394641af9f506",
    "steps": 6,
-   "n_escaped": 9722,
-   "n_core": 278,
+   "n_escaped": 9726,
+   "n_core": 274,
    "n_absorbed": 0,
    "n_interactions": 6125,
-   "E_esc_over_inj": 0.8407327321286207,
-   "E_dep_lab_over_inj": 0.138659884964245
+   "E_esc_over_inj": 0.8410287863544254,
+   "E_dep_lab_over_inj": 0.13865974234504197
   },
   "three_level|binned_group|classical|mem=0": {
-   "sha256": "9462fd6d37b993aaf92aaccbbd33902f9fc7d181d1aea1d54c13da9152cdd2ae",
+   "sha256": "13acbe1642d4a71f6b6c1a02ab8223cd9877c482c934a53b0bc1d658f92ed683",
    "steps": 5,
-   "n_escaped": 9596,
-   "n_core": 404,
+   "n_escaped": 9603,
+   "n_core": 397,
    "n_absorbed": 0,
    "n_interactions": 7899,
-   "E_esc_over_inj": 0.8771754738061871,
-   "E_dep_lab_over_inj": 0.08730619561362599
+   "E_esc_over_inj": 0.8777849676996093,
+   "E_dep_lab_over_inj": 0.08730600985401618
   },
   "three_level|binned_group|classical|mem=1": {
-   "sha256": "9462fd6d37b993aaf92aaccbbd33902f9fc7d181d1aea1d54c13da9152cdd2ae",
+   "sha256": "13acbe1642d4a71f6b6c1a02ab8223cd9877c482c934a53b0bc1d658f92ed683",
    "steps": 5,
-   "n_escaped": 9596,
-   "n_core": 404,
+   "n_escaped": 9603,
+   "n_core": 397,
    "n_absorbed": 0,
    "n_interactions": 7899,
-   "E_esc_over_inj": 0.8771754738061871,
-   "E_dep_lab_over_inj": 0.08730619561362599
+   "E_esc_over_inj": 0.8777849676996093,
+   "E_dep_lab_over_inj": 0.08730600985401618
   },
   "three_level|binned_group|worldline|mem=0": {
-   "sha256": "835f5c51254e0f847727bbb95eba1483b8d81d6615dff98398b77a5983ddf786",
+   "sha256": "cf1afbb64f6fde80a9f9ee7fe9bb0a1070cb14992b42769d1a29d4e6de67af06",
    "steps": 6,
-   "n_escaped": 9606,
-   "n_core": 394,
+   "n_escaped": 9608,
+   "n_core": 392,
    "n_absorbed": 0,
    "n_interactions": 7898,
-   "E_esc_over_inj": 0.8780802962373891,
-   "E_dep_lab_over_inj": 0.08726410975532374
+   "E_esc_over_inj": 0.8782334989212548,
+   "E_dep_lab_over_inj": 0.08726386293393457
   },
   "three_level|binned_absorb|classical|mem=0": {
    "sha256": "0766a5e0a1c3fdaed327995a3a3bbde0e3c1ae17cf48bde4b3b2cb887096c5b1",
@@ -252,84 +252,84 @@
    "E_dep_lab_over_inj": 0.0
   },
   "three_level|expansion_group|classical|mem=0": {
-   "sha256": "5fb5dc30436ffea2a0001a1f9cb2b69e9777c76f15b551d90a493705fbe5af0c",
+   "sha256": "d38e7eac7d0e96550e99bb3b5d980dffb958121c4c4795050b9d9a2345acdbc1",
    "steps": 5,
-   "n_escaped": 9714,
-   "n_core": 286,
+   "n_escaped": 9715,
+   "n_core": 285,
    "n_absorbed": 0,
    "n_interactions": 5474,
-   "E_esc_over_inj": 0.9139117860832228,
-   "E_dep_lab_over_inj": 0.060714447711600304
+   "E_esc_over_inj": 0.9140129139732476,
+   "E_dep_lab_over_inj": 0.0607142528501838
   },
   "three_level|expansion_group|classical|mem=1": {
-   "sha256": "5fb5dc30436ffea2a0001a1f9cb2b69e9777c76f15b551d90a493705fbe5af0c",
+   "sha256": "d38e7eac7d0e96550e99bb3b5d980dffb958121c4c4795050b9d9a2345acdbc1",
    "steps": 5,
-   "n_escaped": 9714,
-   "n_core": 286,
+   "n_escaped": 9715,
+   "n_core": 285,
    "n_absorbed": 0,
    "n_interactions": 5474,
-   "E_esc_over_inj": 0.9139117860832228,
-   "E_dep_lab_over_inj": 0.060714447711600304
+   "E_esc_over_inj": 0.9140129139732476,
+   "E_dep_lab_over_inj": 0.0607142528501838
   },
   "three_level|expansion_group|worldline|mem=0": {
-   "sha256": "deb7f61fbdd623af93aa85a7bfdb32cd24ec6276a5dc5472980c127b676c2ab9",
+   "sha256": "e47551b576099995b1523e872bfe446e2c3c2c29034710b1cc392b1515831268",
    "steps": 5,
-   "n_escaped": 9717,
-   "n_core": 283,
+   "n_escaped": 9721,
+   "n_core": 279,
    "n_absorbed": 0,
    "n_interactions": 5474,
-   "E_esc_over_inj": 0.9142801649494311,
-   "E_dep_lab_over_inj": 0.06065157423181678
+   "E_esc_over_inj": 0.9146590706025032,
+   "E_dep_lab_over_inj": 0.060651344536037016
   },
   "three_level|dual_branch|classical|mem=0": {
-   "sha256": "74a80e6dfc5a2e6d319cd3045224763335126fda69733e0ce79d9f873b54cae7",
+   "sha256": "d91ebc129bbc870f3936321e181dcc823bed99f1c47f0c6224837d1110a0716e",
    "steps": 8,
-   "n_escaped": 9616,
-   "n_core": 384,
+   "n_escaped": 9621,
+   "n_core": 379,
    "n_absorbed": 0,
    "n_interactions": 9645,
-   "E_esc_over_inj": 0.7535251066064904,
-   "E_dep_lab_over_inj": 0.21887192489392213
+   "E_esc_over_inj": 0.7539199319268676,
+   "E_dep_lab_over_inj": 0.2188717460838672
   },
   "three_level|dual_branch|worldline|mem=0": {
-   "sha256": "1e04fd99a7f466ac99a6bfe6cfc28f565d98332dbeb443cf8772a6d3aa1fb340",
+   "sha256": "191d5d83174358939bbc423e8725994eab5dd0dee84d421f7b0385c70519f061",
    "steps": 8,
-   "n_escaped": 9619,
-   "n_core": 381,
+   "n_escaped": 9623,
+   "n_core": 377,
    "n_absorbed": 0,
    "n_interactions": 9604,
-   "E_esc_over_inj": 0.7545811518590549,
-   "E_dep_lab_over_inj": 0.21794896674655798
+   "E_esc_over_inj": 0.754844904975625,
+   "E_dep_lab_over_inj": 0.2179487215769969
   },
   "three_level|dual_group|classical|mem=0": {
-   "sha256": "9462fd6d37b993aaf92aaccbbd33902f9fc7d181d1aea1d54c13da9152cdd2ae",
+   "sha256": "13acbe1642d4a71f6b6c1a02ab8223cd9877c482c934a53b0bc1d658f92ed683",
    "steps": 5,
-   "n_escaped": 9596,
-   "n_core": 404,
+   "n_escaped": 9603,
+   "n_core": 397,
    "n_absorbed": 0,
    "n_interactions": 7899,
-   "E_esc_over_inj": 0.8771754738061871,
-   "E_dep_lab_over_inj": 0.08730619561362599
+   "E_esc_over_inj": 0.8777849676996093,
+   "E_dep_lab_over_inj": 0.08730600985401618
   },
   "three_level|dual_group|classical|mem=1": {
-   "sha256": "9462fd6d37b993aaf92aaccbbd33902f9fc7d181d1aea1d54c13da9152cdd2ae",
+   "sha256": "13acbe1642d4a71f6b6c1a02ab8223cd9877c482c934a53b0bc1d658f92ed683",
    "steps": 5,
-   "n_escaped": 9596,
-   "n_core": 404,
+   "n_escaped": 9603,
+   "n_core": 397,
    "n_absorbed": 0,
    "n_interactions": 7899,
-   "E_esc_over_inj": 0.8771754738061871,
-   "E_dep_lab_over_inj": 0.08730619561362599
+   "E_esc_over_inj": 0.8777849676996093,
+   "E_dep_lab_over_inj": 0.08730600985401618
   },
   "three_level|dual_group|worldline|mem=0": {
-   "sha256": "835f5c51254e0f847727bbb95eba1483b8d81d6615dff98398b77a5983ddf786",
+   "sha256": "cf1afbb64f6fde80a9f9ee7fe9bb0a1070cb14992b42769d1a29d4e6de67af06",
    "steps": 6,
-   "n_escaped": 9606,
-   "n_core": 394,
+   "n_escaped": 9608,
+   "n_core": 392,
    "n_absorbed": 0,
    "n_interactions": 7898,
-   "E_esc_over_inj": 0.8780802962373891,
-   "E_dep_lab_over_inj": 0.08726410975532374
+   "E_esc_over_inj": 0.8782334989212548,
+   "E_dep_lab_over_inj": 0.08726386293393457
   },
   "three_level|dual_absorb|classical|mem=0": {
    "sha256": "0766a5e0a1c3fdaed327995a3a3bbde0e3c1ae17cf48bde4b3b2cb887096c5b1",
@@ -442,24 +442,24 @@
    "E_dep_lab_over_inj": 0.04741818511606996
   },
   "synthetic|expansion_thermal|classical|mem=0": {
-   "sha256": "13ddc66c9580dd6490860a2cf4a4ca3c496851d05edc1d72bd51c2687208452b",
-   "steps": 179,
-   "n_escaped": 4598,
-   "n_core": 5402,
+   "sha256": "92f738451cfe00c5c4c11df55cfeb53ba84757c072fb4a6f04de71a9dac7dbdb",
+   "steps": 232,
+   "n_escaped": 4532,
+   "n_core": 5468,
    "n_absorbed": 0,
-   "n_interactions": 112858,
-   "E_esc_over_inj": 0.4140664839711075,
-   "E_dep_lab_over_inj": 0.07461636891135716
+   "n_interactions": 110380,
+   "E_esc_over_inj": 0.4081675416693203,
+   "E_dep_lab_over_inj": 0.07429588572393554
   },
   "synthetic|expansion_thermal|worldline|mem=0": {
-   "sha256": "9a3166544945916a47de47408e4473c43c06e374b1389f3723fabda17c46fac2",
-   "steps": 116,
-   "n_escaped": 4726,
-   "n_core": 5274,
+   "sha256": "6d7608bc212aae54cf1e93b2f91e090951a733de0592953ef26a59115d07e633",
+   "steps": 96,
+   "n_escaped": 4771,
+   "n_core": 5229,
    "n_absorbed": 0,
-   "n_interactions": 99316,
-   "E_esc_over_inj": 0.4274406862777789,
-   "E_dep_lab_over_inj": 0.07377097345687347
+   "n_interactions": 96791,
+   "E_esc_over_inj": 0.4310703968439072,
+   "E_dep_lab_over_inj": 0.07310829277113384
   },
   "synthetic|sobolev_branch|classical|mem=0": {
    "sha256": "378cc4d15fd9b5f5a0673987d6dffb93690f395366ee87c58baa7fb6f7aa65ca",
@@ -502,74 +502,74 @@
    "E_dep_lab_over_inj": 0.04782337297758758
   },
   "synthetic|expansion_tla|classical|mem=0": {
-   "sha256": "6cf81e2299baa95385a2f5516eac2fc462cbd42eecff807133e6e42cdcda37f1",
-   "steps": 172,
-   "n_escaped": 4534,
-   "n_core": 5466,
+   "sha256": "68245fdffd823c8528db6bda5ca7393568275426ba5015bff86441cfda2fe890",
+   "steps": 162,
+   "n_escaped": 4519,
+   "n_core": 5481,
    "n_absorbed": 0,
-   "n_interactions": 114530,
-   "E_esc_over_inj": 0.4081485851654983,
-   "E_dep_lab_over_inj": 0.07489293724430018
+   "n_interactions": 86116,
+   "E_esc_over_inj": 0.4066271584225271,
+   "E_dep_lab_over_inj": 0.073106107795866
   },
   "synthetic|expansion_tla|worldline|mem=0": {
-   "sha256": "a096cd910769352e3734259c92955090336ca1bbb732b2c2383a331a608f02ec",
-   "steps": 108,
-   "n_escaped": 4636,
-   "n_core": 5364,
+   "sha256": "5605450fbe9cbd33180decd050359a9c34767695d9473a71113e8e3fb6df0347",
+   "steps": 91,
+   "n_escaped": 4722,
+   "n_core": 5278,
    "n_absorbed": 0,
-   "n_interactions": 99981,
-   "E_esc_over_inj": 0.4193662152323863,
-   "E_dep_lab_over_inj": 0.071456251786635
+   "n_interactions": 80340,
+   "E_esc_over_inj": 0.42697918465239565,
+   "E_dep_lab_over_inj": 0.07223805207097057
   },
   "synthetic|expansion_branch|classical|mem=0": {
-   "sha256": "a9b4036ad23e1a07273a04793c85db353bcb8cff03647a98b7619d7eb8641e58",
-   "steps": 90,
-   "n_escaped": 5281,
-   "n_core": 4719,
+   "sha256": "f13b0d545fc8b452e9803583ef6398f49528501fe5ace087be1ee892bf25cac1",
+   "steps": 69,
+   "n_escaped": 5318,
+   "n_core": 4682,
    "n_absorbed": 0,
-   "n_interactions": 52524,
-   "E_esc_over_inj": 0.4897463724554214,
-   "E_dep_lab_over_inj": 0.04907890817699937
+   "n_interactions": 52169,
+   "E_esc_over_inj": 0.49278299592491454,
+   "E_dep_lab_over_inj": 0.04958837439988909
   },
   "synthetic|expansion_branch|worldline|mem=0": {
-   "sha256": "2bbe9634c95182e72ffb8ff4545f62c102dc5da54d8860282a552e79c224555c",
-   "steps": 57,
-   "n_escaped": 5336,
-   "n_core": 4664,
+   "sha256": "033c2988fde3001a289a7e28fa2bb5fc1355a031becd34f78a693119b8718cdb",
+   "steps": 55,
+   "n_escaped": 5362,
+   "n_core": 4638,
    "n_absorbed": 0,
-   "n_interactions": 49932,
-   "E_esc_over_inj": 0.4943810381007004,
-   "E_dep_lab_over_inj": 0.049342449468809176
+   "n_interactions": 50079,
+   "E_esc_over_inj": 0.49709029993831444,
+   "E_dep_lab_over_inj": 0.04886650218658677
   },
   "synthetic|binned_group|classical|mem=0": {
-   "sha256": "062d5a0af805c654b4553a0563296a2d1116c9524d0120d17003258c2a5dc5ff",
-   "steps": 106,
-   "n_escaped": 4850,
-   "n_core": 5150,
+   "sha256": "968921f826af877d8ca728a904b412baa4501b30514c6e9d6cdb7fb8ce6dc1e0",
+   "steps": 95,
+   "n_escaped": 4910,
+   "n_core": 5090,
    "n_absorbed": 0,
-   "n_interactions": 61654,
-   "E_esc_over_inj": 0.4504771845425431,
-   "E_dep_lab_over_inj": 0.039159888007501246
+   "n_interactions": 61643,
+   "E_esc_over_inj": 0.45638976240604806,
+   "E_dep_lab_over_inj": 0.03842298328843897
   },
   "synthetic|binned_group|classical|mem=1": {
-   "sha256": "af421b762791050c467b73819222552ad00d62383a96488684eaf0fec1686691",
-   "steps": 95,
-   "n_escaped": 4730,
-   "n_core": 5270,
+   "sha256": "3987e2efd30d3a5684080fc6a4f81f1498693e41bd26b92b5a4ea3d9be525b20",
+   "steps": 98,
+   "n_escaped": 4755,
+   "n_core": 5245,
    "n_absorbed": 0,
-   "n_interactions": 55303,
-   "E_esc_over_inj": 0.4371040099370173,
-   "E_dep_lab_over_inj": 0.04297418413247588
+   "n_interactions": 55198,
+   "E_esc_over_inj": 0.44020061524814075,
+   "E_dep_lab_over_inj": 0.04243891199682839
   },
   "synthetic|binned_group|worldline|mem=0": {
-   "sha256": "f6ed33209bcc3649fc9134f4162c1a704cef6221a3a1f759d765326f63b0ff77",
-   "steps": 111,
-   "n_escaped": 5014,
-   "n_core": 4986,
+   "sha256": "8a97de317fb6b960fcc9b02a817fe1d73258f406667e136401007f9eebfefa5c",
+   "steps": 96,
+   "n_escaped": 5035,
+   "n_core": 4965,
    "n_absorbed": 0,
-   "n_interactions": 61721,
-   "E_esc_over_inj": 0.4675024931538669,
-   "E_dep_lab_over_inj": 0.03733615713849453
+   "n_interactions": 60775,
+   "E_esc_over_inj": 0.46997702182784545,
+   "E_dep_lab_over_inj": 0.03810773513121907
   },
   "synthetic|binned_absorb|classical|mem=0": {
    "sha256": "3cbc34928f1f1079c694d55d83c982e482217a648d527fe4f4df7684f81f2746",
@@ -592,84 +592,84 @@
    "E_dep_lab_over_inj": 0.0
   },
   "synthetic|expansion_group|classical|mem=0": {
-   "sha256": "cef567d4518cd963d6661256e7331726187cdfc0e22743240675141d20e2c0ba",
-   "steps": 78,
-   "n_escaped": 5478,
-   "n_core": 4522,
+   "sha256": "2bc15c39e2b8eae7731d590d97a5ed1336782f4bcc9bc548fc29ef65ba8894d2",
+   "steps": 92,
+   "n_escaped": 5459,
+   "n_core": 4541,
    "n_absorbed": 0,
-   "n_interactions": 54069,
-   "E_esc_over_inj": 0.5068271181851526,
-   "E_dep_lab_over_inj": 0.049129037757152196
+   "n_interactions": 54458,
+   "E_esc_over_inj": 0.5054214565563774,
+   "E_dep_lab_over_inj": 0.048988574112613606
   },
   "synthetic|expansion_group|classical|mem=1": {
-   "sha256": "10b0791424cb5e6513056327c8ca7e8c8f0ff685699b1b73b9cbc16bbe765a47",
-   "steps": 68,
-   "n_escaped": 5437,
-   "n_core": 4563,
+   "sha256": "92c92ff2d62b1e8ea375e8dc8748e5aed4a929c1be69a3bc7d356d4a9b65467f",
+   "steps": 79,
+   "n_escaped": 5377,
+   "n_core": 4623,
    "n_absorbed": 0,
-   "n_interactions": 51652,
-   "E_esc_over_inj": 0.5013016935649525,
-   "E_dep_lab_over_inj": 0.05179811586659092
+   "n_interactions": 50851,
+   "E_esc_over_inj": 0.4956840416933093,
+   "E_dep_lab_over_inj": 0.05149944611549371
   },
   "synthetic|expansion_group|worldline|mem=0": {
-   "sha256": "a31c40ba76e585e198a3c545d294a2c56a9b1783968ae892e370add7553a87be",
+   "sha256": "66118b2756cbdb70710c71576ab988bd29dbaf601a3202af49a8aba89a40de27",
    "steps": 65,
-   "n_escaped": 5473,
-   "n_core": 4527,
+   "n_escaped": 5575,
+   "n_core": 4425,
    "n_absorbed": 0,
-   "n_interactions": 49370,
-   "E_esc_over_inj": 0.5085680117949108,
-   "E_dep_lab_over_inj": 0.04715526878643352
+   "n_interactions": 50831,
+   "E_esc_over_inj": 0.5170297046765985,
+   "E_dep_lab_over_inj": 0.048211227618155855
   },
   "synthetic|dual_branch|classical|mem=0": {
-   "sha256": "dfd16f728e815b5c7ccd46ffed5ee631a0bcc838b3e9db16df30997c8ed2b2f5",
-   "steps": 153,
-   "n_escaped": 4763,
-   "n_core": 5237,
+   "sha256": "12174b157f3fbd0d0ea70a176c832a4dace48221449d31b68fc7c4ecd097a34d",
+   "steps": 125,
+   "n_escaped": 4782,
+   "n_core": 5218,
    "n_absorbed": 0,
-   "n_interactions": 58844,
-   "E_esc_over_inj": 0.44716701338896814,
-   "E_dep_lab_over_inj": 0.038661358565327326
+   "n_interactions": 57771,
+   "E_esc_over_inj": 0.44830143431391284,
+   "E_dep_lab_over_inj": 0.038824731825101516
   },
   "synthetic|dual_branch|worldline|mem=0": {
-   "sha256": "a039d9ae69e30df49d737340068c4337fc3c8b70ecb9666bc143213789e2ebd6",
+   "sha256": "2f8d5b8af78bec099a523eb6959cd3d2065d44ba25d0dde2f8cd4432c0ea1eae",
    "steps": 97,
-   "n_escaped": 4765,
-   "n_core": 5235,
+   "n_escaped": 4806,
+   "n_core": 5194,
    "n_absorbed": 0,
-   "n_interactions": 56353,
-   "E_esc_over_inj": 0.44781272374171655,
-   "E_dep_lab_over_inj": 0.03831391305715883
+   "n_interactions": 56987,
+   "E_esc_over_inj": 0.4515124442767761,
+   "E_dep_lab_over_inj": 0.03878488950516892
   },
   "synthetic|dual_group|classical|mem=0": {
-   "sha256": "062d5a0af805c654b4553a0563296a2d1116c9524d0120d17003258c2a5dc5ff",
-   "steps": 106,
-   "n_escaped": 4850,
-   "n_core": 5150,
+   "sha256": "968921f826af877d8ca728a904b412baa4501b30514c6e9d6cdb7fb8ce6dc1e0",
+   "steps": 95,
+   "n_escaped": 4910,
+   "n_core": 5090,
    "n_absorbed": 0,
-   "n_interactions": 61654,
-   "E_esc_over_inj": 0.4504771845425431,
-   "E_dep_lab_over_inj": 0.039159888007501246
+   "n_interactions": 61643,
+   "E_esc_over_inj": 0.45638976240604806,
+   "E_dep_lab_over_inj": 0.03842298328843897
   },
   "synthetic|dual_group|classical|mem=1": {
-   "sha256": "af421b762791050c467b73819222552ad00d62383a96488684eaf0fec1686691",
-   "steps": 95,
-   "n_escaped": 4730,
-   "n_core": 5270,
+   "sha256": "3987e2efd30d3a5684080fc6a4f81f1498693e41bd26b92b5a4ea3d9be525b20",
+   "steps": 98,
+   "n_escaped": 4755,
+   "n_core": 5245,
    "n_absorbed": 0,
-   "n_interactions": 55303,
-   "E_esc_over_inj": 0.4371040099370173,
-   "E_dep_lab_over_inj": 0.04297418413247588
+   "n_interactions": 55198,
+   "E_esc_over_inj": 0.44020061524814075,
+   "E_dep_lab_over_inj": 0.04243891199682839
   },
   "synthetic|dual_group|worldline|mem=0": {
-   "sha256": "f6ed33209bcc3649fc9134f4162c1a704cef6221a3a1f759d765326f63b0ff77",
-   "steps": 111,
-   "n_escaped": 5014,
-   "n_core": 4986,
+   "sha256": "8a97de317fb6b960fcc9b02a817fe1d73258f406667e136401007f9eebfefa5c",
+   "steps": 96,
+   "n_escaped": 5035,
+   "n_core": 4965,
    "n_absorbed": 0,
-   "n_interactions": 61721,
-   "E_esc_over_inj": 0.4675024931538669,
-   "E_dep_lab_over_inj": 0.03733615713849453
+   "n_interactions": 60775,
+   "E_esc_over_inj": 0.46997702182784545,
+   "E_dep_lab_over_inj": 0.03810773513121907
   },
   "synthetic|dual_absorb|classical|mem=0": {
    "sha256": "3cbc34928f1f1079c694d55d83c982e482217a648d527fe4f4df7684f81f2746",

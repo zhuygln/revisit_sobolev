@@ -139,31 +139,85 @@ def run_shells(state, shells, n, legs=SHELL_LEGS, seeds=L.SEEDS, stages=("II",),
     return row
 
 
-def compare(row, single_files):
+def compare(row, single_files, weights_leg="R2"):
     """The cancellation block from the single-zone leg files of the transported
-    shells: {shell: path}. Uses B2's band weights by last shell."""
+    shells: {shell: path}. dm_s(b) is each shell's single-zone B2 - R2; the
+    mixture dm_mix(b) = sum_s f_s(b) dm_s(b) uses the band-forming weights
+    f_s(b) (escaped energy per band by the shell of last interaction) of
+    `weights_leg` in the multi-shell run (R2: where the reference's light in
+    the band forms; the B2-weighted mixture is reported beside it), and
+    cancel(b) = 1 - dm_multi / dm_mix. Also the photospheric shell's own
+    single-zone error dm_ph(b), the number the single-zone verdicts quote."""
     shells = row["shells"]
     dm_s = {}
     for s, f in single_files.items():
         d = json.loads(Path(f).read_text())
         dm_s[int(s)] = d["legs"]["B2"]["dm_vs_R2"]
     out = {}
-    if "B2" not in row["legs"] or not dm_s:
+    if "B2" not in row["legs"] or not dm_s or weights_leg not in row["legs"]:
         return out
-    fw = row["legs"]["B2"]["band_weights_by_shell"]
+    fw = row["legs"][weights_leg]["band_weights_by_shell"]
+    fw_b = row["legs"]["B2"]["band_weights_by_shell"]
+    ph = shells[0]
     for b in row["legs"]["B2"]["dm_vs_R2"]:
-        w = np.array(fw[b][1:])                     # drop the never-interacted column
         have = [k for k, s in enumerate(shells) if s in dm_s]
+        w = np.array(fw[b][1:]); wb = np.array(fw_b[b][1:])     # drop the never-interacted column
         if not have or not np.isfinite(w).all():
             continue
-        ww = w[have]; dm = np.array([dm_s[shells[k]][b] for k in have])
-        mix = float(np.sum(ww * dm) / ww.sum()) if ww.sum() > 0 else np.nan
+        dm = np.array([dm_s[shells[k]][b] for k in have])
+        def _mix(ww):
+            ww = ww[have]
+            return float(np.sum(ww * dm) / ww.sum()) if ww.sum() > 0 else np.nan
+        mix, mix_b = _mix(w), _mix(wb)
         multi = row["legs"]["B2"]["dm_vs_R2"][b]
-        out[b] = dict(dm_multi=multi, dm_mix=mix, dm_shells={str(shells[k]): float(dm_s[shells[k]][b]) for k in have},
-                      weights={str(shells[k]): float(ww[i] / ww.sum()) for i, k in enumerate(have)},
+        out[b] = dict(dm_multi=multi, dm_mix=mix, dm_mix_B2w=mix_b, weights_leg=weights_leg,
+                      dm_ph=float(dm_s[ph][b]) if ph in dm_s else np.nan,
+                      dm_shells={str(shells[k]): float(dm_s[shells[k]][b]) for k in have},
+                      weights={str(shells[k]): float(w[k] / w[have].sum()) for k in have},
+                      weights_B2={str(shells[k]): float(wb[k] / wb[have].sum()) for k in have},
                       cancel=(1.0 - multi / mix) if (np.isfinite(mix) and mix != 0) else np.nan,
-                      ratio=(multi / mix) if (np.isfinite(mix) and mix != 0) else np.nan)
+                      ratio=(multi / mix) if (np.isfinite(mix) and mix != 0) else np.nan,
+                      ratio_B2w=(multi / mix_b) if (np.isfinite(mix_b) and mix_b != 0) else np.nan)
     return out
+
+
+def gate4(row, seed_sigma=0.1):
+    """The pre-declared Gate 4 reading of a comparison block, per live band of
+    the multi-shell R2 (verdict.live_bands): ratio = dm_multi / dm_mix with
+    dm_mix the R2-band-forming-weighted mixture of the shells' single-zone
+    errors.  Survives: |ratio| >= 0.5 with the sign kept in every live band.
+    Partial: some live band in 0.2-0.5.  Cancels: every live band < 0.2, or
+    a sign flip in a band whose single-zone error exceeded 1 mag.  Gray:
+    the energy identity, the crossing bookkeeping or a missing single-zone
+    file; a band whose |dm_mix| is within `seed_sigma` of zero is not read
+    (the ratio is noise there)."""
+    sys.path.insert(0, str(HERE.parent / "phase3_legs"))
+    from verdict import live_bands
+    cmp_ = row.get("comparison") or {}
+    if not cmp_:
+        return dict(outcome="GRAY", reason="no comparison block")
+    for k in ("R2", "B2"):
+        o = row["legs"][k]
+        if abs(o["ledger"].get("identity", 0.0)) > 1e-9 or o["energy"].get("dep_cm", 0.0) != 0.0:
+            return dict(outcome="GRAY", reason=f"{k}: energy identity {o['ledger'].get('identity')} / dep_cm")
+    live = [b for b in live_bands(row) if b in cmp_]
+    read = {}
+    for b in live:
+        c = cmp_[b]
+        if not np.isfinite(c["dm_mix"]) or abs(c["dm_mix"]) < seed_sigma:
+            continue
+        flip = np.sign(c["dm_multi"]) != np.sign(c["dm_mix"])
+        big = max(abs(v) for v in c["dm_shells"].values()) > 1.0
+        read[b] = dict(ratio=c["ratio"], flip=bool(flip), big_single=bool(big), dm_multi=c["dm_multi"], dm_mix=c["dm_mix"])
+    if not read:
+        return dict(outcome="GRAY", reason="no live band with |dm_mix| above the seed noise", live=live)
+    if any(r["flip"] and r["big_single"] for r in read.values()) or all(abs(r["ratio"]) < 0.2 for r in read.values()):
+        out = "CANCELS"
+    elif all(abs(r["ratio"]) >= 0.5 and not r["flip"] for r in read.values()):
+        out = "SURVIVES"
+    else:
+        out = "PARTIAL"
+    return dict(outcome=out, live=live, bands=read)
 
 
 def main():
@@ -200,6 +254,7 @@ def main():
     if a.single:
         files = dict(kv.split("=") for kv in a.single.split(","))
         row["comparison"] = compare(row, files)
+        row["gate4"] = gate4(row)
         for b, c in row["comparison"].items():
             print(f"  {b}: dm_multi={c['dm_multi']:+.2f} dm_mix={c['dm_mix']:+.2f} ratio={c['ratio']:.2f} cancel={c['cancel']:+.2f} "
                   f"shells={ {k: round(v, 2) for k, v in c['dm_shells'].items()} } weights={ {k: round(v, 2) for k, v in c['weights'].items()} }")

@@ -803,9 +803,17 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
             frac = (edges[b + 1] - nu) / width[b]
             return G_edges[b + 1] + frac * E[b]
         def nu_of_G(g):
-            # invert: find bin where G_edges[b+1] <= g < G_edges[b]
-            b = np.clip(E.size - 1 - np.searchsorted(G_edges[::-1], g, side="right"), 0, E.size - 1)
-            # G_edges descending in b; G_edges[::-1] ascending
+            # invert: find bin b where G_edges[b+1] <= g < G_edges[b].
+            # G_edges descends in b; on the ascending reversed array
+            # searchsorted(side="right") counts the m edges <= g, i.e.
+            # G_edges[nb-m+1] <= g < G_edges[nb-m], so b = nb - m. (Until
+            # Paper IV Phase 8 this read nb - 1 - m: one bin too low, so the
+            # fraction was formed with the NEIGHBOUR's E; next to a thinner
+            # bin the target overshot upward, landed above the packet's own
+            # frequency, was discarded as "behind", and the packet skipped
+            # the rest of the forest -- the bin legs leaked. Caught by the
+            # split-shell invariance test, results_report 4.55.)
+            b = np.clip(E.size - np.searchsorted(G_edges[::-1], g, side="right"), 0, E.size - 1)
             # within bin b: g = G_edges[b+1] + frac*E[b] -> frac
             frac = np.where(E[b] > 0, (g - G_edges[b + 1]) / np.where(E[b] > 0, E[b], 1.0), 0.0)
             return edges[b + 1] - frac * width[b]
@@ -820,7 +828,7 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
                 for s_ in np.unique(sh):
                     m = sh == s_
                     Gs = G_edges[s_]; Es = E[s_]
-                    b = np.clip(nb - 1 - np.searchsorted(Gs[::-1], g[m], side="right"), 0, nb - 1)
+                    b = np.clip(nb - np.searchsorted(Gs[::-1], g[m], side="right"), 0, nb - 1)   # see nu_of_G
                     frac = np.where(Es[b] > 0, (g[m] - Gs[b + 1]) / np.where(Es[b] > 0, Es[b], 1.0), 0.0)
                     out[m] = edges[b + 1] - frac * width[b]
                 return out
