@@ -4539,6 +4539,61 @@ divided into shells. Phases 9–10 (estimators, upward transitions,
 B_eq − R_eq) would refine a 0.2 mag number; whether they are worth running
 is the PI's call.
 
+### 4.57 The pivot: coarse-graining a lanthanide forest under complete redistribution and under explicit fluorescence (F62)
+
+The PI's reading of §§4.55–4.56 (`paper4/plan_review.md`, 2026-09-10): the
+failure story is over; the cleaner question is *when, and how accurately,
+can dense r-process line forests be coarse-grained when fluorescence is
+treated explicitly and energy is conserved?* — the Fontes et al. (2020)
+benchmark (resolved / expansion / line-binned under complete thermal
+redistribution) repeated with the one change ε = 1 → energy-conserving
+fluorescence. The corrected final-composition legs already contain the
+in-state version of that experiment: Rth / Bth / Bbinth are the three
+opacity treatments under complete thermal redistribution (every
+absorption re-emitted from the LTE line emissivity), R₂ / B₂ / Bbin₂ the
+same three under the downward macroatom. Same atomic data, same states,
+same transport, same packets (3 × 3×10⁵):
+
+| state | redistribution | expansion − resolved (g, i, z, K) | line-binned − resolved (g, i, z, K) |
+|---|---|---|---|
+| P1, 1 d | ε = 1 | −0.02, −0.22, −0.27, −0.16 | +0.24, −0.03, −0.10, −0.03 |
+| | fluorescence | +0.03, −0.12, −0.15, −0.14 | **+0.80, +0.44, +0.32, +0.22** |
+| P1, 2 d | ε = 1 | −0.02, −0.18, −0.12, −0.07 | +0.09, −0.01, +0.01, +0.02 |
+| | fluorescence | −0.09, −0.18, −0.19, −0.10 | **+0.70, +0.46, +0.37, +0.24** |
+| P1, 3 d | ε = 1 | −0.08, −0.13, −0.12, −0.09 | +0.08, +0.02, 0.00, 0.00 |
+| | fluorescence | −0.16, −0.18, −0.15, −0.09 | **+0.78, +0.57, +0.45, +0.30** |
+| P1, 5 d | ε = 1 | −0.16, −0.16, −0.11, −0.07 | −0.03, −0.03, −0.01, +0.01 |
+| | fluorescence | −0.15, −0.24, −0.19, −0.06 | **+0.73, +0.64, +0.38, +0.16** |
+| P1r1 (X_LN = 0.30) | ε = 1 | −0.09, −0.18, −0.20, −0.15 | +0.21, +0.05, +0.01, 0.00 |
+| | fluorescence | −0.14, −0.20, −0.25, −0.14 | **+0.77, +0.49, +0.38, +0.55** |
+| P1r2 (solar_r) | ε = 1 | −0.09, −0.16, −0.14, −0.08 | +0.15, −0.01, 0.00, +0.01 |
+| | fluorescence | −0.13, −0.16, −0.19, −0.12 | **+0.75, +0.49, +0.29, +0.30** |
+| P2, 3.4 d | ε = 1 | −0.11, +0.01, +0.03, +0.01 | −0.09, +0.01, +0.03, 0.00 |
+| | fluorescence | +0.11, +0.05, +0.02, −0.02 | +0.15, +0.05, +0.02, −0.02 |
+
+(Rth − R₂, the effect of the redistribution physics itself on the resolved
+transport, is −1.2 to −2.3 mag in the optical on P1 and −0.5 in g on P2:
+the choice of redistribution moves the answer by an order of magnitude
+more than the choice of opacity closure.)
+
+**F62 — Under complete thermal redistribution the line-binned closure
+reproduces the resolved transport to ≤ 0.1 mag on the saturated
+lanthanide states (Fontes et al.'s result, re-found with independent
+atomic data and a resolved Sobolev reference), and the expansion closure
+sits 0.1–0.3 mag too bright. Switching only the post-absorption physics
+to energy-conserving fluorescence leaves the expansion closure where it
+was (−0.1 to −0.25 mag) and moves the line-binned closure to +0.3 to
++0.8 mag too faint at every epoch and composition pattern; on the thin
+state neither moves beyond 0.15 mag.** The coarse-opacity validation of
+the literature depended on the redistribution it was done under: a
+closure that weights a bin by Σ τ (line-binned) rather than Σ (1 − e^{−τ})
+(expansion) over-absorbs in saturated lines, which complete redistribution
+forgives (the energy is re-emitted from the same thermal emissivity
+either way) and fluorescence does not (the extra absorptions activate
+the wrong upper levels and the cascade lands elsewhere). The mechanism is
+a hypothesis to be tested with the line-identity and dual legs; the
+numbers are the finding.
+
 ## 5. Findings register
 
 | # | Finding | Where |
