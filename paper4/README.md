@@ -29,30 +29,36 @@ and, only if that survives, after radiative equilibrium,
 > Does that difference survive when each transport treatment establishes
 > its own self-consistent thermal and ionization structure?  **(B_eq − R_eq)**
 
-## Where it stands (2026-09-09)
+## Where it stands (2026-09-10)
 
-Phases 0–3 ran the day the plan arrived (`docs/results_report.md` §4.47,
-F50–F52; notebook §9ax–§9ba). Gate 2 on P1, the xkn secular component,
-is **Green**: B₂ − R₂ = −2.2 to −2.9 mag in z and +0.9 to +1.3 mag in K at
-1–5 d, the redistribution control ≤ 0.06 mag, C₂ within 0.08 mag of B₂.
-On P2, the published AT2017gfo 3.4-d state, it is **Red** — +0.19 mag in g
-with the opposite sign — which is Paper III's saturation boundary
-re-found on published states, not a contradiction; the combined verdict
-is Gray by the letter of the rule. The single-zone adequacy trigger fired
-on P1, so shell-resolved transport is a required check. Photon-number
-branching moved the *reference* by 2.5 mag in z (F50). Phase 4 (F53): the
-Fontes-like limit holds on P2 — coarse opacity within 0.08 mag of resolved
-under thermal redistribution, the fluorescence swap opens the gap — and
-fails on P1, where coarse opacity is 3 mag wrong in g already. Phase 5
-(F54): the dual-role closure moves the error around, not away. Phase 7
-instrument in place (Saha: 99 % II at the 2–3 d zones, 41 % III at 1 d).
-Phase 6 (F56): the reference is converged to ≤ 0.03 mag in z/K; the
-closure's error moves ~1 mag with its own bin width and line cut, quoted
-as a range. Phase 7 (F57): Gate 3 passes; 99 % II at the Gate 2 zones,
-60 % Ce III at 1 d with the class kept. The neighbour shells (F55) keep
-the class with a ~1 mag amplitude spread. Open: Phases 8–10 (shells,
-estimators, full macroatom, **B_eq − R_eq**), the Phase 7 sensitivity
-table, Phase 11, Phase 12, and the PI's two provisional inputs.
+**Read §4.55 first.** Multi-shell transport (Phase 8, `sobolev/zoned_atom.py`,
+`paper4/phase8_shells/`) found that the same physical state gave a
+different grouped-opacity answer with a different number of shell
+boundaries. The cause was an off-by-one in the bin legs' inversion of the
+cumulative expansion opacity (`forest_mc.py::nu_of_G`, in every
+expansion_/binned_/dual_ leg since Paper II): next to a thinner bin the
+target overshot above the packet's own frequency and the packet skipped
+the rest of the forest. Fixed in 38ebf30 with the goldens re-pinned and a
+spiky-forest regression test. The Sobolev references (R₁, R₂) and the
+redistribution control (A₂) never used it and stand; **every B, C, D and
+thermal-bridge amplitude in §§4.47–4.54 and in F51–F56, F59 is pre-fix and
+superseded** (the sections are kept as the record). Paper III's closure
+legs at `paper3-freeze` carried the same bug; the tag is not moved and the
+erratum is the PI's call.
+
+On the fixed transport (F60): P1 at 2 d, final composition, the expansion
+closure B₂ − R₂ is −0.19 (z) / −0.10 (K) at the photospheric shell, −0.16 /
+−0.03 on 12 resolved shells, within 0.25 mag on every shell around the
+photosphere; the binned closure is +0.2 to +0.9 mag the other way; the
+split test (4 shells vs the same state as 12) is bit-identical. Gate 4 has
+nothing of magnitude scale left to cancel. Compositions are final
+(Gillanders 2022 Ye-0.21a pattern at X_lan = 0.11 for P1, Ye-0.29a rescaled
+to 2.5×10⁻³ for P2). Running: the final-composition legs for the Gate 2
+verdict at 1/2/3/5 d, P2 and the two robustness patterns; the epochs, P2
+and the 6/24-shell grids in multi-shell; Phase 6 convergence. Open after
+that: Phases 9–10 (estimators, full macroatom, B_eq − R_eq), the Phase 7
+sensitivity table, Phase 11, Phase 12. Photon-number branching still moves
+the *reference* by 2.5 mag in z (F50, Sobolev legs: unaffected).
 
 ## Design decisions taken in implementation
 

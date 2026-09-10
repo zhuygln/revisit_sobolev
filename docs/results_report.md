@@ -4425,7 +4425,47 @@ epoch, P2, dead-end, neighbour and convergence results on the fixed
 transport, and the Gate 2 verdict on the final compositions, follow below
 as they complete.
 
-MULTISHELL_FIXED_PLACEHOLDER
+**On the fixed transport** (`*_fixed.json`; 3 × 3×10⁵ packets, seed
+scatter ≤ 0.02 mag):
+
+| P1, 2 d, final composition | B₂ − R₂ g | z | K | Bbin₂ − R₂ g | z | K | A₂ − R₂ z | R₂ z |
+|---|---|---|---|---|---|---|---|---|
+| single zone, shell 27 (S = 5.6×10⁴) | −0.07 | −0.19 | −0.15 | +0.86 | +0.38 | +0.37 | +0.01 | |
+| single zone, shell 28 (photosphere, S = 4.3×10⁴) | −0.09 | −0.19 | −0.10 | +0.70 | +0.37 | +0.24 | +0.02 | 23.17 |
+| single zone, shell 29 (S = 3.4×10⁴) | −0.13 | −0.11 | −0.02 | +0.52 | +0.23 | −0.11 | 0.00 | |
+| 4 transported shells (28–31) | −0.21 | −0.17 | −0.03 | +0.68 | +0.29 | −0.01 | | 22.41 |
+| the same state as 12 shells (each split in 3) | −0.21 | −0.17 | −0.03 | +0.68 | +0.29 | −0.01 | | 22.41 |
+| 12 shells, ρ ∝ (1 − x²)³ resolved | −0.14 | −0.16 | −0.03 | +0.48 | +0.29 | +0.02 | | 22.25 |
+| shell 28, dead ends deposited | +0.03 | −0.13 | −0.26 | +2.95 | +0.86 | +0.32 | −1.52 | |
+| P2, 3.4 d, dead ends deposited | +0.39 | +0.02 | −0.02 | +0.43 | +0.02 | −0.02 | 0.00 | |
+
+The split test is now bit-identical (4 shells and the same state as 12:
+every band, every leg, the same event count). The single-zone error is
+within 0.2 mag on every shell around the photosphere for the expansion
+closure and +0.2 to +0.9 mag, opposite sign, for the binned one; the 12
+resolved shells give −0.14 to −0.23 (expansion) and +0.3 to +0.6 (binned,
++0.02 in K), and every one of the 12 shells' own single-zone errors is
+within 0.25 mag. The pre-declared Gate 4 reading (`gate4()`) is *survives*
+on the two live bands whose local mixture exceeds the seed noise (J, H:
+ratio 1.4, 1.2) and cannot be read elsewhere because there is no
+magnitude-scale error left to cancel; spatial integration neither cancels
+nor amplifies a 0.15 mag error. The dead-end alternative (§4.54) now moves
+the expansion closure by ≤ 0.2 mag on P1 but the binned closure by 3 mag
+in g and the redistribution control by 1.5 mag in z — the deposit variant
+remains the wrong bookkeeping for the control, not a closure result.
+
+**F60 — The grouped-opacity closure error that Papers III and IV had
+reported at 2–5 mag on saturated lanthanide zones was an off-by-one in
+the bin legs' opacity inversion. On the fixed transport the expansion
+closure is within 0.2 mag of the energy-conserving reference on every
+published zone and grid tried so far, the binned closure within +0.2 to
++0.9 mag with the opposite sign, and neither depends on how the ejecta
+above the photosphere is divided into shells.** Multi-shell transport is
+what found it: the same physical state gave different answers with
+different numbers of boundaries, which no single-zone test could see.
+The epochs, P2, the 6- and 24-shell grids, the Phase 6 convergence axes
+and the Gate 2 verdict on the final compositions follow in §4.56 as the
+reruns complete.
 
 ## 5. Findings register
 
