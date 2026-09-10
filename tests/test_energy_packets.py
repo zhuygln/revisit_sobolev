@@ -37,6 +37,7 @@ def toy():
     fa.temperature = 3000.0
     fa.emis_w = np.array([1.0, 1.0])
     fa.level_energy_cm = np.array([0.0, 0.0, NU_21 / C, NU_13 / C])   # levels 0(unused),1,2,3
+    fa.level_g = np.ones(4)                                          # the full macroatom needs weights
     return fa
 
 
