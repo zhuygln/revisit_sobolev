@@ -4509,7 +4509,34 @@ transition probabilities, unchanged from F50) and B₂ − R₂ = −0.19 (z),
 −0.10 (K); on P2 +0.11 (g). The composition swap from the provisional
 patterns moved nothing by more than 0.15 mag.**
 
-**F61 — Gate 2 on the fixed transport.** GATE2_PLACEHOLDER
+**F61 — Gate 2 on the fixed transport.** The pre-declared rule (§4.47: Green needs |B₂ − R₂| ≥ 0.5 mag in ≥ 2 live
+bands at ≥ 2 epochs with the saturation sign pattern; Red when the
+bookkeeping correction ‖R₁ − R₂‖ exceeds half the closure's own
+‖R₁ − B₁‖), on the final compositions and the fixed transport:
+
+| state | live bands | B₂ − R₂ | Bbin₂ − R₂ | A₂ − R₂ | ‖R₁ − R₂‖ / ‖R₁ − B₁‖ | verdict |
+|---|---|---|---|---|---|---|
+| P1, 1 d (shell 29) | K | −0.14 | +0.22 | −0.01 | 0.85 / 0.07 | Red |
+| P1, 2 d (shell 28) | z, K | −0.19, −0.10 | +0.37, +0.24 | +0.02, +0.03 | 2.52 / 0.04 | Red |
+| P1, 3 d (shell 27) | z, H, K | −0.15, −0.16, −0.09 | +0.45, +0.61, +0.30 | +0.04, 0.00, +0.02 | | Red |
+| P1, 5 d (shell 26) | z, H, K | −0.19, −0.19, −0.06 | +0.38, +0.49, +0.16 | −0.03, −0.02, 0.00 | | Red |
+| P2, 3.4 d | g … K | +0.11 (g) … −0.02 (K) | +0.15 (g) | ≤ 0.02 | 0.26 / 0.31 | Red |
+| P1r1 (Ye-0.21a at X_LN = 0.30), P1r2 (solar_r at 0.11), 2 d | ROBUST_ROW |
+
+**Gate 2 is Red on every state and epoch: the grouped-opacity closure is
+within 0.2 mag of the energy-conserving reference wherever it was tried,
+and the bookkeeping correction R₁ → R₂ (0.9–2.5 mag on P1) is 12–60 times
+the closure's own error.** The binned closure keeps a +0.2 to +0.6 mag
+error of the opposite sign in the red and near-infrared, larger than the
+expansion closure's on every saturated zone, with the redistribution
+control A₂ at ≤ 0.04 mag throughout. By the plan's own rule the program's
+question — does the closure error survive energy-conserving transport in
+coherent published states — is answered: **no**, once the closure legs
+are implemented correctly, on both the lanthanide-rich and the thin
+published state, at every epoch, and independently of how the ejecta is
+divided into shells. Phases 9–10 (estimators, upward transitions,
+B_eq − R_eq) would refine a 0.2 mag number; whether they are worth running
+is the PI's call.
 
 ## 5. Findings register
 

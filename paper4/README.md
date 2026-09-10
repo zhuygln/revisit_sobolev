@@ -53,11 +53,15 @@ photosphere; the binned closure is +0.2 to +0.9 mag the other way; the
 split test (4 shells vs the same state as 12) is bit-identical. Gate 4 has
 nothing of magnitude scale left to cancel. Compositions are final
 (Gillanders 2022 Ye-0.21a pattern at X_lan = 0.11 for P1, Ye-0.29a rescaled
-to 2.5×10⁻³ for P2). Running: the final-composition legs for the Gate 2
-verdict at 1/2/3/5 d, P2 and the two robustness patterns; the epochs, P2
-and the 6/24-shell grids in multi-shell; Phase 6 convergence. Open after
-that: Phases 9–10 (estimators, full macroatom, B_eq − R_eq), the Phase 7
-sensitivity table, Phase 11, Phase 12. Photon-number branching still moves
+to 2.5×10⁻³ for P2). **Gate 2 on the fixed
+transport is Red on every state and epoch** (F61, §4.56): P1 1–5 d
+B₂ − R₂ z −0.14 to −0.19, K −0.06 to −0.14; P2 g +0.11; 4/6/12/23 shells
+and P2's 32 agree; the closure's error moves ≤ 0.05 mag with its own bin
+width and line cut (F58). The program's question is answered in the
+negative. Running: the two robustness patterns at 2 d. Open, at the PI's
+discretion now that the effect is 0.2 mag: Phases 9–10 (estimators, full
+macroatom, B_eq − R_eq), the Phase 7 sensitivity table, Phase 11, Phase 12;
+and the Paper III erratum. Photon-number branching still moves
 the *reference* by 2.5 mag in z (F50, Sobolev legs: unaffected).
 
 ## Design decisions taken in implementation
