@@ -58,7 +58,17 @@ transport is Red on every state and epoch** (F61, §4.56): P1 1–5 d
 B₂ − R₂ z −0.14 to −0.19, K −0.06 to −0.14; P2 g +0.11; 4/6/12/23 shells
 and P2's 32 agree; the closure's error moves ≤ 0.05 mag with its own bin
 width and line cut (F58). The program's question is answered in the
-negative. The two robustness patterns at 2 d (Ye-0.21a at 0.30, solar_r at 0.11) are Red too (K −0.14; z −0.19, K −0.12). Open, at the PI's
+negative. The two robustness patterns at 2 d (Ye-0.21a at 0.30, solar_r at 0.11) are Red too (K −0.14; z −0.19, K −0.12).
+**Phase 10 (the pivot) is done** (F62–F64, §4.57–4.59): under complete
+thermal redistribution the line-binned closure matches the resolved
+transport to ≤ 0.1–0.3 mag and expansion is 0.2–0.3 mag too blue (Fontes
+et al.'s picture, re-found on P1, P2, the Fontes problem and an
+independent line list); with the single switch to energy-conserving
+fluorescence the expansion closure is unchanged while the line-binned
+closure's colour error grows to 0.3–1.7 mag and, on a strong-lined
+forest, its transport does not terminate; the full macroatom moves the
+reference by 1.3–1.8 mag and leaves the expansion closure within 0.18 mag
+of it. Open, at the PI's
 discretion now that the effect is 0.2 mag: Phases 9–10 (estimators, full
 macroatom, B_eq − R_eq), the Phase 7 sensitivity table, Phase 11, Phase 12;
 and the Paper III erratum. Photon-number branching still moves
