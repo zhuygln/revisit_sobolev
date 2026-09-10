@@ -92,7 +92,7 @@ def build_fontes(t_d=4.0, n_shell=64, saha=True):
 
 
 def run_fontes(state, shells, n, legs=LEGS, seeds=L.SEEDS, tau_min=1e-3, emis_cut=1e-6, f_min=1e-3,
-               budget_s=None, verbose=True, dataset=None):
+               budget_s=None, verbose=True, dataset=None, core="reemit"):
     t0 = time.time()
     zone = state.transport_zone(shells)
     m = state.shell_mass()
@@ -105,7 +105,7 @@ def run_fontes(state, shells, n, legs=LEGS, seeds=L.SEEDS, tau_min=1e-3, emis_cu
     l_core = phot.planck_luminosity(lo, hi, zone["r_core"], zone["t_core"])
     row = dict(state=state.meta["name"], t_d=state.t / DAY, shells=list(map(int, shells)), n_shell=len(shells),
                zone={k: v for k, v in zone.items()}, n=n, seeds=list(seeds), tau_min=tau_min, emis_cut=emis_cut,
-               f_min=f_min, dataset=dataset or "gsi", relativity=None, launch="volume", launch_core_frac=core_frac, core="reemit",
+               f_min=f_min, dataset=dataset or "gsi", relativity=None, launch="volume", launch_core_frac=core_frac, core=core,
                n_lines=int(atom.n_lines_total),
                n_opacity_union=int(atom.n_opacity), n_opacity_shell=atom.n_opacity_shell.tolist(),
                ions=atom.ions, t_build=t_build, rss_mb_atom=rss_mb(), lam_window=list(LAM_WIN), n_spec=N_SPEC,
@@ -119,7 +119,7 @@ def run_fontes(state, shells, n, legs=LEGS, seeds=L.SEEDS, tau_min=1e-3, emis_cu
         tl = time.time()
         res = [run_mc(atom, zone["r_core"], zone["r_out"], zone["t_exp"], lo, hi, n, spec["mode"], seed=s,
                       t_core=float(state.T_gas[shells[0]]), relativity=None, max_steps=L.MAX_STEPS, packets="energy",
-                      launch_weight="energy", launch="volume", launch_core_frac=core_frac, core="reemit", wall_s=budget_s) for s in seeds]
+                      launch_weight="energy", launch="volume", launch_core_frac=core_frac, core=core, wall_s=budget_s) for s in seeds]
         # "absorbing" = no synthetic renormalisation: the escaping spectrum itself; legs share E_inj
         o = photometer(observe(res, l_core, "absorbing"), edges, nu_c, phot.D_40MPC)
         per_seed = [photometer(observe([r], l_core, "absorbing"), edges, nu_c, phot.D_40MPC)["mags"] for r in res]
@@ -163,6 +163,7 @@ def main():
     ap.add_argument("--budget", type=float, default=None)
     ap.add_argument("--no-saha", action="store_true")
     ap.add_argument("--dataset", default=None, help="None = GSI cache; 'jplt' = the Japan-Lithuania line list")
+    ap.add_argument("--core", default="reemit", help="inner boundary: reemit (thermalising interior) or reflect (mirror)")
     ap.add_argument("--state-out", default=None)
     ap.add_argument("--out", default=None)
     a = ap.parse_args()
@@ -175,8 +176,8 @@ def main():
         shells = list(range(1, st.n_shell))
     row = run_fontes(st, shells, a.n, tuple(a.legs.split(",")), tuple(int(s) for s in a.seeds.split(",")), a.tau_min,
                      None if a.emis_cut <= 0 else a.emis_cut, None if a.f_min <= 0 else a.f_min, a.budget,
-                     dataset=a.dataset)
-    out = a.out or (HERE / f"fontes_t{a.t:g}_n{a.n_shell}{'' if a.dataset is None else '_' + a.dataset}.json")
+                     dataset=a.dataset, core=a.core)
+    out = a.out or (HERE / f"fontes_t{a.t:g}_n{a.n_shell}{'' if a.dataset is None else '_' + a.dataset}_{a.core}.json")
     Path(out).write_text(json.dumps(row, indent=1, default=float))
     print(f"wrote {out} in {row['t_wall']:.0f}s")
 
