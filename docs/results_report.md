@@ -4630,6 +4630,64 @@ table: the expansion closure tracks the resolved transport to ~0.15 mag
 whichever fluorescence treatment both are given, and the line-binned
 closure's error is larger and changes shape with the treatment.
 
+### 4.59 Phase 10, the Fontes et al. (2020) simplified problem as a snapshot: three opacity treatments under ε = 1 and under fluorescence (F64)
+
+Instrument and approximations: `paper4/phase10_fontes/fontes.py` and
+`paper4/README.md` (Phase 10). Their Appendix C ejecta (pure Nd, ρ ∝
+(1 − x²)³, T ∝ (1 − x²), v_max = 0.25c, 1.4×10⁻² M⊙, T0 = 5700 K at
+t0 = 4 d, lines with f > 10⁻³, bound-bound only, 64 uniform cells) at 4 d,
+LTE Saha (Nd III inside 0.14c, Nd II outside), packets injected in the
+volume in proportion to mass with the local Planck spectrum, the outer 19
+cells (0.176c–0.25c, τ_grey(κ = 10) ≲ 0.7, 12 % of the mass) transported and
+the interior's 88 % of the heating arriving from the inner boundary;
+classical transport; 2 × 5×10⁴ packets. The interior is diffusive (240
+events and 21 boundary returns per packet from 0.16c inward), so the
+inner boundary is treated in **two brackets**: `reemit` (complete
+thermalisation: returning packets come back as the boundary's Planck
+spectrum) and `reflect` (a lossless mirror), each with a 200-return cap
+that books the remainder to the core — the escaped-energy fractions are
+therefore cap-limited (0.37–0.40) and only the *spectral shapes* are the
+observable; a lossless steady-state run (mirror, 2×10⁴ returns) is in
+LOSSLESS_PLACEHOLDER. Data `fontes_t4_z45_{reemit,reflect}.json`,
+`fontes_t6.3_z45_*.json`, `fontes_t4_z45_jplt_*.json`.
+
+Closure − resolved (g, r, i, z, J, H, K), the two brackets side by side:
+
+| redistribution | closure | reemit | reflect |
+|---|---|---|---|
+| ε = 1 | expansion − resolved | −0.12, −0.70, −0.66, −0.56, −0.64, −0.49, −0.52 | −0.20, −0.95, −0.89, −0.68, −0.70, −0.64, −0.66 |
+| ε = 1 | line-binned − resolved | −0.26, −0.06, −0.19, −0.20, −0.29, −0.25, −0.25 | −0.05, −0.39, −0.47, −0.35, −0.41, −0.40, −0.37 |
+| fluorescence | expansion − resolved | +0.05, −0.96, −0.77, −0.54, −0.60, −0.53, −0.53 | −0.58, −1.05, −0.81, −0.67, −0.70, −0.60, −0.69 |
+| fluorescence | line-binned − resolved | **+3.56, +1.39, +0.71, +0.14, +0.17, −0.13, −0.34** | **(g dark), +0.93, +0.59, +0.12, +0.11, −0.15, −0.42** |
+| | resolved: ε = 1 − fluorescence | +0.13, −0.14, +0.01, +0.03, −0.07, −0.04, +0.04 | +0.25, +0.05, +0.14, +0.04, −0.04, −0.01, +0.01 |
+
+Colour r − K of each leg (reemit / reflect): resolved ε = 1 6.15 / 6.38,
+expansion ε = 1 5.97 / 6.09, line-binned ε = 1 6.34 / 6.36; resolved
+fluorescence 6.33 / 6.33, expansion fluorescence 5.90 / 5.98,
+**line-binned fluorescence 8.05 / 7.68**. Events per packet: resolved 71–81,
+expansion 62–72, line-binned ε = 1 6700–7800 (a packet re-emitted
+thermally inside a Σ τ bin is re-absorbed by that bin almost surely),
+line-binned fluorescence 230–290.
+
+**F64 — On the Fontes simplified problem, under complete thermal
+redistribution the line-binned closure reproduces the resolved Sobolev
+colours to 0.0–0.2 mag in r − K and the expansion closure is 0.2–0.3 mag
+too blue and brighter through r–K by 0.5–0.9 mag (their ordering:
+expansion brighter than line-binned, Sobolev between in colour); with the
+single change to energy-conserving fluorescence the expansion closure's
+error is unchanged, while the line-binned closure's colour error opens to
+1.4–1.7 mag in r − K (+1.4 in r, +3.6 in g, −0.3 to −0.4 in K).** Both
+brackets of the inner boundary give the same pattern, so it is a property
+of the transported layers. This is F62 re-found on an independent problem
+with a single element: coarse-opacity closures validated under complete
+redistribution are not thereby validated under fluorescence, and the two
+closures fail in opposite ways — expansion by a nearly grey offset, line-
+binned by its colour. At 6.3 d the initial-profile temperature scaling
+(T ∝ t⁻¹) leaves the zone at ≤ 1800 K and transparent (one event per
+packet, 96 % escape); the epoch is not a test and is not used.
+
+JPLT_PLACEHOLDER
+
 ## 5. Findings register
 
 | # | Finding | Where |
