@@ -877,7 +877,6 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
         n_events_shell = np.zeros(n_sh, np.int64); n_kpackets_shell = np.zeros(n_sh, np.int64)
         n_dead_end_shell = np.zeros(n_sh, np.int64); e_thermal_shell = np.zeros(n_sh)
         last_shell = np.full(n_packets, -1, np.int32)
-        beta_stack = None
     # expansion mode: optical depth still to travel before the next interaction
     tau_r = rng.exponential(1.0, n_packets) if not sobolev else None
     # memory: ring buffer of the last m opacity-line indices each packet emitted
@@ -1344,9 +1343,7 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
                     esc = rng.uniform(size=todo.size) < _beta_of_tau(
                         atom.tau_all[new_line[todo]] * dsc[hit][todo])
                 elif zoned:
-                    if beta_stack is None:
-                        beta_stack = np.stack(atom._beta_all)
-                    esc = rng.uniform(size=todo.size) < beta_stack[sh_hi[todo], new_line[todo]]
+                    esc = rng.uniform(size=todo.size) < atom.beta_of_lines(sh_hi[todo], new_line[todo])
                 else:
                     esc = rng.uniform(size=todo.size) < atom.beta_all[new_line[todo]]
             else:

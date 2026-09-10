@@ -17,6 +17,15 @@ macroatom entries sit in levels with at least one union opacity line and
 are shell-dependent through beta, 29 % are shell-independent and shared.
 A per-shell k-packet sampler needs 2.9 M lines for 1 - 1e-6 of its weight.
 
+MEMORY. The first version kept every per-shell array over all 20 M lines
+(populations, tau, beta, emissivity) and was killed at 23 GB on twelve
+shells. This one streams: shell by shell it computes the all-line
+transients, keeps only the union-subset opacity arrays, the shell's
+macroatom block and its two prebuilt emissivity samplers, and frees the
+rest. The macroatom's shell-dependent levels are those with at least one
+union opacity line (decided before any beta exists), so identical shells
+hold identical blocks rather than a shared one.
+
 Two classes:
 
 `ZonedMacroAtom`  the downward-macroatom tables of `sobolev/macroatom.py`
@@ -56,13 +65,15 @@ class ZonedMacroAtom:
     Parameters
     ----------
     nu0, A, lower, upper : per-line arrays (all lines).
-    beta : (n_shell, n_lines) escape probabilities per shell, or a callable
-        shell -> beta array (built one shell at a time to bound memory).
     level_energy_cm : per-level energies above the ion's ground.
-    n_shell : number of shells (needed when `beta` is a callable).
+    n_shell : number of shells.
+    dep_lines : bool per line -- lines whose beta may differ between shells
+        (the union opacity lines); every other line has beta = 1 in every
+        shell. Levels with any such line get one block per shell, filled
+        by `add_shell(s, beta_s)`; the others share the base block.
     """
 
-    def __init__(self, nu0, A, lower, upper, beta, level_energy_cm, n_shell=None):
+    def __init__(self, nu0, A, lower, upper, level_energy_cm, n_shell, dep_lines):
         nu0 = np.asarray(nu0, float); A = np.asarray(A, float)
         lower = np.asarray(lower, int); upper = np.asarray(upper, int)
         eps = HC * np.asarray(level_energy_cm, float)
@@ -83,54 +94,60 @@ class ZonedMacroAtom:
         self.has_exit = seg_len > 0
         self.dead_end = (~self.has_exit) & (eps > 0)
         self.n_entries = int(line2.size)
+        self.n_shell = int(n_shell)
         # weights exactly as DownwardMacroAtom forms them: (A beta) * H * nu0 for
         # de-activation, (A beta) * eps_lower for internal jumps -- the
         # operation order matters for bit-identity at one shell
-        nu_line = nu0[line2]; eps_low = eps[lower[line2]]
-        a_line = A[line2]
-        def weights(b):
-            ab = a_line * b[line2]
-            return np.where(kind2 == 0, ab * H * nu_line, ab * eps_low)
-        if callable(beta):
-            if n_shell is None:
-                raise ValueError("n_shell is needed when beta is a callable")
-            get_beta = beta
-        else:
-            beta = np.asarray(beta, float)
-            if beta.ndim == 1:
-                beta = beta[None, :]
-            n_shell = beta.shape[0]
-            get_beta = lambda s: beta[s]
-        self.n_shell = int(n_shell)
-        # which levels depend on the shell: any line of the segment whose beta
-        # differs between shells. Decided from the beta arrays themselves so
-        # that a toy with identical shells shares everything.
+        self._nu_line = nu0[line2]; self._eps_low = eps[lower[line2]]; self._a_line = A[line2]
+        self._deact = kind2 == 0
         dep = np.zeros(n_lev, bool)
-        beta0 = get_beta(0)
-        for s in range(1, self.n_shell):
-            diff = get_beta(s)[line2] != beta0[line2]
-            if diff.any():
-                np.logical_or.at(dep, lev2[diff], True)
+        dl = np.asarray(dep_lines, bool)
+        np.logical_or.at(dep, lev2[dl[line2]], True)
         self.dep = dep
-        # base block: independent levels at shell 0's beta (== every shell's)
-        base_cum = _segment_cum(weights(beta0), off, n_lev)
-        indep_entries = ~dep[lev2]
-        base = base_cum[indep_entries]
-        # offsets of each level's segment inside the base block
-        base_off = np.zeros(n_lev + 1, np.int64)
-        base_off[1:] = np.cumsum(np.where(dep, 0, seg_len))
-        dep_off = np.zeros(n_lev + 1, np.int64)
-        dep_off[1:] = np.cumsum(np.where(dep, seg_len, 0))
+        self._dep_entries = dep[lev2]
+        # base block: beta = 1 for every line of an independent level
+        base = _segment_cum(self._weights(np.ones(nu0.size)), off, n_lev)[~self._dep_entries]
+        base_off = np.zeros(n_lev + 1, np.int64); base_off[1:] = np.cumsum(np.where(dep, 0, seg_len))
+        dep_off = np.zeros(n_lev + 1, np.int64); dep_off[1:] = np.cumsum(np.where(dep, seg_len, 0))
         n_dep = int(dep_off[-1])
-        blocks = [base]
-        start = np.empty((self.n_shell, n_lev), np.int64)
-        for s in range(self.n_shell):
-            cum = _segment_cum(weights(get_beta(s)), off, n_lev)
-            blocks.append(cum[dep[lev2]])
-            start[s] = np.where(dep, base.size + s * n_dep + dep_off[:-1], base_off[:-1])
-        self.cum = np.concatenate(blocks)
-        self.start = start
         self.n_dep_entries = n_dep
+        self._base_size = int(base.size)
+        self.cum = np.empty(base.size + self.n_shell * n_dep)
+        self.cum[:base.size] = base
+        self.start = np.empty((self.n_shell, n_lev), np.int64)
+        for s in range(self.n_shell):
+            self.start[s] = np.where(dep, base.size + s * n_dep + dep_off[:-1], base_off[:-1])
+        self.filled = np.zeros(self.n_shell, bool)
+
+    def _weights(self, beta_all):
+        ab = self._a_line * beta_all[self.line]
+        return np.where(self._deact, ab * H * self._nu_line, ab * self._eps_low)
+
+    def add_shell(self, s, beta_all):
+        """Fill shell s's block from its beta over ALL lines (a transient
+        of the caller; nothing over all lines is kept here)."""
+        cum = _segment_cum(self._weights(np.asarray(beta_all, float)), self.off, self.n_levels)
+        a = self._base_size + s * self.n_dep_entries
+        self.cum[a:a + self.n_dep_entries] = cum[self._dep_entries]
+        self.filled[s] = True
+
+    @classmethod
+    def from_beta(cls, nu0, A, lower, upper, beta, level_energy_cm):
+        """Toys and tests: beta as (n_shell, n_lines) (1-D = one shell);
+        lines with beta < 1 in any shell are the dependent ones."""
+        beta = np.asarray(beta, float)
+        if beta.ndim == 1:
+            beta = beta[None, :]
+        zm = cls(nu0, A, lower, upper, level_energy_cm, beta.shape[0], np.any(beta < 1.0, axis=0))
+        for s in range(beta.shape[0]):
+            zm.add_shell(s, beta[s])
+        return zm
+
+    def level_cum(self, level, shell=0):
+        """The level's cumulative segment in that shell (the slice of
+        `DownwardMacroAtom.cum` for the same level at one shell)."""
+        st = self.start[shell, level]
+        return self.cum[st:st + self.seg_len[level]]
 
     # ---- sampling ------------------------------------------------------
     def sample(self, levels, v, shells):
@@ -201,23 +218,55 @@ def _beta_of(tau):
         return np.where(tau > 1e-12, -np.expm1(-tau) / np.where(tau > 1e-12, tau, 1.0), 1.0)
 
 
+def _cut_sampler(w, emis_cut):
+    """u -> line index from the weights w (all lines); lines below the
+    weight cut are dropped from the table (None = full, bit-identical)."""
+    tot = w.sum()
+    if tot <= 0:
+        return None                                   # no emissivity (toys): error on use
+    cum_full = np.cumsum(w / tot)
+    if emis_cut is None:
+        idx = np.arange(w.size); cum = cum_full
+    else:
+        # keep the lines that carry all but emis_cut of the weight, in order
+        order = np.argsort(-w, kind="stable")
+        c = np.cumsum(w[order]) / tot
+        n_keep = int(np.searchsorted(c, 1.0 - emis_cut, side="left")) + 1
+        idx = np.sort(order[:n_keep])
+        cum = cum_full[idx]
+    def sample(u):
+        return idx[np.minimum(np.searchsorted(cum, u), idx.size - 1)]
+    sample.n_lines = int(idx.size)
+    return sample
+
+
 class ZonedAtom:
     """A line list with per-shell populations for `run_mc`.
 
     Built from per-shell lower/upper populations of every line
-    (`from_arrays`) or from an `EjectaState` and the compact cache
-    (`from_state`). Public arrays mirror `ForestAtom`'s where the transport
-    reads them, with a leading shell axis where they depend on the shell.
+    (`from_arrays`: (n_shell, n_lines) arrays, or a callable
+    `populations(s) -> (n_lower_s, n_upper_s)` with `n_shell`, which is how
+    `from_state` streams one shell at a time) or from an `EjectaState` and
+    the compact cache (`from_state`). Public arrays mirror `ForestAtom`'s
+    where the transport reads them, with a leading shell axis where they
+    depend on the shell. Nothing over all lines is kept per shell.
     """
     is_zoned = True
 
     def __init__(self, nu0, f_osc, n_lower, n_upper, A, lower, upper, r_edges, t_exp,
                  tau_min=1e-3, stim=True, temperature=None, level_energy_cm=None,
-                 emis_cut=1e-6, ions=None, ion_of_line=None, ion_of_level=None):
+                 emis_cut=1e-6, ions=None, ion_of_line=None, ion_of_level=None, n_shell=None):
         nu0 = np.asarray(nu0, float); f_osc = np.asarray(f_osc, float)
         A = np.asarray(A, float); lower = np.asarray(lower, int); upper = np.asarray(upper, int)
-        n_lower = np.atleast_2d(np.asarray(n_lower, float)); n_upper = np.atleast_2d(np.asarray(n_upper, float))
-        self.n_shell = n_lower.shape[0]
+        if callable(n_lower):
+            if n_shell is None:
+                raise ValueError("n_shell is needed with a populations callable")
+            pops = n_lower
+        else:
+            nl = np.atleast_2d(np.asarray(n_lower, float)); nu_ = np.atleast_2d(np.asarray(n_upper, float))
+            n_shell = nl.shape[0]
+            pops = lambda s: (nl[s], nu_[s])
+        self.n_shell = int(n_shell)
         self.r_edges = np.asarray(r_edges, float)
         if self.r_edges.size != self.n_shell + 1:
             raise ValueError(f"r_edges has {self.r_edges.size} entries for {self.n_shell} shells")
@@ -231,15 +280,13 @@ class ZonedAtom:
         self.level_energy_cm = None if level_energy_cm is None else np.asarray(level_energy_cm, float)
         self.ions, self.ion_of_line, self.ion_of_level = ions, ion_of_line, ion_of_level
         self.tau_min, self.emis_cut = tau_min, emis_cut
-        # per-shell optical depths of every line (transient), the union mask
+        self._pops = pops; self._f_osc = f_osc
+        self._stim = bool(stim and T is not None)
+
+        # pass 1: the union of the shells' opacity lines (one transient at a time)
         keep = np.zeros(nu0.size, bool)
-        tau_s = []
         for s in range(self.n_shell):
-            tau = SIGMA_CLASSICAL * f_osc * n_lower[s] * (C / nu0) * t_exp
-            if stim and T is not None:
-                tau = tau * (1.0 - np.exp(-H * nu0 / (K_B * T[s])))
-            tau_s.append(tau)
-            keep |= tau > tau_min
+            keep |= self._tau_of(s) > tau_min
         op = np.flatnonzero(keep)
         order = op[np.argsort(nu0[op])]
         self.op_idx = order
@@ -247,13 +294,19 @@ class ZonedAtom:
         self.op_upper = upper[order]
         self.n_opacity = order.size
         U = order.size
+        self.line_to_union = np.full(nu0.size, -1, np.int64); self.line_to_union[order] = np.arange(U)
         self.op_tau = np.empty((self.n_shell, U)); self.op_p = np.empty((self.n_shell, U))
         self.op_beta = np.empty((self.n_shell, U))
         self.op_nxt = np.empty((self.n_shell, U), np.int64)
         self.n_opacity_shell = np.zeros(self.n_shell, np.int64)
-        self._beta_all = []            # per-shell beta over ALL lines (n_shell x n_lines); freed later if large
+        self.macro = None
+        if self.level_energy_cm is not None:
+            self.macro = ZonedMacroAtom(nu0, A, lower, upper, self.level_energy_cm, self.n_shell, keep)
+        self._samplers = {}
+        self.tau_all = None; self.beta_all = None                # single-shell compatibility
+        # pass 2: shell by shell; tau, beta and the emissivity are transients
         for s in range(self.n_shell):
-            tau = tau_s[s]
+            tau = self._tau_of(s)
             t_op = tau[order]
             live = t_op > tau_min
             self.op_tau[s] = np.where(live, t_op, 0.0)
@@ -261,23 +314,33 @@ class ZonedAtom:
             beta = _beta_of(tau)
             free = np.ones(nu0.size, bool); free[order[live]] = False
             beta = np.where(free, 1.0, beta)
-            self._beta_all.append(beta)
             self.op_beta[s] = beta[order]
             self.n_opacity_shell[s] = int(live.sum())
             # skip table: largest k' <= k with a live line in this shell, else -1
             idx = np.where(live, np.arange(U), -1)
             self.op_nxt[s] = np.maximum.accumulate(idx) if U else idx
-        self.line_to_union = np.full(nu0.size, -1, np.int64); self.line_to_union[order] = np.arange(U)
-        # emissivities per shell (photon-number weights A n_u, as ForestAtom.emis_w)
-        self.emis_w = np.array([A * n_upper[s] for s in range(self.n_shell)])
-        self._samplers = {}
-        # the macroatom
-        self.macro = None
-        if self.level_energy_cm is not None:
-            self.macro = ZonedMacroAtom(nu0, A, lower, upper, lambda s: self._beta_all[s],
-                                        self.level_energy_cm, n_shell=self.n_shell)
-        self.tau_all = tau_s[0] if self.n_shell == 1 else None     # single-shell compatibility
-        self.beta_all = self._beta_all[0] if self.n_shell == 1 else None
+            if self.macro is not None:
+                self.macro.add_shell(s, beta)
+            w = A * pops(s)[1] * nu0                           # A n_u nu (h dropped, as ForestAtom)
+            self._samplers[(s, "energy", None)] = _cut_sampler(w, emis_cut)
+            self._samplers[(s, "energy_beta", None)] = _cut_sampler(w * beta, emis_cut)
+            if self.n_shell == 1:
+                self.tau_all = tau; self.beta_all = beta
+            del tau, beta, w
+
+    def _tau_of(self, s):
+        """Sobolev optical depth of every line in shell s (transient)."""
+        nu0 = self.nu0_all
+        tau = SIGMA_CLASSICAL * self._f_osc * self._pops(s)[0] * (C / nu0) * self.t_exp
+        if self._stim:
+            tau = tau * (1.0 - np.exp(-H * nu0 / (K_B * self.T[s])))
+        return tau
+
+    def beta_of_lines(self, shells, lines):
+        """Escape probability of `lines` for packets in `shells`: 1 outside
+        the union opacity set, the shell's beta inside it."""
+        lu = self.line_to_union[np.asarray(lines, int)]
+        return np.where(lu >= 0, self.op_beta[np.asarray(shells, int), np.maximum(lu, 0)], 1.0)
 
     # ---- builders ------------------------------------------------------
     @classmethod
@@ -304,27 +367,31 @@ class ZonedAtom:
                     n = np.array([state.n_ion(el, st, s, ATOMIC_MASS[el]) for s in shells])
                     if n.max() > n_ion_min:
                         specs.append((f"{Z_OF[el]}{el}{st}", n))
-        arrays = {k: [] for k in ("nu0", "f", "A", "low", "up", "E")}
-        nl, nu_ = [], []
-        ion_line, ion_lev, offset = [], [], 0
         T = np.array([float(state.T_gas[s]) for s in shells])
-        for i, (ion, n) in enumerate(specs):
-            d = load_cached(ion, **kw)
-            low = d["lower"].astype(int); up = d["upper"].astype(int)
-            fr = [boltzmann_fractions(d["g_lev"], d["E_lev"], T[k]) for k in range(len(shells))]
-            nl.append(np.array([fr[k][low] * n[k] for k in range(len(shells))]))
-            nu_.append(np.array([fr[k][up] * n[k] for k in range(len(shells))]))
-            arrays["nu0"].append(d["nu0"]); arrays["f"].append(d["f_lu"]); arrays["A"].append(d["A"])
-            arrays["low"].append(low + offset); arrays["up"].append(up + offset); arrays["E"].append(d["E_lev"])
-            ion_line.append(np.full(d["n_lines"], i)); ion_lev.append(np.full(d["n_levels"], i))
-            offset += d["n_levels"]
-        cat = {k: np.concatenate(v) for k, v in arrays.items()}
+        ions_d = [load_cached(ion, **kw) for ion, _ in specs]
+        offs = np.cumsum([0] + [d["n_levels"] for d in ions_d])
+        cat = dict(nu0=np.concatenate([d["nu0"] for d in ions_d]), f=np.concatenate([d["f_lu"] for d in ions_d]),
+                   A=np.concatenate([d["A"] for d in ions_d]), E=np.concatenate([d["E_lev"] for d in ions_d]),
+                   low=np.concatenate([d["lower"].astype(int) + offs[i] for i, d in enumerate(ions_d)]),
+                   up=np.concatenate([d["upper"].astype(int) + offs[i] for i, d in enumerate(ions_d)]))
+        ion_line = np.concatenate([np.full(d["n_lines"], i) for i, d in enumerate(ions_d)])
+        ion_lev = np.concatenate([np.full(d["n_levels"], i) for i, d in enumerate(ions_d)])
+        n_per = [n for _, n in specs]
+
+        def populations(k):
+            """Boltzmann populations of every line's lower and upper level
+            in transported shell k (a transient of the zoned builder)."""
+            nl, nu_ = [], []
+            for i, d in enumerate(ions_d):
+                fr = boltzmann_fractions(d["g_lev"], d["E_lev"], T[k])
+                nl.append(fr[d["lower"].astype(int)] * n_per[i][k]); nu_.append(fr[d["upper"].astype(int)] * n_per[i][k])
+            return np.concatenate(nl), np.concatenate(nu_)
+
         r_edges = np.array([state.r_edges[s] for s in shells] + [state.r_edges[shells[-1] + 1]])
-        atom = cls(cat["nu0"], cat["f"], np.concatenate(nl, axis=1), np.concatenate(nu_, axis=1), cat["A"],
-                   cat["low"], cat["up"], r_edges, float(state.t), tau_min=tau_min, stim=True,
-                   temperature=T, level_energy_cm=cat["E"], emis_cut=emis_cut,
-                   ions=[sp[0] for sp in specs], ion_of_line=np.concatenate(ion_line),
-                   ion_of_level=np.concatenate(ion_lev))
+        atom = cls(cat["nu0"], cat["f"], populations, None, cat["A"], cat["low"], cat["up"], r_edges,
+                   float(state.t), tau_min=tau_min, stim=True, temperature=T, level_energy_cm=cat["E"],
+                   emis_cut=emis_cut, ions=[sp[0] for sp in specs], ion_of_line=ion_line, ion_of_level=ion_lev,
+                   n_shell=len(shells))
         atom.shells = shells
         atom.n_ion = {sp[0]: sp[1].tolist() for sp in specs}
         atom.rho = np.array([float(state.rho[s]) for s in shells])
@@ -334,36 +401,28 @@ class ZonedAtom:
     def thermal_sampler(self, shell, emit_window=None, weight="energy_beta"):
         """u -> line index from the shell's LTE line emissivity: "energy"
         (A n_u h nu) or "energy_beta" (A n_u h nu beta); lines below the
-        weight cut `emis_cut` are dropped from the table (None = full)."""
-        key = (int(shell), weight, emit_window)
-        if key in self._samplers:
-            return self._samplers[key]
-        w = self.emis_w[shell] * self.nu0_all
-        if weight == "energy_beta":
-            w = w * self._beta_all[shell]
-        elif weight != "energy":
+        weight cut `emis_cut` are dropped from the table (None = full).
+        The windowless samplers are prebuilt; a window rebuilds the shell's
+        transients once."""
+        if weight not in ("energy", "energy_beta"):
             raise ValueError(f"zoned samplers are energy-weighted: 'energy' or 'energy_beta', got {weight!r}")
-        if emit_window is not None:
-            lo, hi = emit_window
-            w = np.where((self.nu0_all < lo) | (self.nu0_all > hi), 0.0, w)
-        tot = w.sum()
-        if tot <= 0:
+        key = (int(shell), weight, None if emit_window is None else tuple(emit_window))
+        if key in self._samplers:
+            if self._samplers[key] is None:
+                raise ValueError("thermal emissivity is empty")
+            return self._samplers[key]
+        s = int(shell)
+        w = self.A_all * self._pops(s)[1] * self.nu0_all
+        if weight == "energy_beta":
+            beta = _beta_of(self._tau_of(s))
+            free = np.ones(w.size, bool); free[self.op_idx[self.op_p[s] > 0]] = False
+            w = w * np.where(free, 1.0, beta)
+        lo, hi = emit_window
+        w = np.where((self.nu0_all < lo) | (self.nu0_all > hi), 0.0, w)
+        self._samplers[key] = _cut_sampler(w, self.emis_cut)
+        if self._samplers[key] is None:
             raise ValueError("thermal emissivity is empty in the requested window")
-        cum_full = np.cumsum(w / tot)
-        if self.emis_cut is None:
-            idx = np.arange(w.size); cum = cum_full
-        else:
-            # keep the lines that carry all but emis_cut of the weight, in order
-            order = np.argsort(-w, kind="stable")
-            c = np.cumsum(w[order]) / tot
-            n_keep = int(np.searchsorted(c, 1.0 - self.emis_cut, side="left")) + 1
-            idx = np.sort(order[:n_keep])
-            cum = cum_full[idx]
-        def sample(u):
-            return idx[np.minimum(np.searchsorted(cum, u), idx.size - 1)]
-        sample.n_lines = idx.size
-        self._samplers[key] = sample
-        return sample
+        return self._samplers[key]
 
     def expansion_bins(self, dnu_over_nu=4.17e-5, nu_lo=None, nu_hi=None, weight="poisson"):
         """Log bins (shared edges) with per-shell E[s, b]; sets the per-shell

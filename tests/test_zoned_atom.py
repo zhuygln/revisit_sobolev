@@ -32,7 +32,7 @@ def _cascade_arrays(tau13, a31, a32, tau32=0.0):
 def test_zoned_macroatom_matches_downward_macroatom_at_one_shell():
     fa = cascade_atom(3.0, 1.0, 1.0, tau32=6.0)
     dm = fa.dmacro()
-    zm = ZonedMacroAtom(fa.nu0_all, fa.A_all, fa.lower_all, fa.upper_all, fa.beta_all[None, :], LEVEL_E)
+    zm = ZonedMacroAtom.from_beta(fa.nu0_all, fa.A_all, fa.lower_all, fa.upper_all, fa.beta_all[None, :], LEVEL_E)
     assert zm.n_entries == dm.n_entries and np.array_equal(zm.line, dm.line) and np.array_equal(zm.kind, dm.kind)
     assert np.array_equal(zm.off, dm.off) and np.array_equal(zm.has_exit, dm.has_exit)
     rng = np.random.default_rng(0)
@@ -49,11 +49,15 @@ def test_zoned_macroatom_matches_downward_macroatom_at_one_shell():
 def test_identical_shells_share_every_segment_and_differ_when_beta_differs():
     fa = cascade_atom(3.0, 1.0, 1.0, tau32=6.0)
     b = fa.beta_all
-    zm = ZonedMacroAtom(fa.nu0_all, fa.A_all, fa.lower_all, fa.upper_all, np.array([b, b]), LEVEL_E)
-    assert not zm.dep.any() and zm.n_dep_entries == 0
-    assert np.array_equal(zm.start[0], zm.start[1])
+    zm = ZonedMacroAtom.from_beta(fa.nu0_all, fa.A_all, fa.lower_all, fa.upper_all, np.array([b, b]), LEVEL_E)
+    # the pumped levels are shell-dependent by construction; identical shells
+    # then hold identical blocks
+    assert zm.dep[3] and not zm.dep[2]
+    for L_ in (2, 3):
+        n_ = zm.seg_len[L_]
+        assert np.array_equal(zm.cum[zm.start[0, L_]:zm.start[0, L_] + n_], zm.cum[zm.start[1, L_]:zm.start[1, L_] + n_])
     b2 = b.copy(); b2[1] *= 0.5                      # line 3->2 more trapped in shell 1
-    zm2 = ZonedMacroAtom(fa.nu0_all, fa.A_all, fa.lower_all, fa.upper_all, np.array([b, b2]), LEVEL_E)
+    zm2 = ZonedMacroAtom.from_beta(fa.nu0_all, fa.A_all, fa.lower_all, fa.upper_all, np.array([b, b2]), LEVEL_E)
     assert zm2.dep[3] and not zm2.dep[2]
     _, p0, _ = zm2.probabilities(3, 0); _, p1, _ = zm2.probabilities(3, 1)
     assert p1[0] > p0[0]                              # 3->1 wins more when 3->2 is trapped
@@ -71,7 +75,9 @@ def test_zoned_atom_one_shell_equals_forest_atom():
     assert np.array_equal(za.op_tau[0], fa.op_tau) and np.array_equal(za.op_p[0], fa.op_p)
     assert np.array_equal(za.op_beta[0], fa.beta_all[fa.op_idx]) and np.array_equal(za.beta_all, fa.beta_all)
     assert np.array_equal(za.op_nxt[0], np.arange(za.n_opacity))
-    assert np.array_equal(za.macro.cum, fa.dmacro().cum)
+    dm0 = fa.dmacro()
+    for L_ in range(za.macro.n_levels):
+        assert np.array_equal(za.macro.level_cum(L_, 0), dm0.cum[dm0.off[L_]:dm0.off[L_ + 1]])
 
 
 def test_two_shells_union_and_skip_table():
@@ -84,7 +90,7 @@ def test_two_shells_union_and_skip_table():
     k32 = int(np.flatnonzero(za.op_nu == NU_32)[0]); k13 = int(np.flatnonzero(za.op_nu == NU_13)[0])
     assert za.op_p[1, k13] == 0.0 and za.op_beta[1, k13] == 1.0 and za.op_p[1, k32] > 0
     assert za.op_nxt[1, k13] == (k32 if k32 < k13 else -1)
-    assert za.macro.dep[3]                                              # beta of the pump differs
+    assert za.macro.dep[3]                                              # the pump is a union line
 
 
 @pytest.mark.skipif(not (ac.CACHE_DIR / "57LaII.npz").exists(), reason="La II cache not built")
@@ -100,7 +106,10 @@ def test_from_state_one_shell_equals_from_cached(tmp_path):
     za = ZonedAtom.from_state(st, [1], tau_min=1e-3, emis_cut=None)
     assert np.array_equal(za.op_idx, fa.op_idx) and np.array_equal(za.op_tau[0], fa.op_tau)
     assert np.array_equal(za.op_beta[0], fa.beta_all[fa.op_idx])
-    assert np.array_equal(za.macro.cum, fa.dmacro().cum) and np.array_equal(za.macro.dead_end, fa.dmacro().dead_end)
+    dm = fa.dmacro()
+    assert np.array_equal(za.macro.dead_end, dm.dead_end) and za.macro.cum.size == dm.cum.size
+    for L_ in range(za.macro.n_levels):                     # same segments, base/dependent order
+        assert np.array_equal(za.macro.level_cum(L_, 0), dm.cum[dm.off[L_]:dm.off[L_ + 1]])
     s = za.thermal_sampler(0, weight="energy_beta"); f = fa.thermal_sampler(weight="energy_beta")
     u = np.random.default_rng(1).uniform(size=100000)
     assert np.array_equal(s(u), f(u))
