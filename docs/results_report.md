@@ -4024,6 +4024,13 @@ the second occurrence of the commit-10 failure. Restored (main text 2981 →
 
 ### 4.47 Paper IV, Phases 0–3: energy-conserving downward fluorescence on two published ejecta states, and Gate 2 (F50, F51, F52)
 
+> **Superseded on 2026-09-10.** Every grouped-opacity amplitude in §§4.47–4.54
+> (the B, C, D and thermal-bridge legs; not the Sobolev references R and A)
+> was produced with an off-by-one in the bin legs' opacity inversion, found
+> and fixed in §4.55. The corrected numbers are in §4.55; the text below is
+> kept as the record of what was believed and why.
+
+
 Program: `paper4/plan.md` (as received 2026-09-09) and the PI's review
 `paper4/plan_review.md`; design decisions and the pre-declared gates in
 `paper4/README.md`. Code: `sobolev/energy_packets.py`, `sobolev/macroatom.py`,
@@ -4173,6 +4180,13 @@ now justified by the plan's own rule.
 
 ### 4.48 Paper IV, Phase 4: the Fontes-like limit — coarse opacity looks adequate under thermal redistribution only where the forest is thin (F53)
 
+> **Superseded on 2026-09-10.** Every grouped-opacity amplitude in §§4.47–4.54
+> (the B, C, D and thermal-bridge legs; not the Sobolev references R and A)
+> was produced with an off-by-one in the bin legs' opacity inversion, found
+> and fixed in §4.55. The corrected numbers are in §4.55; the text below is
+> kept as the record of what was believed and why.
+
+
 Driver: `paper4/phase2_energy/legs.py --legs thermal` (legs `Rth`, `Bth`,
 `Bbinth` = `sobolev_thermal`, `expansion_thermal`, `binned_thermal` with the
 energy-weighted LTE emissivity and the exact scale; then the single swap of
@@ -4193,6 +4207,13 @@ redistribution and fails only when the fluorescence network is kept.
 **F53 — The hypothesis holds on the thin state and fails on the saturated one.** On P2, the published AT2017gfo line-forming region, the expansion and exact-sum bins reproduce the resolved calculation under complete thermal redistribution to ≤ 0.08 mag in every band; swapping thermal redistribution for the downward macroatom — and nothing else — opens the +0.21 mag gap in g of F52. That is the causal statement the plan asked for: there, coarse opacity is adequate until the fluorescence network is retained. On P1, the lanthanide-rich state, the coarse opacity is already 3 mag too bright in g and 1.8 mag too faint in K under thermal redistribution, and fluorescence makes the blue error larger (−4.6 mag in g) while flattening the near-infrared one (K +1.3). The historical adequacy of line-binned opacity is therefore a property of the thin regime (band saturation of order 10), not of thermal redistribution as such; at S ~ 10⁴ no redistribution assumption rescues the coarse opacity. The redistribution swap on its own moves the resolved reference by +1.9 mag in g on P1 (fluorescence drains the blue) and +0.30 on P2.
 
 ### 4.49 Paper IV, Phase 5: the dual-role closure D does not recover the resolved fluorescent spectrum (F54)
+
+> **Superseded on 2026-09-10.** Every grouped-opacity amplitude in §§4.47–4.54
+> (the B, C, D and thermal-bridge legs; not the Sobolev references R and A)
+> was produced with an off-by-one in the bin legs' opacity inversion, found
+> and fixed in §4.55. The corrected numbers are in §4.55; the text below is
+> kept as the record of what was believed and why.
+
 
 Instrument: `run_mc(reprocess="capped")` (`sobolev/energy_balance.py::capped_reprocessing`,
 `tests/test_dual_role.py`), Morag's (2026, MNRAS 549, stag938) two
@@ -4215,6 +4236,13 @@ B₂, Bbin₂; data `paper4/phase5_dual_role/dual_*.json`, 3 × 3×10⁵ packets
 
 ### 4.50 Paper IV, the adequacy check: the closure error on the neighbouring shells of P1 (F55)
 
+> **Superseded on 2026-09-10.** Every grouped-opacity amplitude in §§4.47–4.54
+> (the B, C, D and thermal-bridge legs; not the Sobolev references R and A)
+> was produced with an off-by-one in the bin legs' opacity inversion, found
+> and fixed in §4.55. The corrected numbers are in §4.55; the text below is
+> kept as the record of what was believed and why.
+
+
 Driver: `paper4/phase2_energy/legs.py --shell 27|29`; data
 `paper4/phase3_legs/neighbour_P1_t2_s{27,29}.json` (3 × 3×10⁵ packets),
 against the zone's `legs_P1_t2_s28_n300k.json`. The single-zone adequacy
@@ -4230,6 +4258,13 @@ this is the robustness check it demanded.
 **F55 — The closure error is the same sign and the same class on every shell around the photosphere; its amplitude in a given band is set by where the band sits relative to the saturation front.** From shell 29 to 27 (a factor 5 in saturation) the blue error stays at −4 to −5 mag in g, the near-infrared crossover moves outward (H changes sign between shells 28 and 29, K stays +0.6 to +1.3), and z runs −1.4 to −3.7. The control stays ≤ 0.07 mag. The single-zone amplitude in one band is therefore uncertain by ~1 mag across the line-forming region — the shell-resolved transport of Phases 8–10 is where that number becomes a prediction — while Gate 2's class, signs and magnitude scale are not in question.
 
 ### 4.51 Paper IV, Phase 6: the reference is converged; the closure's error is a function of the closure's own grid (F56)
+
+> **Superseded on 2026-09-10.** Every grouped-opacity amplitude in §§4.47–4.54
+> (the B, C, D and thermal-bridge legs; not the Sobolev references R and A)
+> was produced with an off-by-one in the bin legs' opacity inversion, found
+> and fixed in §4.55. The corrected numbers are in §4.55; the text below is
+> kept as the record of what was believed and why.
+
 
 Driver: `paper4/phase6_convergence/converge.py` on P1 at 2 d, shell 28,
 3 seeds; data `converge_P1_t2_s28.json`. One axis at a time about the
@@ -4248,6 +4283,13 @@ production settings (τ_min = 10⁻³, Δv = 12.5 km s⁻¹, n = 3×10⁵, no ta
 
 ### 4.54 Paper IV, the dead-end check: the fate of macroatom activations with no radiative exit is in the error budget (F59)
 
+> **Superseded on 2026-09-10.** Every grouped-opacity amplitude in §§4.47–4.54
+> (the B, C, D and thermal-bridge legs; not the Sobolev references R and A)
+> was produced with an off-by-one in the bin legs' opacity inversion, found
+> and fixed in §4.55. The corrected numbers are in §4.55; the text below is
+> kept as the record of what was believed and why.
+
+
 Driver: `paper4/phase2_energy/legs.py --thermal-k deposit` (dead ends and
 k-packets booked as deposit, fate 3) against the production `reemit` (re-
 emitted from the net LTE line emissivity A n_u hν β); data
@@ -4265,6 +4307,13 @@ reference until that is shown not to drive B₂ − R₂.
 **F59 — Under the deposit alternative the reference on the lanthanide-rich state loses 62 % of the injected energy to the gas and moves 1–3 mag; the closure error keeps its sign in the optical but changes by 2 mag and loses its K excess. Dead-end handling is therefore in the error budget, and the budget is closed only by the thermal balance of Phases 9–10.** On P1 a downward walk hits a dead end 0.9 times per packet; if that energy is left in the gas the reference fades by 1.9 mag in z and 0.9 in K, B₂ − R₂ becomes −4.9 (z) and +0.1 (K), and the kernel control fails (A₂ carries no dead ends), which is the plan's Gray condition for that variant. On the thin state the two treatments differ by ≤ 0.3 mag. The production choice, re-emission from the LTE line emissivity, is the energy-conserving reading of a fixed atmosphere — the deposited energy is what a thermal balance would re-radiate — and F51 stands on it; the deposit variant is the bound. Quoted range for the P1 headline: B₂ − R₂(z) = −2.9 (reemit) to −4.9 (deposit), K +1.3 to +0.1.
 
 ### 4.52 Paper IV, Phase 7 and Gate 3: LTE Saha ionization (F57)
+
+> **Superseded on 2026-09-10.** Every grouped-opacity amplitude in §§4.47–4.54
+> (the B, C, D and thermal-bridge legs; not the Sobolev references R and A)
+> was produced with an off-by-one in the bin legs' opacity inversion, found
+> and fixed in §4.55. The corrected numbers are in §4.55; the text below is
+> kept as the record of what was believed and why.
+
 
 Instrument: `sobolev/ionization.py` (§4.48's commit), `paper4/phase7_ionization/saha_states.py`
 (the Phase 1 states re-ionized shell by shell: NIST ASD 5.12 ionization
@@ -4286,6 +4335,97 @@ the `scale` policy — the transport carries no neutral opacity.)
 **Gate 3, pre-declared** (`paper4/README.md`): the B-vs-R class and colour signs survive the ionization change; the amplitude may move.
 
 **F57 — Gate 3 passes: the closure error survives LTE ionization, and the fixed-II assumption was right where Gate 2 was decided.** At the 2–3 d P1 zones and on P2 the lanthanides are 99 % singly ionised, so the Phase 3 numbers move by ≤ 0.05 mag. At P1's 1 d zone 60 % of the cerium (41 % of the lanthanides by number) is doubly ionised: the opacity-line count falls from 744k to 594k, the reference brightens by 0.4–0.5 mag in every band, and the closure error keeps its class and signs at −2.7 mag in z and +1.9 in K. The controls stay ≤ 0.08 mag. Not tested: the bulk proxy and the neutral-stage policy (a sensitivity table is the open item), and the P2 question of §4.47 — whether AT2017gfo's line-forming region is thin because of its composition or its ionization — is answered for LTE: it is thin at 3200 K in II as in II + III.
+
+### 4.55 Paper IV, Phase 8: multi-shell transport, and the off-by-one it found in the bin legs' opacity inversion (F60)
+
+Instrument: `sobolev/zoned_atom.py` (`ZonedAtom`, `ZonedMacroAtom`: one
+line list, per-shell τ / p / β on the union opacity set, per-shell
+macroatom blocks and emissivity samplers, built one shell at a time — 12
+shells 7.6 GB, 24 shells 9.7 GB), the zoned hooks in `run_mc` (per-packet
+shell, position-invariant crossing loop, per-shell samplers; one shell is
+bit-identical to the single-zone path, `tests/test_zoned_run_mc.py`),
+`EjectaState.regrid` / `transport_zone`, driver
+`paper4/phase8_shells/shells.py` (legs R₂, B₂, Bbin₂; energy ledger, per-shell
+tallies, band-forming weights by shell of last interaction; `compare()`
+against the shells' single-zone errors; `gate4()`). The PI's question
+(2026-09-10): does spatial integration across shells on opposite sides of
+the saturation crossover cancel the single-zone closure error?
+
+**What the first runs showed.** P1 at 2 d, final composition, the region
+above the τ_grey = 2/3 photosphere transported as 4, 6, 12 and 23 shells
+(the model's ρ ∝ (1 − x²)³ resolved inside each coarse shell, grey T
+recomputed), 3 × 3×10⁵ packets:
+
+| transported shells | B₂ − R₂ g | z | K | R₂ z | events per packet R₂ / B₂ |
+|---|---|---|---|---|---|
+| 1 (photospheric shell, §4.47) | −4.81 | −2.97 | +1.38 | 23.17 | 12.2 / 5.1 |
+| 4 | −2.87 | −0.89 | +0.21 | 22.41 | 7.7 / 5.1 |
+| 6 | −2.18 | −0.72 | +0.09 | 22.33 | 7.2 / 5.3 |
+| 12 | −0.91 | −0.33 | +0.06 | 22.25 | 7.5 / 6.5 |
+| 23 | −0.25 | −0.11 | +0.06 | 22.16 | 6.9 / 6.8 |
+
+The reference drifts by < 0.1 mag per doubling; the closure's error
+shrinks without converging, and its event count climbs towards the
+reference's. The mixture of the shells' own single-zone errors weighted by
+where the band forms (Σ_s f_s(b) dm_s(b), f_s from R₂) is stable at
+z −0.40 across the grids, so the shrinkage was not the density gradient
+being resolved. **The split test** decided it: the 4-shell state with every
+shell split into 2 and 3 identical constant-density sub-shells — the same
+physical state — gave R₂ bit-identical and B₂ − R₂ (z) −0.89 → −0.55 →
+−0.35, ev/pkt 5.1 → 6.2 → 6.9. A probe over outcomes showed the absorb legs
+invariant (classical bit-identical) and every re-emitting bin leg (dmacro,
+thermal, classical and worldline) not.
+
+**The bug.** `forest_mc.py::nu_of_G` (and its zoned copy) inverts the
+cumulative expansion opacity G(ν) to find the frequency where the drawn
+optical depth τ_r is reached. It located the bin as `nb − 1 − m` with
+`m = searchsorted(G_edges[::-1], g, "right")`; the bin satisfying
+G_edges[b+1] ≤ g < G_edges[b] is `nb − m`. One bin too low, the within-bin
+fraction was formed with the *neighbour's* E: next to a thinner bin the
+target overshot upward, landed above the packet's own comoving frequency,
+was discarded as "behind" (s_res < _S_MIN → ∞), and the packet skipped the
+rest of the forest. On a smooth forest (every toy in the test suite, the
+Paper III synthetic forest) neighbouring bins have equal E and the error is
+a fraction of a 4×10⁻⁵ bin; on a real lanthanide forest at that bin width
+E jumps by orders of magnitude between neighbours and the bin legs leaked
+at every leg. A leaked packet gets a new chance at every shell boundary,
+which is why the error shrank with the number of crossings. Regression
+test (`test_bin_legs_are_invariant_under_splitting_a_shell_on_a_spiky_forest`,
+4000 clustered lines with log-uniform τ): one shell escaped 0.227 of the
+injected energy, three identical shells 0.161; fixed, both 0.142. Fixed in
+commit 38ebf30; the 34 bin-mode golden histories re-pinned (the Sobolev
+legs and the smooth-toy absorb legs did not move; the pre-fix digests are
+kept in `tests/data/golden_run_mc_prefix_2026-09-10.json`). The Sobolev
+references R₁, R₂ and the redistribution control A₂ never used the
+inversion and stand. Every expansion_/binned_/dual_ leg since Paper II
+carried the bug, including Paper III's closure legs at `paper3-freeze`
+(the tag is not moved; the PI decides on the erratum).
+
+**The corrected single zone** (P1, 2 d, photospheric shell 28, final
+composition, `paper4/phase8_shells/single_P1_t2_s28_fixed.json`; seed
+scatter 0.02 mag):
+
+| leg − R₂ | g | r | i | z | J | H | K |
+|---|---|---|---|---|---|---|---|
+| B₂ (expansion) pre-fix | −4.72 | −3.74 | −3.39 | −2.80 | −1.63 | −0.12 | +1.45 |
+| **B₂ fixed** | **−0.09** | **−0.09** | **−0.18** | **−0.19** | **−0.22** | **−0.22** | **−0.10** |
+| Bbin₂ (binned) pre-fix | −4.65 | −3.77 | −3.47 | −2.80 | −1.84 | −0.48 | +1.51 |
+| **Bbin₂ fixed** | **+0.70** | **+0.55** | **+0.46** | **+0.37** | **+0.29** | **+0.48** | **+0.24** |
+| C₂ fixed | −0.21 | −0.16 | −0.18 | −0.21 | −0.24 | −0.22 | −0.03 |
+| Cbin₂ fixed | +0.51 | +0.36 | +0.32 | +0.26 | +0.23 | +0.39 | +0.40 |
+| A₂ (unchanged) | +0.04 | +0.01 | +0.00 | +0.02 | −0.03 | −0.02 | +0.03 |
+
+The 3–5 mag optical deficit and the K excess of §4.47 were the leak. What
+remains of the grouped-opacity error on the most saturated published zone
+is 0.1–0.2 mag (expansion) to 0.2–0.7 mag (binned, the opposite sign),
+with the identical-redistribution control C₂ within 0.15 mag of B₂ — so the
+0.5 mag Gate 2 threshold is no longer reached at this zone by the
+expansion closure and only in g–i by the binned one. The multi-shell,
+epoch, P2, dead-end, neighbour and convergence results on the fixed
+transport, and the Gate 2 verdict on the final compositions, follow below
+as they complete.
+
+MULTISHELL_FIXED_PLACEHOLDER
 
 ## 5. Findings register
 

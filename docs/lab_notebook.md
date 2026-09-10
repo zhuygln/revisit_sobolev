@@ -2893,6 +2893,65 @@ justified by the plan's own rule.
 
 Suite: 509 (+ the ionization and dual-role tests).
 
+## 9bc. Final compositions, the dead-end check, multi-shell transport -- and the off-by-one that had been in every bin leg since Paper II (2026-09-10)
+
+*Decisions from the PI (verbatim in `paper4/plan_review.md`, second block).*
+Compositions from the Gillanders 2022 dataset: P1 = the Ye-0.21a element
+pattern at X_lan = 0.11 (Tanaka 2020, Ye = 0.20), robustness Ye-0.21a at
+its own 0.30 and solar_r at 0.11; P2 = the Ye-0.29a profile with Z 57-70
+scaled to 2.5e-3. Phases 8-10 reordered: multi-shell with the current
+downward macroatom first. Push, draft PR, do not merge. Dead-end fraction
+checked before R2 is final; the energy ledger never normalised away.
+
+*Compositions.* The QUB zip (Cloudflare-blocked for the tool; the PI
+downloaded it) has every element for twelve Y_e profiles. Committed CSVs,
+`full_composition` / `rescale_lanthanides` in `sobolev/abundances.py`,
+`build.py` rebuilt; Gate 1 pins the dataset sha. The pattern swap moved the
+single-zone verdicts by <= 0.15 mag (pre-fix numbers, see below).
+
+*Dead ends (F59, pre-fix).* `--thermal-k deposit` moved the reference
+1-3 mag on P1 and flipped nothing on P2; recorded as a range.
+
+*Zoned atom.* First version held every per-shell array over 20 M lines and
+was OOM-killed at 23 GB on twelve shells. Rewritten to stream one shell at
+a time: keep only the union-subset opacity arrays, the shell's macroatom
+block (levels with a union line are shell-dependent by construction) and
+two prebuilt samplers; 12 shells 7.6 GB, 24 shells 9.7 GB. One shell stays
+bit-identical to `ForestAtom`.
+
+*The trend that was not physics.* On P1 at 2 d the multi-shell B2 - R2 in
+z went -2.97 (1 shell) -> -0.89 (4) -> -0.72 (6) -> -0.33 (12) -> -0.11
+(23) while R2 drifted < 0.1 mag per doubling and the band-forming-weighted
+mixture of the shells' own errors sat at -0.40 on every grid. I nearly
+wrote that up as "the light forms where the forest is thin". The split
+test (each of the 4 shells cut into 2 and 3 identical constant-density
+copies -- the same state) gave R2 bit-identical and B2 - R2 -0.89 -> -0.55
+-> -0.35: the closure's answer depended on how many boundaries a packet
+crossed. Absorb legs invariant; every re-emitting bin leg not, classical
+and worldline alike.
+
+*The bug.* Traced one packet through the crossing loop: in one shell its
+target frequency came out ABOVE its current frequency and it was declared
+escaped; in two shells the same packet interacted after the crossing.
+`nu_of_G` located the bin as `nb - 1 - m` instead of `nb - m`, so the
+within-bin fraction was formed with the neighbour's E; next to a thinner
+bin the target overshot, was discarded as "behind", and the packet skipped
+the forest. Invisible on smooth toys (every test forest, the Paper III
+synthetic forest), catastrophic on a real forest at 4e-5 bins. Fixed
+(38ebf30), goldens re-pinned with the pre-fix file kept, regression test
+on a spiky forest (1 shell 0.227 escaped vs 3 shells 0.161; fixed 0.142
+both), replicate probe now bit-invariant for dmacro and thermal.
+
+*What is left of the closure error.* P1, 2 d, shell 28, fixed: B2 - R2
+z -0.19, K -0.10 (was -2.80, +1.45); Bbin2 z +0.37, K +0.24; C2 within
+0.15 mag of B2; A2 unchanged. The Paper III closure legs at `paper3-freeze`
+carried the same inversion; the tag stays where it is and the PI decides
+on the erratum. Reruns of everything downstream launched (final-composition
+legs for the Gate 2 verdict, multi-shell grids and epochs, P2, neighbours,
+deposit, convergence).
+
+Suite: 557.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,
