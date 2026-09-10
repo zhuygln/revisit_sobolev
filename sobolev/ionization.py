@@ -116,10 +116,15 @@ def solve_ionization(T, rho, X, partition, bulk=BulkSpecies(), z1_policy="scale"
         if el == "bulk":
             n = rho * x / (bulk.A * M_U)
             species.append((el, n, bulk.chi_ev, bulk.u_ratio))
-        else:
+        elif el in CHI_EV and el in partition:
             n = rho * x / (am[el] * M_U)
             u_II, u_III = partition[el]
             species.append((el, n, CHI_EV[el], u_ratios_for(el, T, u_II, u_III, z1_policy)))
+        else:
+            # a named non-lanthanide element (a full published composition):
+            # its own mass, the bulk proxy's ionization energies -- declared
+            n = rho * x / (am.get(el, bulk.A) * M_U)
+            species.append((el, n, bulk.chi_ev, bulk.u_ratio))
 
     def charge(log_ne):
         n_e = 10.0 ** log_ne
