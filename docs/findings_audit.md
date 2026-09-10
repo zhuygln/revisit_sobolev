@@ -251,7 +251,7 @@ Not classifications, but the same kind of problem the audit exists to catch:
   pre-declared criterion fails (4 of 12) and is reported as failed, with the
   non-monotone cap dependence as the reason it does not indicate a
   systematic; the class half passes at all 27 points.
-- **F49 (§4.45)**: the σ_sys comparison. Driver
+- **F49 (§4.45)** *(INVALID — affected by transport bug 38ebf30, see `paper3/CORRECTION.md`; the closure legs it summarises were produced with the bug)*: the σ_sys comparison. Driver
   `paper3/phase12_grid/syserr.py`, data `syserr.json`, tests
   `tests/test_syserr.py`. Classification: **derived, not measured** — no
   new transport; every number is a statistic of `sensitivity.json`. The

@@ -18,7 +18,7 @@
 \newcommand{\Aleg}{A\xspace}
 \newcommand{\Bleg}{B\xspace}
 \newcommand{\dRT}{d_{\rm RT}}
-\newcommand{\Xlan}{X_{\rm lan}}
+\newcommand{\Xlan}{X_{\rm 4Ln}}
 \newcommand{\Mej}{M_{\rm ej}}
 \newcommand{\vej}{v_{\rm ej}}
 \newcommand{\Teff}{T_{\rm eff}}
@@ -36,6 +36,25 @@
 
 \begin{document}
 \maketitle
+
+% ---- Scientific correction, September 2026 (added after the freeze; the
+% ---- tag paper3-freeze and the PDFs are untouched; see paper3/CORRECTION.md)
+\begin{center}
+\fbox{\parbox{0.92\linewidth}{\textbf{Scientific correction --- September 2026.}
+The grouped-opacity results reported in this Supplementary Information and its manuscript are \textbf{invalid}
+because of an implementation error in the inversion of cumulative binned
+opacity (\texttt{forest\_mc.py::nu\_of\_G}, fixed in commit 38ebf30). The error
+caused packets in expansion-, line-binned- and dual-opacity modes to skip
+portions of non-smooth line forests. The resolved Sobolev calculations are
+unaffected. After correcting the transport and rerunning the analysis with
+energy-conserving transport on published ejecta benchmarks, the reported
+magnitude-scale grouped-opacity discrepancy is not reproduced. This manuscript
+is retained as a historical research record and is not a publication
+candidate. Corrected results: the Paper IV campaign
+(\texttt{docs/results\_report.md} Sections 4.55 to 4.59, findings F60 to F64);
+the affected findings are listed in \texttt{paper3/CORRECTION.md}.}}
+\end{center}
+
 
 This Supplementary Information gives the full tables behind the display items of the main text: the classification of every grid point under every rule and tangent space (Tables~\ref{stab:robustness} and \ref{stab:points}), the chain-cap test per cell and cap (Table~\ref{stab:chain}), the temperature-direction validation per observable (Table~\ref{stab:tscale}) and the closure error per band and epoch (Table~\ref{stab:syserr}). Every entry is generated from \texttt{paper3/FROZEN.json} by \texttt{docs/paper3/latex\_tables.py}; nothing is transcribed by hand.
 

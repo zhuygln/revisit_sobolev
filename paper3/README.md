@@ -1,5 +1,20 @@
 # Paper III — the campaign directory
 
+> **Scientific correction — September 2026.** The grouped-opacity results
+> reported here are **invalid** because of an implementation error in the
+> inversion of cumulative binned opacity (`paper2/phase1/forest_mc.py::nu_of_G`,
+> fixed in commit 38ebf30). The error caused packets in expansion-, line-binned-
+> and dual-opacity modes to skip portions of non-smooth line forests. The
+> resolved Sobolev calculations are unaffected. After correcting the transport
+> and rerunning the analysis with energy-conserving transport on published
+> ejecta benchmarks, the reported 1–3 mag grouped-opacity discrepancy is not
+> reproduced. This manuscript is retained as a historical research record and
+> is not a publication candidate. Corrected results: the Paper IV campaign
+> (`docs/results_report.md` §4.55–4.59, F60–F64); the list of affected
+> findings is in [`paper3/CORRECTION.md`](CORRECTION.md). The
+> frozen tag `paper3-freeze` and the PDFs are left as they were.
+
+
 This directory holds the **code, run outputs and frozen record** of Paper III.
 The **manuscript** lives in [`docs/paper3/`](../docs/paper3/) and is generated
 from what is here: every number in it is a LaTeX macro produced by
@@ -25,10 +40,22 @@ The answer came out yes (F25, F27): redistribution compresses. That turned the
 campaign toward the approximation that does *not* compress -- the grouped
 opacity (F30/F31) -- and then toward what its error does to an observer: the
 kilonova trajectory (phase10), the observables (phase11), the (M_ej, v_ej,
-X_lan) grid (phase12) and the observing scenarios (phase13). The manuscript is
+X_4Ln) grid (phase12) and the observing scenarios (phase13). The manuscript is
 the second half of that arc with the first half as its safe-closure control
 leg, which is why its title is about opacity and `plan.md` is about
 redistribution. Both halves are here.
+
+**Relabelled 2026-09-09 (Paper IV, Phase 0).** The grid is a *controlled
+fixed-atmosphere closure experiment*: one uniform zone, populations frozen
+in LTE, photon-number-conserving branching, and an equal-mass blend of
+La II, Ce II, Pr II and Nd II. Its composition parameter is therefore the
+four-ion fraction `X_4Ln = X_La + X_Ce + X_Pr + X_Nd`, not the total
+lanthanide fraction of an r-process pattern; the manuscript, tables and
+figures now write it that way (`X_lan` is reserved for Paper IV's full
+pattern). The JSON key `x_lan` and the file names `model_M*_v*_X*` are
+part of the frozen record and keep their spelling. Nothing numerical
+changed; the label-only freeze is tagged `paper3-freeze-x4ln`, and the
+original `paper3-freeze` stays where it was.
 
 ## Design decisions taken in implementation
 
@@ -80,7 +107,7 @@ phase10_kilonova/     does a real kilonova cross the cancellation
                       boundary                                           item 5
 phase11_observables/  what the sign change does to an observer;
                       Gate 1 with real DECam + 2MASS passbands           §10
-phase12_grid/         the (M_ej, v_ej, X_lan) heating-powered grid,
+phase12_grid/         the (M_ej, v_ej, X_4Ln) heating-powered grid,
                       robustness, sensitivity, syserr, tscale, chain     P12
 phase13_observability/ Gate 3: three pre-declared observing scenarios
 figures/              working figures for docs/results_report.md (the
@@ -102,7 +129,8 @@ python paper3/freeze.py --check --strict     # every derived quantity + figure
 cd docs/paper3 && make                       # manuscript.pdf, si.pdf, structure check
 ```
 
-The tag `paper3-freeze` marks the state the manuscript was built from. Because
+The tag `paper3-freeze-x4ln` marks the state the manuscript was built from
+(`paper3-freeze` is the original, pre-relabel freeze; tags are never moved). Because
 the manuscript prose, `freeze.py`, `docs/paper3/display_items.py`,
 `docs/paper3/check_structure.py` and that tag all name the literal path
 `paper3/`, this directory's name is part of the frozen record: renaming it

@@ -241,7 +241,7 @@ def _median(v):
 
 
 def verdict_rows(h, dest):
-    """Table 1: one row per X_lan."""
+    """Table 1: one row per X_4Ln."""
     T0, T1 = _j(dest["sensitivity"]), _j(dest["sensitivity_T1"])
     g, ob = _j(dest["grid_table"]), _j(dest["observability"])
     rows = []
@@ -285,7 +285,7 @@ def _check_columns(tex):
 def tab_verdict(h, dest):
     rows = verdict_rows(h, dest)
     head = (r"\begin{tabular}{lccccccccc}" "\n" r"\toprule" "\n"
-            r"$X_{\rm lan}$ & $|\Delta({\rm colour})|_{\max}$ & floor & Gate 2 & \multicolumn{2}{c}{free $L(t)$} & "
+            r"$X_{\rm 4Ln}$ & $|\Delta({\rm colour})|_{\max}$ & floor & Gate 2 & \multicolumn{2}{c}{free $L(t)$} & "
             r"\multicolumn{3}{c}{Gate 3, $(M,v,X)$} & Gate 3, free $L(t)$ \\" "\n"
             r" & (mag) & (mag) & C-B & C-B & $\chi^2_{\rm res}/{\rm dof}$ & dense & sparse & optical & dense \\" "\n"
             r"\midrule" "\n")
@@ -324,7 +324,7 @@ def grid_rows(dest):
 def tab_grid(dest):
     rows = grid_rows(dest)
     head = (r"\begin{tabular}{cccrcrrcccccc}" "\n" r"\toprule" "\n"
-            r"$M_{\rm ej}$ & $v_{\rm ej}$ & $X_{\rm lan}$ & $N$ & $n_{\rm used}$ & trapped & floor & "
+            r"$M_{\rm ej}$ & $v_{\rm ej}$ & $X_{\rm 4Ln}$ & $N$ & $n_{\rm used}$ & trapped & floor & "
             r"$|\Delta{\rm col}|_{\max}$ & $|\Delta{\rm col}|_{\max}$ & \multicolumn{4}{c}{class} \\" "\n"
             r"($M_\odot$) & ($c$) & & & ($10^3$) & (\%) & (mag) & C & C$_{\rm bin}$ & T0 & T1 & T2 & T3 \\" "\n"
             r"\midrule" "\n")
@@ -406,7 +406,7 @@ def tab_si_points(dest):
                 cells += ["--", "--", "--"]; continue
             cells += [_f(r["R"]), _f(r["chi2_res_dof"], 1), "underdet." if r.get("underdetermined") else r["cls"]]
         rows.append(cells)
-    hdr1 = (r"$M_{\rm ej}$ & $v_{\rm ej}$ & $X_{\rm lan}$ & $N$ & floor & \multicolumn{3}{c}{T0} & \multicolumn{3}{c}{T1} & "
+    hdr1 = (r"$M_{\rm ej}$ & $v_{\rm ej}$ & $X_{\rm 4Ln}$ & $N$ & floor & \multicolumn{3}{c}{T0} & \multicolumn{3}{c}{T1} & "
             r"\multicolumn{3}{c}{T2} & \multicolumn{3}{c}{T3}")
     sub = r"$R$ & $\chi^2_{\rm res}/{\rm dof}$ & class"
     hdr2 = r"($M_\odot$) & ($c$) & & & (mag) & " + " & ".join([sub] * 4)

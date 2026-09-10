@@ -2613,6 +2613,375 @@ the checker strips comments before counting. Now `check_literals` refuses
 any text after the mark, and I read the built PDF's extracted text for the
 edited sentences rather than trusting the `.tex`.
 
+## 9ax. Paper IV opens: golden histories, a bit-identical sampler, and a relabel that moved no number (2026-09-09)
+
+The PI reorganised the project around one question -- does the closure
+error survive energy-conserving transport in a coherent ejecta state? --
+and sent the program as a thirteen-phase plan, then reviewed the
+implementation plan I drafted from it with ten corrections. Both are in
+`paper4/` verbatim; the corrections are design decisions in its README.
+The two that changed the most: the clean causal gate is B2 - R2 (grouped
+opacity with the *same* detailed transport), not the kernel leg; and the
+Phase 2 atom is a *downward* macroatom, to be named as such until
+radiation-field estimators exist.
+
+*Golden hashes before any edit.* `paper3/freeze.py --check` never re-runs
+transport, so nothing guarded `run_mc` numerically except statistical
+physics tests. `tests/test_golden_run_mc.py` now pins SHA-256 of the packet
+histories (escape frequencies, fates, weights, event and first-line
+counters) for all 17 modes on the three-level atom and a 60-line synthetic
+forest, classical and worldline, plus the line-memory variants: 68 runs,
+4.5 s. Taken at e858f6d, before the sampler change below.
+
+*The CSR sampler.* The chain loop drew each packet's downward line inside
+`for uval in np.unique(cur_up[todo])` -- one Python iteration per distinct
+upper level per chain step, ~10 us each. Ce II reaches ~2000 distinct
+uppers per step; a full La-Yb pattern would reach ~20k, i.e. 0.2 s per step
+before any physics. The tables are now flat CSR arrays grouped by upper
+level with one global `searchsorted` on the key `rank(u) + cum`. Adding the
+integer rank can round `cum` and `v` onto the same double, so the global
+answer is corrected against the within-segment cumulative afterwards; the
+result is bit-identical to the per-level draw, not statistically equal.
+Measured on Ce II at the grid's central density (n_op = 171,409; 5,000
+packets; 496,584 interactions): reference leg 3.1 s -> 1.7 s, identical
+hashes. The per-level dicts survive as lazy views for the tests that read
+them.
+
+*The relabel.* The grid's composition parameter is now written X_4Ln =
+X_La + X_Ce + X_Pr + X_Nd in the manuscript, SI, tables and figures, with
+one Methods sentence calling the grid a controlled fixed-atmosphere closure
+experiment. The JSON key `x_lan`, the file names and the point keys stay:
+renaming them breaks the harness test, the freeze manifest and every stored
+sensitivity file. Zero of 146 headline numbers moved; `freeze.py --check
+--strict` exits 0. Per the PI, the tag is *not* moved: `paper3-freeze`
+stays on the original, `paper3-freeze-x4ln` marks this one.
+
+*Two things that bit.* (1) The manuscript's structure check fails at HEAD
+too -- the affiliation and repository-URL placeholders are unresolved
+`\todo`s -- so `make` has ended in that failure since 2026-09-03; the PDFs
+still build. Not mine to resolve; noted. (2) After a `git stash` /
+`stash pop` round trip the relabelled `latex_tables.py` regenerated the
+*old* header: the stash had restored the HEAD file (same byte length),
+`check_structure.py` imported it and wrote a `.pyc`, and the pop landed in
+the same second, so the cache validated against the new source by mtime
+and size. `rm -rf docs/paper3/__pycache__` fixed it. Never trust a
+same-length edit through a stash.
+
+Suite: 419 passed (was 350; 69 golden cases).
+
+## 9ay. Energy packets, the downward macroatom, and what Ce II does to photon-number branching (2026-09-09)
+
+*The contract first.* Before any fluorescence test, `sobolev/energy_packets.py`
+states what a packet is -- (E_cm, nu_cm, nu_lab, mu, r, t) -- and the two
+invariants: E_cm conserved at every atomic interaction, E_lab conserved in
+free flight, the two joined by the local Doppler factor. Test 2A.0
+(`tests/test_energy_frames.py`) checks the factors against the analytic
+transformations, classical and worldline, and free flight / coherent
+scattering in the transport. The switch itself, `run_mc(packets="energy")`,
+rescales `w` by nu_abs,cm/nu_rest at re-emission; because the step loop
+never reads `w`, every photon-probability mode keeps its histories bit for
+bit (pinned per mode, both transports) -- the R1 -> R1^E rung is
+bookkeeping alone. The comoving deposit is then zero *by construction* (I
+do not accumulate a difference that would round to 1e-16; it is not
+accumulated at all), and E_dep_lab is the Doppler work.
+
+*The atom.* `sobolev/macroatom.py::DownwardMacroAtom` is the Lucy downward
+set with fixed populations: de-activate ~ A beta (eps_u - eps_l), internal
+jump ~ A beta eps_l, one global searchsorted on a per-level CSR key with the
+same exact correction as the branching sampler. Beta enters once: exits go
+straight out, never through the chain (the populated-level cascade test
+separates A beta from A beta^2 by > 10 sigma and the MC sits on the first).
+Named `dmacro` everywhere: no internal upward transitions until estimators
+exist. The three-level cascade reproduces the table's energy fractions and
+the *inferred* photon numbers N ~ E/(h nu) of 3->2 and 2->1 come out equal,
+which is the whole point of an indivisible packet -- it does not split.
+
+*Dead ends are physics, and they are 10 %.* La II has 14 levels with no
+downward E1 line in the data -- the 13 lowest even-parity levels
+(1016-12364 cm^-1, the ground term and the metastables) and one odd level.
+A downward walk that lands there cannot de-activate radiatively; 7 % of
+walks from La II's pumped levels do, 10 % of activations at grid density on
+Ce II (26 dead-end levels of 2829). First version absorbed them and the
+escaped fraction dropped 3 %. They are the E_stored / thermal term of the
+plan: in a fixed LTE atmosphere the metastable energy goes to the thermal
+pool and comes back as LTE line emission, so they are k-packets re-emitted
+from A n_u h nu beta (built lazily, so toys without emissivity never need
+it). `n_dead_end`, `n_kpackets` and `E_thermal` are reported per run.
+
+*Ce II at the grid's central density, 5,000 packets, worldline.*
+
+    leg                       wall    events/pkt  esc    core   E_dep,cm  work
+    sobolev_branch  photon   106 s      171       0.030  1.000   -0.183   +0.152
+    sobolev_branch  energy   106 s      171       0.016  0.883    0       +0.101
+    sobolev_dmacro  energy   1.9 s       32       0.080  0.838    0       +0.082
+    expansion_branch photon  0.1 s      2.4       0.826  0.638   -0.496   +0.032
+    expansion_dmacro energy  0.1 s      2.5       0.524  0.442    0       +0.034
+
+Photon-number branching *creates* energy here: the reference returns more
+to the core than it received (f_ret = 1.00 plus 3 % escaping), the
+expansion leg deposits minus half the injected energy. That is the number
+the PI's question is about. The downward macroatom closes the identity to
+1e-16, and is 56x cheaper than the chained reference because it never
+re-absorbs (171 -> 32 events per packet, 1991 -> 0 re-absorptions).
+
+*The re-emitting core.* `core="reemit"` relaunches returning packets with
+the energy-weighted Planck draw and the same lab energy; per band it agrees
+with `photometry._scale("equilibrium")` to the 4 sigma + 1 % criterion,
+classical and worldline. So the exact normalisation of an energy-conserving
+run is the geometric series already in the frozen photometry module,
+wrapped in `sobolev/energy_balance.py`, not edited. What Paper III's grey
+"conserving" scale would add on top is exactly W/E_esc -- the adiabatic
+loss -- which is physical and must not be re-radiated; I had first written
+the test to demand it be < 2 % and it failed at 2.4 % on a worldline shell
+at beta = 0.05 with many passes, correctly.
+
+*Two smaller lessons.* A launch band widened by 2 % on each side is not a
+small change on a shell whose beta is 0.3 %: most packets then never meet
+the line, and the "return fraction" I was trying to test was 1 %. And a
+deposited k-packet has no exit line; the first-branch tally must skip it
+(it indexed uninitialised memory -- an IndexError on the toy, silence on a
+real atom).
+
+*The cache.* `sobolev/atomic_cache.py` streams the six numbers the
+transport needs per line straight from the zip members in chunks (Tb II's
+1.08 GB of text never touches the disk), 36 B/line, and
+`ForestAtom.from_cached` is bit-identical to `from_gsi` on La II. The full
+La-Yb pattern is now loadable; whether it fits as an atom is the WP1
+memory gate.
+
+Suite: 493 passed (69 golden, 62 Paper IV energy/macroatom/core tests, 3
+cache tests).
+
+## 9az. Two published ejecta states, and the full lanthanide pattern fits in memory (2026-09-09)
+
+*The benchmarks.* The PI replaced my "Y_e ~ 0.2 yield plus Kasen-style
+density" with exact published anchors, and Gate 1 became numerical. P1 is
+the secular component of the xkn radiative-transfer comparison (Ricigliano
+et al. 2024, sec. 5.2): 2.64e-2 Msun, v_rms = 0.06c, Y_e = 0.20, s = 10,
+tau ~ 17 ms, rho ~ (1 - x^2)^3 (their eq. 25) -- which fixes v_max =
+0.1149c for that rms velocity -- L(t) and the grey photosphere from
+`SourceModel`, the Eddington T(v). P2 is the Gillanders et al. 2026 3.4-d
+AT2017gfo model, Table 3 verbatim: 0.15-0.35c, rho0 = 4e-15 at t0 = 2 d
+and v0 = 14000 km/s, v^-3, 3200 K, X_LN = 2.5e-3 (their Ye-0.29a profile
+with the lanthanides reduced 20x; the 2022 paper's Table 2 gives 4.99e-2
+before the cut). `EjectaState` (sobolev/ejecta.py) carries the shells,
+`check()` is the mass integral and the composition sums, and
+`local_zone()` is the PI's single-zone reduction -- the shell holding
+tau_grey = 2/3, its own state, never a mass-weighted mean. P1's
+photosphere at kappa = 10 sits at 0.10c (shell 28 of 32) with T = 3400 K
+at 2 d; P2's zone is the published inner boundary; its line-forming
+region holds 3.0e-4 Msun.
+
+*What I could not source, said so.* Neither the xkn paper (tracer-based
+yields) nor Lippuner & Roberts 2015 (figures only; their fit places
+(0.20, 10, 17 ms) inside the lanthanide-rich region) tabulates a lanthanide
+fraction for P1: it is 0.10, marked provisional. Both lanthanide *patterns*
+are the solar r-process residuals by mass -- Prantzos et al. 2020 Table 4
+(Lodders 2009 mass fractions times their r-fractions), transcribed by text
+extraction and checked row by row -- because the Ye-0.29a element list is in
+the 2022 supplement I could not reach. All of it is in the ledger and in
+each state's `meta["provisional"]`; the PI confirms or replaces at Gate 1.
+The pattern itself is instructive: Dy, Nd and Gd carry 46 % of the
+lanthanide mass, Ce 7 %, La 4 % -- the Paper III blend had La at 25 %.
+
+*The cache and the memory gate.* `sobolev/atomic_cache.py` streams the six
+numbers per line straight from the zip members (Tb II: 5.2 M lines, 29 s,
+never 1 GB of text on disk); the 13 La-Yb II ions are 19.8 M lines in
+636 MB of `.npz`, and `from_cached` is bit-identical to `from_gsi`. The
+gate that decided whether the full pattern is usable at all: the 13-ion
+blend at P1's shell 28 (375k opacity lines, tau_max = 7200) is a 3.9 GB
+atom, 4.7 GB with the macroatom tables (39.7 M entries, 400 dead-end
+levels of 83k), built in 10 s. Two workers fit on 24 GB; no A-cut needed
+yet. And the downward macroatom is cheap where the chain was not: 0.6 ms
+per packet on that shell, 12.9 events per packet, versus ~20 ms per packet
+for the chained reference on Ce II alone at grid density.
+
+*P2 is thin.* At X_LN = 2.5e-3, rho = 2.4e-17 and 3200 K with every
+lanthanide singly ionised, the published line-forming region has 6322
+opacity lines with tau_max = 2.2 and lets 92 % of the injected energy
+straight out. The closure test there will be a low-saturation case by
+construction; whether that is the published model's physics or our II-only
+LTE populations is a Phase 7 question, and the number is recorded now so
+it cannot be re-read later.
+
+*Running.* All legs on P1 (2 d, shell 28, neighbours 27/29) and P2 (shell
+0, neighbours 1/2), 30k packets x 3 seeds, wall budget 5400 s per run.
+
+## 9ba. Gate 2: Green on the lanthanide-rich state, Red on the thin one, and the reference moved 2.5 mag (2026-09-09)
+
+*The ladder.* P1 at 2 d, shell 28, 3 x 3e5 packets, worldline. R1 -> R1E
+moves z by +1.43 mag and K by +0.50 -- pure bookkeeping, identical
+histories -- and R1E -> R2 by another +1.03 / +0.32 (the transition
+probabilities and the cascade). So photon-number branching had the
+*reference* 2.5 mag too bright in z. Then B2 - R2 = -2.88 (z), +1.27 (K):
+the closure error against the energy-conserving reference is as large as
+Paper III's or larger, same signs, and the kernel control A2 sits at 0.03
+with C2 within 0.05 of B2. Bolometrically B2 is 0.34 mag too bright under
+the exact scale: the resolved leg loses 10.5 % of the injected energy to
+adiabatic work, the grouped leg 5.6 %, and Paper III's common-L_bol
+harness had hidden exactly that. The verdict script says GREEN on the
+three P1 epochs with two live bands (1 d has only K above the depth mask;
+the model is faint at 40 Mpc, g = 26).
+
+*P2 says something different, and both are right.* The published 3.4-d
+line-forming region at X_LN = 2.5e-3 is thin -- 6322 opacity lines, tau_max
+2.2, S_band 8.6, 92 % escapes -- and there B2 - R2 is +0.19 mag in g, +0.12
+in r, nothing elsewhere, with the noise at 0.01 and A2 at 0.01. Opposite
+sign, one fifth the amplitude: the pre-declared rule reads RED (and the
+R1 - R2 norm is comparable to R1 - B1). This is F35/F40's boundary -- too
+opaque at low saturation, too transparent at high -- on published states
+rather than on a density scan. The combined verdict is GRAY by the letter,
+because the sign flips between states, and I have written it that way: the
+outcome is benchmark-dependent, and which side of the boundary AT2017gfo's
+line-forming region sits on is now a Phase 7 (ionization) question.
+
+*Flags I owe the record.* The adequacy trigger fired on P1: S_band in the
+neighbouring shells is 1.95x and 0.40x the zone's, so shells are a required
+check, not deferred forever. The 1/3/5 d rows are 3e4-packet runs (the
+signal is 50-100 sigma of the seed scatter, so the verdict stands); the 3e5
+reruns are running and will replace the files. And two inputs are still
+provisional.
+
+*Costs, for planning.* R1 (chained) 399 s per 3 x 3e5 packets on the
+375k-line zone; R2 66 s; every grouped leg < 10 s. The full pattern is not
+the problem the plan feared; the chain was.
+
+## 9bb. Phases 4-7 in one afternoon: the thin/saturated split, a closure that only moves the error, and a reference that converges (2026-09-09)
+
+*Fontes.* The plan's conceptual centre -- coarse opacity looks adequate
+under thermal redistribution and fails once fluorescence is kept -- is
+true on P2 and false on P1. On the thin published AT2017gfo zone the
+expansion and exact-sum bins sit within 0.08 mag of the resolved leg under
+complete thermal redistribution, and swapping only the redistribution to
+the downward macroatom opens the +0.21 mag g gap of F52. On the
+lanthanide-rich zone the coarse opacity is 3 mag wrong in g and 1.8 in K
+before any fluorescence is allowed. So the historical adequacy of
+line-binned opacity is a statement about band saturation of order 10, not
+about thermal redistribution (F53).
+
+*Morag.* I fetched the paper before coding: EP93 is the mean free path
+(eq. 1), the net absorption/emission term is the bin-averaged static
+opacity with each line capped at (rho c t)^-1 (eq. 3), no consistent
+coarse-frequency scheme exists, and no Monte Carlo combination is given.
+Our reading -- encounter with EP93, exchange energy with probability
+sum min(tau, dnu/nu) / sum(1 - e^-tau), else scatter coherently -- is in
+the docstring so it can be judged. It trims g on P1 from -4.65 to -3.62,
+flips K, leaves z at -2.9 and worsens J/H; on P2 it doubles the g error.
+The plan's second outcome (F54).
+
+*Convergence, and what it is not.* R2 moves <= 0.03 mag in z and K
+across two decades of tau_min, a factor 4 in packets and three decades of
+table cut -- the reference is converged. B2 - R2 moves 0.8-1.0 mag with
+tau_min and 1.1 mag in z between 1.25 and 12.5 km/s bins, and that is not
+a convergence failure: the bins and the line cut ARE the grouped closure.
+Different defensible groupings differ by a magnitude at S ~ 1e4 where
+F41 found 0.15 mag on La II. The headline carries its range (F56).
+
+*Ionization.* NIST ASD 5.12 energies, GSI partition functions for II and
+III, a declared neutral policy and one bulk proxy. At the Gate 2 zones the
+lanthanides are 99 % II, so the fixed-II assumption cost <= 0.05 mag; at
+1 d (4411 K) 60 % of Ce is III, the 26-ion blend (27.6 M lines, 5.2 GB)
+brightens the reference by half a magnitude and the error keeps its class
+and signs at z -2.7, K +1.9. Gate 3 passes (F57). P2 is thin in II as in
+II + III: its thinness is its composition, in LTE.
+
+*Neighbours.* Shells 27/28/29 (S = 5.6e4 / 2.9e4 / 1.1e4): g -4 to -5,
+K +0.6 to +1.3, z -1.4 to -3.7, controls <= 0.07. The class is robust;
+the single-zone amplitude in one band is not better than ~1 mag until
+shells are resolved (F55). That is the plan's Phase 8-10 and it is now
+justified by the plan's own rule.
+
+Suite: 509 (+ the ionization and dual-role tests).
+
+## 9bc. Final compositions, the dead-end check, multi-shell transport -- and the off-by-one that had been in every bin leg since Paper II (2026-09-10)
+
+*Decisions from the PI (verbatim in `paper4/plan_review.md`, second block).*
+Compositions from the Gillanders 2022 dataset: P1 = the Ye-0.21a element
+pattern at X_lan = 0.11 (Tanaka 2020, Ye = 0.20), robustness Ye-0.21a at
+its own 0.30 and solar_r at 0.11; P2 = the Ye-0.29a profile with Z 57-70
+scaled to 2.5e-3. Phases 8-10 reordered: multi-shell with the current
+downward macroatom first. Push, draft PR, do not merge. Dead-end fraction
+checked before R2 is final; the energy ledger never normalised away.
+
+*Compositions.* The QUB zip (Cloudflare-blocked for the tool; the PI
+downloaded it) has every element for twelve Y_e profiles. Committed CSVs,
+`full_composition` / `rescale_lanthanides` in `sobolev/abundances.py`,
+`build.py` rebuilt; Gate 1 pins the dataset sha. The pattern swap moved the
+single-zone verdicts by <= 0.15 mag (pre-fix numbers, see below).
+
+*Dead ends (F59, pre-fix).* `--thermal-k deposit` moved the reference
+1-3 mag on P1 and flipped nothing on P2; recorded as a range.
+
+*Zoned atom.* First version held every per-shell array over 20 M lines and
+was OOM-killed at 23 GB on twelve shells. Rewritten to stream one shell at
+a time: keep only the union-subset opacity arrays, the shell's macroatom
+block (levels with a union line are shell-dependent by construction) and
+two prebuilt samplers; 12 shells 7.6 GB, 24 shells 9.7 GB. One shell stays
+bit-identical to `ForestAtom`.
+
+*The trend that was not physics.* On P1 at 2 d the multi-shell B2 - R2 in
+z went -2.97 (1 shell) -> -0.89 (4) -> -0.72 (6) -> -0.33 (12) -> -0.11
+(23) while R2 drifted < 0.1 mag per doubling and the band-forming-weighted
+mixture of the shells' own errors sat at -0.40 on every grid. I nearly
+wrote that up as "the light forms where the forest is thin". The split
+test (each of the 4 shells cut into 2 and 3 identical constant-density
+copies -- the same state) gave R2 bit-identical and B2 - R2 -0.89 -> -0.55
+-> -0.35: the closure's answer depended on how many boundaries a packet
+crossed. Absorb legs invariant; every re-emitting bin leg not, classical
+and worldline alike.
+
+*The bug.* Traced one packet through the crossing loop: in one shell its
+target frequency came out ABOVE its current frequency and it was declared
+escaped; in two shells the same packet interacted after the crossing.
+`nu_of_G` located the bin as `nb - 1 - m` instead of `nb - m`, so the
+within-bin fraction was formed with the neighbour's E; next to a thinner
+bin the target overshot, was discarded as "behind", and the packet skipped
+the forest. Invisible on smooth toys (every test forest, the Paper III
+synthetic forest), catastrophic on a real forest at 4e-5 bins. Fixed
+(38ebf30), goldens re-pinned with the pre-fix file kept, regression test
+on a spiky forest (1 shell 0.227 escaped vs 3 shells 0.161; fixed 0.142
+both), replicate probe now bit-invariant for dmacro and thermal.
+
+*What is left of the closure error.* P1, 2 d, shell 28, fixed: B2 - R2
+z -0.19, K -0.10 (was -2.80, +1.45); Bbin2 z +0.37, K +0.24; C2 within
+0.15 mag of B2; A2 unchanged. The Paper III closure legs at `paper3-freeze`
+carried the same inversion; the tag stays where it is and the PI decides
+on the erratum. Reruns of everything downstream launched (final-composition
+legs for the Gate 2 verdict, multi-shell grids and epochs, P2, neighbours,
+deposit, convergence).
+
+Suite: 557.
+
+## 9bd. The correction goes on Paper III; the pivot becomes a paper; one more experiment (2026-09-10)
+
+*PI decision (verbatim in `paper4/plan_review.md`, last block).* F62-F64 are
+the nucleus of a methods paper -- "Fluorescence breaks the equivalence of
+coarse line-opacity treatments in kilonova radiative transfer" -- with one
+more experiment first: the Fontes benchmark as a time-dependent light
+curve, resolved vs expansion vs line-binned under eps = 1 and under
+energy-conserving fluorescence, same ejecta / atomic data / time grid /
+heating. Time dependence before full equilibrium. F63 is to be called a
+radiation-field-driven macroatom robustness test. The non-termination is
+the information-loss problem of binned opacity made concrete, not "binned
+opacity is broken".
+
+*Paper III correction.* A boxed "Scientific correction -- September 2026"
+notice at the top of `paper3/README.md`, `docs/paper3/README.md`,
+`manuscript.tex` (after \maketitle, digit-free so `check_structure.py`
+stays green), `si.tex`, the cover letter and the `freeze.py` docstring;
+`paper3/CORRECTION.md` with the mechanism and the affected findings;
+README rows F21-F24, F30, F31, F33, F35, F36, F38, F40-F49 marked INVALID,
+F34/F37/F39 "affected in principle, unverified" (smooth synthetic forests,
+not rerun), the Paper IV rows "superseded -- do not use"; notice blocks
+under every Paper II/III section built on bin legs (INVALID under the
+headlines 4.27 and 4.40). `paper3-freeze`, FROZEN.json and the PDFs
+untouched -- everything additive.
+
+*Next.* Review 38ebf30 and merge PR #2 (the fixed transport becomes
+`main`); then the time-slab machinery in `run_mc` (pause at t_stop, resume,
+absolute injection energy, escape times, event cap) and the light-curve
+driver; pilot; production overnight; the feedback-T variant.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

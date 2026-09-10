@@ -33,3 +33,19 @@ download; they are gitignored along with everything else in `data/`.
 The archives are Mac-made: skip the `__MACOSX/` entries and extract the
 per-ion `.txt` files **flat** into `data/`, which is where `load_gsi` looks.
 Commands are in [../docs/sedona/SETUP.md](../docs/sedona/SETUP.md) §2.
+
+## Paper IV (2026-09-09)
+
+Two committed exceptions to the "nothing in data/ is tracked" rule:
+`data/abundances/` (small pattern tables, provenance in each file's header)
+and this ledger. `data/cache/` holds the compact per-ion `.npz` caches that
+`sobolev/atomic_cache.py` builds from the archives (derived, gitignored).
+
+| Item | Content | Source | Date |
+|---|---|---|---|
+| `abundances/solar_r.csv` | solar-system r-process residual pattern by mass, La–Lu: `w = X_solar × f_r` | Prantzos, Abia, Cristallo, Limongi & Chieffi 2020, MNRAS 491, 1832, **Table 4** (Lodders et al. 2009 mass fractions; the study's s/r/p fractions); transcribed from arXiv:1911.02545 by text extraction and checked row by row (`w = X × f_r` to 0.2 %) | 2026-09-09 |
+| P1 anchors | secular component of the xkn radiative-transfer comparison: `M_sec = 2.64e-2 Msun`, `v_rms = 0.06c`, `Y_e = 0.20`, `s = 10 k_B/baryon`, `τ_exp = c/v_rms ≈ 17 ms`; density `ρ(t,x) = ρ0 (t0/t)^3 (1 − x^2)^3`, `x = v/v_max` (**eq. 25**); heating from Wanajo et al. 2014 tracers, thermalisation Barnes et al. 2016 | Ricigliano et al. 2024, MNRAS 529, 647, §5.1–5.2 (arXiv:2311.15709) | 2026-09-09 |
+| `gillanders2022/additional_paper_resources.zip` (gitignored) and `abundances/gillanders2022_Ye-0.29a.csv`, `abundances/gillanders2022_Ye-0.21a.csv` (committed) | the complete composition profiles of Gillanders et al. 2022 Table 2 — every element with its mass fraction for the twelve Y_e bins (`composition_profiles_complete.ascii`, sha256 `9f06304b…819bd1`; zip sha256 `793b5ae2…8784bc`, 5 468 757 bytes); the two profiles used are extracted verbatim (sums 0.9998 / 0.9984 before renormalisation; X_LN(57–70) = 4.986×10⁻² / 2.989×10⁻¹, Table 2's 4.99×10⁻² / 2.99×10⁻¹) | Gillanders, Smartt, Sim, Bauswein & Goriely 2022, MNRAS 515, 631; QUB dataset DOI 10.17034/404fbfbe-5f47-42ff-a7d0-12e7c447ebff (downloaded by the PI in a browser: the server challenges scripted downloads) | 2026-09-10 |
+| P1 composition | `Ye−0.21a` with the lanthanides (Z = 57–70) rescaled to `X_lan = 0.11` and the other elements to 0.89; the 0.11 is Tanaka, Kato, Gaigalas & Kawaguchi 2020, MNRAS 496, 1369, **Table 1** at Y_e = 0.20 (X(La) = 1.1×10⁻¹ from Wanajo et al. 2014 yields; per-element yields only in their Fig. 11). Robustness: `P1r1` = Ye−0.21a at its own X_LN = 0.30, `P1r2` = `solar_r` at 0.11 (the previous provisional pattern) | PI decision 2026-09-10 | 2026-09-10 |
+| P2 composition | `Ye−0.29a` with Z = 57–70 rescaled to `X_LN = 2.5×10⁻³` exactly (the 2026 paper's quoted value; a 20× reduction to its rounding) and the other elements to 1 − X_LN | Gillanders et al. 2026, §4 | 2026-09-10 |
+| standard atomic weights | `sobolev/abundances.py::ATOMIC_MASS`, IUPAC conventional values | — | 2026-09-09 |

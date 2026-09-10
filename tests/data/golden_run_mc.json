@@ -1,0 +1,695 @@
+{
+ "git_head": "4a5c7eec0d3ef8c29619fb969754b6c67f7d61bc",
+ "n_packets": 10000,
+ "hashed": [
+  "nu_out_all",
+  "fate",
+  "w",
+  "n_events",
+  "first_line"
+ ],
+ "seed": 1,
+ "eps": 0.5,
+ "runs": {
+  "three_level|sobolev_group|classical|mem=0": {
+   "sha256": "16ea2cd9451193520f7da917a33fbeae9601c154f492f6fa6e858a67f4764516",
+   "steps": 5,
+   "n_escaped": 9589,
+   "n_core": 411,
+   "n_absorbed": 0,
+   "n_interactions": 7930,
+   "E_esc_over_inj": 0.8759963497250972,
+   "E_dep_lab_over_inj": 0.08798559888810475
+  },
+  "three_level|sobolev_group|classical|mem=1": {
+   "sha256": "16ea2cd9451193520f7da917a33fbeae9601c154f492f6fa6e858a67f4764516",
+   "steps": 5,
+   "n_escaped": 9589,
+   "n_core": 411,
+   "n_absorbed": 0,
+   "n_interactions": 7930,
+   "E_esc_over_inj": 0.8759963497250972,
+   "E_dep_lab_over_inj": 0.08798559888810475
+  },
+  "three_level|sobolev_group|worldline|mem=0": {
+   "sha256": "927519290747c8b99844c71a742b935dd00951baefde0213ab61f855fb31d7b8",
+   "steps": 4,
+   "n_escaped": 9570,
+   "n_core": 430,
+   "n_absorbed": 0,
+   "n_interactions": 7874,
+   "E_esc_over_inj": 0.8748535460230998,
+   "E_dep_lab_over_inj": 0.0871231203032624
+  },
+  "three_level|sobolev_absorb|classical|mem=0": {
+   "sha256": "87b778b640936afb3df78fef7eb8286879538123315b26e7ba6a9f4534e972aa",
+   "steps": 3,
+   "n_escaped": 2220,
+   "n_core": 0,
+   "n_absorbed": 7780,
+   "n_interactions": 7780,
+   "E_esc_over_inj": 0.22199057034659958,
+   "E_dep_lab_over_inj": 0.0
+  },
+  "three_level|sobolev_absorb|worldline|mem=0": {
+   "sha256": "793f4489eb694b5a443f9dd14dd328019d29a8c0a51ee91aba2d1fc461a280b5",
+   "steps": 3,
+   "n_escaped": 2258,
+   "n_core": 0,
+   "n_absorbed": 7742,
+   "n_interactions": 7742,
+   "E_esc_over_inj": 0.22579573562294258,
+   "E_dep_lab_over_inj": 0.0
+  },
+  "three_level|expansion_absorb|classical|mem=0": {
+   "sha256": "bc66a640fc72ff416bcb21876397d2e3562d22c786a9b36f6ab1fdd51b6e1886",
+   "steps": 2,
+   "n_escaped": 4594,
+   "n_core": 0,
+   "n_absorbed": 5406,
+   "n_interactions": 5406,
+   "E_esc_over_inj": 0.4594124285854618,
+   "E_dep_lab_over_inj": 0.0
+  },
+  "three_level|expansion_absorb|worldline|mem=0": {
+   "sha256": "bc66a640fc72ff416bcb21876397d2e3562d22c786a9b36f6ab1fdd51b6e1886",
+   "steps": 2,
+   "n_escaped": 4594,
+   "n_core": 0,
+   "n_absorbed": 5406,
+   "n_interactions": 5406,
+   "E_esc_over_inj": 0.4594124285854618,
+   "E_dep_lab_over_inj": 0.0
+  },
+  "three_level|sobolev_thermal|classical|mem=0": {
+   "sha256": "c5e7e346d18e6a004bd0afa46d4c90a7d69c5d8ecbff0dee0d7407ffd14e0415",
+   "steps": 3,
+   "n_escaped": 9594,
+   "n_core": 406,
+   "n_absorbed": 0,
+   "n_interactions": 10372,
+   "E_esc_over_inj": 0.7943197666431414,
+   "E_dep_lab_over_inj": 0.17499459900697795
+  },
+  "three_level|sobolev_thermal|worldline|mem=0": {
+   "sha256": "38b591c508e9c951c1b436659569c338d366b6e9beaf5fcdc6513f771360c9ee",
+   "steps": 3,
+   "n_escaped": 9605,
+   "n_core": 395,
+   "n_absorbed": 0,
+   "n_interactions": 10328,
+   "E_esc_over_inj": 0.7951004259029896,
+   "E_dep_lab_over_inj": 0.1745414752763798
+  },
+  "three_level|expansion_thermal|classical|mem=0": {
+   "sha256": "5e92bf4743cdf5cfac494650b1fa289a2e1b0bb056b4dc8b6a3e5e4d46974117",
+   "steps": 11,
+   "n_escaped": 9726,
+   "n_core": 274,
+   "n_absorbed": 0,
+   "n_interactions": 7782,
+   "E_esc_over_inj": 0.9684406815485056,
+   "E_dep_lab_over_inj": 0.004580871038791027
+  },
+  "three_level|expansion_thermal|worldline|mem=0": {
+   "sha256": "907f815a7a6df2ef88336dee1149ceccaf1150c4a1122ef1a87c82b642d071fb",
+   "steps": 10,
+   "n_escaped": 9719,
+   "n_core": 281,
+   "n_absorbed": 0,
+   "n_interactions": 7753,
+   "E_esc_over_inj": 0.9677383199071119,
+   "E_dep_lab_over_inj": 0.004601291942111972
+  },
+  "three_level|sobolev_branch|classical|mem=0": {
+   "sha256": "c5e7e346d18e6a004bd0afa46d4c90a7d69c5d8ecbff0dee0d7407ffd14e0415",
+   "steps": 3,
+   "n_escaped": 9594,
+   "n_core": 406,
+   "n_absorbed": 0,
+   "n_interactions": 10372,
+   "E_esc_over_inj": 0.7943197666431414,
+   "E_dep_lab_over_inj": 0.17499459900697795
+  },
+  "three_level|sobolev_branch|worldline|mem=0": {
+   "sha256": "38b591c508e9c951c1b436659569c338d366b6e9beaf5fcdc6513f771360c9ee",
+   "steps": 3,
+   "n_escaped": 9605,
+   "n_core": 395,
+   "n_absorbed": 0,
+   "n_interactions": 10328,
+   "E_esc_over_inj": 0.7951004259029896,
+   "E_dep_lab_over_inj": 0.1745414752763798
+  },
+  "three_level|sobolev_tla|classical|mem=0": {
+   "sha256": "d4022226c833fd5a596ac9b5cb372c98198f068eef336d62e655fbf5dafee085",
+   "steps": 3,
+   "n_escaped": 9615,
+   "n_core": 385,
+   "n_absorbed": 0,
+   "n_interactions": 12186,
+   "E_esc_over_inj": 0.8577893888459931,
+   "E_dep_lab_over_inj": 0.1087246049996162
+  },
+  "three_level|sobolev_tla|worldline|mem=0": {
+   "sha256": "7941d52c1ed0c6ba78265cbfa2489c9df71fd6911897bad07fb0e3dcb62f393e",
+   "steps": 3,
+   "n_escaped": 9611,
+   "n_core": 389,
+   "n_absorbed": 0,
+   "n_interactions": 12049,
+   "E_esc_over_inj": 0.8598394681170701,
+   "E_dep_lab_over_inj": 0.10664929445072684
+  },
+  "three_level|expansion_tla|classical|mem=0": {
+   "sha256": "ba1742846849a6b47b0125706b02bf1c0c76033a130b777258aa0ea3b3bc0d67",
+   "steps": 10,
+   "n_escaped": 9734,
+   "n_core": 266,
+   "n_absorbed": 0,
+   "n_interactions": 7774,
+   "E_esc_over_inj": 0.969218917075273,
+   "E_dep_lab_over_inj": 0.0045885638151078635
+  },
+  "three_level|expansion_tla|worldline|mem=0": {
+   "sha256": "0aab77b0b1c36e524b8842422e8ac740697370ef43183c1e96dbd705fd88351a",
+   "steps": 9,
+   "n_escaped": 9733,
+   "n_core": 267,
+   "n_absorbed": 0,
+   "n_interactions": 7699,
+   "E_esc_over_inj": 0.9691545193014012,
+   "E_dep_lab_over_inj": 0.004557088560397921
+  },
+  "three_level|expansion_branch|classical|mem=0": {
+   "sha256": "ac060046f7439eafd318f6291a796ce2e36bb0ef33961e21c8aa8ff6af2332c0",
+   "steps": 7,
+   "n_escaped": 9720,
+   "n_core": 280,
+   "n_absorbed": 0,
+   "n_interactions": 6150,
+   "E_esc_over_inj": 0.8404160420890393,
+   "E_dep_lab_over_inj": 0.13884221441932704
+  },
+  "three_level|expansion_branch|worldline|mem=0": {
+   "sha256": "554c0935f158418cae832b9a61861003c013eb0aa96c31731c70229bf34418f9",
+   "steps": 6,
+   "n_escaped": 9722,
+   "n_core": 278,
+   "n_absorbed": 0,
+   "n_interactions": 6125,
+   "E_esc_over_inj": 0.8407327321286207,
+   "E_dep_lab_over_inj": 0.138659884964245
+  },
+  "three_level|binned_group|classical|mem=0": {
+   "sha256": "9462fd6d37b993aaf92aaccbbd33902f9fc7d181d1aea1d54c13da9152cdd2ae",
+   "steps": 5,
+   "n_escaped": 9596,
+   "n_core": 404,
+   "n_absorbed": 0,
+   "n_interactions": 7899,
+   "E_esc_over_inj": 0.8771754738061871,
+   "E_dep_lab_over_inj": 0.08730619561362599
+  },
+  "three_level|binned_group|classical|mem=1": {
+   "sha256": "9462fd6d37b993aaf92aaccbbd33902f9fc7d181d1aea1d54c13da9152cdd2ae",
+   "steps": 5,
+   "n_escaped": 9596,
+   "n_core": 404,
+   "n_absorbed": 0,
+   "n_interactions": 7899,
+   "E_esc_over_inj": 0.8771754738061871,
+   "E_dep_lab_over_inj": 0.08730619561362599
+  },
+  "three_level|binned_group|worldline|mem=0": {
+   "sha256": "835f5c51254e0f847727bbb95eba1483b8d81d6615dff98398b77a5983ddf786",
+   "steps": 6,
+   "n_escaped": 9606,
+   "n_core": 394,
+   "n_absorbed": 0,
+   "n_interactions": 7898,
+   "E_esc_over_inj": 0.8780802962373891,
+   "E_dep_lab_over_inj": 0.08726410975532374
+  },
+  "three_level|binned_absorb|classical|mem=0": {
+   "sha256": "0766a5e0a1c3fdaed327995a3a3bbde0e3c1ae17cf48bde4b3b2cb887096c5b1",
+   "steps": 2,
+   "n_escaped": 2257,
+   "n_core": 0,
+   "n_absorbed": 7743,
+   "n_interactions": 7743,
+   "E_esc_over_inj": 0.22571660343669672,
+   "E_dep_lab_over_inj": 0.0
+  },
+  "three_level|binned_absorb|worldline|mem=0": {
+   "sha256": "0766a5e0a1c3fdaed327995a3a3bbde0e3c1ae17cf48bde4b3b2cb887096c5b1",
+   "steps": 2,
+   "n_escaped": 2257,
+   "n_core": 0,
+   "n_absorbed": 7743,
+   "n_interactions": 7743,
+   "E_esc_over_inj": 0.22571660343669672,
+   "E_dep_lab_over_inj": 0.0
+  },
+  "three_level|expansion_group|classical|mem=0": {
+   "sha256": "5fb5dc30436ffea2a0001a1f9cb2b69e9777c76f15b551d90a493705fbe5af0c",
+   "steps": 5,
+   "n_escaped": 9714,
+   "n_core": 286,
+   "n_absorbed": 0,
+   "n_interactions": 5474,
+   "E_esc_over_inj": 0.9139117860832228,
+   "E_dep_lab_over_inj": 0.060714447711600304
+  },
+  "three_level|expansion_group|classical|mem=1": {
+   "sha256": "5fb5dc30436ffea2a0001a1f9cb2b69e9777c76f15b551d90a493705fbe5af0c",
+   "steps": 5,
+   "n_escaped": 9714,
+   "n_core": 286,
+   "n_absorbed": 0,
+   "n_interactions": 5474,
+   "E_esc_over_inj": 0.9139117860832228,
+   "E_dep_lab_over_inj": 0.060714447711600304
+  },
+  "three_level|expansion_group|worldline|mem=0": {
+   "sha256": "deb7f61fbdd623af93aa85a7bfdb32cd24ec6276a5dc5472980c127b676c2ab9",
+   "steps": 5,
+   "n_escaped": 9717,
+   "n_core": 283,
+   "n_absorbed": 0,
+   "n_interactions": 5474,
+   "E_esc_over_inj": 0.9142801649494311,
+   "E_dep_lab_over_inj": 0.06065157423181678
+  },
+  "three_level|dual_branch|classical|mem=0": {
+   "sha256": "74a80e6dfc5a2e6d319cd3045224763335126fda69733e0ce79d9f873b54cae7",
+   "steps": 8,
+   "n_escaped": 9616,
+   "n_core": 384,
+   "n_absorbed": 0,
+   "n_interactions": 9645,
+   "E_esc_over_inj": 0.7535251066064904,
+   "E_dep_lab_over_inj": 0.21887192489392213
+  },
+  "three_level|dual_branch|worldline|mem=0": {
+   "sha256": "1e04fd99a7f466ac99a6bfe6cfc28f565d98332dbeb443cf8772a6d3aa1fb340",
+   "steps": 8,
+   "n_escaped": 9619,
+   "n_core": 381,
+   "n_absorbed": 0,
+   "n_interactions": 9604,
+   "E_esc_over_inj": 0.7545811518590549,
+   "E_dep_lab_over_inj": 0.21794896674655798
+  },
+  "three_level|dual_group|classical|mem=0": {
+   "sha256": "9462fd6d37b993aaf92aaccbbd33902f9fc7d181d1aea1d54c13da9152cdd2ae",
+   "steps": 5,
+   "n_escaped": 9596,
+   "n_core": 404,
+   "n_absorbed": 0,
+   "n_interactions": 7899,
+   "E_esc_over_inj": 0.8771754738061871,
+   "E_dep_lab_over_inj": 0.08730619561362599
+  },
+  "three_level|dual_group|classical|mem=1": {
+   "sha256": "9462fd6d37b993aaf92aaccbbd33902f9fc7d181d1aea1d54c13da9152cdd2ae",
+   "steps": 5,
+   "n_escaped": 9596,
+   "n_core": 404,
+   "n_absorbed": 0,
+   "n_interactions": 7899,
+   "E_esc_over_inj": 0.8771754738061871,
+   "E_dep_lab_over_inj": 0.08730619561362599
+  },
+  "three_level|dual_group|worldline|mem=0": {
+   "sha256": "835f5c51254e0f847727bbb95eba1483b8d81d6615dff98398b77a5983ddf786",
+   "steps": 6,
+   "n_escaped": 9606,
+   "n_core": 394,
+   "n_absorbed": 0,
+   "n_interactions": 7898,
+   "E_esc_over_inj": 0.8780802962373891,
+   "E_dep_lab_over_inj": 0.08726410975532374
+  },
+  "three_level|dual_absorb|classical|mem=0": {
+   "sha256": "0766a5e0a1c3fdaed327995a3a3bbde0e3c1ae17cf48bde4b3b2cb887096c5b1",
+   "steps": 2,
+   "n_escaped": 2257,
+   "n_core": 0,
+   "n_absorbed": 7743,
+   "n_interactions": 7743,
+   "E_esc_over_inj": 0.22571660343669672,
+   "E_dep_lab_over_inj": 0.0
+  },
+  "three_level|dual_absorb|worldline|mem=0": {
+   "sha256": "0766a5e0a1c3fdaed327995a3a3bbde0e3c1ae17cf48bde4b3b2cb887096c5b1",
+   "steps": 2,
+   "n_escaped": 2257,
+   "n_core": 0,
+   "n_absorbed": 7743,
+   "n_interactions": 7743,
+   "E_esc_over_inj": 0.22571660343669672,
+   "E_dep_lab_over_inj": 0.0
+  },
+  "synthetic|sobolev_group|classical|mem=0": {
+   "sha256": "d377f39c5b24fb434e8e59f9f06107b210d24725673b335e44aa6d0a66b53435",
+   "steps": 121,
+   "n_escaped": 4728,
+   "n_core": 5272,
+   "n_absorbed": 0,
+   "n_interactions": 54158,
+   "E_esc_over_inj": 0.4382276655483304,
+   "E_dep_lab_over_inj": 0.0406317583273805
+  },
+  "synthetic|sobolev_group|classical|mem=1": {
+   "sha256": "d377f39c5b24fb434e8e59f9f06107b210d24725673b335e44aa6d0a66b53435",
+   "steps": 121,
+   "n_escaped": 4728,
+   "n_core": 5272,
+   "n_absorbed": 0,
+   "n_interactions": 54158,
+   "E_esc_over_inj": 0.4382276655483304,
+   "E_dep_lab_over_inj": 0.0406317583273805
+  },
+  "synthetic|sobolev_group|worldline|mem=0": {
+   "sha256": "307cf7bccf8cf20a67ec74e4ac777f7cc77c148ac392440bee4684b6d656593b",
+   "steps": 112,
+   "n_escaped": 4814,
+   "n_core": 5186,
+   "n_absorbed": 0,
+   "n_interactions": 56051,
+   "E_esc_over_inj": 0.44875862060601546,
+   "E_dep_lab_over_inj": 0.03986350658075886
+  },
+  "synthetic|sobolev_absorb|classical|mem=0": {
+   "sha256": "9497d450ce9b5a273480f250f8b6e213d9082d3a785cc44d21c3592f8cc63540",
+   "steps": 3,
+   "n_escaped": 1474,
+   "n_core": 0,
+   "n_absorbed": 8526,
+   "n_interactions": 8526,
+   "E_esc_over_inj": 0.1320060037532688,
+   "E_dep_lab_over_inj": 0.0
+  },
+  "synthetic|sobolev_absorb|worldline|mem=0": {
+   "sha256": "a634d8a84528c116879f8b0db660e8b28d8ddd0be8330074e6aa3054ed82079e",
+   "steps": 3,
+   "n_escaped": 1453,
+   "n_core": 10,
+   "n_absorbed": 8537,
+   "n_interactions": 8537,
+   "E_esc_over_inj": 0.1300985063936308,
+   "E_dep_lab_over_inj": 0.0
+  },
+  "synthetic|expansion_absorb|classical|mem=0": {
+   "sha256": "66a7314618c35e2c71b73758701c1dec2e62a2cfb02df7e74b53a46571059b0c",
+   "steps": 2,
+   "n_escaped": 1578,
+   "n_core": 0,
+   "n_absorbed": 8422,
+   "n_interactions": 8422,
+   "E_esc_over_inj": 0.1415008865536605,
+   "E_dep_lab_over_inj": 0.0
+  },
+  "synthetic|expansion_absorb|worldline|mem=0": {
+   "sha256": "f5b7a27d980a7efedb68aba489fbefa448f6ece0278df5056f1f772aca84991c",
+   "steps": 2,
+   "n_escaped": 1563,
+   "n_core": 10,
+   "n_absorbed": 8427,
+   "n_interactions": 8427,
+   "E_esc_over_inj": 0.14013754850736065,
+   "E_dep_lab_over_inj": 0.0
+  },
+  "synthetic|sobolev_thermal|classical|mem=0": {
+   "sha256": "f20b979cb12571b28ce821bbe0f01a9a8002708a4b02c1f1b3fceac43be39dbf",
+   "steps": 93,
+   "n_escaped": 4645,
+   "n_core": 5355,
+   "n_absorbed": 0,
+   "n_interactions": 91098,
+   "E_esc_over_inj": 0.4157849448481399,
+   "E_dep_lab_over_inj": 0.04726628663884647
+  },
+  "synthetic|sobolev_thermal|worldline|mem=0": {
+   "sha256": "59b58bc08633f36d6560eebf6842d26e9ad200b65639ffee795964b7a089f6ea",
+   "steps": 102,
+   "n_escaped": 4675,
+   "n_core": 5325,
+   "n_absorbed": 0,
+   "n_interactions": 91939,
+   "E_esc_over_inj": 0.4186032122228527,
+   "E_dep_lab_over_inj": 0.04741818511606996
+  },
+  "synthetic|expansion_thermal|classical|mem=0": {
+   "sha256": "13ddc66c9580dd6490860a2cf4a4ca3c496851d05edc1d72bd51c2687208452b",
+   "steps": 179,
+   "n_escaped": 4598,
+   "n_core": 5402,
+   "n_absorbed": 0,
+   "n_interactions": 112858,
+   "E_esc_over_inj": 0.4140664839711075,
+   "E_dep_lab_over_inj": 0.07461636891135716
+  },
+  "synthetic|expansion_thermal|worldline|mem=0": {
+   "sha256": "9a3166544945916a47de47408e4473c43c06e374b1389f3723fabda17c46fac2",
+   "steps": 116,
+   "n_escaped": 4726,
+   "n_core": 5274,
+   "n_absorbed": 0,
+   "n_interactions": 99316,
+   "E_esc_over_inj": 0.4274406862777789,
+   "E_dep_lab_over_inj": 0.07377097345687347
+  },
+  "synthetic|sobolev_branch|classical|mem=0": {
+   "sha256": "378cc4d15fd9b5f5a0673987d6dffb93690f395366ee87c58baa7fb6f7aa65ca",
+   "steps": 120,
+   "n_escaped": 4562,
+   "n_core": 5438,
+   "n_absorbed": 0,
+   "n_interactions": 89895,
+   "E_esc_over_inj": 0.42738953711005156,
+   "E_dep_lab_over_inj": 0.03814472498888095
+  },
+  "synthetic|sobolev_branch|worldline|mem=0": {
+   "sha256": "6928ef131a9eb3adb63e52e8978e8ed38ff4aa070564b15ec379244a6f84a839",
+   "steps": 119,
+   "n_escaped": 4636,
+   "n_core": 5364,
+   "n_absorbed": 0,
+   "n_interactions": 87620,
+   "E_esc_over_inj": 0.43432865817541655,
+   "E_dep_lab_over_inj": 0.039209869828117354
+  },
+  "synthetic|sobolev_tla|classical|mem=0": {
+   "sha256": "3137b980bc585e06e653ec490340c7a4c182caf8abf1506229708ead51957251",
+   "steps": 109,
+   "n_escaped": 4400,
+   "n_core": 5600,
+   "n_absorbed": 0,
+   "n_interactions": 149693,
+   "E_esc_over_inj": 0.39559908668551824,
+   "E_dep_lab_over_inj": 0.044904679346009606
+  },
+  "synthetic|sobolev_tla|worldline|mem=0": {
+   "sha256": "5fe873dcc8992120f11bfd8407f24fdc97081b651a76a359a62f74642ebb9365",
+   "steps": 117,
+   "n_escaped": 4371,
+   "n_core": 5629,
+   "n_absorbed": 0,
+   "n_interactions": 158859,
+   "E_esc_over_inj": 0.3916314051813807,
+   "E_dep_lab_over_inj": 0.04782337297758758
+  },
+  "synthetic|expansion_tla|classical|mem=0": {
+   "sha256": "6cf81e2299baa95385a2f5516eac2fc462cbd42eecff807133e6e42cdcda37f1",
+   "steps": 172,
+   "n_escaped": 4534,
+   "n_core": 5466,
+   "n_absorbed": 0,
+   "n_interactions": 114530,
+   "E_esc_over_inj": 0.4081485851654983,
+   "E_dep_lab_over_inj": 0.07489293724430018
+  },
+  "synthetic|expansion_tla|worldline|mem=0": {
+   "sha256": "a096cd910769352e3734259c92955090336ca1bbb732b2c2383a331a608f02ec",
+   "steps": 108,
+   "n_escaped": 4636,
+   "n_core": 5364,
+   "n_absorbed": 0,
+   "n_interactions": 99981,
+   "E_esc_over_inj": 0.4193662152323863,
+   "E_dep_lab_over_inj": 0.071456251786635
+  },
+  "synthetic|expansion_branch|classical|mem=0": {
+   "sha256": "a9b4036ad23e1a07273a04793c85db353bcb8cff03647a98b7619d7eb8641e58",
+   "steps": 90,
+   "n_escaped": 5281,
+   "n_core": 4719,
+   "n_absorbed": 0,
+   "n_interactions": 52524,
+   "E_esc_over_inj": 0.4897463724554214,
+   "E_dep_lab_over_inj": 0.04907890817699937
+  },
+  "synthetic|expansion_branch|worldline|mem=0": {
+   "sha256": "2bbe9634c95182e72ffb8ff4545f62c102dc5da54d8860282a552e79c224555c",
+   "steps": 57,
+   "n_escaped": 5336,
+   "n_core": 4664,
+   "n_absorbed": 0,
+   "n_interactions": 49932,
+   "E_esc_over_inj": 0.4943810381007004,
+   "E_dep_lab_over_inj": 0.049342449468809176
+  },
+  "synthetic|binned_group|classical|mem=0": {
+   "sha256": "062d5a0af805c654b4553a0563296a2d1116c9524d0120d17003258c2a5dc5ff",
+   "steps": 106,
+   "n_escaped": 4850,
+   "n_core": 5150,
+   "n_absorbed": 0,
+   "n_interactions": 61654,
+   "E_esc_over_inj": 0.4504771845425431,
+   "E_dep_lab_over_inj": 0.039159888007501246
+  },
+  "synthetic|binned_group|classical|mem=1": {
+   "sha256": "af421b762791050c467b73819222552ad00d62383a96488684eaf0fec1686691",
+   "steps": 95,
+   "n_escaped": 4730,
+   "n_core": 5270,
+   "n_absorbed": 0,
+   "n_interactions": 55303,
+   "E_esc_over_inj": 0.4371040099370173,
+   "E_dep_lab_over_inj": 0.04297418413247588
+  },
+  "synthetic|binned_group|worldline|mem=0": {
+   "sha256": "f6ed33209bcc3649fc9134f4162c1a704cef6221a3a1f759d765326f63b0ff77",
+   "steps": 111,
+   "n_escaped": 5014,
+   "n_core": 4986,
+   "n_absorbed": 0,
+   "n_interactions": 61721,
+   "E_esc_over_inj": 0.4675024931538669,
+   "E_dep_lab_over_inj": 0.03733615713849453
+  },
+  "synthetic|binned_absorb|classical|mem=0": {
+   "sha256": "3cbc34928f1f1079c694d55d83c982e482217a648d527fe4f4df7684f81f2746",
+   "steps": 2,
+   "n_escaped": 1473,
+   "n_core": 0,
+   "n_absorbed": 8527,
+   "n_interactions": 8527,
+   "E_esc_over_inj": 0.1319165485097312,
+   "E_dep_lab_over_inj": 0.0
+  },
+  "synthetic|binned_absorb|worldline|mem=0": {
+   "sha256": "32b83b18f34967cc1682ea66311e17eeba88fe35a94c89ab420bb098b2b26166",
+   "steps": 2,
+   "n_escaped": 1453,
+   "n_core": 10,
+   "n_absorbed": 8537,
+   "n_interactions": 8537,
+   "E_esc_over_inj": 0.1300985063936308,
+   "E_dep_lab_over_inj": 0.0
+  },
+  "synthetic|expansion_group|classical|mem=0": {
+   "sha256": "cef567d4518cd963d6661256e7331726187cdfc0e22743240675141d20e2c0ba",
+   "steps": 78,
+   "n_escaped": 5478,
+   "n_core": 4522,
+   "n_absorbed": 0,
+   "n_interactions": 54069,
+   "E_esc_over_inj": 0.5068271181851526,
+   "E_dep_lab_over_inj": 0.049129037757152196
+  },
+  "synthetic|expansion_group|classical|mem=1": {
+   "sha256": "10b0791424cb5e6513056327c8ca7e8c8f0ff685699b1b73b9cbc16bbe765a47",
+   "steps": 68,
+   "n_escaped": 5437,
+   "n_core": 4563,
+   "n_absorbed": 0,
+   "n_interactions": 51652,
+   "E_esc_over_inj": 0.5013016935649525,
+   "E_dep_lab_over_inj": 0.05179811586659092
+  },
+  "synthetic|expansion_group|worldline|mem=0": {
+   "sha256": "a31c40ba76e585e198a3c545d294a2c56a9b1783968ae892e370add7553a87be",
+   "steps": 65,
+   "n_escaped": 5473,
+   "n_core": 4527,
+   "n_absorbed": 0,
+   "n_interactions": 49370,
+   "E_esc_over_inj": 0.5085680117949108,
+   "E_dep_lab_over_inj": 0.04715526878643352
+  },
+  "synthetic|dual_branch|classical|mem=0": {
+   "sha256": "dfd16f728e815b5c7ccd46ffed5ee631a0bcc838b3e9db16df30997c8ed2b2f5",
+   "steps": 153,
+   "n_escaped": 4763,
+   "n_core": 5237,
+   "n_absorbed": 0,
+   "n_interactions": 58844,
+   "E_esc_over_inj": 0.44716701338896814,
+   "E_dep_lab_over_inj": 0.038661358565327326
+  },
+  "synthetic|dual_branch|worldline|mem=0": {
+   "sha256": "a039d9ae69e30df49d737340068c4337fc3c8b70ecb9666bc143213789e2ebd6",
+   "steps": 97,
+   "n_escaped": 4765,
+   "n_core": 5235,
+   "n_absorbed": 0,
+   "n_interactions": 56353,
+   "E_esc_over_inj": 0.44781272374171655,
+   "E_dep_lab_over_inj": 0.03831391305715883
+  },
+  "synthetic|dual_group|classical|mem=0": {
+   "sha256": "062d5a0af805c654b4553a0563296a2d1116c9524d0120d17003258c2a5dc5ff",
+   "steps": 106,
+   "n_escaped": 4850,
+   "n_core": 5150,
+   "n_absorbed": 0,
+   "n_interactions": 61654,
+   "E_esc_over_inj": 0.4504771845425431,
+   "E_dep_lab_over_inj": 0.039159888007501246
+  },
+  "synthetic|dual_group|classical|mem=1": {
+   "sha256": "af421b762791050c467b73819222552ad00d62383a96488684eaf0fec1686691",
+   "steps": 95,
+   "n_escaped": 4730,
+   "n_core": 5270,
+   "n_absorbed": 0,
+   "n_interactions": 55303,
+   "E_esc_over_inj": 0.4371040099370173,
+   "E_dep_lab_over_inj": 0.04297418413247588
+  },
+  "synthetic|dual_group|worldline|mem=0": {
+   "sha256": "f6ed33209bcc3649fc9134f4162c1a704cef6221a3a1f759d765326f63b0ff77",
+   "steps": 111,
+   "n_escaped": 5014,
+   "n_core": 4986,
+   "n_absorbed": 0,
+   "n_interactions": 61721,
+   "E_esc_over_inj": 0.4675024931538669,
+   "E_dep_lab_over_inj": 0.03733615713849453
+  },
+  "synthetic|dual_absorb|classical|mem=0": {
+   "sha256": "3cbc34928f1f1079c694d55d83c982e482217a648d527fe4f4df7684f81f2746",
+   "steps": 2,
+   "n_escaped": 1473,
+   "n_core": 0,
+   "n_absorbed": 8527,
+   "n_interactions": 8527,
+   "E_esc_over_inj": 0.1319165485097312,
+   "E_dep_lab_over_inj": 0.0
+  },
+  "synthetic|dual_absorb|worldline|mem=0": {
+   "sha256": "32b83b18f34967cc1682ea66311e17eeba88fe35a94c89ab420bb098b2b26166",
+   "steps": 2,
+   "n_escaped": 1453,
+   "n_core": 10,
+   "n_absorbed": 8537,
+   "n_interactions": 8537,
+   "E_esc_over_inj": 0.1300985063936308,
+   "E_dep_lab_over_inj": 0.0
+  }
+ }
+}

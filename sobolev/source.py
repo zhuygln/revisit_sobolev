@@ -13,7 +13,9 @@ the line opacity. That is the Tier-1 control the user chose: the grey
 diffusion opacity `kappa` is FIXED and independent of X_lan, so the lanthanide
 fraction is not counted twice (once in the diffusion time, once in the lines).
 X_lan is therefore an *effective* or tracer lanthanide abundance in this grid;
-a lanthanide-dependent kappa (xkn-like) is the deferred Tier 2.
+a lanthanide-dependent kappa (xkn-like) is the deferred Tier 2. In the Paper
+III manuscript this equal four-ion fraction is written X_4Ln (Paper IV, Phase
+0, 2026-09-09); the JSON key stays `x_lan`.
 
 Ingredients, all cgs (t in s, m in g, v in cm/s):
 

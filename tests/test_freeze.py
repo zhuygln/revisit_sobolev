@@ -99,7 +99,7 @@ def test_headline_matches_committed_json():
 @needs_frozen
 def test_frozen_manifests_and_git_fields():
     fz = json.loads(FROZEN.read_text())
-    assert fz["tag"] == freeze.TAG
+    assert fz["tag"] == freeze.TAG == "paper3-freeze-x4ln"
     assert set(fz["git"]["trees"]) == {"grid", "grid/tscale", "robustness", "data/filters"}
     assert set(fz["inputs"]) == {freeze.rel(f) for f in freeze.input_files()}
     assert freeze.check_inputs(fz) == []   # the working tree's inputs are the frozen ones
