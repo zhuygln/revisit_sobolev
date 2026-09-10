@@ -64,6 +64,54 @@ macroatom, B_eq − R_eq), the Phase 7 sensitivity table, Phase 11, Phase 12;
 and the Paper III erratum. Photon-number branching still moves
 the *reference* by 2.5 mag in z (F50, Sobolev legs: unaffected).
 
+## Phase 10 — the pivot (2026-09-10): a controlled coarse-graining benchmark
+
+The PI's decision after §4.55–4.57 (`paper4/plan_review.md`, last block):
+Paper III stays a frozen record with a prominent correction; the old
+hypothesis is falsified and the Red gate honoured; the question becomes
+*when, and how accurately, can dense r-process line forests be
+coarse-grained when fluorescence is treated explicitly and energy is
+conserved?* Three tasks: reproduce the Fontes et al. (2020) benchmark
+(resolved / expansion / line-binned under ε = 1), repeat it with the one
+change ε = 1 → energy-conserving fluorescence, and one stronger macroatom
+check; plus an independent line list as a cheap external check.
+
+Instrument (`paper4/phase10_fontes/fontes.py`, `sobolev/macroatom.py::MacroAtom`,
+`run_mc(launch="volume", core="reflect", outcome "macro")`,
+`atomic_cache.build_cache_jplt`):
+
+- **The Fontes simplified problem** (their Appendix C: ρ ∝ (1 − x²)³,
+  T ∝ (1 − x²), v_max = 0.25c, 1.4×10⁻² M⊙, T0 = 5700 K at t0 = 4 d, pure
+  Nd, f > 10⁻³, bound-bound only, 64 uniform cells) as a **snapshot**: their
+  initial ρ(r), T(r) at the epoch; LTE Saha for Nd (II and III carry the
+  GSI lines; I and IV have no data here); packets injected in the volume in
+  proportion to mass with the local Planck spectrum, the interior's share
+  arriving from the inner boundary; the observable is the escaping
+  spectrum, its band magnitudes and the escaped-energy fraction, not a
+  light curve; classical transport for every leg (the zoned thermal legs
+  are classical). Their light-curve result (peaks within 8 %, expansion
+  brighter than binned by ≤ 5 %) is the qualitative target, not a number
+  to match.
+- **The transport zone** is the outer part (τ_grey(κ = 10) ≲ 0.7, shells 45–63
+  of 64): the deep interior is diffusive (240 events and 21 core returns
+  per packet from shell 42 inward, where the inner boundary's treatment
+  then dominates the answer). The interior enters through **two brackets**
+  of the inner boundary: `reemit` (complete thermalisation: returning
+  packets come back with the core's Planck spectrum) and `reflect` (a
+  lossless mirror: no thermalisation). A result that holds in both is a
+  result of the transported layers.
+- **Six legs on the same state**: Rth / Bth / Bbinth (complete thermal
+  redistribution, ε = 1) and R₂ / B₂ / Bbin₂ (downward macroatom). §4.57
+  already holds the in-state version on P1 and P2 (F62).
+- **The stronger macroatom** (`MacroAtom`): Lucy's internal upward
+  transitions B_ik J̄ ε_i under an imposed diluted Planck field
+  J̄ = W B_ν(T_zone), W = ½ at the photosphere; collisions absent; the
+  downward rates unchanged. Legs R2M / B2M / Bbin2M on P1 at 2 d, shell 28.
+  It is not an equilibrium solution: J̄ is imposed, not estimated.
+- **The independent line list**: the Japan-Lithuania Opacity Database
+  v2.1 (Kato et al. 2021; HULLAC/GRASP, uncalibrated) as `<ion>@jplt` cache
+  entries; the Fontes problem rerun with Nd II/III from it.
+
 ## Design decisions taken in implementation
 
 (Recorded here because the plan and its review leave them to the
