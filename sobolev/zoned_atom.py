@@ -289,7 +289,7 @@ class ZonedAtom:
                    n_ion_min=1e-30):
         """The zoned blend of the transported `shells` of an `EjectaState`,
         from the compact cache; populations Boltzmann at each shell's T."""
-        from .abundances import ATOMIC_MASS, Z_OF
+        from .abundances import ATOMIC_MASS, Z_OF, GSI_IONS
         from .atomic_cache import load_cached
         from .populations import boltzmann_fractions
         shells = list(shells)
@@ -298,6 +298,8 @@ class ZonedAtom:
         specs = []
         for el in elements:
             for st in stages:
+                if f"{Z_OF[el]}{el}{st}" not in GSI_IONS:
+                    continue
                 if f"{el} {st}" in state.f_ion or (st == "II" and not state.f_ion):
                     n = np.array([state.n_ion(el, st, s, ATOMIC_MASS[el]) for s in shells])
                     if n.max() > n_ion_min:

@@ -510,6 +510,39 @@ def _moving_boundary(r, mu, ctm, b_core, b_out):
     return np.where(core_first, s_core, s_out), core_first
 
 
+def _shell_exit(r, mu, s_from, r_lo, r_hi):
+    """Next shell boundary along a ray from an anchor (r, mu) that has
+    already been cleared to distance `s_from` (a crossing): the inner sphere
+    at its SMALLER root if that lies beyond s_from, else the outer sphere at
+    its LARGER root. The root just used is the other root of the same
+    sphere, excluded by construction. Returns (s, hits_inner)."""
+    rmu = r * mu
+    d_out = np.maximum(rmu * rmu - r * r + r_hi * r_hi, 0.0)
+    s_out = -rmu + np.sqrt(d_out)
+    d_in = rmu * rmu - r * r + r_lo * r_lo
+    ok = d_in > 0.0
+    s_in = np.where(ok, -rmu - np.sqrt(np.maximum(d_in, 0.0)), np.inf)
+    hits_in = ok & (s_in > s_from + _S_MIN) & (s_in < s_out)
+    return np.where(hits_in, s_in, s_out), hits_in
+
+
+def _moving_shell_exit(r, mu, ctm, s_from, b_lo, b_hi):
+    """`_shell_exit` for homologously expanding boundaries r_b = b c t
+    (the quadratics of `_moving_boundary`)."""
+    A = 1.0 - b_hi * b_hi
+    B = r * mu - b_hi * b_hi * ctm
+    Cq = r * r - (b_hi * ctm) ** 2
+    s_out = (-B + np.sqrt(np.maximum(B * B - A * Cq, 0.0))) / A
+    Ac = 1.0 - b_lo * b_lo
+    Bc = r * mu - b_lo * b_lo * ctm
+    Cc = r * r - (b_lo * ctm) ** 2
+    dc = Bc * Bc - Ac * Cc
+    ok = dc > 0.0
+    s_in = np.where(ok, (-Bc - np.sqrt(np.maximum(dc, 0.0))) / Ac, np.inf)
+    hits_in = ok & (s_in > s_from + _S_MIN) & (s_in < s_out)
+    return np.where(hits_in, s_in, s_out), hits_in
+
+
 def _beta_of_tau(tau):
     """(1 - e^-tau)/tau, safe at 0."""
     t = np.maximum(tau, 1e-12)
@@ -677,13 +710,37 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
         raise ValueError("the downward macroatom carries indivisible energy packets: packets='energy'")
     if reprocess is not None and (sobolev or outcome not in ("dmacro", "thermal")):
         raise ValueError("reprocess='capped' is a bin-leg closure for the dmacro/thermal outcomes")
-    dm = atom.dmacro(a_cut) if outcome == "dmacro" else None
+    zoned = bool(getattr(atom, "is_zoned", False))
+    if zoned:
+        # Paper IV multi-shell transport (sobolev/zoned_atom.py): energy packets,
+        # the downward macroatom / thermal / absorb outcomes, no table cut, no
+        # line memory; the transported region is the atom's own shells
+        if not energy:
+            raise NotImplementedError("zoned transport carries energy packets: packets='energy'")
+        if outcome not in ("absorb", "dmacro", "thermal"):
+            raise NotImplementedError(f"zoned transport supports absorb/dmacro/thermal, not {outcome!r}")
+        if outcome == "thermal" and wl:
+            raise NotImplementedError("zoned thermal legs under worldline transport are not implemented")
+        if a_cut is not None or line_memory:
+            raise NotImplementedError("a_cut and line_memory are not available in zoned transport")
+        if not (np.isclose(r_core, atom.r_edges[0]) and np.isclose(r_out, atom.r_edges[-1])):
+            raise ValueError("zoned transport: r_core/r_out must be the atom's inner/outer edges")
+        n_sh = atom.n_shell
+        r_edges = atom.r_edges.copy(); r_edges[0] = float(r_core); r_edges[-1] = float(r_out)
+        b_edges = r_edges / ct
+    dm = (atom.macro if zoned else atom.dmacro(a_cut)) if outcome == "dmacro" else None
     # the k-packet sampler (thermal channel and dead-end levels) is built on
     # first use, so a toy atom with no emissivity and no dead ends never needs it
     kpack = None
+    kpack_s = {}
     needs_thermal = outcome in ("thermal", "tla")
-    thermal = (atom.thermal_sampler(emit_window, weight="energy" if energy else "photon")
-               if (needs_thermal and (sobolev or exp_emit == "line")) else None)
+    if zoned:
+        thermal = None
+        thermal_s = ([atom.thermal_sampler(s_, emit_window, weight="energy") for s_ in range(n_sh)]
+                     if (needs_thermal and (sobolev or exp_emit == "line")) else None)
+    else:
+        thermal = (atom.thermal_sampler(emit_window, weight="energy" if energy else "photon")
+                   if (needs_thermal and (sobolev or exp_emit == "line")) else None)
     if not sobolev:
         # "dual" carries survival on the exact-sum grid, so its credit unit is
         # tau as well; only the Poisson grid credits p.
@@ -695,13 +752,22 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
         # cumulative E from the top (high frequency) downward; G(nu) = optical
         # depth accumulated sweeping from the top edge down to nu.
         # G is piecewise linear in nu inside each bin.
-        G_edges = np.concatenate([[0.0], np.cumsum(E[::-1])])[::-1]   # G at each edge, top = 0
+        if zoned:
+            # E is (n_shell, n_bins): G per shell, same arithmetic per row
+            G_edges = np.array([np.concatenate([[0.0], np.cumsum(E[s_][::-1])])[::-1] for s_ in range(n_sh)])
+        else:
+            G_edges = np.concatenate([[0.0], np.cumsum(E[::-1])])[::-1]   # G at each edge, top = 0
         width = np.diff(edges)
         if reprocess is not None:
             if reprocess != "capped":
                 raise ValueError(f"reprocess must be None or 'capped', got {reprocess!r}")
             from sobolev.energy_balance import capped_reprocessing
-            p_rep = capped_reprocessing(atom, edges, E, dnu_over_nu if tau_cap is None else tau_cap)
+            if zoned:
+                p_rep = np.array([capped_reprocessing(atom.shell_view(s_), edges, E[s_],
+                                                      dnu_over_nu if tau_cap is None else tau_cap)
+                                  for s_ in range(n_sh)])
+            else:
+                p_rep = capped_reprocessing(atom, edges, E, dnu_over_nu if tau_cap is None else tau_cap)
         if needs_thermal and exp_emit == "bin":
             # Kirchhoff for the closure's OWN opacity: emissivity per bin is
             # kappa_exp(b) B_nu(T) -- photon-number weight E_b * B_nu/(h nu) --
@@ -709,24 +775,29 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
             # Sobolev line emissivity A n_u (~ tau). This is what SEDONA's
             # expansion mode re-emits from; frequency uniform within the bin.
             nu_b = np.sqrt(edges[1:] * edges[:-1])
-            T_em = getattr(atom, "temperature", None)
-            if T_em is None:
-                # toy atoms without a temperature: flat B_nu (weights E_b only)
-                w_b = E * width
-            elif energy:
-                # energy packets: the energy emissivity kappa_exp(b) B_nu, ~ nu^3
-                xb = H * nu_b / (K_B * T_em)
-                w_b = E * nu_b**3 / np.expm1(np.minimum(xb, 700.0)) * width
+            def _bin_sampler(E_row, T_em):
+                if T_em is None:
+                    # toy atoms without a temperature: flat B_nu (weights E_b only)
+                    w_b = E_row * width
+                elif energy:
+                    # energy packets: the energy emissivity kappa_exp(b) B_nu, ~ nu^3
+                    xb = H * nu_b / (K_B * T_em)
+                    w_b = E_row * nu_b**3 / np.expm1(np.minimum(xb, 700.0)) * width
+                else:
+                    xb = H * nu_b / (K_B * T_em)
+                    w_b = E_row * nu_b**2 / np.expm1(np.minimum(xb, 700.0)) * width
+                if emit_window is not None:
+                    w_b[(nu_b < emit_window[0]) | (nu_b > emit_window[1])] = 0.0
+                if w_b.sum() <= 0:
+                    raise ValueError("expansion thermal emissivity is empty in the window")
+                cum_b = np.cumsum(w_b / w_b.sum())
+                def sampler(u):
+                    return np.searchsorted(cum_b, u)
+                return sampler
+            if zoned:
+                thermal_bin_s = [_bin_sampler(E[s_], None if atom.T is None else float(atom.T[s_])) for s_ in range(n_sh)]
             else:
-                xb = H * nu_b / (K_B * T_em)
-                w_b = E * nu_b**2 / np.expm1(np.minimum(xb, 700.0)) * width
-            if emit_window is not None:
-                w_b[(nu_b < emit_window[0]) | (nu_b > emit_window[1])] = 0.0
-            if w_b.sum() <= 0:
-                raise ValueError("expansion thermal emissivity is empty in the window")
-            cum_b = np.cumsum(w_b / w_b.sum())
-            def thermal_bin(u):
-                return np.searchsorted(cum_b, u)
+                thermal_bin = _bin_sampler(E, getattr(atom, "temperature", None))
         def G_of(nu):
             b = np.clip(np.searchsorted(edges, nu, side="right") - 1, 0, E.size - 1)
             frac = (edges[b + 1] - nu) / width[b]
@@ -738,6 +809,21 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
             # within bin b: g = G_edges[b+1] + frac*E[b] -> frac
             frac = np.where(E[b] > 0, (g - G_edges[b + 1]) / np.where(E[b] > 0, E[b], 1.0), 0.0)
             return edges[b + 1] - frac * width[b]
+        if zoned:
+            nb = E.shape[1]
+            def G_of_z(nu, sh):
+                b = np.clip(np.searchsorted(edges, nu, side="right") - 1, 0, nb - 1)
+                frac = (edges[b + 1] - nu) / width[b]
+                return G_edges[sh, b + 1] + frac * E[sh, b]
+            def nu_of_G_z(g, sh):
+                out = np.empty(g.size)
+                for s_ in np.unique(sh):
+                    m = sh == s_
+                    Gs = G_edges[s_]; Es = E[s_]
+                    b = np.clip(nb - 1 - np.searchsorted(Gs[::-1], g[m], side="right"), 0, nb - 1)
+                    frac = np.where(Es[b] > 0, (g[m] - Gs[b + 1]) / np.where(Es[b] > 0, Es[b], 1.0), 0.0)
+                    out[m] = edges[b + 1] - frac * width[b]
+                return out
 
     if launch_weight == "photon" or t_core is None:
         nu_launch = sample_launch(rng, nu_min, nu_max, n_packets, t_core)
@@ -781,6 +867,17 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
     e_thermal = 0.0
     n_kpackets = 0
     n_dead_end = 0
+    # zoned transport: the shell each packet is in, the distance already
+    # cleared from its anchor by crossings, the comoving frequency there
+    if zoned:
+        shell_of = np.zeros(n_packets, np.int32)
+        s_acc = np.zeros(n_packets)
+        nu_key = np.zeros(n_packets)
+        n_cross_out = np.zeros(n_sh, np.int64); n_cross_in = np.zeros(n_sh, np.int64)
+        n_events_shell = np.zeros(n_sh, np.int64); n_kpackets_shell = np.zeros(n_sh, np.int64)
+        n_dead_end_shell = np.zeros(n_sh, np.int64); e_thermal_shell = np.zeros(n_sh)
+        last_shell = np.full(n_packets, -1, np.int32)
+        beta_stack = None
     # expansion mode: optical depth still to travel before the next interaction
     tau_r = rng.exponential(1.0, n_packets) if not sobolev else None
     # memory: ring buffer of the last m opacity-line indices each packet emitted
@@ -810,20 +907,119 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
                                f"with {idx.size} packets alive")
         ri, mi, ni = r[idx], mu[idx], nu[idx]
         z = ri * mi
-        if wl:
-            cti = ctime[idx]
-            s_b, core_first = _moving_boundary(ri, mi, cti, b_core_v, b_out_v)
-            beta_i = ri / cti
-            gam_i = 1.0 / np.sqrt(1.0 - beta_i * beta_i)
-            nu_cm = ni * gam_i * (1.0 - z / cti)
-            Z0 = cti - z
-            p2 = ri * ri * (1.0 - mi * mi)
-            dsc_now = (ct / cti) ** 2 / gam_i
+        if zoned:
+            # ---- the crossing loop: every position from the anchor; shells
+            # change, r/mu/ctime do not (sobolev/zoned_atom.py, plan Step 3)
+            if wl:
+                cti = ctime[idx]
+                beta_i = ri / cti
+                gam_i = 1.0 / np.sqrt(1.0 - beta_i * beta_i)
+                nu_cm0 = ni * gam_i * (1.0 - z / cti)
+                Z0 = cti - z
+                p2 = ri * ri * (1.0 - mi * mi)
+                dsc_now = (ct / cti) ** 2 / gam_i
+            else:
+                nu_cm0 = ni * (1.0 - z / ct)
+            n_i = idx.size
+            sh = shell_of[idx].copy(); sacc = s_acc[idx].copy(); key_prev = nu_key[idx].copy()
+            s_b = np.empty(n_i); core_first = np.zeros(n_i, bool)
+            s_res = np.full(n_i, np.inf); interact_candidate = np.zeros(n_i, bool)
+            kk = np.zeros(n_i, np.int64); nu_target = np.empty(n_i)
+            todo_c = np.arange(n_i)
+            for _cross in range(2 * n_sh + 2):
+                if todo_c.size == 0:
+                    break
+                t = todo_c
+                fresh = sacc[t] == 0.0
+                key = np.where(fresh, nu_cm0[t], key_prev[t])
+                r_lo = r_edges[sh[t]]; r_hi = r_edges[sh[t] + 1]
+                sb_t = np.empty(t.size); in_t = np.zeros(t.size, bool)
+                if fresh.any():
+                    f = np.flatnonzero(fresh)
+                    if wl:
+                        a_, b_ = _moving_boundary(ri[t][f], mi[t][f], cti[t][f], b_edges[sh[t][f]], b_edges[sh[t][f] + 1])
+                    else:
+                        a_, b_ = distance_to_boundary(ri[t][f], mi[t][f], r_lo[f], r_hi[f])
+                    sb_t[f] = a_; in_t[f] = b_
+                if (~fresh).any():
+                    g = np.flatnonzero(~fresh)
+                    if wl:
+                        a_, b_ = _moving_shell_exit(ri[t][g], mi[t][g], cti[t][g], sacc[t][g], b_edges[sh[t][g]], b_edges[sh[t][g] + 1])
+                    else:
+                        a_, b_ = _shell_exit(ri[t][g], mi[t][g], sacc[t][g], r_lo[g], r_hi[g])
+                    sb_t[g] = a_; in_t[g] = b_
+                if sobolev:
+                    kq = key * (1.0 - 1e-12) if wl else np.where(fresh, key, key * (1.0 - 1e-12))
+                    k = np.searchsorted(atom.op_nu, kq, side="left") - 1
+                    k = np.where(k >= 0, atom.op_nxt[sh[t], np.maximum(k, 0)], -1)
+                    has = k >= 0
+                    kk_t = np.where(has, k, 0)
+                    if wl:
+                        y = ni[t] / atom.op_nu[kk_t]
+                        z_res = 0.5 * Z0[t] * (y * y - 1.0) + p2[t] / (2.0 * Z0[t])
+                        sr_t = np.where(has, z_res - z[t], np.inf)
+                    else:
+                        sr_t = np.where(has, ct * (1.0 - atom.op_nu[kk_t] / ni[t]) - z[t], np.inf)
+                    sr_t = np.where(sr_t > _S_MIN, sr_t, np.inf)
+                    nt_t = np.empty(t.size)
+                else:
+                    g_now = G_of_z(key, sh[t])
+                    g_target = g_now + (tau_r[idx[t]] / dsc_now[t] if wl else tau_r[idx[t]])
+                    nt_t = nu_of_G_z(g_target, sh[t])
+                    reachable = g_target <= G_edges[sh[t], 0]
+                    if wl:
+                        y = ni[t] / nt_t
+                        z_res = 0.5 * Z0[t] * (y * y - 1.0) + p2[t] / (2.0 * Z0[t])
+                        sr_t = np.where(reachable, z_res - z[t], np.inf)
+                    else:
+                        sr_t = np.where(reachable, ct * (1.0 - nt_t / ni[t]) - z[t], np.inf)
+                    sr_t = np.where(sr_t > _S_MIN, sr_t, np.inf)
+                    kk_t = np.zeros(t.size, np.int64)
+                cand = sr_t < sb_t
+                interior = np.where(in_t, sh[t] > 0, sh[t] < n_sh - 1)
+                cross = ~cand & interior
+                done = ~cross
+                d = t[done]
+                s_b[d] = sb_t[done]; core_first[d] = in_t[done]; s_res[d] = sr_t[done]
+                interact_candidate[d] = cand[done]; kk[d] = kk_t[done]; nu_target[d] = nt_t[done]
+                if cross.any():
+                    cidx_ = t[cross]
+                    sb_c = sb_t[cross]
+                    zb = z[cidx_] + sb_c
+                    if wl:
+                        key_b = ni[cidx_] * Z0[cidx_] / np.sqrt(Z0[cidx_] ** 2 + 2.0 * Z0[cidx_] * zb - p2[cidx_])
+                    else:
+                        key_b = ni[cidx_] * (1.0 - zb / ct)
+                    if not sobolev:
+                        dg = G_of_z(key_b, sh[cidx_]) - g_now[cross]
+                        tau_r[idx[cidx_]] = np.maximum(tau_r[idx[cidx_]] - dg * (dsc_now[cidx_] if wl else 1.0), 0.0)
+                    inward = in_t[cross]
+                    np.add.at(n_cross_in, sh[cidx_][inward], 1)
+                    np.add.at(n_cross_out, sh[cidx_][~inward], 1)
+                    sh[cidx_] = np.where(inward, sh[cidx_] - 1, sh[cidx_] + 1)
+                    sacc[cidx_] = sb_c
+                    key_prev[cidx_] = key_b
+                todo_c = t[cross]
+            else:
+                raise RuntimeError("zoned transport: a packet crossed more shells than exist")
+            shell_of[idx] = sh; s_acc[idx] = sacc; nu_key[idx] = key_prev
         else:
-            s_b, core_first = distance_to_boundary(ri, mi, r_core, r_out)
-            nu_cm = ni * (1.0 - z / ct)
+            if wl:
+                cti = ctime[idx]
+                s_b, core_first = _moving_boundary(ri, mi, cti, b_core_v, b_out_v)
+                beta_i = ri / cti
+                gam_i = 1.0 / np.sqrt(1.0 - beta_i * beta_i)
+                nu_cm = ni * gam_i * (1.0 - z / cti)
+                Z0 = cti - z
+                p2 = ri * ri * (1.0 - mi * mi)
+                dsc_now = (ct / cti) ** 2 / gam_i
+            else:
+                s_b, core_first = distance_to_boundary(ri, mi, r_core, r_out)
+                nu_cm = ni * (1.0 - z / ct)
 
-        if sobolev:
+        if zoned:
+            pass
+        elif sobolev:
             # next opacity line strictly below the current comoving frequency.
             # Worldline: nu_cm is recomputed from gamma (1 - z/ct) rather than
             # from the resonance inversion, so at a just-used resonance its
@@ -887,9 +1083,11 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
                 nu_old = nu[rl].copy()
                 if wl:
                     ctime[rl] += s_b[esc][hit_core][again]
-                    r[rl] = b_core_v * ctime[rl]
+                    r[rl] = (b_edges[0] if zoned else b_core_v) * ctime[rl]
                 else:
                     r[rl] = float(r_core)
+                if zoned:
+                    shell_of[rl] = 0; s_acc[rl] = 0.0
                 mu[rl] = np.sqrt(rng.uniform(0.0, 1.0, rl.size))
                 nu_new = sample_launch_energy(rng, nu_min, nu_max, rl.size, t_core)
                 w[rl] = w[rl] * (nu_old / nu_new)
@@ -912,13 +1110,21 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
         ci = idx[c]
         rn, mn = advance(ri[c], mi[c], s_res[c])
         r[ci], mu[ci] = rn, mn
+        if zoned:
+            s_acc[ci] = 0.0
+            sh_c = shell_of[ci]
         if wl:
             ctime[ci] += s_res[c]
             beta_c = rn / ctime[ci]
             dsc = (ct / ctime[ci]) ** 2 * np.sqrt(1.0 - beta_c * beta_c)
         if sobolev:
             kc = kk[c]
-            if wl:
+            if zoned:
+                if wl:
+                    hit = rng.uniform(size=ci.size) < 1.0 - np.exp(-atom.op_tau[sh_c, kc] * dsc)
+                else:
+                    hit = rng.uniform(size=ci.size) < atom.op_p[sh_c, kc]
+            elif wl:
                 hit = rng.uniform(size=ci.size) < 1.0 - np.exp(-atom.op_tau[kc] * dsc)
             else:
                 hit = rng.uniform(size=ci.size) < atom.op_p[kc]
@@ -938,6 +1144,10 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
         nu_abs_cm = (atom.op_nu[kc] if sobolev else nu_target[c])[hit]
         nu_lab_before = nu[hi].copy()
         w_before = w[hi].copy()
+        if zoned:
+            sh_hi = shell_of[hi]
+            np.add.at(n_events_shell, sh_hi, 1)
+            last_shell[hi] = sh_hi
         if sobolev:
             first_line[hi[first]] = atom.op_idx[kc[hit][first]]
         if outcome == "absorb":
@@ -1017,8 +1227,12 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
         if reprocess is not None:
             # dual-role closure: exchange energy with the atom only with the
             # bin's capped net-absorption probability, else scatter coherently
-            b_rep = np.clip(np.searchsorted(edges, nu_abs_cm, side="right") - 1, 0, E.size - 1)
-            coherent[:] = rng.uniform(size=hi.size) >= p_rep[b_rep]
+            if zoned:
+                b_rep = np.clip(np.searchsorted(edges, nu_abs_cm, side="right") - 1, 0, nb - 1)
+                coherent[:] = rng.uniform(size=hi.size) >= p_rep[sh_hi, b_rep]
+            else:
+                b_rep = np.clip(np.searchsorted(edges, nu_abs_cm, side="right") - 1, 0, E.size - 1)
+                coherent[:] = rng.uniform(size=hi.size) >= p_rep[b_rep]
         if outcome in ("branch", "dmacro") and sobolev:
             cur_up = atom.op_upper[kc[hit]].copy()
         if outcome == "tla" and sobolev:
@@ -1026,8 +1240,12 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
         if outcome in ("branch", "dmacro") and not sobolev:
             # E8: restore line identity at the interaction point -- the
             # absorbing line within the bin, with probability op_p[k]/E_b
-            b_hit = np.clip(np.searchsorted(edges, nu_abs_cm, side="right") - 1, 0, E.size - 1)
-            k_abs = atom.sample_line_in_bin(b_hit, rng.uniform(size=hi.size))
+            if zoned:
+                b_hit = np.clip(np.searchsorted(edges, nu_abs_cm, side="right") - 1, 0, nb - 1)
+                k_abs = atom.sample_line_in_bin(sh_hi, b_hit, rng.uniform(size=hi.size))
+            else:
+                b_hit = np.clip(np.searchsorted(edges, nu_abs_cm, side="right") - 1, 0, E.size - 1)
+                k_abs = atom.sample_line_in_bin(b_hit, rng.uniform(size=hi.size))
             first_line[hi[first]] = atom.op_idx[k_abs[first]]
             cur_up = atom.op_upper[k_abs].copy()
         new_line = np.empty(hi.size, int)
@@ -1052,17 +1270,33 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
                 act = todo[~coherent[todo]]            # coherent scatterers skip the atom
                 kp = (rng.uniform(size=act.size) < eps_k) if eps_k > 0 else np.zeros(act.size, bool)
                 walkers = act[~kp]
-                ex, _nj, dead = dm.walk(cur_up[walkers], rng)
+                if zoned:
+                    ex, _nj, dead = dm.walk(cur_up[walkers], rng, sh_hi[walkers])
+                else:
+                    ex, _nj, dead = dm.walk(cur_up[walkers], rng)
                 new_line[walkers] = ex
                 n_dead_end += int(dead.sum())
                 kp_idx = np.concatenate([act[kp], walkers[dead]])
+                if zoned:
+                    np.add.at(n_dead_end_shell, sh_hi[walkers[dead]], 1)
                 if kp_idx.size:
                     n_kpackets += kp_idx.size
                     e_thermal += float(np.sum(w_before[kp_idx] * H * nu_abs_cm[kp_idx]))
+                    if zoned:
+                        np.add.at(n_kpackets_shell, sh_hi[kp_idx], 1)
+                        np.add.at(e_thermal_shell, sh_hi[kp_idx], w_before[kp_idx] * H * nu_abs_cm[kp_idx])
                     if thermal_k == "deposit":
                         trapped = kp_idx
                         new_line[kp_idx] = -1        # no exit line: deposited below
                         todo = np.setdiff1d(todo, kp_idx)
+                    elif zoned:
+                        # one uniform for the batch, dispatched by shell
+                        u_k = rng.uniform(size=kp_idx.size)
+                        for s_ in np.unique(sh_hi[kp_idx]):
+                            m_ = sh_hi[kp_idx] == s_
+                            if s_ not in kpack_s:
+                                kpack_s[s_] = atom.thermal_sampler(int(s_), emit_window, weight="energy_beta")
+                            new_line[kp_idx[m_]] = kpack_s[s_](u_k[m_])
                     else:
                         if kpack is None:
                             kpack = atom.thermal_sampler(emit_window, weight="energy_beta")
@@ -1080,6 +1314,19 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
                             new_line[todo[th]] = thermal_bin(rng.uniform(size=th.sum())); is_bin[todo[th]] = True
                         else:
                             new_line[todo[th]] = thermal(rng.uniform(size=th.sum()))
+            elif zoned and thermal_s is not None:   # zoned thermal, line-based, per shell
+                act = todo[~coherent[todo]]
+                u_t = rng.uniform(size=act.size)
+                for s_ in np.unique(sh_hi[act]):
+                    m_ = sh_hi[act] == s_
+                    new_line[act[m_]] = thermal_s[s_](u_t[m_])
+            elif zoned:                              # zoned thermal, bin-based, per shell
+                act = todo[~coherent[todo]]
+                u_t = rng.uniform(size=act.size)
+                for s_ in np.unique(sh_hi[act]):
+                    m_ = sh_hi[act] == s_
+                    new_line[act[m_]] = thermal_bin_s[s_](u_t[m_])
+                is_bin[act] = True
             elif thermal is not None:  # thermal, line-based (Sobolev legs, or exp_emit="line")
                 act = todo[~coherent[todo]]
                 new_line[act] = thermal(rng.uniform(size=act.size))
@@ -1096,6 +1343,10 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
                 if wl:
                     esc = rng.uniform(size=todo.size) < _beta_of_tau(
                         atom.tau_all[new_line[todo]] * dsc[hit][todo])
+                elif zoned:
+                    if beta_stack is None:
+                        beta_stack = np.stack(atom._beta_all)
+                    esc = rng.uniform(size=todo.size) < beta_stack[sh_hi[todo], new_line[todo]]
                 else:
                     esc = rng.uniform(size=todo.size) < atom.beta_all[new_line[todo]]
             else:
@@ -1123,6 +1374,8 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
             is_bin, coherent = is_bin[keep], coherent[keep]
             nu_abs_cm, nu_lab_before = nu_abs_cm[keep], nu_lab_before[keep]
             w_before = w_before[keep]
+            if zoned:
+                sh_hi = sh_hi[keep]
             if outcome in ("branch", "dmacro") and not sobolev:
                 k_abs = k_abs[keep]
             if hi.size == 0:
@@ -1199,6 +1452,10 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
                 packets=packets, core=core, w_launch=w_launch, exit_energy=exit_energy,
                 n_core_passes=n_core_passes, n_core_passes_total=int(n_core_passes.sum()),
                 n_kpackets=n_kpackets, n_dead_end=n_dead_end,
+                zoned=zoned,
+                **(dict(shell_of=shell_of, last_shell=last_shell, n_cross_in=n_cross_in, n_cross_out=n_cross_out,
+                        n_events_shell=n_events_shell, n_kpackets_shell=n_kpackets_shell,
+                        n_dead_end_shell=n_dead_end_shell, e_thermal_shell=e_thermal_shell) if zoned else {}),
                 events=((np.concatenate(ev_in) if ev_in else np.empty(0),
                          np.concatenate(ev_out) if ev_out else np.empty(0),
                          np.concatenate(ev_w) if ev_w else np.empty(0))

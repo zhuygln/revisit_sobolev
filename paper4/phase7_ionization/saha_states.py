@@ -27,17 +27,24 @@ STAGES = ("I", "II", "III", "IV")
 
 def partition_functions(elements, T):
     out = {}
+    from sobolev.abundances import GSI_IONS
     for el in elements:
         u = []
         for st in ("II", "III"):
-            d = load_cached(f"{Z_OF[el]}{el}{st}")
+            name = f"{Z_OF[el]}{el}{st}"
+            if name not in GSI_IONS:            # Pm III: no GSI data -> U_III = U_II, declared
+                u.append(u[-1]); continue
+            d = load_cached(name)
             u.append(ion.partition_function_gsi(d["g_lev"], d["E_lev"], T))
         out[el] = tuple(u)
     return out
 
 
 def ionize(state, z1_policy="scale", bulk=ion.BulkSpecies()):
-    elements = [el for el in state.X if el != "bulk"]
+    # the lanthanides carry the GSI partition functions and the line opacity;
+    # every other named element enters charge neutrality with the proxy
+    # energies inside solve_ionization
+    elements = [el for el in state.X if el in Z_OF and Z_OF[el] <= 70]
     n = state.n_shell
     f_ion = {f"{el} {st}": np.zeros(n) for el in elements for st in STAGES}
     n_e = np.zeros(n)
@@ -69,9 +76,10 @@ def main():
         s = st.meta.get("photospheric_shell", 0)
         out = Path(path).with_name(Path(path).stem + "_saha.json")
         st.to_json(out)
-        f2 = np.mean([st.f_ion[f"{el} II"][s] for el in st.X if el != "bulk"])
-        f3 = np.mean([st.f_ion[f"{el} III"][s] for el in st.X if el != "bulk"])
-        f1 = np.mean([st.f_ion[f"{el} I"][s] for el in st.X if el != "bulk"])
+        lan = [el for el in st.X if el in Z_OF and Z_OF[el] <= 70]
+        f2 = np.mean([st.f_ion[f"{el} II"][s] for el in lan])
+        f3 = np.mean([st.f_ion[f"{el} III"][s] for el in lan])
+        f1 = np.mean([st.f_ion[f"{el} I"][s] for el in lan])
         print(f"{st.meta.get('name')} t={st.t / 86400:g} d shell {s}: T={st.T_gas[s]:.0f} K n_e={st.n_e[s]:.3e} "
               f"<f_I>={f1:.3f} <f_II>={f2:.3f} <f_III>={f3:.3f}  Ce: {[round(x, 3) for x in (st.f_ion[f'Ce {q}'][s] for q in STAGES)]} -> {out.name}")
 

@@ -44,7 +44,7 @@ from sobolev.constants import C                                   # noqa: E402
 from sobolev import photometry as phot                            # noqa: E402
 from sobolev import energy_balance as eb                          # noqa: E402
 from sobolev.energy_packets import energy_accounting              # noqa: E402
-from sobolev.abundances import ATOMIC_MASS, Z_OF                  # noqa: E402
+from sobolev.abundances import ATOMIC_MASS, Z_OF, GSI_IONS        # noqa: E402
 from sobolev.ejecta import EjectaState                            # noqa: E402
 from sobolev.forest_stats import band_saturation                  # noqa: E402
 from forest_mc import ForestAtom, run_mc                          # noqa: E402
@@ -98,8 +98,11 @@ def ions_of(state, stages=("II",)):
         if el == "bulk" or el not in Z_OF:
             continue
         for st in stages:
+            ion = f"{Z_OF[el]}{el}{st}"
+            if ion not in GSI_IONS:             # Pm III has no data: its mass stays in the balance, no opacity
+                continue
             if f"{el} {st}" in state.f_ion or (st == "II" and not state.f_ion):
-                out.append((f"{Z_OF[el]}{el}{st}", el, st))
+                out.append((ion, el, st))
     return out
 
 
