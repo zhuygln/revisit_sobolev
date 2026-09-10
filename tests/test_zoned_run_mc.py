@@ -280,3 +280,21 @@ def test_zoned_from_state_f_min_drops_weak_lines():
     cut = ZonedAtom.from_state(st, [1], tau_min=1e-3, f_min=1e-2)
     assert cut.n_lines_total < full.n_lines_total and cut.f_min == 1e-2
     assert cut.n_opacity <= full.n_opacity
+
+
+
+def test_zoned_from_state_dataset_tag_selects_an_independent_line_list():
+    from sobolev.atomic_cache import CACHE_DIR
+    if not (CACHE_DIR / "60NdIII@jplt.npz").exists():
+        pytest.skip("JPLT cache not built (data/jplt is not committed)")
+    from sobolev.ejecta import EjectaState
+    from sobolev.constants import C as C_
+    import sobolev.ejecta as ej_
+    n = 2
+    v_edges, rho = ej_.power_law_profile(1e-3 * 1.989e33, 2 * 86400.0, 0.1 * C_, 0.2 * C_, -3.0, n)
+    st = EjectaState(t=2 * 86400.0, v_edges=v_edges, rho=rho, T_gas=np.full(n, 5000.0), T_rad=np.full(n, 5000.0),
+                     X={"Nd": np.full(n, 1e-2), "bulk": np.full(n, 0.99)}, f_ion={"Nd III": np.ones(n), "Nd II": np.zeros(n)})
+    gsi = ZonedAtom.from_state(st, [1], stages=("III",), tau_min=1e-3)
+    jplt = ZonedAtom.from_state(st, [1], stages=("III",), tau_min=1e-3, dataset="jplt")
+    assert jplt.ions == ["60NdIII@jplt"] and gsi.ions == ["60NdIII"] and jplt.n_lines_total != gsi.n_lines_total
+    assert jplt.n_opacity > 0 and jplt.dataset == "jplt"

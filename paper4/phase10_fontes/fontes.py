@@ -92,19 +92,20 @@ def build_fontes(t_d=4.0, n_shell=64, saha=True):
 
 
 def run_fontes(state, shells, n, legs=LEGS, seeds=L.SEEDS, tau_min=1e-3, emis_cut=1e-6, f_min=1e-3,
-               budget_s=None, verbose=True):
+               budget_s=None, verbose=True, dataset=None):
     t0 = time.time()
     zone = state.transport_zone(shells)
     m = state.shell_mass()
     core_frac = float(m[:shells[0]].sum() / m.sum())      # the interior's share of a uniform heating rate
-    atom = ZonedAtom.from_state(state, shells, stages=("II", "III"), tau_min=tau_min, emis_cut=emis_cut, f_min=f_min)
+    atom = ZonedAtom.from_state(state, shells, stages=("II", "III"), tau_min=tau_min, emis_cut=emis_cut, f_min=f_min,
+                                dataset=dataset)
     t_build = time.time() - t0
     lo, hi = (float(x) for x in phot.nu_edges(*LAM_WIN, 1))
     edges = phot.nu_edges(*LAM_WIN, N_SPEC); nu_c = np.sqrt(edges[1:] * edges[:-1])
     l_core = phot.planck_luminosity(lo, hi, zone["r_core"], zone["t_core"])
     row = dict(state=state.meta["name"], t_d=state.t / DAY, shells=list(map(int, shells)), n_shell=len(shells),
                zone={k: v for k, v in zone.items()}, n=n, seeds=list(seeds), tau_min=tau_min, emis_cut=emis_cut,
-               f_min=f_min, relativity=None, launch="volume", launch_core_frac=core_frac, core="reemit",
+               f_min=f_min, dataset=dataset or "gsi", relativity=None, launch="volume", launch_core_frac=core_frac, core="reemit",
                n_lines=int(atom.n_lines_total),
                n_opacity_union=int(atom.n_opacity), n_opacity_shell=atom.n_opacity_shell.tolist(),
                ions=atom.ions, t_build=t_build, rss_mb_atom=rss_mb(), lam_window=list(LAM_WIN), n_spec=N_SPEC,
@@ -161,6 +162,7 @@ def main():
     ap.add_argument("--f-min", type=float, default=1e-3)
     ap.add_argument("--budget", type=float, default=None)
     ap.add_argument("--no-saha", action="store_true")
+    ap.add_argument("--dataset", default=None, help="None = GSI cache; 'jplt' = the Japan-Lithuania line list")
     ap.add_argument("--state-out", default=None)
     ap.add_argument("--out", default=None)
     a = ap.parse_args()
@@ -172,8 +174,9 @@ def main():
     else:
         shells = list(range(1, st.n_shell))
     row = run_fontes(st, shells, a.n, tuple(a.legs.split(",")), tuple(int(s) for s in a.seeds.split(",")), a.tau_min,
-                     None if a.emis_cut <= 0 else a.emis_cut, None if a.f_min <= 0 else a.f_min, a.budget)
-    out = a.out or (HERE / f"fontes_t{a.t:g}_n{a.n_shell}.json")
+                     None if a.emis_cut <= 0 else a.emis_cut, None if a.f_min <= 0 else a.f_min, a.budget,
+                     dataset=a.dataset)
+    out = a.out or (HERE / f"fontes_t{a.t:g}_n{a.n_shell}{'' if a.dataset is None else '_' + a.dataset}.json")
     Path(out).write_text(json.dumps(row, indent=1, default=float))
     print(f"wrote {out} in {row['t_wall']:.0f}s")
 

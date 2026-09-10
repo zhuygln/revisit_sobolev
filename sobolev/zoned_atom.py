@@ -38,6 +38,8 @@ Two classes:
                   tau / p / beta and a per-shell skip table, per-shell
                   emissivity samplers with a weight cut, per-shell bins.
 """
+from pathlib import Path
+
 import numpy as np
 
 from .constants import C, H, SIGMA_CLASSICAL, K_B
@@ -349,12 +351,15 @@ class ZonedAtom:
 
     @classmethod
     def from_state(cls, state, shells, stages=("II",), tau_min=1e-3, emis_cut=1e-6, cache_dir=None,
-                   n_ion_min=1e-30, f_min=None):
+                   n_ion_min=1e-30, f_min=None, dataset=None):
         """The zoned blend of the transported `shells` of an `EjectaState`,
         from the compact cache; populations Boltzmann at each shell's T,
         computed per shell on demand (nothing over all lines is held).
         `f_min`: drop lines with oscillator strength below it before anything
-        else (Fontes et al. 2020's f_c cut; None keeps every line)."""
+        else (Fontes et al. 2020's f_c cut; None keeps every line).
+        `dataset`: None for the GSI cache; a tag (e.g. "jplt") selects the
+        cache entries `<ion>@<tag>` built by `atomic_cache.build_cache_jplt`
+        (an independent line list; the ion must exist in that cache)."""
         from .abundances import ATOMIC_MASS, Z_OF, GSI_IONS
         from .atomic_cache import load_cached
         from .populations import boltzmann_fractions
@@ -362,14 +367,18 @@ class ZonedAtom:
         kw = {} if cache_dir is None else {"cache_dir": cache_dir}
         elements = [el for el in state.X if el != "bulk" and el in Z_OF]
         specs = []
+        from .atomic_cache import CACHE_DIR
         for el in elements:
             for st in stages:
-                if f"{Z_OF[el]}{el}{st}" not in GSI_IONS:
+                name = f"{Z_OF[el]}{el}{st}" if dataset is None else f"{Z_OF[el]}{el}{st}@{dataset}"
+                if dataset is None and name not in GSI_IONS:
+                    continue
+                if dataset is not None and not (Path(cache_dir or CACHE_DIR) / f"{name}.npz").exists():
                     continue
                 if f"{el} {st}" in state.f_ion or (st == "II" and not state.f_ion):
                     n = np.array([state.n_ion(el, st, s, ATOMIC_MASS[el]) for s in shells])
                     if n.max() > n_ion_min:
-                        specs.append((f"{Z_OF[el]}{el}{st}", n))
+                        specs.append((name, n))
         T = np.array([float(state.T_gas[s]) for s in shells])
         ions_d = [load_cached(ion, **kw) for ion, _ in specs]
         if f_min is not None:
@@ -404,6 +413,7 @@ class ZonedAtom:
                    n_shell=len(shells))
         atom.shells = shells
         atom.f_min = f_min
+        atom.dataset = dataset
         atom.n_ion = {sp[0]: sp[1].tolist() for sp in specs}
         atom.rho = np.array([float(state.rho[s]) for s in shells])
         return atom

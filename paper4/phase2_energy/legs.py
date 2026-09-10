@@ -79,6 +79,14 @@ THERMAL = ("Rth", "Bth", "Bbinth", "R2", "B2", "Bbin2")
 LEGS["D2"] = dict(mode="expansion_dmacro", packets="energy", scale="equilibrium", reprocess="capped")
 LEGS["Dbin2"] = dict(mode="binned_dmacro", packets="energy", scale="equilibrium", reprocess="capped")
 DUAL = ("R2", "B2", "Bbin2", "D2", "Dbin2")
+# Paper IV Phase 10: Lucy's macroatom with internal upward transitions under
+# an imposed diluted Planck field Jbar = W B_nu(T_zone), W = 1/2 at the
+# photosphere (sobolev/macroatom.py MacroAtom); the "one stronger macroatom
+# check" of the PI's pivot. Same three opacity treatments as R2 / B2 / Bbin2.
+LEGS["R2M"] = dict(mode="sobolev_macro", packets="energy", scale="equilibrium", macro_kw=dict(W=0.5))
+LEGS["B2M"] = dict(mode="expansion_macro", packets="energy", scale="equilibrium", macro_kw=dict(W=0.5))
+LEGS["Bbin2M"] = dict(mode="binned_macro", packets="energy", scale="equilibrium", macro_kw=dict(W=0.5))
+MACRO = ("R2", "B2", "Bbin2", "R2M", "B2M", "Bbin2M")
 LADDER = ("R1", "R1E", "R2", "B1", "B1E", "B2")
 PHASE3 = ("R2", "A2", "B2", "Bbin2", "C2", "Cbin2")
 
@@ -154,7 +162,8 @@ def run_legs(zone, atom, n, legs=LADDER, seeds=SEEDS, ng=NG, relativity="worldli
                       seed=seed, t_core=zone["t_core"], relativity=relativity, max_steps=MAX_STEPS,
                       chain_max=chain_max, chain_overflow="absorb", packets=spec["packets"],
                       launch_weight="energy", wall_s=budget_s, a_cut=a_cut, dnu_over_nu=dnu_over_nu,
-                      reprocess=spec.get("reprocess"), thermal_k=thermal_k, eps_k=eps_k, **kw)
+                      reprocess=spec.get("reprocess"), thermal_k=thermal_k, eps_k=eps_k,
+                      macro_kw=spec.get("macro_kw"), **kw)
 
     kernels, results = {}, {}
     order = [l for l in legs if "kernel" not in LEGS[l]] + [l for l in legs if "kernel" in LEGS[l]]
