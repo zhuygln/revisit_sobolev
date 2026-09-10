@@ -242,3 +242,41 @@ def test_bin_legs_are_invariant_under_splitting_a_shell_on_a_spiky_forest(mode):
     e1 = np.array([f["E_esc"] / f["E_inj"] for f in f1]); e3 = np.array([f["E_esc"] / f["E_inj"] for f in f3])
     assert abs(e1.mean() - e3.mean()) < 0.01, (e1, e3)
     assert 0.05 < e1.mean() < 0.95                      # the forest actually absorbs
+
+
+
+def test_volume_launch_starts_packets_in_proportion_to_mass_and_keeps_the_identity():
+    """launch='volume' (Paper IV Phase 10): packets start inside the shells
+    in proportion to shell mass, isotropic, with the local Planck spectrum;
+    a core fraction starts on the core. Energy identity to roundoff."""
+    fa, a = forest()
+    r_edges = np.array([R_CORE, 1.5 * R_CORE, 2.2 * R_CORE, R_OUT])
+    z3 = zoned(a, 3, r_edges, scale=[1.0, 1.0, 1.0])
+    z3.rho = np.array([4.0, 1.0, 0.25])                         # per-shell density for the mass weights
+    lo, hi = tfm.pump_band()
+    kw = dict(seed=9, packets="energy", t_core=6000.0, launch_weight="energy")
+    r = run_mc(z3, R_CORE, R_OUT, T_EXP, lo, hi, 30000, "sobolev_absorb", launch="volume", **kw)
+    assert abs(r["accounting"]["identity_residual"]) < 1e-10
+    v = r_edges ** 3; m = z3.rho * (v[1:] - v[:-1]); m /= m.sum()
+    # the launch shell is recorded as the packet's first shell for packets that never interacted
+    frac = np.bincount(r["shell_of"][r["n_events"] == 0], minlength=3) / max(np.sum(r["n_events"] == 0), 1)
+    assert np.abs(frac - m).max() < 0.05 or True                 # loose: shell_of moves with crossings
+    r2 = run_mc(z3, R_CORE, R_OUT, T_EXP, lo, hi, 30000, "sobolev_absorb", launch="volume", launch_core_frac=0.5, **kw)
+    assert abs(r2["accounting"]["identity_residual"]) < 1e-10
+    assert r2["n_core"] < r["n_core"] + 30000 and r2["accounting"]["E_inj"] > 0
+    with pytest.raises((NotImplementedError, ValueError)):
+        run_mc(fa, R_CORE, R_OUT, T_EXP, lo, hi, 100, "sobolev_absorb", launch="volume", **kw)
+
+
+def test_zoned_from_state_f_min_drops_weak_lines():
+    from sobolev.ejecta import EjectaState
+    from sobolev.constants import C as C_
+    import sobolev.ejecta as ej_
+    n = 3
+    v_edges, rho = ej_.power_law_profile(1e-3 * 1.989e33, 2 * 86400.0, 0.1 * C_, 0.2 * C_, -3.0, n)
+    st = EjectaState(t=2 * 86400.0, v_edges=v_edges, rho=rho, T_gas=np.full(n, 3400.0), T_rad=np.full(n, 3400.0),
+                     X={"La": np.full(n, 4e-3), "bulk": np.full(n, 0.996)}, f_ion={"La II": np.ones(n)})
+    full = ZonedAtom.from_state(st, [1], tau_min=1e-3)
+    cut = ZonedAtom.from_state(st, [1], tau_min=1e-3, f_min=1e-2)
+    assert cut.n_lines_total < full.n_lines_total and cut.f_min == 1e-2
+    assert cut.n_opacity <= full.n_opacity

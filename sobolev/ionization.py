@@ -135,7 +135,13 @@ def solve_ionization(T, rho, X, partition, bulk=BulkSpecies(), z1_policy="scale"
         return tot - n_e
 
     lo, hi = np.log10(n_e_bounds)
-    log_ne = brentq(charge, lo, hi, xtol=1e-12)
+    if charge(lo) <= 0.0:
+        # the gas is neutral to below the lower bound (a cold, thin outer
+        # cell): the electron density is at the bound and every fraction is
+        # evaluated there -- declared rather than raised
+        log_ne = lo
+    else:
+        log_ne = brentq(charge, lo, hi, xtol=1e-12)
     n_e = 10.0 ** log_ne
     fr = {el: tuple(float(v) for v in _fractions(T, n_e, chi, ur)) for el, n, chi, ur in species}
     return n_e, fr

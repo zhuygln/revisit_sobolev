@@ -21,7 +21,7 @@ for p in (ROOT, ROOT / "tests", ROOT / "paper2/phase1"):
 
 from sobolev.constants import C, H                      # noqa: E402
 from sobolev.optical_depth import tau_sobolev           # noqa: E402
-from sobolev.macroatom import DownwardMacroAtom         # noqa: E402
+from sobolev.macroatom import DownwardMacroAtom, MacroAtom   # noqa: E402
 from forest_mc import ForestAtom, run_mc, band_ratio    # noqa: E402
 import test_forest_mc as tfm                            # noqa: E402
 
@@ -205,3 +205,60 @@ def test_thermal_channel_reemit_keeps_the_energy_and_follows_the_net_emissivity(
     for line in (0, 1):
         assert abs(ex[line] / ex.sum() - p[line]) < 4 * np.sqrt(p[line] * (1 - p[line]) / n) + 1e-3
     assert ex[2] == 0.0
+
+
+
+# --------------------------------------------------------------------------
+# Paper IV Phase 10: the full macroatom (internal upward transitions under an
+# imposed diluted Planck field)
+# --------------------------------------------------------------------------
+
+def test_full_macroatom_with_no_field_is_the_downward_table():
+    fa = cascade_atom(3.0, 1.0, 2.0, tau32=6.0)
+    fa.level_g = np.array([1.0, 2.0, 4.0, 6.0])
+    dm = fa.dmacro()
+    full = MacroAtom(fa.nu0_all, fa.A_all, fa.lower_all, fa.upper_all, fa.beta_all, LEVEL_E, fa.level_g, T_rad=3000.0, W=0.0)
+    assert full.n_up_entries == 0 and full.n_entries == dm.n_entries
+    for L_ in range(4):
+        a, b = dm.off[L_], dm.off[L_ + 1]
+        assert np.array_equal(full.cum[full.off[L_]:full.off[L_ + 1]], dm.cum[a:b])
+        assert np.array_equal(full.line[full.off[L_]:full.off[L_ + 1]], dm.line[a:b])
+    assert np.array_equal(full.dead_end, dm.dead_end)
+
+
+def test_full_macroatom_upward_probabilities_are_the_imposed_rates():
+    """Level 2 (populated only by the cascade 3 -> 2) has one downward line
+    (2 -> 1, A = a21) and one upward line (2 -> 3 via line 1, 3 -> 2 with
+    A = a32): p_up / p_deact = (g3/g2) a32 W n_BE(nu32, T) eps_2 /
+    (a21 beta21 h nu21), exactly the table's ratio."""
+    from sobolev.constants import K_B
+    a21, a32 = 0.7, 2.0
+    fa = cascade_atom(3.0, 1.0, a32, a21=a21, tau32=6.0)
+    g = np.array([1.0, 2.0, 4.0, 6.0]); fa.level_g = g
+    T, W = 3000.0, 0.5
+    full = MacroAtom(fa.nu0_all, fa.A_all, fa.lower_all, fa.upper_all, fa.beta_all, LEVEL_E, g, T, W)
+    lines, p_de, p_in, p_up = full.probabilities(2)
+    eps2 = H * C * LEVEL_E[2]
+    n_be = 1.0 / np.expm1(H * NU_32 / (K_B * T))
+    w_up = (g[3] / g[2]) * a32 * W * n_be * eps2
+    w_de = a21 * fa.beta_all[2] * H * NU_21
+    i_up = list(lines).index(1); i_de = list(lines).index(2)
+    assert abs(p_up[i_up] / p_de[i_de] - w_up / w_de) < 1e-12
+    assert abs(p_up.sum() + p_de.sum() + p_in.sum() - 1.0) < 1e-12
+
+
+def test_full_macroatom_walk_climbs_out_of_a_dead_end_and_conserves_energy():
+    """Level 2 with a21 = 0 is a dead end for the downward table; with the
+    field on it climbs to 3 and de-activates through 3 -> 1 or 3 -> 2 -> ...
+    every walk ends in a radiative exit and the run's energy identity holds."""
+    fa = cascade_atom(3.0, 1.0, 2.0, a21=0.0, tau32=6.0)
+    fa.level_g = np.array([1.0, 2.0, 4.0, 6.0])
+    fa.temperature = 3000.0
+    full = fa.fullmacro(T_rad=3000.0, W=0.5)
+    assert fa.dmacro().dead_end[2] and not full.dead_end[2]
+    rng = np.random.default_rng(3)
+    ex, nj, dead = full.walk(np.full(2000, 2), rng)
+    assert not dead.any() and np.isin(ex, [0, 1]).all() and nj.min() >= 1     # exits 3->1 or 3->2
+    res = _run(fa, "sobolev_macro", n=20000, macro_kw=dict(T_rad=3000.0, W=0.5))
+    a = res["accounting"]
+    assert abs(a["identity_residual"]) < 1e-10 and res["n_dead_end"] == 0

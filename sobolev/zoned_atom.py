@@ -349,9 +349,12 @@ class ZonedAtom:
 
     @classmethod
     def from_state(cls, state, shells, stages=("II",), tau_min=1e-3, emis_cut=1e-6, cache_dir=None,
-                   n_ion_min=1e-30):
+                   n_ion_min=1e-30, f_min=None):
         """The zoned blend of the transported `shells` of an `EjectaState`,
-        from the compact cache; populations Boltzmann at each shell's T."""
+        from the compact cache; populations Boltzmann at each shell's T,
+        computed per shell on demand (nothing over all lines is held).
+        `f_min`: drop lines with oscillator strength below it before anything
+        else (Fontes et al. 2020's f_c cut; None keeps every line)."""
         from .abundances import ATOMIC_MASS, Z_OF, GSI_IONS
         from .atomic_cache import load_cached
         from .populations import boltzmann_fractions
@@ -369,6 +372,13 @@ class ZonedAtom:
                         specs.append((f"{Z_OF[el]}{el}{st}", n))
         T = np.array([float(state.T_gas[s]) for s in shells])
         ions_d = [load_cached(ion, **kw) for ion, _ in specs]
+        if f_min is not None:
+            cut = []
+            for d in ions_d:
+                keep = d["f_lu"] > f_min
+                cut.append({**d, "nu0": d["nu0"][keep], "f_lu": d["f_lu"][keep], "A": d["A"][keep],
+                            "lower": d["lower"][keep], "upper": d["upper"][keep], "n_lines": int(keep.sum())})
+            ions_d = cut
         offs = np.cumsum([0] + [d["n_levels"] for d in ions_d])
         cat = dict(nu0=np.concatenate([d["nu0"] for d in ions_d]), f=np.concatenate([d["f_lu"] for d in ions_d]),
                    A=np.concatenate([d["A"] for d in ions_d]), E=np.concatenate([d["E_lev"] for d in ions_d]),
@@ -393,6 +403,7 @@ class ZonedAtom:
                    emis_cut=emis_cut, ions=[sp[0] for sp in specs], ion_of_line=ion_line, ion_of_level=ion_lev,
                    n_shell=len(shells))
         atom.shells = shells
+        atom.f_min = f_min
         atom.n_ion = {sp[0]: sp[1].tolist() for sp in specs}
         atom.rho = np.array([float(state.rho[s]) for s in shells])
         return atom

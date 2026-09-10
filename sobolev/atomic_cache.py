@@ -142,3 +142,57 @@ def load_cached(ion, cache_dir=CACHE_DIR, build=True):
 
 def available(cache_dir=CACHE_DIR):
     return sorted(p.stem for p in Path(cache_dir).glob("*.npz")) if Path(cache_dir).exists() else []
+
+
+# --------------------------------------------------------------------------
+# The Japan-Lithuania Opacity Database (an independent line list, Paper IV
+# Phase 10's external check)
+# --------------------------------------------------------------------------
+
+JPLT_DIR = DATA / "jplt"
+
+
+def build_cache_jplt(z, stage, path=None, out_dir=CACHE_DIR, tag="jplt"):
+    """One ion of the Japan-Lithuania Opacity Database for Kilonova (Kato et
+    al. 2021; version 2.1, `<Z>_<stage>.txt`) into `out_dir/<Z><El><St>@<tag>.npz`
+    with the cache's own fields. File format (their readme): header lines
+    starting with '#', a level table `num  weight parity E(eV) config LS`
+    up to the line 'Electric dipole transitions', then `Upper Lower
+    Wavelength(nm) g_up*A(s^-1) log10(g_low*f)`. Level numbering is 1-based.
+    Energies are converted eV -> cm^-1 (1 eV = 8065.544 cm^-1); f_lu =
+    10^log(g_l f) / g_l; A = (g_up A) / g_up; nu0 = c / lambda."""
+    from .abundances import ELEMENT_Z
+    sym = {v: k for k, v in ELEMENT_Z.items()}[int(z)]
+    roman = {1: "I", 2: "II", 3: "III", 4: "IV", 5: "V"}[int(stage)]
+    ion = f"{z}{sym}{roman}"
+    path = Path(path) if path is not None else next(JPLT_DIR.rglob(f"{z}_{stage}.txt"))
+    E, g, up, lo, lam, gA, lggf = [], [], [], [], [], [], []
+    with open(path) as fh:
+        in_levels = False; in_trans = False
+        for line in fh:
+            t = line.split()
+            if not t:
+                continue
+            if line.startswith("#"):
+                low = line.lower()
+                if "energy levels" in low:
+                    in_levels, in_trans = True, False
+                elif "electric dipole" in low or "transitions" in low:
+                    in_levels, in_trans = False, True
+                continue
+            if in_levels:
+                E.append(float(t[3])); g.append(float(t[1]))
+            elif in_trans:
+                up.append(int(t[0])); lo.append(int(t[1])); lam.append(float(t[2])); gA.append(float(t[3])); lggf.append(float(t[4]))
+    E = np.asarray(E) * 8065.544; g = np.asarray(g, np.float32)
+    up = np.asarray(up) - 1; lo = np.asarray(lo) - 1
+    g_l = g[lo].astype(float); g_u = g[up].astype(float)
+    f_lu = 10.0 ** np.asarray(lggf) / g_l
+    A = np.asarray(gA) / g_u
+    nu0 = C / (np.asarray(lam) * 1e-7)
+    out_dir = Path(out_dir); out_dir.mkdir(parents=True, exist_ok=True)
+    name = f"{ion}@{tag}"
+    p = out_dir / f"{name}.npz"
+    np.savez(p, ion=name, nu0=nu0, f_lu=f_lu, A=A.astype(np.float64), lower=lo.astype(np.int32), upper=up.astype(np.int32),
+             E_lev=E.astype(np.float64), g_lev=g, n_lines=np.int64(nu0.size), n_levels=np.int64(E.size))
+    return p

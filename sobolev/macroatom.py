@@ -182,3 +182,115 @@ class DownwardMacroAtom:
         p_de = np.array([p[(lines == l) & (kinds == 0)].sum() for l in ul])
         p_in = np.array([p[(lines == l) & (kinds == 1)].sum() for l in ul])
         return ul, p_de, p_in
+
+
+class MacroAtom(DownwardMacroAtom):
+    """Lucy's (2003) macroatom with internal UPWARD transitions driven by an
+    imposed radiation field, on top of the downward tables (Paper IV,
+    Phase 10's "one stronger macroatom check").
+
+    Activated in level i (energy eps_i above the ion's ground), with the
+    radiative rates per atom in level i:
+
+        de-activate via i -> j (j < i):  p ~ A_ij beta_ij (eps_i - eps_j)
+        internal down  i -> j (j < i):   p ~ A_ij beta_ij  eps_j
+        internal up    i -> k (k > i):   p ~ B_ik Jbar_ik  eps_i
+
+    B_ik Jbar_ik = (g_k / g_i) A_ki W / (exp(h nu / k T_rad) - 1) for the
+    imposed field Jbar = W B_nu(T_rad): a diluted Planck field at the local
+    radiation temperature, the fixed-state stand-in for the estimator that a
+    radiative-equilibrium iteration would provide (W = 1/2 at a photosphere,
+    smaller above it). Collisions are not included. Downward weights are the
+    net radiative rates with the Sobolev beta, as in `DownwardMacroAtom`;
+    the upward rate uses the imposed field without a beta factor (the
+    absorbed field is the external one, not the line's own trapped
+    radiation -- stated, not derived). The walk is a Markov chain with
+    de-activation as the absorbing state; it terminates with probability
+    one and is capped at `max_jumps` (an overflow is booked as a dead end
+    and counted, never raised). A level with no downward line but with
+    upward lines is no longer a dead end: it climbs and cascades elsewhere,
+    which is the physical answer to the 7-10 % dead-end fraction of the
+    downward table.
+
+    Parameters as `DownwardMacroAtom` plus `g_lev` (statistical weights),
+    `T_rad` (K) and `W` (dilution). `a_cut` is not supported here.
+    """
+
+    def __init__(self, nu0, A, lower, upper, beta, level_energy_cm, g_lev, T_rad, W=0.5):
+        nu0 = np.asarray(nu0, float); A = np.asarray(A, float)
+        lower = np.asarray(lower, int); upper = np.asarray(upper, int)
+        beta = np.asarray(beta, float); g = np.asarray(g_lev, float)
+        eps = HC * np.asarray(level_energy_cm, float)
+        n_lev = eps.size
+        ab = A * beta
+        good = (ab > 0) & (nu0 > 0)
+        gi = np.flatnonzero(good)
+        gu = np.flatnonzero((A > 0) & (nu0 > 0))
+        from .constants import K_B
+        x = H * nu0[gu] / (K_B * float(T_rad))
+        with np.errstate(over="ignore"):
+            occ = np.where(x < 700.0, 1.0 / np.expm1(np.minimum(x, 700.0)), 0.0)
+        w_up = (g[upper[gu]] / g[lower[gu]]) * A[gu] * float(W) * occ * eps[lower[gu]]
+        line3 = np.concatenate([gi, gi, gu])
+        kind3 = np.concatenate([np.zeros(gi.size, np.int8), np.ones(gi.size, np.int8), np.full(gu.size, 2, np.int8)])
+        w3 = np.concatenate([ab[gi] * H * nu0[gi], ab[gi] * eps[lower[gi]], w_up])
+        lev3 = np.concatenate([upper[gi], upper[gi], lower[gu]])
+        tgt3 = np.concatenate([lower[gi], lower[gi], upper[gu]])
+        keep = (kind3 < 2) | (w3 > 0)          # downward entries exactly as the downward table keeps them
+        line3, kind3, w3, lev3, tgt3 = line3[keep], kind3[keep], w3[keep], lev3[keep], tgt3[keep]
+        order = np.argsort(lev3, kind="stable")
+        line3, kind3, w3, lev3, tgt3 = line3[order], kind3[order], w3[order], lev3[order], tgt3[order]
+        off = np.searchsorted(lev3, np.arange(n_lev + 1))
+        cum = np.empty(w3.size)
+        for i in range(n_lev):
+            a, b = off[i], off[i + 1]
+            if b > a:
+                c = np.cumsum(w3[a:b]); cum[a:b] = c / c[-1]
+        self.n_levels = n_lev; self.off = off; self.line = line3; self.kind = kind3
+        self.target = tgt3; self.cum = cum
+        self.key = np.repeat(np.arange(n_lev, dtype=float), np.diff(off)) + cum
+        self.eps = eps; self.has_exit = np.diff(off) > 0; self.a_cut = None
+        self.n_entries = int(line3.size)
+        self.dead_end = (~self.has_exit) & (eps > 0)
+        self.T_rad, self.W = float(T_rad), float(W)
+        self.n_up_entries = int((kind3 == 2).sum())
+        self.n_overflow = 0
+
+    def walk(self, levels, rng, max_jumps=100000):
+        """The macroatom walk: de-activation ends it; internal jumps go down
+        (kind 1) or up (kind 2). Overflowing `max_jumps` is booked as a dead
+        end and counted in `n_overflow`."""
+        lev = np.array(levels, int, copy=True)
+        exit_line = np.full(lev.size, -1, np.int64)
+        n_jumps = np.zeros(lev.size, np.int32)
+        dead = np.zeros(lev.size, bool)
+        active = np.flatnonzero(np.ones(lev.size, bool))
+        for _ in range(max_jumps):
+            if active.size == 0:
+                break
+            ok = self.has_exit[lev[active]]
+            dead[active[~ok]] = True
+            active = active[ok]
+            if active.size == 0:
+                break
+            e = self.sample(lev[active], rng.uniform(size=active.size))
+            de = self.kind[e] == 0
+            exit_line[active[de]] = self.line[e[de]]
+            jump = active[~de]
+            lev[jump] = self.target[e[~de]]
+            n_jumps[jump] += 1
+            active = jump
+        else:
+            dead[active] = True
+            self.n_overflow += int(active.size)
+        return exit_line, n_jumps, dead
+
+    def probabilities(self, level):
+        """(lines, p_deactivate, p_internal_down, p_internal_up) for one level."""
+        a, b = self.off[level], self.off[level + 1]
+        p = np.diff(np.concatenate([[0.0], self.cum[a:b]]))
+        lines, kinds = self.line[a:b], self.kind[a:b]
+        ul = np.unique(lines)
+        return (ul, np.array([p[(lines == l) & (kinds == 0)].sum() for l in ul]),
+                np.array([p[(lines == l) & (kinds == 1)].sum() for l in ul]),
+                np.array([p[(lines == l) & (kinds == 2)].sum() for l in ul]))
