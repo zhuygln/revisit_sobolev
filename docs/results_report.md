@@ -4647,8 +4647,17 @@ thermalisation: returning packets come back as the boundary's Planck
 spectrum) and `reflect` (a lossless mirror), each with a 200-return cap
 that books the remainder to the core — the escaped-energy fractions are
 therefore cap-limited (0.37–0.40) and only the *spectral shapes* are the
-observable; a lossless steady-state run (mirror, 2×10⁴ returns) is in
-LOSSLESS_PLACEHOLDER. Data `fontes_t4_z45_{reemit,reflect}.json`,
+observable. A mirror run with a 2×10⁴-return cap
+(`fontes_t4_z45_reflect_lossless.json`, 2 × 2×10⁴ packets) escapes the same
+0.37–0.38 of the injected energy: the cap is not what limits the escape,
+the expansion work is — a packet that needs 80 interactions to leave a
+homologous flow loses most of its lab energy to the flow (W ≈ 0.6), and
+the expansion closure, which needs 62–65, keeps 60 % more (a snapshot's
+adiabatic loss, not a light-curve luminosity; their 5–8 % peak
+differences are not reproducible by a static transport and are not
+claimed). The lossless run's colours agree with the capped brackets
+(r − K: resolved 6.26 / 6.10, expansion 6.12 / 5.89, line-binned 6.37 /
+7.74 under ε = 1 / fluorescence). Data `fontes_t4_z45_{reemit,reflect}.json`,
 `fontes_t6.3_z45_*.json`, `fontes_t4_z45_jplt_*.json`.
 
 Closure − resolved (g, r, i, z, J, H, K), the two brackets side by side:
