@@ -1,5 +1,20 @@
 # Paper III — the campaign directory
 
+> **Scientific correction — September 2026.** The grouped-opacity results
+> reported here are **invalid** because of an implementation error in the
+> inversion of cumulative binned opacity (`paper2/phase1/forest_mc.py::nu_of_G`,
+> fixed in commit 38ebf30). The error caused packets in expansion-, line-binned-
+> and dual-opacity modes to skip portions of non-smooth line forests. The
+> resolved Sobolev calculations are unaffected. After correcting the transport
+> and rerunning the analysis with energy-conserving transport on published
+> ejecta benchmarks, the reported 1–3 mag grouped-opacity discrepancy is not
+> reproduced. This manuscript is retained as a historical research record and
+> is not a publication candidate. Corrected results: the Paper IV campaign
+> (`docs/results_report.md` §4.55–4.59, F60–F64); the list of affected
+> findings is in [`paper3/CORRECTION.md`](CORRECTION.md). The
+> frozen tag `paper3-freeze` and the PDFs are left as they were.
+
+
 This directory holds the **code, run outputs and frozen record** of Paper III.
 The **manuscript** lives in [`docs/paper3/`](../docs/paper3/) and is generated
 from what is here: every number in it is a LaTeX macro produced by

@@ -337,3 +337,133 @@ So the practical recommendation is:
 **Pivot Paper IV into a controlled opacity-validity benchmark rather than end it or continue the old failure story.**
 
 The next three tasks are: reproduce Fontes, repeat with explicit energy-conserving fluorescence, and run one stronger macroatom check. If those show a meaningful difference between expansion and line-binned treatments, there is likely a solid MNRAS/ApJ/A&A methods paper. If they do not, then the scientifically correct outcome is that modern expansion opacity is already quite adequate for the broadband problem tested, and the project can close cleanly.
+
+---
+
+## PI decision after Phase 10 (2026-09-10, verbatim)
+
+Yes. With these new results, I would now make a firmer decision than before:
+
+**F62–F64 are the nucleus of a real methods paper.**
+
+And the paper is no longer about rescuing Paper III. It has a cleaner question:
+
+**How well do expansion and line-binned opacity closures survive when fluorescence is treated explicitly and energy is conserved?**
+
+The literature gap is unusually well aligned with what you have now done. Shingles et al. explicitly wrote that the only direct kilonova comparison among line-by-line, line-binned, and expansion opacities was Fontes et al. 2020, using a 1-D pure-Nd test without fluorescence. Their own work then uses line-by-line transport precisely because it enables detailed fluorescence, but does not perform the controlled closure comparison. Fontes, meanwhile, established that line-binned and expansion treatments can agree reasonably well with continuous Sobolev transport in their thermalized benchmark and attributed much of that agreement to the low-optical-depth transport regime.
+
+I searched specifically for a later published kilonova paper closing that gap and did not find one. ARTIS currently supports both line-by-line Sobolev/macroatom and optional binned expansion opacities, but its own project page still describes the expansion-opacity + parameterized scattering/thermalization comparison as work "in prep," not as an existing published benchmark.
+
+That makes your experiment substantially more interesting than I thought immediately after the Paper III correction.
+
+What F62–F64 now say
+
+There is a coherent three-part result.
+
+First, under the Fontes-like ε=1 thermalized limit, you broadly recover the known result: coarse opacity works reasonably well.
+
+Second, changing the post-absorption physics to energy-conserving fluorescence does not hurt expansion opacity much, but it strongly changes the behavior of line-binned opacity.
+
+Third, this is not just one peculiar atomic dataset: the hierarchy repeats on an independently generated, substantially thinner Nd forest.
+
+So the result is not simply: "line-binned opacity differs by 1.5 mag."
+
+It is the conditional statement:
+
+**The validity of a coarse opacity treatment depends on how post-absorption energy redistribution is represented.**
+
+And more specifically, in your tests:
+
+**EP93-style expansion opacity remains surprisingly robust, whereas area-preserving line binning does not remain equivalent once explicit fluorescence is attached.**
+
+That is a much more interesting methods result.
+
+I also think the nontermination of the independent Nd line-binned case deserves attention. Do not sell it as "line-binned opacity is mathematically broken," because it may depend on how you attach a line-specific macroatom to a bin opacity that has intentionally erased line identity. But that is precisely the conceptual point: a line-binned opacity does not naturally retain enough information to define the post-absorption atomic escape process. Shingles already points out that once transitions are binned, the absorbing transition is unknown and detailed fluorescence cannot straightforwardly be followed. Your nontermination example is a concrete manifestation of that information-loss problem.
+
+I would do one more major experiment before writing
+
+Yes: the time-dependent light-curve calculation is now the obvious missing piece.
+
+Not because you need another dramatic number, but because your current Fontes reproduction is a snapshot while Fontes' important validation was also about spectra and light curves.
+
+A static snapshot answers: F_ν(t) given the state at t.
+
+A time-dependent calculation also asks whether the closure changes how long radiation remains trapped, how much energy is lost through expansion, and when stored radiation emerges: L(t), E_rad(t), W_exp(t).
+
+That matters particularly because you've already discovered that expansion work differs between resolved and approximate treatments.
+
+I would therefore make the next decisive experiment very narrow:
+
+**Fontes benchmark light curve: resolved vs expansion vs line-binned**
+
+under two post-absorption models: ε=1 and energy-conserving fluorescence.
+
+Same ejecta. Same atomic data. Same time grid. Same source/heating. Change only the closure and redistribution treatment.
+
+That produces an extremely clean 3×2 experimental matrix.
+
+You want to know whether the snapshot result turns into something like: thermalized: R ≃ E ≃ LB, but fluorescent: R ≃ E, LB ≠ R.
+
+If that holds over the light curve rather than at one epoch, I think the paper becomes much easier to defend.
+
+I would measure both bolometric and broadband quantities. In particular, record peak time, peak luminosity, integrated radiated energy, g/r/i/z/J/H/K evolution, expansion-work loss, and the maximum color residual.
+
+Importantly, do not insist that line-binned must remain 1.4–1.7 mag wrong. If the time-dependent calculation reduces it to 0.3 mag but preserves the systematic difference from expansion opacity, that is still scientifically useful.
+
+I would not build full Phases 9–10 before this
+
+Your stronger macroatom result is already enough to justify saying that the downward-only treatment was not accidentally creating the hierarchy: upward transitions move the reference dramatically, yet expansion still stays close while line-binned remains displaced.
+
+But because that radiation field is imposed rather than estimated, don't call F63 a fully self-consistent macroatom calculation.
+
+I would phrase it as: a radiation-field-driven macroatom robustness test.
+
+Only if the time-dependent experiment succeeds and reviewers/publication ambitions justify the investment would I implement the fully estimated J_ν, independent thermal equilibrium, and B_eq−R_eq.
+
+In other words: **time dependence before full equilibrium.**
+
+That is now the much higher information-per-effort experiment.
+
+Paper III correction
+
+I would make this extremely explicit rather than delicate.
+
+At the very top of the Paper III README and manuscript source, put a boxed/status warning approximately like:
+
+Scientific correction — September 2026. The grouped-opacity results reported in this manuscript are invalid because of an implementation error in the inversion of cumulative binned opacity. The error caused packets in expansion-, line-binned-, and dual-opacity modes to skip portions of non-smooth line forests. The resolved Sobolev calculations are unaffected. After correcting the transport algorithm and rerunning the analysis with energy-conserving transport and published ejecta benchmarks, the reported 1–3 mag grouped-opacity discrepancy is not reproduced. This manuscript is retained as a historical research record and is not a publication candidate. Corrected results are documented in the Paper IV campaign.
+
+Then in results_report.md, each affected finding should say plainly: Superseded — affected by transport bug 38ebf30. Do not use quantitatively or scientifically.
+
+I would use "invalid" for the Paper III closure headline, not merely "superseded," because we now know its physical conclusion was caused by the bug.
+
+Keep the original paper3-freeze tag untouched. That is exactly the right provenance behavior.
+
+PR #2
+
+I would merge it now, after normal code review of the bug fix.
+
+The reason has changed. Earlier I suggested holding it as a draft because the physical interpretation was unsettled. Now the branch contains something more fundamental: the correction to a long-standing transport bug; the regression tests; multi-shell invariance tests; the corrected P1/P2 results; F62–F64; 573 passing tests; preserved pre-fix goldens; explicit supersession records.
+
+That is no longer an experimental scratch branch. It is the correct transport implementation.
+
+The scientific paper can remain undecided while the corrected code becomes canonical.
+
+I would review 38ebf30 particularly carefully before merge—especially the index inversion itself and splitting invariance—but assuming that review is clean, leaving the known-correct implementation sitting indefinitely in a draft branch is actually less desirable.
+
+So my three decisions are:
+
+1. Yes, treat F62–F64 as the core of the new methods paper.
+2. Do one time-dependent Fontes-style light-curve experiment before committing to the manuscript.
+3. Put a prominent "invalid due to transport bug" correction on Paper III and merge PR #2 once the bug-fix review is clean.
+
+The working paper story I would pursue now is something close to:
+
+Fluorescence breaks the equivalence of coarse line-opacity treatments in kilonova radiative transfer
+
+with the result underneath:
+
+**expansion opacity remains close to resolved Sobolev transport, whereas line-binned opacity develops substantially larger chromatic errors once explicit fluorescence is retained.**
+
+That is a much cleaner paper than either Paper III or the original Paper IV hypothesis.
+
+Design answers (AskUserQuestion, same day): temperature rule — both (prescribed analytic default, radiation-energy feedback as a variant on the resolved and expansion legs); PR #2 — Claude reviews, reports, merges; synthetic-forest rows F34/F37/F39 — mark "affected in principle, unverified"; budget — overnight, ~12 h per matrix.

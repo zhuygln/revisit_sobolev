@@ -554,3 +554,43 @@ def test_blend_atom_structure_and_identity():
     res = run_mc(blend, ct / 300.0, ct / 100.0, t_exp, lo, hi, 100_000,
                  "sobolev_branch", seed=6)
     assert abs(res["accounting"]["identity_residual"]) < 1e-12
+
+
+@pytest.mark.parametrize("mode,weight", [("expansion_absorb", "poisson"), ("binned_absorb", "exact")])
+def test_bin_legs_reproduce_the_analytic_attenuation_on_an_uneven_forest(mode, weight):
+    """Paper IV Phase 8 regression for the opacity inversion (38ebf30): lines
+    of alternating strength (tau 4 next to tau 0.002) in ADJACENT bins, so
+    the cumulative opacity's slope changes by three orders of magnitude from
+    one bin to the next; every packet's comoving sweep covers all of them
+    (the lines lie below every launch frequency at the core and above every
+    end frequency at the edge, r_out >> r_core), so the closure's own
+    interaction probability is exactly 1 - exp(-sum_b E_b): sum(1 - e^-tau)
+    for expansion, sum(tau) for line-binned. The pre-fix inversion formed the
+    within-bin fraction with the neighbour bin's E: from a strong bin next
+    to a weak one the target overshot above the packet's own frequency, was
+    discarded as behind it, and the packet escaped (pre-fix code on this
+    test: 0.19 against the analytic 0.997 for expansion, 0.008 against 1.0
+    for line-binned)."""
+    from sobolev.optical_depth import tau_sobolev
+    t_exp = T_EXP; r_core = R_CORE; r_out = 40.0 * R_CORE
+    v_core, v_out = r_core / (C * t_exp), r_out / (C * t_exp)
+    nu_hi_launch, nu_lo_launch = 7.6e14, 7.55e14          # launch window
+    dnu = 4.17e-5
+    hi_line = nu_lo_launch * (1.0 - v_core) * 0.999        # below every start frequency
+    n_lines = 12
+    edges_l = hi_line * (1.0 + dnu) ** (-np.arange(n_lines + 1))[::-1]     # n_lines adjacent bins below hi_line
+    nu0 = np.sqrt(edges_l[1:] * edges_l[:-1])                                 # one line per bin, at the bin centre
+    assert nu0.min() > nu_hi_launch * (1.0 - v_out)                          # above every end frequency
+    taus = np.where(np.arange(n_lines) % 2 == 0, 4.0, 0.002)
+    n_low = taus / tau_sobolev(F_OSC, 1.0, C / nu0, t_exp)
+    fa = ForestAtom(nu0=nu0, f_osc=np.full(n_lines, F_OSC), n_lower=n_low, n_upper=np.zeros(n_lines),
+                    A=np.ones(n_lines), lower=np.zeros(n_lines, int), upper=np.ones(n_lines, int), t_exp=t_exp,
+                    tau_min=1e-6, stim=False)
+    edges, E = fa.expansion_bins(dnu, nu_lo=edges_l[0], nu_hi=edges_l[-1] * (1.0 + 1e-9), weight=weight)
+    assert (E > 0).sum() == n_lines                                           # every line in its own bin
+    p_th = 1.0 - np.exp(-E.sum())
+    n = 60000
+    res = run_mc(fa, r_core, r_out, t_exp, nu_lo_launch, nu_hi_launch, n, mode, seed=3, packets="energy",
+                 dnu_over_nu=dnu)
+    p_mc = res["n_absorbed"] / n
+    assert abs(p_mc - p_th) < 4 * np.sqrt(p_th * (1 - p_th) / n) + 1e-3, (p_mc, p_th)

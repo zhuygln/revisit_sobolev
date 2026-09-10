@@ -46,6 +46,24 @@
 \begin{document}
 \maketitle
 
+% ---- Scientific correction, September 2026 (added after the freeze; the
+% ---- tag paper3-freeze and the PDFs are untouched; see paper3/CORRECTION.md)
+\begin{center}
+\fbox{\parbox{0.92\linewidth}{\textbf{Scientific correction --- September 2026.}
+The grouped-opacity results reported in this manuscript are \textbf{invalid}
+because of an implementation error in the inversion of cumulative binned
+opacity (\texttt{forest\_mc.py::nu\_of\_G}, fixed in commit 38ebf30). The error
+caused packets in expansion-, line-binned- and dual-opacity modes to skip
+portions of non-smooth line forests. The resolved Sobolev calculations are
+unaffected. After correcting the transport and rerunning the analysis with
+energy-conserving transport on published ejecta benchmarks, the reported
+magnitude-scale grouped-opacity discrepancy is not reproduced. This manuscript
+is retained as a historical research record and is not a publication
+candidate. Corrected results: the Paper IV campaign
+(\texttt{docs/results\_report.md} Sections 4.55 to 4.59, findings F60 to F64);
+the affected findings are listed in \texttt{paper3/CORRECTION.md}.}}
+\end{center}
+
 \begin{abstract}
 % six beats: problem; positive result; negative result; inference result;
 % observational significance; physical interpretation.

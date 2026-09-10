@@ -2952,6 +2952,36 @@ deposit, convergence).
 
 Suite: 557.
 
+## 9bd. The correction goes on Paper III; the pivot becomes a paper; one more experiment (2026-09-10)
+
+*PI decision (verbatim in `paper4/plan_review.md`, last block).* F62-F64 are
+the nucleus of a methods paper -- "Fluorescence breaks the equivalence of
+coarse line-opacity treatments in kilonova radiative transfer" -- with one
+more experiment first: the Fontes benchmark as a time-dependent light
+curve, resolved vs expansion vs line-binned under eps = 1 and under
+energy-conserving fluorescence, same ejecta / atomic data / time grid /
+heating. Time dependence before full equilibrium. F63 is to be called a
+radiation-field-driven macroatom robustness test. The non-termination is
+the information-loss problem of binned opacity made concrete, not "binned
+opacity is broken".
+
+*Paper III correction.* A boxed "Scientific correction -- September 2026"
+notice at the top of `paper3/README.md`, `docs/paper3/README.md`,
+`manuscript.tex` (after \maketitle, digit-free so `check_structure.py`
+stays green), `si.tex`, the cover letter and the `freeze.py` docstring;
+`paper3/CORRECTION.md` with the mechanism and the affected findings;
+README rows F21-F24, F30, F31, F33, F35, F36, F38, F40-F49 marked INVALID,
+F34/F37/F39 "affected in principle, unverified" (smooth synthetic forests,
+not rerun), the Paper IV rows "superseded -- do not use"; notice blocks
+under every Paper II/III section built on bin legs (INVALID under the
+headlines 4.27 and 4.40). `paper3-freeze`, FROZEN.json and the PDFs
+untouched -- everything additive.
+
+*Next.* Review 38ebf30 and merge PR #2 (the fixed transport becomes
+`main`); then the time-slab machinery in `run_mc` (pause at t_stop, resume,
+absolute injection energy, escape times, event cap) and the light-curve
+driver; pilot; production overnight; the feedback-T variant.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

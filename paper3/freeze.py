@@ -1,4 +1,9 @@
-"""Freeze the Paper III analysis: regenerate every derived table, JSON and
+"""SCIENTIFIC CORRECTION (2026-09-10): the grouped-opacity results this freeze
+records are invalid -- an off-by-one in the bin legs' opacity inversion
+(forest_mc.py::nu_of_G, fixed in 38ebf30); see paper3/CORRECTION.md. The
+freeze, its tag and FROZEN.json are kept as the historical record.
+
+Freeze the Paper III analysis: regenerate every derived table, JSON and
 figure from the committed transport outputs, then record what was used and
 what came out in `paper3/FROZEN.json`.
 

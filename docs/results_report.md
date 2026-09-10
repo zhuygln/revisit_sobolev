@@ -825,6 +825,16 @@ on one line. Figure: `docs/figures/fig_ladder.png`; table generator
 
 ### 4.19 Paper II Phase 1 — the whole ion, one code (F19–F21)
 
+> **Superseded — affected by transport bug 38ebf30 (2026-09-10). Do not use
+> quantitatively or scientifically.** The grouped-opacity legs of this section
+> (expansion_/binned_/dual_ modes) were run with the off-by-one in the bin
+> legs' opacity inversion found in §4.55; the Sobolev legs are unaffected. The
+> text is kept as the record of what was believed and why; see
+> `paper3/CORRECTION.md`.
+
+> (F21 only; F19 and F20 are Sobolev-leg results and stand.)
+
+
 #### 4.19.1 Instrument
 
 `paper2/phase1/forest_mc.py` — Phase 0's successor: packets advanced in
@@ -956,6 +966,14 @@ one scalar ε transfers is exactly what E4 tests.
 
 ### 4.20 Paper II Phase 2 — does any scalar ε reproduce La II fluorescence? (F22)
 
+> **Superseded — affected by transport bug 38ebf30 (2026-09-10). Do not use
+> quantitatively or scientifically.** The grouped-opacity legs of this section
+> (expansion_/binned_/dual_ modes) were run with the off-by-one in the bin
+> legs' opacity inversion found in §4.55; the Sobolev legs are unaffected. The
+> text is kept as the record of what was believed and why; see
+> `paper3/CORRECTION.md`.
+
+
 `paper2/phase1/e4_eps_sweep.py` (E4/E5), `e6_redistribution.py` (E6),
 `e4_fig.py`; full La II atom, Planck 6000 K photon launch over 1142–17,697 Å,
 3 seeds × 2×10⁶ packets per leg, energy-weighted band fractions F_b =
@@ -1058,6 +1076,14 @@ sweeping the rest of its own bin) is the caveat that goes with it.
 
 ### 4.21 Paper II Phase 2.75 — the closure verdict at 0.1c (E13, F23)
 
+> **Superseded — affected by transport bug 38ebf30 (2026-09-10). Do not use
+> quantitatively or scientifically.** The grouped-opacity legs of this section
+> (expansion_/binned_/dual_ modes) were run with the off-by-one in the bin
+> legs' opacity inversion found in §4.55; the Sobolev legs are unaffected. The
+> text is kept as the record of what was believed and why; see
+> `paper3/CORRECTION.md`.
+
+
 `paper2/phase1/e13_worldline.py`; `forest_mc.run_mc(relativity="worldline")`
 carries each packet's own clock — exact Doppler D = γ(1−β_z), the linear
 resonance locus z_res = Z0(y²−1)/2 + p²/2Z0 from Paper I's addendum,
@@ -1144,6 +1170,14 @@ conclusion as the ε shifts, seen mechanistically
 (`e13_matrix_{slow,fast}.npz`).
 
 ### 4.22 Paper II Phase 4 — Ce II and the mixture: outcome C, and the closure's density limit (E9–E10, F24)
+
+> **Superseded — affected by transport bug 38ebf30 (2026-09-10). Do not use
+> quantitatively or scientifically.** The grouped-opacity legs of this section
+> (expansion_/binned_/dual_ modes) were run with the off-by-one in the bin
+> legs' opacity inversion found in §4.55; the Sobolev legs are unaffected. The
+> text is kept as the record of what was believed and why; see
+> `paper3/CORRECTION.md`.
+
 
 `paper2/phase1/e9_ceII.py`, `e10_blend.py`; `ForestAtom.from_gsi_blend`
 (level-offset concatenation, branching kept ion-internal — ions share only
@@ -1451,6 +1485,14 @@ input group, the same approximation the single-species kernel already makes.
 
 ### 4.27 Paper III P11 — the opacity is the binding constraint, not the redistribution (F30)
 
+> **INVALID — affected by transport bug 38ebf30 (2026-09-10). Do not use
+> quantitatively or scientifically.** This is a Paper III headline; the grouped-opacity legs of this section
+> (expansion_/binned_/dual_ modes) were run with the off-by-one in the bin
+> legs' opacity inversion found in §4.55; the Sobolev legs are unaffected. The
+> text is kept as the record of what was believed and why; see
+> `paper3/CORRECTION.md`.
+
+
 `paper3/phase6_opacity/opacity.py`. Every Paper III measurement up to here
 held the opacity fixed — Sobolev line-by-line on both sides — so that any
 error was redistribution compression alone. That isolation was the plan's
@@ -1549,6 +1591,14 @@ converged there for both ions), one bin width, two ions, LTE populations.
 Nd II is untested here.
 
 ### 4.28 Paper III — is one remembered line the missing state? (F31)
+
+> **Superseded — affected by transport bug 38ebf30 (2026-09-10). Do not use
+> quantitatively or scientifically.** The grouped-opacity legs of this section
+> (expansion_/binned_/dual_ modes) were run with the off-by-one in the bin
+> legs' opacity inversion found in §4.55; the Sobolev legs are unaffected. The
+> text is kept as the record of what was believed and why; see
+> `paper3/CORRECTION.md`.
+
 
 F30 localized the grouped-opacity failure to a specific mechanism: a bin has
 no way to skip the line a packet was just emitted from, so the packet
@@ -1720,6 +1770,14 @@ throughout — this asks about group-to-group structure only.
 
 ### 4.30 Paper III E2 — memory depth, and the control parameter is band-local saturation (F33)
 
+> **Superseded — affected by transport bug 38ebf30 (2026-09-10). Do not use
+> quantitatively or scientifically.** The grouped-opacity legs of this section
+> (expansion_/binned_/dual_ modes) were run with the off-by-one in the bin
+> legs' opacity inversion found in §4.55; the Sobolev legs are unaffected. The
+> text is kept as the record of what was believed and why; see
+> `paper3/CORRECTION.md`.
+
+
 F31 ended with an interpretation: "sparse forests need one remembered line;
 dense forests need the resonance *sequence*." E2 tests the second half by
 making memory a depth rather than a switch. `run_mc(line_memory=m)` carries a
@@ -1789,6 +1847,12 @@ too-transparent one. On Nd the Poisson leg is already accurate, so memory moves
 it only 1.36 → 1.66%.
 
 ### 4.31 Paper III E3 — the synthetic phase diagram: saturation controls it, partially (F34)
+
+> **Affected in principle by transport bug 38ebf30 (2026-09-10), effect
+> unverified.** The synthetic forests of this section are smooth, where the
+> inversion error is a fraction of a bin; its size here was not measured.
+> See §4.55 and `paper3/CORRECTION.md`.
+
 
 F33 identified band-local saturation as the variable ordering three ions. Three
 points cannot fix an exponent, and a referee can say "three peculiar atoms", so
@@ -1863,6 +1927,14 @@ strengthen it is more real atoms: the GSI archive holds **27 ions**, all already
 downloaded, of which three have been used.
 
 ### 4.32 Paper III E3b — thirteen ions, and the error changes sign (F35)
+
+> **Superseded — affected by transport bug 38ebf30 (2026-09-10). Do not use
+> quantitatively or scientifically.** The grouped-opacity legs of this section
+> (expansion_/binned_/dual_ modes) were run with the off-by-one in the bin
+> legs' opacity inversion found in §4.55; the Sobolev legs are unaffected. The
+> text is kept as the record of what was believed and why; see
+> `paper3/CORRECTION.md`.
+
 
 F34's collapse rested on three real atoms. The GSI archive holds 27 ions, all
 already on disk, so `paper3/phase8_survey/survey.py` measures the same three legs
@@ -1955,6 +2027,14 @@ and the structure is a sign change rather than a scaling.
 
 ### 4.33 Paper III — the normalization audit: three claims revised (F36)
 
+> **Superseded — affected by transport bug 38ebf30 (2026-09-10). Do not use
+> quantitatively or scientifically.** The grouped-opacity legs of this section
+> (expansion_/binned_/dual_ modes) were run with the off-by-one in the bin
+> legs' opacity inversion found in §4.55; the Sobolev legs are unaffected. The
+> text is kept as the record of what was believed and why; see
+> `paper3/CORRECTION.md`.
+
+
 F35 showed the project's `window_tau_max` recipe is ion-specific by accident.
 Every cross-ion claim rested on it. `paper3/phase9_audit/audit.py` re-measures
 compression, the opacity decomposition and memory depth for five ions under the
@@ -2011,6 +2091,12 @@ it does not answer what any of these ions does in a real kilonova, which needs
 the astrophysical standard (`from_conditions`).
 
 ### 4.34 Paper III E4 — the synthetic model cannot reach the too-bright branch (F37)
+
+> **Affected in principle by transport bug 38ebf30 (2026-09-10), effect
+> unverified.** The synthetic forests of this section are smooth, where the
+> inversion error is a fraction of a bin; its size here was not measured.
+> See §4.55 and `paper3/CORRECTION.md`.
+
 
 F35 located a ΔF = 0 boundary three ways at S ≈ 50. E4 set out to map it in
 controlled synthetic forests and test whether it moves with redistribution
@@ -2092,6 +2178,12 @@ that mechanism as this project has.
 
 ### 4.34b The one iteration: recurrent exit opacity recovers the boundary (F39)
 
+> **Affected in principle by transport bug 38ebf30 (2026-09-10), effect
+> unverified.** The synthetic forests of this section are smooth, where the
+> inversion error is a fraction of a bin; its size here was not measured.
+> See §4.55 and `paper3/CORRECTION.md`.
+
+
 §4.34 diagnosed the synthetic model's failure precisely: exit channels
 terminated on unpopulated sink levels, so a photon leaving through one could
 never be re-absorbed and cascade again. Real forests refill a band *more* as
@@ -2134,6 +2226,14 @@ evidence already carries the existence claim, and a further-tuned toy would
 start to look post hoc.
 
 ### 4.35 Paper III — counterfactual legs: the errors are not additive (F38)
+
+> **Superseded — affected by transport bug 38ebf30 (2026-09-10). Do not use
+> quantitatively or scientifically.** The grouped-opacity legs of this section
+> (expansion_/binned_/dual_ modes) were run with the off-by-one in the bin
+> legs' opacity inversion found in §4.55; the Sobolev legs are unaffected. The
+> text is kept as the record of what was believed and why; see
+> `paper3/CORRECTION.md`.
+
 
 The zero crossing needs a causal account, not just an empirical curve. Three
 legs isolate the two approximations, all against the same `sobolev_branch`
@@ -2180,6 +2280,14 @@ and the Poisson grid only. The interaction term's own sign and scaling are not
 yet mapped.
 
 ### 4.36 Paper III item 5 — a kilonova crosses the boundary at 1.2 days (F40)
+
+> **Superseded — affected by transport bug 38ebf30 (2026-09-10). Do not use
+> quantitatively or scientifically.** The grouped-opacity legs of this section
+> (expansion_/binned_/dual_ modes) were run with the off-by-one in the bin
+> legs' opacity inversion found in §4.55; the Sobolev legs are unaffected. The
+> text is kept as the record of what was believed and why; see
+> `paper3/CORRECTION.md`.
+
 
 The question this section asks is not how inaccurate grouped opacity is, but
 whether an approximate transport model can *appear accurate at one epoch* while
@@ -2276,6 +2384,14 @@ any boundary lying inside that range. Single-ion ejecta are also not a real
 composition — §4.25's mixture rule would be needed for that.
 
 ### 4.37 Paper III §10 — the closure error is chromatic, not bolometric (F41)
+
+> **Superseded — affected by transport bug 38ebf30 (2026-09-10). Do not use
+> quantitatively or scientifically.** The grouped-opacity legs of this section
+> (expansion_/binned_/dual_ modes) were run with the off-by-one in the bin
+> legs' opacity inversion found in §4.55; the Sobolev legs are unaffected. The
+> text is kept as the record of what was believed and why; see
+> `paper3/CORRECTION.md`.
+
 
 Everything in §4.23–§4.36 is a **band ratio**: escaped over launched energy in a
 155 Å window, measured against a reference run. That is the right quantity for
@@ -2501,6 +2617,14 @@ transport treatments are quoted.
 
 ### 4.38 Provenance closures, real passbands and Gate 1 (F42)
 
+> **Superseded — affected by transport bug 38ebf30 (2026-09-10). Do not use
+> quantitatively or scientifically.** The grouped-opacity legs of this section
+> (expansion_/binned_/dual_ modes) were run with the off-by-one in the bin
+> legs' opacity inversion found in §4.55; the Sobolev legs are unaffected. The
+> text is kept as the record of what was believed and why; see
+> `paper3/CORRECTION.md`.
+
+
 Drivers: `paper3/phase8_survey/density_scan.py`,
 `paper3/phase9_audit/counterfactual_table.py`, `paper3/synthetic/boundary.py
 --delocalize 1 --n-exit 6 --exit-tau 0.5,2.0`, `data/filters/fetch_filters.py`,
@@ -2604,6 +2728,14 @@ from g−r to i−J, at the same epoch and nearly the same size. The effect is a
 property of the spectrum, not of the top-hats it was first measured with.
 
 ### 4.39 A heating-powered source: the Source Model Gate
+
+> **Superseded — affected by transport bug 38ebf30 (2026-09-10). Do not use
+> quantitatively or scientifically.** The grouped-opacity legs of this section
+> (expansion_/binned_/dual_ modes) were run with the off-by-one in the bin
+> legs' opacity inversion found in §4.55; the Sobolev legs are unaffected. The
+> text is kept as the record of what was believed and why; see
+> `paper3/CORRECTION.md`.
+
 
 Driver: `sobolev/source.py` (`--plot` writes
 `paper3/phase12_grid/source_gate.png`). Tests: `tests/test_source.py` (7).
@@ -2710,6 +2842,14 @@ and no more is claimed: plausibility, not a fit.
   harness's energy bookkeeping, is §4.40.
 
 ### 4.40 The M–v–X_lan grid: the closure error on a physically powered kilonova (F43), and the Gate 2 verdict (F44)
+
+> **INVALID — affected by transport bug 38ebf30 (2026-09-10). Do not use
+> quantitatively or scientifically.** This is a Paper III headline; the grouped-opacity legs of this section
+> (expansion_/binned_/dual_ modes) were run with the off-by-one in the bin
+> legs' opacity inversion found in §4.55; the Sobolev legs are unaffected. The
+> text is kept as the record of what was believed and why; see
+> `paper3/CORRECTION.md`.
+
 
 *Relabelled 2026-09-09 (Paper IV Phase 0): the composition parameter of this
 grid is the equal four-ion fraction X_4Ln = X_La + X_Ce + X_Pr + X_Nd, and the
@@ -2988,6 +3128,14 @@ stated before the grid ran (plan §5):
    derivative-zeroing rule is conservative in the right direction.
 
 ### 4.41 Are F43/F44 harness artefacts? The floor mask, the core convention, the chain cutoff, and one layer of source freedom (F45)
+
+> **Superseded — affected by transport bug 38ebf30 (2026-09-10). Do not use
+> quantitatively or scientifically.** The grouped-opacity legs of this section
+> (expansion_/binned_/dual_ modes) were run with the off-by-one in the bin
+> legs' opacity inversion found in §4.55; the Sobolev legs are unaffected. The
+> text is kept as the record of what was believed and why; see
+> `paper3/CORRECTION.md`.
+
 
 Gate 2 (§4.40) rests on three harness conventions that became
 publication-level assumptions the moment the grid ran: the photosphere floor
@@ -3285,6 +3433,14 @@ detects that misfit is §4.42.
 
 ### 4.42 Phase 3A: does the closure residual survive a real observation? (F46)
 
+> **Superseded — affected by transport bug 38ebf30 (2026-09-10). Do not use
+> quantitatively or scientifically.** The grouped-opacity legs of this section
+> (expansion_/binned_/dual_ modes) were run with the off-by-one in the bin
+> legs' opacity inversion found in §4.55; the Sobolev legs are unaffected. The
+> text is kept as the record of what was believed and why; see
+> `paper3/CORRECTION.md`.
+
+
 §4.40–4.41 are noiseless and fully sampled: seven bands at six epochs with
 σ = 0.05 / 0.10 mag regardless of brightness. The Nature-Astronomy question
 is whether *six real measurements* still see the residual, and whether they
@@ -3380,6 +3536,14 @@ other distances here). The redo of the nine X = 0.1 early epochs raises N_obs wh
 T1–T3 spaces are underdetermined; §4.44.
 
 ### 4.43 Phase 3B: is the photospheric-temperature direction real? The T_eff validation (F47)
+
+> **Superseded — affected by transport bug 38ebf30 (2026-09-10). Do not use
+> quantitatively or scientifically.** The grouped-opacity legs of this section
+> (expansion_/binned_/dual_ modes) were run with the off-by-one in the bin
+> legs' opacity inversion found in §4.55; the Sobolev legs are unaffected. The
+> text is kept as the record of what was believed and why; see
+> `paper3/CORRECTION.md`.
+
 
 **Question.** §4.41's T2 tangent space adds ∂m_b/∂lnT of a Planck spectrum
 at fixed L — a *proxy*, chosen because it costs nothing. Two things can be
@@ -3556,6 +3720,14 @@ the effects the community attributes to composition — and does not support
 any stronger claim.
 
 ### 4.44 The grid completed: the nine redone cells, and what changes in F43–F46 (F48)
+
+> **Superseded — affected by transport bug 38ebf30 (2026-09-10). Do not use
+> quantitatively or scientifically.** The grouped-opacity legs of this section
+> (expansion_/binned_/dual_ modes) were run with the off-by-one in the bin
+> legs' opacity inversion found in §4.55; the Sobolev legs are unaffected. The
+> text is kept as the record of what was believed and why; see
+> `paper3/CORRECTION.md`.
+
 
 Nine early X_lan = 0.1 epochs were `over_budget` at the grid's 1500 s
 budget (§4.40): (0.003, 0.1, 0.1) at 1 d, (0.003, 0.2, 0.1) at 0.5 d,
@@ -3753,6 +3925,14 @@ single case (N = 17, C-B under every space).
 
 ### 4.45 The freeze, the uncertainty convention, and the closure error against the model-error allowance (F49)
 
+> **Superseded — affected by transport bug 38ebf30 (2026-09-10). Do not use
+> quantitatively or scientifically.** The grouped-opacity legs of this section
+> (expansion_/binned_/dual_ modes) were run with the off-by-one in the bin
+> legs' opacity inversion found in §4.55; the Sobolev legs are unaffected. The
+> text is kept as the record of what was believed and why; see
+> `paper3/CORRECTION.md`.
+
+
 *Why this section exists.* The scientific case for Paper III was judged
 complete on 2026-09-03 (§4.44, F48); what remained before a manuscript was
 bookkeeping with teeth: one commit from which every headline number,
@@ -3931,6 +4111,14 @@ with n < 5 greyed (J, H, K at 0.5 d; r at 5 d; z, J, H, K at 7 d).
 
 ### 4.46 The manuscript: numbers as macros, budgets as checks (2026-09-03)
 
+> **Superseded — affected by transport bug 38ebf30 (2026-09-10). Do not use
+> quantitatively or scientifically.** The grouped-opacity legs of this section
+> (expansion_/binned_/dual_ modes) were run with the off-by-one in the bin
+> legs' opacity inversion found in §4.55; the Sobolev legs are unaffected. The
+> text is kept as the record of what was believed and why; see
+> `paper3/CORRECTION.md`.
+
+
 `docs/paper3/` holds the Nature Astronomy manuscript and the tooling that
 keeps it honest. The chain is FROZEN.json → `latex_tables.py` → `numbers.tex`
 (121 `\newcommand` macros, one per quoted number, formatted in one place) +
@@ -4024,7 +4212,7 @@ the second occurrence of the commit-10 failure. Restored (main text 2981 →
 
 ### 4.47 Paper IV, Phases 0–3: energy-conserving downward fluorescence on two published ejecta states, and Gate 2 (F50, F51, F52)
 
-> **Superseded on 2026-09-10.** Every grouped-opacity amplitude in §§4.47–4.54
+> **Superseded on 2026-09-10 — affected by transport bug 38ebf30. Do not use quantitatively or scientifically.** Every grouped-opacity amplitude in §§4.47–4.54
 > (the B, C, D and thermal-bridge legs; not the Sobolev references R and A)
 > was produced with an off-by-one in the bin legs' opacity inversion, found
 > and fixed in §4.55. The corrected numbers are in §4.55; the text below is
@@ -4180,7 +4368,7 @@ now justified by the plan's own rule.
 
 ### 4.48 Paper IV, Phase 4: the Fontes-like limit — coarse opacity looks adequate under thermal redistribution only where the forest is thin (F53)
 
-> **Superseded on 2026-09-10.** Every grouped-opacity amplitude in §§4.47–4.54
+> **Superseded on 2026-09-10 — affected by transport bug 38ebf30. Do not use quantitatively or scientifically.** Every grouped-opacity amplitude in §§4.47–4.54
 > (the B, C, D and thermal-bridge legs; not the Sobolev references R and A)
 > was produced with an off-by-one in the bin legs' opacity inversion, found
 > and fixed in §4.55. The corrected numbers are in §4.55; the text below is
@@ -4208,7 +4396,7 @@ redistribution and fails only when the fluorescence network is kept.
 
 ### 4.49 Paper IV, Phase 5: the dual-role closure D does not recover the resolved fluorescent spectrum (F54)
 
-> **Superseded on 2026-09-10.** Every grouped-opacity amplitude in §§4.47–4.54
+> **Superseded on 2026-09-10 — affected by transport bug 38ebf30. Do not use quantitatively or scientifically.** Every grouped-opacity amplitude in §§4.47–4.54
 > (the B, C, D and thermal-bridge legs; not the Sobolev references R and A)
 > was produced with an off-by-one in the bin legs' opacity inversion, found
 > and fixed in §4.55. The corrected numbers are in §4.55; the text below is
@@ -4236,7 +4424,7 @@ B₂, Bbin₂; data `paper4/phase5_dual_role/dual_*.json`, 3 × 3×10⁵ packets
 
 ### 4.50 Paper IV, the adequacy check: the closure error on the neighbouring shells of P1 (F55)
 
-> **Superseded on 2026-09-10.** Every grouped-opacity amplitude in §§4.47–4.54
+> **Superseded on 2026-09-10 — affected by transport bug 38ebf30. Do not use quantitatively or scientifically.** Every grouped-opacity amplitude in §§4.47–4.54
 > (the B, C, D and thermal-bridge legs; not the Sobolev references R and A)
 > was produced with an off-by-one in the bin legs' opacity inversion, found
 > and fixed in §4.55. The corrected numbers are in §4.55; the text below is
@@ -4259,7 +4447,7 @@ this is the robustness check it demanded.
 
 ### 4.51 Paper IV, Phase 6: the reference is converged; the closure's error is a function of the closure's own grid (F56)
 
-> **Superseded on 2026-09-10.** Every grouped-opacity amplitude in §§4.47–4.54
+> **Superseded on 2026-09-10 — affected by transport bug 38ebf30. Do not use quantitatively or scientifically.** Every grouped-opacity amplitude in §§4.47–4.54
 > (the B, C, D and thermal-bridge legs; not the Sobolev references R and A)
 > was produced with an off-by-one in the bin legs' opacity inversion, found
 > and fixed in §4.55. The corrected numbers are in §4.55; the text below is
@@ -4283,7 +4471,7 @@ production settings (τ_min = 10⁻³, Δv = 12.5 km s⁻¹, n = 3×10⁵, no ta
 
 ### 4.54 Paper IV, the dead-end check: the fate of macroatom activations with no radiative exit is in the error budget (F59)
 
-> **Superseded on 2026-09-10.** Every grouped-opacity amplitude in §§4.47–4.54
+> **Superseded on 2026-09-10 — affected by transport bug 38ebf30. Do not use quantitatively or scientifically.** Every grouped-opacity amplitude in §§4.47–4.54
 > (the B, C, D and thermal-bridge legs; not the Sobolev references R and A)
 > was produced with an off-by-one in the bin legs' opacity inversion, found
 > and fixed in §4.55. The corrected numbers are in §4.55; the text below is
@@ -4308,7 +4496,7 @@ reference until that is shown not to drive B₂ − R₂.
 
 ### 4.52 Paper IV, Phase 7 and Gate 3: LTE Saha ionization (F57)
 
-> **Superseded on 2026-09-10.** Every grouped-opacity amplitude in §§4.47–4.54
+> **Superseded on 2026-09-10 — affected by transport bug 38ebf30. Do not use quantitatively or scientifically.** Every grouped-opacity amplitude in §§4.47–4.54
 > (the B, C, D and thermal-bridge legs; not the Sobolev references R and A)
 > was produced with an off-by-one in the bin legs' opacity inversion, found
 > and fixed in §4.55. The corrected numbers are in §4.55; the text below is
@@ -4399,7 +4587,7 @@ kept in `tests/data/golden_run_mc_prefix_2026-09-10.json`). The Sobolev
 references R₁, R₂ and the redistribution control A₂ never used the
 inversion and stand. Every expansion_/binned_/dual_ leg since Paper II
 carried the bug, including Paper III's closure legs at `paper3-freeze`
-(the tag is not moved; the PI decides on the erratum).
+(the tag is not moved; the correction is `paper3/CORRECTION.md`).
 
 **The corrected single zone** (P1, 2 d, photospheric shell 28, final
 composition, `paper4/phase8_shells/single_P1_t2_s28_fixed.json`; seed

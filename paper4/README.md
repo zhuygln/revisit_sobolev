@@ -68,7 +68,11 @@ fluorescence the expansion closure is unchanged while the line-binned
 closure's colour error grows to 0.3–1.7 mag and, on a strong-lined
 forest, its transport does not terminate; the full macroatom moves the
 reference by 1.3–1.8 mag and leaves the expansion closure within 0.18 mag
-of it. Open, at the PI's
+of it. **PI decision (same day, verbatim in `plan_review.md`):** F62–F64 are the
+nucleus of the methods paper; one more experiment first — the Fontes
+benchmark as a time-dependent light curve (Phase 10b; notebook §9bd);
+Paper III carries a boxed correction (`paper3/CORRECTION.md`); PR #2 is
+merged after review. Open, at the PI's
 discretion now that the effect is 0.2 mag: Phases 9–10 (estimators, full
 macroatom, B_eq − R_eq), the Phase 7 sensitivity table, Phase 11, Phase 12;
 and the Paper III erratum. Photon-number branching still moves
