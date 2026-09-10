@@ -811,7 +811,7 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
             # Sobolev line emissivity A n_u (~ tau). This is what SEDONA's
             # expansion mode re-emits from; frequency uniform within the bin.
             nu_b = np.sqrt(edges[1:] * edges[:-1])
-            def _bin_sampler(E_row, T_em):
+            def _bin_sampler(E_row, T_em, allow_empty=False):
                 if T_em is None:
                     # toy atoms without a temperature: flat B_nu (weights E_b only)
                     w_b = E_row * width
@@ -825,13 +825,16 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
                 if emit_window is not None:
                     w_b[(nu_b < emit_window[0]) | (nu_b > emit_window[1])] = 0.0
                 if w_b.sum() <= 0:
+                    if allow_empty:
+                        return None            # a shell with no opacity: no event can ask it
                     raise ValueError("expansion thermal emissivity is empty in the window")
                 cum_b = np.cumsum(w_b / w_b.sum())
                 def sampler(u):
                     return np.searchsorted(cum_b, u)
                 return sampler
             if zoned:
-                thermal_bin_s = [_bin_sampler(E[s_], None if atom.T is None else float(atom.T[s_])) for s_ in range(n_sh)]
+                thermal_bin_s = [_bin_sampler(E[s_], None if atom.T is None else float(atom.T[s_]), allow_empty=True)
+                                 for s_ in range(n_sh)]
             else:
                 thermal_bin = _bin_sampler(E, getattr(atom, "temperature", None))
         def G_of(nu):
@@ -1410,6 +1413,8 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
                 u_t = rng.uniform(size=act.size)
                 for s_ in np.unique(sh_hi[act]):
                     m_ = sh_hi[act] == s_
+                    if thermal_bin_s[s_] is None:
+                        raise RuntimeError(f"thermal re-emission asked of shell {s_}, which has no opacity")
                     new_line[act[m_]] = thermal_bin_s[s_](u_t[m_])
                 is_bin[act] = True
             elif thermal is not None:  # thermal, line-based (Sobolev legs, or exp_emit="line")
