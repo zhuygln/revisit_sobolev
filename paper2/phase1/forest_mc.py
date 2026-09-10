@@ -754,8 +754,6 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
             raise NotImplementedError("zoned transport carries energy packets: packets='energy'")
         if outcome not in ("absorb", "dmacro", "thermal"):
             raise NotImplementedError(f"zoned transport supports absorb/dmacro/thermal, not {outcome!r}")
-        if outcome == "thermal" and wl:
-            raise NotImplementedError("zoned thermal legs under worldline transport are not implemented")
         if a_cut is not None or line_memory:
             raise NotImplementedError("a_cut and line_memory are not available in zoned transport")
         if not (np.isclose(r_core, atom.r_edges[0]) and np.isclose(r_out, atom.r_edges[-1])):
@@ -1431,8 +1429,9 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
             # contains its beta)
             if (sobolev and outcome not in ("dmacro", "macro")) or (beta_on_expansion and exp_emit == "line" and outcome == "thermal"):
                 if wl:
-                    esc = rng.uniform(size=todo.size) < _beta_of_tau(
-                        atom.tau_all[new_line[todo]] * dsc[hit][todo])
+                    tau_line = (atom.tau_of_lines(sh_hi[todo], new_line[todo]) if zoned
+                                else atom.tau_all[new_line[todo]])
+                    esc = rng.uniform(size=todo.size) < _beta_of_tau(tau_line * dsc[hit][todo])
                 elif zoned:
                     esc = rng.uniform(size=todo.size) < atom.beta_of_lines(sh_hi[todo], new_line[todo])
                 else:

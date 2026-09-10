@@ -67,8 +67,6 @@ MODES_Z = ("sobolev_absorb", "expansion_absorb", "binned_absorb", "sobolev_dmacr
 @pytest.mark.parametrize("mode", MODES_Z)
 @pytest.mark.parametrize("relativity", [None, "worldline"])
 def test_one_shell_is_bit_identical_to_the_single_zone_path(mode, relativity):
-    if "thermal" in mode and relativity == "worldline":
-        pytest.skip("zoned thermal legs under worldline are not implemented")
     fa, a = forest()
     za = zoned(a, 1, np.array([R_CORE, R_OUT]))
     lo, hi = tfm.pump_band()
@@ -82,8 +80,6 @@ def test_one_shell_is_bit_identical_to_the_single_zone_path(mode, relativity):
 @pytest.mark.parametrize("mode", ("sobolev_absorb", "sobolev_dmacro", "sobolev_thermal"))
 @pytest.mark.parametrize("relativity", [None, "worldline"])
 def test_two_identical_shells_equal_one_shell_exactly_for_sobolev_legs(mode, relativity):
-    if "thermal" in mode and relativity == "worldline":
-        pytest.skip("zoned thermal legs under worldline are not implemented")
     fa, a = forest()
     z1 = zoned(a, 1, np.array([R_CORE, R_OUT]))
     z2 = zoned(a, 2, np.array([R_CORE, 2.2 * R_CORE, R_OUT]))

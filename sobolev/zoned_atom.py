@@ -344,6 +344,15 @@ class ZonedAtom:
         lu = self.line_to_union[np.asarray(lines, int)]
         return np.where(lu >= 0, self.op_beta[np.asarray(shells, int), np.maximum(lu, 0)], 1.0)
 
+    def tau_of_lines(self, shells, lines):
+        """Sobolev optical depth of `lines` for packets in `shells`: the
+        shell's tau inside the union opacity set, 0 outside it (no opacity
+        -> escape probability 1, the convention of `beta_of_lines`). The
+        worldline thermal escape coin dilutes it by the packet's own epoch
+        factor (Paper IV Phase 10b)."""
+        lu = self.line_to_union[np.asarray(lines, int)]
+        return np.where(lu >= 0, self.op_tau[np.asarray(shells, int), np.maximum(lu, 0)], 0.0)
+
     # ---- builders ------------------------------------------------------
     @classmethod
     def from_arrays(cls, nu0, f_osc, n_lower, n_upper, A, lower, upper, r_edges, t_exp, **kw):
