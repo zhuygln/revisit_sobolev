@@ -114,8 +114,21 @@ def atom_for_zone(state, shell, stages=("II",), tau_min=1e-3, n_ion_min=1e-30):
     return atom, n_ion
 
 
+def ledger(res_list):
+    """The energy ledger of a leg, seed-averaged fractions of E_inj: what was
+    injected, what escaped, what returned to the core, what was deposited
+    (k-packets, trapped chains), and the expansion work W. Sums to one by
+    the identity; never normalised away."""
+    keys = ("E_esc", "E_core", "E_abs", "E_dep_lab", "E_dep_cm", "W", "E_thermal")
+    out = {k: float(np.mean([r["accounting"][k] / r["accounting"]["E_inj"] for r in res_list])) for k in keys}
+    out["E_inj_synthetic"] = float(np.mean([r["accounting"]["E_inj"] for r in res_list]))
+    out["identity"] = float(np.max([abs(r["accounting"]["identity_residual"]) for r in res_list]))
+    return out
+
+
 def run_legs(zone, atom, n, legs=LADDER, seeds=SEEDS, ng=NG, relativity="worldline",
-             chain_max=CHAIN_MAX, budget_s=None, a_cut=None, verbose=True, dnu_over_nu=4.17e-5):
+             chain_max=CHAIN_MAX, budget_s=None, a_cut=None, verbose=True, dnu_over_nu=4.17e-5,
+             thermal_k="reemit", eps_k=0.0):
     """All `legs` on one zone dict (from `EjectaState.local_zone`) with one atom."""
     t0 = time.time()
     lo, hi = (float(x) for x in phot.nu_edges(*LAM_WIN, 1))
@@ -124,7 +137,8 @@ def run_legs(zone, atom, n, legs=LADDER, seeds=SEEDS, ng=NG, relativity="worldli
     nu_c = np.sqrt(edges[1:] * edges[:-1])
     row = dict(zone={k: v for k, v in zone.items() if k not in ("X", "f_ion")},
                n=n, seeds=list(seeds), ng=ng, relativity=relativity, chain_max=chain_max,
-               a_cut=a_cut, dnu_over_nu=dnu_over_nu, lam_window=list(LAM_WIN), n_spec=N_SPEC, L_core_window=l_core,
+               a_cut=a_cut, dnu_over_nu=dnu_over_nu, thermal_k=thermal_k, eps_k=eps_k,
+               lam_window=list(LAM_WIN), n_spec=N_SPEC, L_core_window=l_core,
                n_opacity=int(atom.n_opacity), n_lines=int(atom.n_lines_total),
                tau_max=float(atom.op_tau.max()) if atom.n_opacity else 0.0, rss_mb_atom=rss_mb(),
                git=git_sha(), legs={}, timing={})
@@ -137,7 +151,7 @@ def run_legs(zone, atom, n, legs=LADDER, seeds=SEEDS, ng=NG, relativity="worldli
                       seed=seed, t_core=zone["t_core"], relativity=relativity, max_steps=MAX_STEPS,
                       chain_max=chain_max, chain_overflow="absorb", packets=spec["packets"],
                       launch_weight="energy", wall_s=budget_s, a_cut=a_cut, dnu_over_nu=dnu_over_nu,
-                      reprocess=spec.get("reprocess"), **kw)
+                      reprocess=spec.get("reprocess"), thermal_k=thermal_k, eps_k=eps_k, **kw)
 
     kernels, results = {}, {}
     order = [l for l in legs if "kernel" not in LEGS[l]] + [l for l in legs if "kernel" in LEGS[l]]
@@ -169,6 +183,7 @@ def run_legs(zone, atom, n, legs=LADDER, seeds=SEEDS, ng=NG, relativity="worldli
         acc = [energy_accounting(r) for r in res]
         o["energy"] = {k: float(np.mean([a[k] for a in acc])) for k in acc[0] if k != "packets"}
         o["energy"]["packets"] = spec["packets"]
+        o["ledger"] = ledger(res)
         o["events_per_packet"] = float(np.mean([r["n_events"].mean() for r in res]))
         o["reabs_per_packet"] = float(np.mean([r["n_reabs"].mean() for r in res]))
         o["n_trapped"] = int(sum(r["n_trapped"] for r in res))
@@ -221,6 +236,8 @@ def main():
     ap.add_argument("--tau-min", type=float, default=1e-3)
     ap.add_argument("--neighbours", default="", help="comma list of shells for the adequacy ratio")
     ap.add_argument("--stages", default="II", help="ion stages to carry opacity, e.g. II,III (Phase 7)")
+    ap.add_argument("--thermal-k", default="reemit", help="dead ends / k-packets: reemit (production) or deposit")
+    ap.add_argument("--eps-k", type=float, default=0.0)
     ap.add_argument("--out", default=None)
     a = ap.parse_args()
     state = EjectaState.from_json(a.state)
@@ -234,7 +251,8 @@ def main():
     print(f"{state.meta.get('name')} t={state.t / DAY:g} d shell {shell}: v={zone['v_core'] / C:.4f}c rho={zone['rho']:.3e} "
           f"T={zone['T_gas']:.0f} K; {len(n_ion)} ions, {atom.n_lines_total} lines, {atom.n_opacity} opacity, "
           f"atom {time.time() - t0:.1f}s, rss {rss_mb():.0f} MB", flush=True)
-    row = run_legs(zone, atom, a.n, legs, seeds, a.ng, a.relativity or None, a.chain_max, a.budget, a.a_cut)
+    row = run_legs(zone, atom, a.n, legs, seeds, a.ng, a.relativity or None, a.chain_max, a.budget, a.a_cut,
+                   thermal_k=a.thermal_k, eps_k=a.eps_k)
     row.update(state=str(a.state), name=state.meta.get("name"), t_d=state.t / DAY, shell=shell, n_ion=n_ion,
                tau_min=a.tau_min, ions=sorted(n_ion), stages=list(stages),
                f_ion_zone={k: v for k, v in zone["f_ion"].items()})

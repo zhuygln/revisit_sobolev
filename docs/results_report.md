@@ -4246,6 +4246,24 @@ production settings (τ_min = 10⁻³, Δv = 12.5 km s⁻¹, n = 3×10⁵, no ta
 
 **F56 — The energy-conserving reference meets the plan's convergence criterion in the headline bands; the closure's error does not converge because the grid is the closure.** R₂ moves by ≤ 0.03 mag in z and K (≤ 0.10 in g, at the noise) across a factor 100 in τ_min, a factor 4 in packets and three decades of table cut. B₂ − R₂ moves by 0.8–1.0 mag with τ_min and by 1.1 mag in z between 1.25 and 12.5 km s⁻¹ bins (K flips sign only at 125 km s⁻¹): which lines count as opacity and how wide the bins are are part of the grouped closure's definition, so different defensible groupings differ by a magnitude — F41's 0.15 mag on La II, here 1 mag on the full pattern at S ~ 10⁴. The headline B₂ − R₂ is therefore quoted at SEDONA's production width (12.5 km s⁻¹, τ_min = 10⁻³) with its range: z −1.8 to −3.0, K +0.7 to +1.3 over the settings above. Gate 2's class and signs hold at every setting except the coarsest bins' K.
 
+### 4.54 Paper IV, the dead-end check: the fate of macroatom activations with no radiative exit is in the error budget (F59)
+
+Driver: `paper4/phase2_energy/legs.py --thermal-k deposit` (dead ends and
+k-packets booked as deposit, fate 3) against the production `reemit` (re-
+emitted from the net LTE line emissivity A n_u hν β); data
+`paper4/phase8_deadend/deposit_*.json`, 3 × 3×10⁵ packets; every leg now
+carries an energy `ledger` (E_esc, E_core, E_abs, E_dep, W, E_thermal as
+fractions of E_inj). The PI's warning: 7–10 % of activations land on
+levels with no downward line in the data, and R₂ is not the final
+reference until that is shown not to drive B₂ − R₂.
+
+| | R₂ ledger (esc / core / abs / W) | R₂ shift, deposit − reemit (g, z, K) | B₂ − R₂ deposit (g … K) | B₂ − R₂ reemit (z, K) | A₂ − R₂ deposit |
+|---|---|---|---|---|---|
+| P1, 2 d | 0.04 / 0.29 / **0.62** / 0.06 | +3.39, +1.92, +0.93 | −7.75, −6.26, −5.66, −4.90, −3.67, −2.44, +0.12 | −2.88, +1.27 | z −1.67, K −1.00 |
+| P2, 3.4 d | 0.90 / 0.05 / 0.03 / 0.02 | +0.28, −0.01, −0.03 | g +0.31, r +0.15, rest ≤ 0.02 | g +0.19 | ≤ 0.10 |
+
+**F59 — Under the deposit alternative the reference on the lanthanide-rich state loses 62 % of the injected energy to the gas and moves 1–3 mag; the closure error keeps its sign in the optical but changes by 2 mag and loses its K excess. Dead-end handling is therefore in the error budget, and the budget is closed only by the thermal balance of Phases 9–10.** On P1 a downward walk hits a dead end 0.9 times per packet; if that energy is left in the gas the reference fades by 1.9 mag in z and 0.9 in K, B₂ − R₂ becomes −4.9 (z) and +0.1 (K), and the kernel control fails (A₂ carries no dead ends), which is the plan's Gray condition for that variant. On the thin state the two treatments differ by ≤ 0.3 mag. The production choice, re-emission from the LTE line emissivity, is the energy-conserving reading of a fixed atmosphere — the deposited energy is what a thermal balance would re-radiate — and F51 stands on it; the deposit variant is the bound. Quoted range for the P1 headline: B₂ − R₂(z) = −2.9 (reemit) to −4.9 (deposit), K +1.3 to +0.1.
+
 ### 4.52 Paper IV, Phase 7 and Gate 3: LTE Saha ionization (F57)
 
 Instrument: `sobolev/ionization.py` (§4.48's commit), `paper4/phase7_ionization/saha_states.py`
@@ -4330,6 +4348,7 @@ the `scale` policy — the transport carries no neutral opacity.)
 | F55 | **The closure error keeps its sign and class on every shell around P1's photosphere (saturation 1.1×10⁴–5.6×10⁴): g −4 to −5 mag, K +0.6 to +1.3, z −1.4 to −3.7; the crossover band moves with the saturation front.** The single-zone amplitude in one band is uncertain by ~1 mag; the class is not | §4.50 |
 | F56 | **The energy-conserving reference is converged (≤ 0.03 mag in z/K across τ_min, packets and table cut); the closure's error is not, because the grid is the closure:** B₂ − R₂ moves 0.8–1.0 mag with τ_min and 1.1 mag in z between 1.25 and 12.5 km s⁻¹ bins. Headline quoted at 12.5 km s⁻¹ with the range z −1.8 to −3.0, K +0.7 to +1.3 | §4.51 |
 | F57 | **Gate 3 passes: LTE Saha ionization leaves the closure error's class and signs intact.** 99 % II at the 2–3 d zones and on P2 (≤ 0.05 mag change); at P1's 1 d zone 60 % of Ce is III and the error is −2.7 (z), +1.9 (K) with the control ≤ 0.04 | §4.52 |
+| F59 | **Dead-end handling is in the error budget:** depositing the activations with no radiative exit (0.9 per packet on P1) instead of re-emitting them thermally moves the reference 1–3 mag and B₂ − R₂ from −2.9/+1.3 to −4.9/+0.1 (z/K), while the thin state moves ≤ 0.3 mag; only the thermal balance of Phases 9–10 closes it | §4.54 |
 
 ## 6. Caveats and limitations
 

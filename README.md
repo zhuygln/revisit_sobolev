@@ -111,6 +111,7 @@ repository URL are still placeholders.
 | F55 | **Sign and class of the closure error hold on every shell around the photosphere; the single-zone amplitude in one band is uncertain by ~1 mag** (z −1.4 to −3.7 across a factor 5 in saturation, g −4 to −5, K +0.6 to +1.3, controls ≤ 0.07) | [§4.50](docs/results_report.md) |
 | F56 | **The energy-conserving reference is converged to ≤ 0.03 mag in z/K; the closure's error moves by ~1 mag with the bin width and line cut that define it** (z −1.8 to −3.0, K +0.7 to +1.3 across the settings) | [§4.51](docs/results_report.md) |
 | F57 | **Gate 3 passes: LTE Saha ionization (NIST energies, GSI partition functions) leaves the class and signs intact;** the II-only assumption was right at the Gate 2 zones (99 % II) and at 1 d, with 60 % Ce III, the error is z −2.7 / K +1.9 | [§4.52](docs/results_report.md) |
+| F59 | **Dead-end handling is in the error budget:** depositing macroatom activations with no radiative exit instead of re-emitting them thermally moves B₂ − R₂ on the lanthanide-rich state from −2.9/+1.3 to −4.9/+0.1 mag (z/K); the thin state moves ≤ 0.3 mag; the thermal balance of Phases 9–10 closes it | [§4.54](docs/results_report.md) |
 
 Full write-up with figures and numbers:
 **[docs/results_report.md](docs/results_report.md)**.
