@@ -119,9 +119,9 @@ def run_fontes(state, shells, n, legs=LEGS, seeds=L.SEEDS, tau_min=1e-3, emis_cu
         res = [run_mc(atom, zone["r_core"], zone["r_out"], zone["t_exp"], lo, hi, n, spec["mode"], seed=s,
                       t_core=float(state.T_gas[shells[0]]), relativity=None, max_steps=L.MAX_STEPS, packets="energy",
                       launch_weight="energy", launch="volume", launch_core_frac=core_frac, core="reemit", wall_s=budget_s) for s in seeds]
-        # no grey scale: the escaping spectrum is the observable, scaled by nothing
-        o = photometer(observe(res, l_core, "none"), edges, nu_c, phot.D_40MPC)
-        per_seed = [photometer(observe([r], l_core, "none"), edges, nu_c, phot.D_40MPC)["mags"] for r in res]
+        # "absorbing" = no synthetic renormalisation: the escaping spectrum itself; legs share E_inj
+        o = photometer(observe(res, l_core, "absorbing"), edges, nu_c, phot.D_40MPC)
+        per_seed = [photometer(observe([r], l_core, "absorbing"), edges, nu_c, phot.D_40MPC)["mags"] for r in res]
         o["mags_seed_std"] = {b: float(np.std([m[b] for m in per_seed], ddof=1)) if len(res) > 1 else np.nan for b in o["mags"]}
         acc = [energy_accounting(r) for r in res]
         o["energy"] = {k: float(np.mean([a[k] for a in acc])) for k in acc[0] if k != "packets"}
