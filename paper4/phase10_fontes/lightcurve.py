@@ -341,6 +341,11 @@ def main():
                 else:
                     pop = ts.Population.empty()
             else:
+                if not pop_path.exists():
+                    run["notes"].append(f"{leg} slab {k}: no checkpoint (an earlier slab failed); leg stopped")
+                    print(f"  {leg} slab {k}: no checkpoint, leg stopped (gray)", flush=True)
+                    write_json_atomic(run_path, run)
+                    continue
                 pop = ts.Population.from_npz(pop_path)
             n_heat_k = int(round(cfg["n_heat"] * n_scale[leg] * E_heat[k] / E_heat.sum()))
             try:

@@ -155,3 +155,34 @@ def test_initial_radiation_energy_and_the_radiation_temperature_round_trip():
     assert np.all(n >= 50) and np.allclose(T, st.T_rad[1:5], rtol=0.01)
     # the lab energy exceeds the comoving one on average by the Doppler boost
     assert pop.energy_lab() > pop.energy_cm()
+
+
+def test_lightcurve_driver_smoke(tmp_path):
+    """The Phase 10b driver end to end on a tiny configuration (8 shells, two
+    0.15-d slabs, the resolved leg): checkpoints, atomic run.json, --analyse
+    with the global closure, and --resume reproducing a deleted slab bit for
+    bit. Needs the Nd cache."""
+    import json, shutil, subprocess
+    from sobolev.atomic_cache import CACHE_DIR
+    if not (CACHE_DIR / "60NdII.npz").exists():
+        pytest.skip("Nd cache not built")
+    drv = ROOT / "paper4/phase10_fontes/lightcurve.py"
+    py = sys.executable
+    out = tmp_path / "lc"
+    args = [py, str(drv), "--out", str(out), "--n-shell", "8", "--t1", "4.3", "--n-slabs", "2", "--n-init", "400",
+            "--n-heat", "200", "--legs", "R2"]
+    subprocess.run(args, check=True, capture_output=True, timeout=900)
+    run = json.loads((out / "run.json").read_text())
+    assert run["done"]["R2"] == [0, 1] and all(abs(t["identity"]) < 1e-12 for t in run["tallies"]["R2"])
+    assert np.isclose(run["tallies"]["R2"][1]["E_carried_in"], run["tallies"]["R2"][0]["E_carried_out"], rtol=1e-12)
+    subprocess.run([py, str(drv), "--out", str(out), "--analyse"], check=True, capture_output=True, timeout=300)
+    s = json.loads((out / "summary.json").read_text())
+    assert abs(s["legs"]["R2"]["closure"]) < 1e-10 and (out / "esc_R2_001.npz").exists()
+    # resume: drop slab 1 and rerun it from the slab-0 checkpoint
+    t1 = dict(run["tallies"]["R2"][1]); run["done"]["R2"] = [0]; run["tallies"]["R2"] = run["tallies"]["R2"][:1]
+    shutil.copy(out / "pop_R2.prev.npz", out / "pop_R2.npz")
+    (out / "run.json").write_text(json.dumps(run))
+    subprocess.run(args + ["--resume"], check=True, capture_output=True, timeout=900)
+    run2 = json.loads((out / "run.json").read_text())
+    t1b = run2["tallies"]["R2"][1]
+    assert all(t1[k] == t1b[k] for k in ("E_esc", "W", "E_carried_out", "seed", "n_paused", "events_max"))
