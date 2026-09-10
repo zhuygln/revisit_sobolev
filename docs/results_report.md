@@ -4594,6 +4594,42 @@ the wrong upper levels and the cascade lands elsewhere). The mechanism is
 a hypothesis to be tested with the line-identity and dual legs; the
 numbers are the finding.
 
+### 4.58 Phase 10, the stronger macroatom: internal upward transitions under an imposed field (F63)
+
+Instrument: `sobolev/macroatom.py::MacroAtom` — Lucy's (2003) macroatom
+with internal upward jumps p ∝ B_ik J̄_ik ε_i under an imposed diluted
+Planck field J̄ = W B_ν(T_zone), W = ½ (a photosphere), no collisions, the
+downward rates as before (net A β); `run_mc` outcome `macro`, legs R2M /
+B2M / Bbin2M (`paper4/phase2_energy/legs.py`). Data
+`paper4/phase10_fontes/macro_P1_t2_s28.json`: P1, 2 d, shell 28, final
+composition, 3 × 3×10⁵ packets, fixed populations. A level with no
+downward line is no longer a dead end (it climbs and cascades elsewhere:
+0 dead ends against 0.9 per packet in the downward table). This is not
+an equilibrium solution — J̄ is imposed, not estimated — but it is the
+strongest fluorescence treatment the fixed-state machinery can carry.
+
+| leg | g | r | i | z | J | H | K | E_esc / E_core / W | events per packet |
+|---|---|---|---|---|---|---|---|---|---|
+| R₂ (downward) | 26.02 | 24.42 | 23.67 | 23.17 | 22.47 | 21.85 | 20.34 | 0.230 / 0.668 / 0.102 | 12.2 |
+| R2M (full) | 24.22 | 22.68 | 21.97 | 21.50 | 20.83 | 20.59 | 20.35 | 0.139 / 0.738 / 0.123 | 43.5 |
+| B₂ − R₂ | −0.09 | −0.09 | −0.18 | −0.19 | −0.22 | −0.22 | −0.10 | | |
+| **B2M − R2M** | **−0.17** | **−0.14** | **−0.17** | **−0.18** | **−0.10** | **−0.14** | **−0.14** | | |
+| Bbin₂ − R₂ | +0.70 | +0.55 | +0.46 | +0.37 | +0.29 | +0.48 | +0.24 | | |
+| **Bbin2M − R2M** | **+0.67** | **+0.34** | **+0.25** | **+0.05** | **+0.01** | **+0.10** | **−0.25** | | |
+
+(Seed scatter ≤ 0.06 mag on R2M, ≤ 0.03 elsewhere.)
+
+**F63 — Under the full macroatom the resolved reference itself moves by
+1.3–1.8 mag (brighter in g–H, K unchanged: the imposed field pumps
+energy blueward through upward jumps and triples the events per packet),
+while the expansion closure's error stays where the downward macroatom
+put it, −0.10 to −0.18 mag in every band; the line-binned closure keeps
+its +0.7 mag g error, loses its red excess (z +0.05, J +0.01) and turns
+to −0.25 in K.** The conclusion of §4.57 is not a property of the downward
+table: the expansion closure tracks the resolved transport to ~0.15 mag
+whichever fluorescence treatment both are given, and the line-binned
+closure's error is larger and changes shape with the treatment.
+
 ## 5. Findings register
 
 | # | Finding | Where |
