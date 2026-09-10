@@ -2982,6 +2982,48 @@ untouched -- everything additive.
 absolute injection energy, escape times, event cap) and the light-curve
 driver; pilot; production overnight; the feedback-T variant.
 
+## 9be. The time-slab transport, its tests, and the pilots (2026-09-10)
+
+*Machinery.* `run_mc` gained the slab contract behind four keywords
+(`t_stop`, `resume`, `launch_energy`, `max_events`; worldline only): a
+packet whose clock reaches C t_stop is paused exactly there (fate 4, r and
+mu advanced, ctime assigned, s_acc = 0, shell at the pause), carried
+packets keep w and nu, new packets are equal-energy packets summing to the
+slab's heating and are injected at a uniform time in the slab at the
+shell's radii of that epoch, emitted isotropically in the comoving frame
+and aberrated; escapes record ct_esc and mu_esc; fate 5 = capped. The
+golden histories did not move (every branch is behind the keywords).
+`sobolev/timeslab.py` holds the checkpoint population, the Fontes heating
+law in closed form, the trapped field as the initial population, the
+observables and the T_rad rule. Zoned thermal legs now run under worldline
+(`tau_of_lines`); one shell stays bit-identical to the single zone.
+
+*Tests.* A slab split of a frozen-atom run reproduces the single run
+(escaped energy within noise, spectrum chi^2) with the per-slab identity
+exact and E_carried_out(k) == E_carried_in(k+1); escape times along radial
+rays through an opacity-free zone; injection energy exact in the comoving
+frame with shell shares proportional to mass; pause exactness and
+bit-reproducible resume; the cap; the initial field and the T_rad round
+trip; the driver end to end (checkpoints, closure, a deleted slab rerun
+bit for bit). Suite 589.
+
+*Pilots (Fontes 64 cells, mirror at cell 1, 4 -> 4.14 d, 2e4 packets).*
+R2 6 s per slab, 39 events per packet (the design estimate was 200 s: the
+interior packets meet far fewer resonances per slab than assumed); B2 5 s,
+Bth 2 s; Rth 170 s (the thermal re-absorption chain); Bbin2 94 s with 525
+events per packet and 1.9 % of the packets at the 20000-event cap; Bbinth
+100 s with 3513 events per packet. Slab convergence over 4 -> 5.2 d, 5 vs
+10 slabs: escaped energy 5.54e45 vs 5.69e45 (2.6 %, inside the Poisson
+noise of ~2500 escapes), work 1.264e46 vs 1.261e46, carried 4.874e46 vs
+4.862e46. The initial trapped field is 6.4e46 erg against 8.9e45 of
+heating over 4-16 d; in the first slab 2.5 % of it goes to expansion work
+and 0.02 % escapes.
+
+*Production launched.* 40 log slabs 4 -> 16 d, n_init 2e5, n_heat 1e5, four
+processes (R2; B2 + Bth; Rth at 0.35; Bbinth at 0.3), Bbin2 at 0.3 to
+follow; then the radiation-temperature variant for R2 and B2; then
+`--analyse`.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,
