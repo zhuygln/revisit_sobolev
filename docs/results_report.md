@@ -4473,6 +4473,44 @@ vs Bth within 0.1 mag). The epochs, P2, the 6- and 24-shell grids, the
 Phase 6 convergence axes and the Gate 2 verdict on the final compositions
 at every epoch follow in §4.56 as the reruns complete.
 
+### 4.56 Paper IV on the fixed transport: epochs, grids, convergence, and Gate 2 on the final compositions (F58, F61)
+
+Data: `paper4/phase8_shells/shells_*_fixed.json` (12 resolved shells above
+the photosphere at 1, 2, 3, 5 d; 6 and 24 shells at 2 d; P2 on all 32
+shells), `paper4/phase6_convergence/converge_P1_t2_s28_fixed.json`,
+`paper4/phase9_final/legs_*.json` (every leg, 3 × 3×10⁵ packets, final
+compositions), verdict `paper4/phase3_legs/verdict.py`.
+
+**Multi-shell, P1, final composition** (B₂ − R₂ and Bbin₂ − R₂; seed scatter ≤ 0.02):
+
+| grid | B₂ g | r | i | z | J | H | K | Bbin₂ g | z | K |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1 d, 11 shells | −0.10 | −0.16 | −0.17 | −0.19 | −0.20 | −0.16 | −0.05 | +0.54 | +0.22 | 0.00 |
+| 2 d, 4 shells | −0.21 | −0.22 | −0.25 | −0.17 | −0.17 | −0.17 | −0.03 | +0.68 | +0.29 | −0.01 |
+| 2 d, 6 shells | −0.14 | −0.19 | −0.24 | −0.18 | −0.15 | −0.17 | −0.03 | +0.66 | +0.28 | +0.05 |
+| 2 d, 12 shells | −0.14 | −0.18 | −0.23 | −0.16 | −0.16 | −0.17 | −0.03 | +0.48 | +0.29 | +0.02 |
+| 2 d, 23 shells | F24_ROW |
+| 3 d, 12 shells | −0.20 | −0.28 | −0.21 | −0.18 | −0.15 | −0.17 | −0.02 | +0.58 | +0.28 | +0.04 |
+| 5 d, 12 shells | −0.25 | −0.25 | −0.22 | −0.15 | −0.12 | −0.13 | 0.00 | +0.44 | +0.19 | −0.03 |
+| P2, 3.4 d, 32 shells | P2_ROW |
+
+**Convergence of the corrected closure** (P1, 2 d, shell 28, §4.51's axes
+rerun): B₂ − R₂ in z is −0.13 / −0.19 / −0.17 for τ_min = 10⁻² / 10⁻³ /
+10⁻⁴, −0.18 / −0.19 / −0.15 for bin widths 4.2×10⁻⁶ / 4.2×10⁻⁵ / 4.2×10⁻⁴,
+−0.23 / −0.14 / −0.19 / −0.20 for 1–4 × 10⁵ packets, −0.22 / −0.16 / −0.20
+for a_cut 10⁻³ / 10⁻⁴ / 10⁻⁵; K within −0.01 … −0.14 throughout. The
+closure's error now moves by ≤ 0.05 mag with its own bin width and line
+cut (it moved ~1 mag pre-fix, §4.51) — the bin-width sensitivity was the
+leak's sensitivity to how spiky neighbouring bins are.
+
+**F58 — On the final compositions the corrected single-zone ladder at
+P1, 2 d is R₁ → R₁ᴱ → R₂ = +1.33 / +1.09 mag in z (bookkeeping /
+transition probabilities, unchanged from F50) and B₂ − R₂ = −0.19 (z),
+−0.10 (K); on P2 +0.11 (g). The composition swap from the provisional
+patterns moved nothing by more than 0.15 mag.**
+
+**F61 — Gate 2 on the fixed transport.** GATE2_PLACEHOLDER
+
 ## 5. Findings register
 
 | # | Finding | Where |
