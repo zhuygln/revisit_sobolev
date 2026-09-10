@@ -4695,7 +4695,36 @@ binned by its colour. At 6.3 d the initial-profile temperature scaling
 (T ∝ t⁻¹) leaves the zone at ≤ 1800 K and transparent (one event per
 packet, 96 % escape); the epoch is not a test and is not used.
 
-JPLT_PLACEHOLDER
+**The independent line list.** The same snapshot with Nd II/III from the
+Japan-Lithuania Opacity Database v2.1 (Kato et al. 2021; HULLAC/GRASP,
+uncalibrated; 0.25 M lines above f = 10⁻³ against the GSI set's 1.09 M —
+a four times thinner forest, 13–17 events per packet), `fontes_t4_z45_jplt_*.json`:
+
+| redistribution | closure − resolved (g, r, i, z, J, H, K) | reemit | reflect |
+|---|---|---|---|
+| ε = 1 | expansion | −0.78, −0.52, −0.57, −0.16, −0.39, +0.01, +0.05 | −0.86, −0.45, −0.48, −0.16, −0.41, −0.05, −0.06 |
+| ε = 1 | line-binned | −0.30, −0.17, −0.13, −0.06, −0.16, −0.01, +0.01 | −0.09, −0.04, −0.06, −0.01, −0.12, −0.07, −0.07 |
+| fluorescence | expansion | −0.50, −0.57, −0.46, −0.22, −0.42, +0.03, +0.04 | −0.84, −0.57, −0.45, −0.24, −0.47, −0.03, −0.04 |
+| fluorescence | line-binned | did not terminate | did not terminate |
+
+Colour r − K (reemit / reflect): resolved ε = 1 5.43 / 5.07, expansion
+4.87 / 4.69, line-binned 5.25 / 5.10; resolved fluorescence 5.18 / 4.88,
+expansion 4.56 / 4.35. The five-leg pattern is the GSI one on a different
+forest: line-binned within 0.0–0.3 mag under complete redistribution,
+expansion 0.4–0.6 mag too blue in r − K under both. The line-binned
+closure under the downward macroatom **did not terminate** on this line
+list (packets still alive after 10⁶ transport steps at 10⁴ packets, both
+brackets; on the GSI forest it needed 230–290 events per packet against
+60–80 for the others): a packet re-emitted by the macroatom at the
+frequency of a saturated line sits in a Σ τ bin that re-absorbs it with
+certainty, the walk re-enters the same upper level and leaves by the same
+line, and nothing in the closure plays the role the Sobolev escape
+probability plays in the resolved transport (or 1 − e^{−τ} in the
+expansion closure). Under complete redistribution the same bins cost
+1000–8000 events per packet and terminate. The line-binned closure with
+explicit fluorescence is therefore not merely less accurate but, on a
+strong-lined forest, ill-posed without a per-line escape treatment — a
+result of the benchmark, stated as such.
 
 ## 5. Findings register
 
