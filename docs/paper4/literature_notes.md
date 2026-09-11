@@ -22,7 +22,7 @@ read in the full text, never inferred.
 | claim in the manuscript | source | how verified |
 |---|---|---|
 | The expansion-opacity formalism replaces the lines of a bin by an effective opacity ∝ Σ(1 − e^{−τ}) | `karp1977`, `eastman1993` | Paper III notes (full text of Eastman & Pinto 1993 §2) |
-| Fontes et al. 2020 compared line-by-line, expansion and line-binned transport on a pure-Nd problem and found agreement to within several per cent at the peak, expansion the brightest | `fontes2020` | full text: Appendix C (the problem's parameters are transcribed in `paper4/phase10_fontes/fontes.py`) and their light-curve comparison of the three treatments |
+| Fontes et al. 2020 compared line-by-line, expansion and line-binned transport on a pure-Nd problem and found agreement to within several per cent at the peak, resolved Sobolev the brightest, expansion next, line-binned the faintest | `fontes2020` | full text: Appendix C (the problem's parameters are transcribed in `paper4/phase10_fontes/fontes.py`) and their light-curve comparison of the three treatments |
 | The line-binned opacity is the one used in SuperNu-based kilonova models | `wollaeger2018`, `fontes2020` | Fontes et al. 2020 (full text: the line-binned opacity is the treatment used with SuperNu) |
 | ARTIS treats fluorescence line by line with the Lucy macroatom; Shingles et al. argue it matters for the NIR | `shingles2023`, `collins2023`, `lucy2002`, `lucy2003` | Paper III notes (abstracts + full text of Shingles et al. 2023) |
 | Collins et al. 2026 and Morag et al. 2026 identify line-opacity treatment as a leading uncontrolled choice | `collins2026`, `morag2026` | Paper III notes (abstracts) |

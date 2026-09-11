@@ -1,12 +1,19 @@
 # Sobolev Validity in Kilonova Ejecta — Results Report
 
-**Status:** Phase 0 through the validity maps and mechanism isolation, complete
-— findings F1–F14, 13 figures, 68 tests. **Date:** 2026-08-18. **Repo:** `zhuygln/revisit_sobolev`.
+**Status:** Paper I and Paper III are frozen records; Paper III is tagged
+`paper3-freeze` and carries the boxed correction of `paper3/CORRECTION.md`.
+Paper IV is complete on the corrected transport — findings F1–F66, 603 tests,
+the computational result set tagged `paper4-freeze`.
+**Date:** 2026-09-12. **Repo:** `zhuygln/revisit_sobolev`.
 
-**Manuscript:** [paper/manuscript.pdf](paper/manuscript.pdf) — the paper drawn
-from this report, written for readers without a radiative-transfer background.
-Companion: [lab_notebook.md](lab_notebook.md) (chronological log, including
-dead ends and fixes). Planning inputs, preserved unmodified:
+**Manuscripts:** [paper4/manuscript.pdf](paper4/manuscript.pdf) — the Paper IV
+methods paper (every number a macro generated from `paper4/FROZEN.json`;
+§4.55–4.61 of this report are its record). Paper I is at
+[paper/manuscript.pdf](paper/manuscript.pdf) and Paper III at
+[paper3/manuscript.pdf](paper3/manuscript.pdf), the latter under its
+correction notice. Companion:
+[lab_notebook.md](lab_notebook.md) (chronological log, including dead ends
+and fixes). Planning inputs, preserved unmodified:
 [babystep_plan.md](babystep_plan.md), [research_requirements.md](research_requirements.md).
 
 ---
