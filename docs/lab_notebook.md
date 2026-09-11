@@ -3080,7 +3080,9 @@ Controls: 5 vs 10 slabs over 2 -> 2.5 d agree in E_rad to 0.5 %, W to
 source arriving late).
 
 Result (4.61, F66): the three treatments give the same bolometric curve
-(peaks within 2 %, noise 1.6 % -> R2 Gray by rule: nothing to order); the
+(peaks within 2 %, noise 1.6 % -> R2 Gray by rule; the PI reads it as
+"no statistically resolved bolometric ordering, but distinct chromatic
+biases", not as a zone too thin to order); the
 colours differ -- expansion i 0.32 too bright, K unchanged (i-K -0.32);
 line-binned i 0.36 too faint, K 0.11 too bright (i-K +0.51, J-K +0.17):
 opposite signs, line-binned larger in every colour that reaches K,

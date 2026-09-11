@@ -544,3 +544,106 @@ Replace: outer zone above τ ≈ 30 + full SourceModel luminosity + zone heating
 ## Manuscript wording
 
 If you make that change, I would describe P1 as: "a transport replacement test on the published xkn secular-ejecta structure: the xkn diffusion solution supplies the optically thick photospheric boundary condition, while the outer ejecta are evolved with resolved or coarse-grained line transport." That is much stronger than saying "xkn-like." So my decision is: **Approve Parts A and C; revise Part B before running production.** The current Part B is close, but the energy partition should follow xkn's own thick/thin decomposition. Otherwise the P1 light curve risks becoming internally inconsistent precisely in the way we're trying to avoid in this paper.
+
+### Scope freeze and the review pass (2026-09-11, late; verbatim)
+
+Yes — I think the project is now at the point where you should freeze the scientific scope and move into review/writing mode.
+
+My calls are:
+
+1. Title: use the safer, specific title
+
+I would use:
+
+Testing coarse line-opacity treatments with energy-conserving fluorescence in kilonova ejecta
+
+That is stronger scientifically than the earlier "breaks the equivalence" wording because it does not overstate what the field previously assumed.
+
+A slightly more assertive alternative, if the abstract stays careful, is:
+
+Fluorescence differentiates expansion and line-binned opacity treatments in kilonova radiative transfer
+
+I would probably submit with the first one unless the coauthors strongly prefer a punchier title.
+
+2. F66's Gray bolometric result is not a failure
+
+I would not describe it as "the zone is too thin to order."
+
+What F66 actually says is more interesting: the closures are nearly indistinguishable bolometrically, while they produce different colours, with opposite signs.
+
+That fits the methods-paper story very well.
+
+For P1-xkn: expansion: i-K about 0.32 mag too blue; line-binned: i-K about 0.51 mag too red; peak luminosities differ by less than the MC resolution.
+
+So the correct statement is:
+
+No statistically resolved bolometric ordering is present in the P1 outer-ejecta benchmark, but the two closures produce distinct chromatic biases.
+
+That is actually cleaner than finding another 15% luminosity difference. It tells us the closure choice can alter the SED without strongly changing the total light curve.
+
+I would not rerun deeper shells simply to manufacture a bolometric hierarchy.
+
+3. F65 stays Gray — and that is fine
+
+The high-cap experiment gave exactly the right diagnostic result. The trapped line-binned packets simply consume more interactions when you give them a larger budget: 1786 → 4435 mean interactions per packet, while the trapped fraction barely moves. That shows this is not ordinary insufficient max_events. It's a structural limitation of attaching explicit fluorescence to that particular line-binned representation.
+
+The important observation is that the observable light curve is fairly insensitive to increasing the cap, even though a small trapped population remains.
+
+So I would report:
+
+The line-binned fluorescence light curve is numerically stable at the quoted level, but a small non-terminating packet population prevents interpreting the calculation as fully converged in the microscopic transport sense.
+
+That's more informative than forcing Green/Red. And keep the word Gray. Your preregistered rule did its job.
+
+4. The paper's actual result is now quite clear
+
+I think the manuscript should center around three statements.
+
+First: Under complete thermal redistribution, resolved, expansion, and line-binned treatments remain relatively close. That's the Fontes connection.
+
+Second: With explicit energy-conserving fluorescence, expansion opacity remains close to resolved transport in the tested states.
+
+Third: Line-binned opacity develops larger and oppositely directed chromatic differences because binning has discarded information needed to determine post-absorption line behavior.
+
+The P1 result is especially useful because it shows this isn't just a pure-Nd artifact.
+
+And importantly: bolometric agreement ⇏ spectral agreement. That's now a legitimate conclusion again — but this time from corrected transport.
+
+5. Do not add more major physics before submission
+
+I would now not do: deeper P1 transport; full gas-energy equilibrium; NLTE; Phases 9–10; another abundance grid; another 27-point parameter survey. Those would make the paper harder to finish without materially improving the central claim.
+
+The limitations are already explicit: prescribed thermal trajectory; radiation-field-driven macroatom is not self-consistent; II-only P1; Fontes light curve is a controlled extension, not an exact SuperNu reproduction; line-binned fluorescence has a small non-terminating packet population; some late bands are packet-starved.
+
+That's acceptable for a methods benchmark paper as long as the claims stay inside those boundaries.
+
+6. PR #3 should leave draft now
+
+Yes. You now have: corrected transport merged; the high-cap rerun finished; F65 finalized; F66 finalized; 600 tests passing; make check green; no TODOs; frozen numerical macros; compiled manuscript; all major preregistered conditions reported, including Gray outcomes.
+
+So: Mark PR #3 ready for review.
+
+I would not merge it immediately, though. At this point the purpose of the PR is no longer "does the code run?" It should get one deliberate scientific/code review pass of:
+
+1. the time-slab energy accounting;
+2. the moving xkn photosphere bookkeeping;
+3. the line-binned fluorescence interpretation;
+4. the manuscript claims against F62–F66;
+5. the figures/macros/freeze provenance.
+
+Then merge.
+
+7. I would freeze the scope after review
+
+You have had several moments in this project where a more ambitious result disappeared under a better test. That is actually why the current paper is now much more trustworthy.
+
+The final progression is: apparent catastrophic closure failure → transport bug found → corrected expansion opacity works fairly well → but fluorescence reveals a meaningful distinction between expansion and line-binned coarse graining.
+
+That is a solid methods story.
+
+So my final calls are:
+* Title: use the safe "Testing coarse line-opacity treatments…" title.
+* F66: treat Gray bolometric agreement as a result, not a failed hierarchy.
+* F65: retain Gray because of the persistent trapped population.
+* PR #3: mark ready for review now.
+* Science scope: freeze after that review and finish the manuscript.

@@ -5001,9 +5001,13 @@ to 4435 — the trapped packets absorb whatever budget they are given and do
 not terminate. The light curve is insensitive to the cap: escaped energy
 +1.1 %, peak luminosity −0.1 %, per-slab luminosities within the leg's
 packet noise (one slab at 7.3 d differs by 11 %), max|Δcolour| 0.45 → 0.51
-(J − K). The tables carry the high-cap run; R2 stays Gray — not because
-the answer is uncertain but because the leg is the bounded form of the
-ill-posedness of §4.59. Read past the gray, the numbers are expansion
+(J − K). The tables carry the high-cap run. PI (2026-09-11): "the line-binned
+fluorescence light curve is numerically stable at the quoted level, but a
+small non-terminating packet population prevents interpreting the
+calculation as fully converged in the microscopic transport sense" — a
+structural limitation of attaching explicit fluorescence to this
+line-binned representation, not ordinary insufficient max_events; R2
+stays Gray. Read past the gray, the numbers are expansion
 +17 %, line-binned +3.7 %, the same ordering.
 (R3) the colour residual: under ε = 1 line-binned 0.13 and
 expansion 0.20; under fluorescence expansion 0.32 and line-binned 0.45,
@@ -5124,8 +5128,10 @@ does not change how much comes out.
 bolometric hierarchy under fluorescence: **Gray** by the rule — the
 peak-luminosity spread of the three treatments is 2.1 % against a Poisson
 noise of 1.6 % (expansion +0.9 %, line-binned −1.2 %), so no ordering can be
-read; what the gray says is that on this zone the three treatments give the
-same bolometric light curve. (R3) the colour residuals: the expansion
+read; what the gray says (PI, 2026-09-11: not "the zone is too thin to
+order") is that the closures are nearly indistinguishable bolometrically
+while they produce different colours with opposite signs — the closure
+choice can alter the SED without strongly changing the total light curve. (R3) the colour residuals: the expansion
 closure is 0.32 mag too bright in i throughout, unchanged in K, so its
 i − K is 0.32 mag too blue (the grey blueward offset of F62 and F65, here
 concentrated in i because z–K are nearly transparent); the line-binned
@@ -5143,9 +5149,10 @@ the resolved leg has become transparent.
 **F66 — On the published xkn secular-ejecta structure with the P1
 composition, evolved from 2 to 8 d with the xkn diffusion solution as the
 photospheric boundary condition and the outer ejecta under resolved,
-expansion or line-binned transport with explicit fluorescence, the three
-treatments give the same bolometric light curve (peak luminosities within
-2 %, inside the packet noise) and differ in colour: the expansion closure
+expansion or line-binned transport with explicit fluorescence, no
+statistically resolved bolometric ordering is present (peak luminosities
+within 2 %, inside the packet noise) but the two closures produce distinct
+chromatic biases: the expansion closure
 is a 0.3 mag blueward offset in i − K, the line-binned closure a 0.5 mag
 redward one, opposite in sign and larger, with the line-binned leg's
 interaction count growing twenty-fold over the run.** The hierarchy of
