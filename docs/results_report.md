@@ -5067,7 +5067,10 @@ x_ph(t_a); T_ph from L_thick; the thin shells' temperatures by eq. 50); the
 transport zone is the set of fine shells whose inner edge lies at or
 outside R_ph(t_a) — it grows inward as the photosphere recedes, and the
 packets carried over from the previous slab are inside it by
-construction; the inner boundary injects E_thick = ∫ L_thick dt with the
+construction (the sliver between R_ph and the zone's inner edge, up to
+0.85 of a fine shell, is neither transported nor heated: its heating
+would be a fraction of the zone's 0.3 %, and L_thick is injected at the
+zone's inner edge rather than at R_ph itself); the inner boundary injects E_thick = ∫ L_thick dt with the
 Planck spectrum at T_ph(t_a), and each zone shell only its own deposited
 heating m_i ∫ ε̇ f_th(t, x_i) dt; there is no other source and no trapped
 field is injected for the zone at 2 d or for shells that join it later

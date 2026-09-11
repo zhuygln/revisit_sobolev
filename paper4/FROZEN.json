@@ -1,6 +1,6 @@
 {
  "paper": "IV",
- "git_head": "e0a5e8c94bb94c1bf848fd642aa3ea34451527d4",
+ "git_head": "72fff8dc378f1c8ba8e7f54d544067cb00e60359",
  "headline": {
   "sources": {
    "paper4/phase9_final/legs_P1_t1.json": "24b118aa795f3052",
@@ -30,6 +30,7 @@
    "paper4/phase10_fontes/fontes_t4_z45_jplt_reemit.json": "9353e1f4de6e99fe",
    "paper4/phase10_fontes/fontes_t4_z45_jplt_reflect.json": "ecb514c51a36e42f",
    "paper4/phase10_fontes/prod_record/merged/summary.json": "d00a233bdd98df3a",
+   "paper4/phase10_fontes/prod_record/merged/run.json": "ac3c7d4f2cc809d3",
    "paper4/phase10_fontes/prod_record/Bbin2/run.json": "2784f1847974b7f1",
    "paper4/phase10_fontes/prod_record/Bbin2_cap3e5/run.json": "894655fb10aa667b",
    "paper4/phase10_fontes/prod_record/merged_cap1e5/summary.json": "8dc2e2c0ef40173f",

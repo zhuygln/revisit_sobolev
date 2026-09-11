@@ -118,6 +118,7 @@ def headline():
 
     # ---- the light curve (F65) ----
     d, rel, s = load("paper4/phase10_fontes/prod_record/merged/summary.json"); note(rel, s)
+    note("paper4/phase10_fontes/prod_record/merged/run.json", sha(ROOT / "paper4/phase10_fontes/prod_record/merged/run.json"))   # the summary derives from it
     lc = {}
     for leg, o in d["legs"].items():
         lc[leg] = dict(t_peak_d=o["t_peak_d"], L_peak=o["L_peak"], E_rad=o["E_rad"], W_tot=o["W_tot"], E_init=o["E_init"],

@@ -105,6 +105,9 @@ MACROS = [
     ("LcCapLdev", "lightcurve.bbin2_cap.L_ratio_max_dev", "pct0", False),
     ("LcCapLpeakChange", lambda h: abs(h["lightcurve"]["bbin2_cap"]["L_peak_change"]), "pct1", True),
     ("LcCapOldColour", "lightcurve.bbin2_cap.cap1e5_max_abs_dcolour", "f2", True),
+    ("LcFreeClosure", lambda h: abs(h["lightcurve"]["free_streaming"]["closure"]), "sci1", True),
+    ("FontesBbinEvRatioR", lambda h: h["fontes_snapshot"]["gsi_reflect"]["ev"]["Bbin2"] / h["fontes_snapshot"]["gsi_reflect"]["ev"]["R2"], "f1", True),
+    ("FontesBbinEvRatioB", lambda h: h["fontes_snapshot"]["gsi_reflect"]["ev"]["Bbin2"] / h["fontes_snapshot"]["gsi_reflect"]["ev"]["B2"], "f1", True),
     # the P1-xkn transport replacement test (F66)
     ("PxSlabs", "lightcurve_p1xkn.n_slabs", "int", True),
     ("PxXphFirst", "lightcurve_p1xkn.zone.x_ph_first", "f2", True),

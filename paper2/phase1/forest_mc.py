@@ -631,7 +631,16 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
         absorbs it. A VALIDATION mode for the geometric-series normalisation
         (`photometry._scale(core="equilibrium")` is exact for i.i.d.
         relaunches); it costs x1/(1 - f_return) and is not for production.
-        Requires packets="energy". "reflect" -- a lossless mirror: the packet
+        Requires packets="energy". Note that "reemit" draws the direction and
+        the Planck frequency in the LAB frame and keeps the lab energy: at a
+        boundary moving at beta it is not the emission of a thermalising
+        surface. "reemit_cm" -- the same surface treated in its own comoving
+        frame: the arriving lab energy is transformed to the boundary frame,
+        the packet is re-emitted there (flux-weighted isotropic, comoving
+        Planck at t_core) and aberrated to the lab, and the lab-energy change
+        is booked as work with the interaction work (the identity still
+        closes). Paper IV Phase 10c review: the P1-xkn photosphere at 0.10c.
+        "reflect" -- a lossless mirror: the packet
         keeps its frequency and weight and leaves radially outward (Phase 10,
         the "no thermalisation inside" bracket for an interior the transport
         does not contain; "reemit" is the "complete thermalisation" bracket).
@@ -760,9 +769,9 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
     if packets not in ("photon", "energy"):
         raise ValueError(f"packets must be 'photon' or 'energy', got {packets!r}")
     energy = packets == "energy"
-    if core not in ("absorb", "reemit", "reflect"):
-        raise ValueError(f"core must be 'absorb', 'reemit' or 'reflect', got {core!r}")
-    reemit = core in ("reemit", "reflect")
+    if core not in ("absorb", "reemit", "reemit_cm", "reflect"):
+        raise ValueError(f"core must be 'absorb', 'reemit', 'reemit_cm' or 'reflect', got {core!r}")
+    reemit = core in ("reemit", "reemit_cm", "reflect")
     reflect = core == "reflect"
     if reemit and (not energy or t_core is None):
         raise ValueError("core='reemit' needs packets='energy' and a Planck core (t_core)")
@@ -1282,6 +1291,25 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
                     # the "no thermalisation inside" bracket of an interior
                     # the transport does not contain)
                     mu[rl] = np.abs(mu[rl])
+                elif core == "reemit_cm":
+                    # thermalised in the boundary's comoving frame and
+                    # re-emitted there: the arriving lab energy is transformed
+                    # to the boundary frame, the packet leaves isotropically
+                    # (flux-weighted) in that frame with a comoving Planck
+                    # frequency at t_core, and is aberrated to the lab; the
+                    # lab-energy change is the work the moving boundary does
+                    # on the radiation, booked with the interaction work
+                    b_b = (r[rl] / ctime[rl]) if wl else np.full(rl.size, b_core_v)
+                    g_b = 1.0 / np.sqrt(1.0 - b_b * b_b)
+                    e_cm = w[rl] * nu_old * g_b * (1.0 - b_b * mu[rl])       # / H
+                    mu_c = np.sqrt(rng.uniform(0.0, 1.0, rl.size))
+                    nu_c = sample_launch_energy(rng, nu_min, nu_max, rl.size, t_core)
+                    den_b = 1.0 + b_b * mu_c
+                    nu_new = nu_c * g_b * den_b
+                    w_new = e_cm / nu_c
+                    e_dep_lab[rl] += H * (w[rl] * nu_old - w_new * nu_new)
+                    mu[rl] = (mu_c + b_b) / den_b
+                    w[rl] = w_new; nu[rl] = nu_new
                 else:
                     mu[rl] = np.sqrt(rng.uniform(0.0, 1.0, rl.size))
                     nu_new = sample_launch_energy(rng, nu_min, nu_max, rl.size, t_core)

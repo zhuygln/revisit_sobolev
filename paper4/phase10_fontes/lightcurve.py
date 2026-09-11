@@ -360,7 +360,7 @@ def main():
     ap.add_argument("--n-slabs", type=int, default=40)
     ap.add_argument("--n-shell", type=int, default=64)
     ap.add_argument("--transport", default=None, help="a-b shells (default 1 to the edge)")
-    ap.add_argument("--core", default="reflect"); ap.add_argument("--max-passes", type=int, default=10 ** 9)
+    ap.add_argument("--core", default="reflect", help="absorb, reemit (lab-frame re-emission), reemit_cm (comoving-frame re-emission, boundary work booked), reflect"); ap.add_argument("--max-passes", type=int, default=10 ** 9)
     ap.add_argument("--legs", default="R2,B2,Bbin2,Rth,Bth,Bbinth")
     ap.add_argument("--n-scale", default="", help="per-leg packet multipliers, e.g. Bbinth=0.03,Bbin2=0.3")
     ap.add_argument("--n-init", type=int, default=200000); ap.add_argument("--n-heat", type=int, default=100000)
@@ -474,9 +474,9 @@ def main():
                 run["tallies"][leg].append(dict(k=k, status=f"failed: {str(e)[:120]}", t_a=t_a, t_b=t_b, f_capped=0.0, W=0.0, E_capped=0.0,
                                                 E_core=0.0, E_abs=0.0, E_inj_new=0.0, E_carried_in=0.0, E_carried_out=0.0))
                 run["notes"].append(f"{leg} slab {k} failed: {e}")
-                print(f"  {leg} slab {k}: FAILED {str(e)[:100]}", flush=True)
+                print(f"  {leg} slab {k}: FAILED {str(e)[:100]} -- the leg stops here (gray)", flush=True)
                 write_json_atomic(run_path, run)
-                continue
+                break                                   # the next slab would resume a stale checkpoint
             if pop_path.exists():
                 os.replace(pop_path, out_dir / f"pop_{leg}.prev.npz")
             pop_next.to_npz(pop_path)
