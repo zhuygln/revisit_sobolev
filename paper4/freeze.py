@@ -164,7 +164,7 @@ def main():
     fz = build()
     if a.check:
         old = json.loads(OUT.read_text())
-        same = old["headline"] == fz["headline"]
+        same = json.dumps(old["headline"], sort_keys=True, default=float) == json.dumps(fz["headline"], sort_keys=True, default=float)
         print("FROZEN.json headline", "matches" if same else "DIFFERS from", "the records")
         sys.exit(0 if same else 1)
     OUT.write_text(json.dumps(fz, indent=1, default=float))

@@ -62,3 +62,11 @@ docs/paper3/*.blg
 docs/paper3/*.log
 docs/paper3/*.out
 docs/paper3/*.toc
+
+# Paper IV manuscript build products (manuscript.pdf tracked, as for Paper III)
+docs/paper4/*.aux
+docs/paper4/*.bbl
+docs/paper4/*.blg
+docs/paper4/*.log
+docs/paper4/*.out
+docs/paper4/*.toc

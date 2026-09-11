@@ -5021,6 +5021,74 @@ transport to the 0.1 mag level once fluorescence is retained, and the
 expansion closure misstates the peak luminosity by 15 % under either
 redistribution.
 
+### 4.61 Phase 10c, the P1 composition as a light curve: a transport replacement test on the published xkn secular-ejecta structure (F66)
+
+Instrument: `sobolev/xkn.py` (the xkn-diff prescription of Ricigliano et
+al. 2024, MNRAS 529, 647: the thick-ejecta diffusion luminosity of their
+eq. 22–23 by an exponential-Euler mode integration, 1000 modes, within
+0.7 % of 4000; the M_thick rescale of eq. 24; the (1 − x²)³ profile of
+eq. 25; the photosphere τ_γ = 2/3 of eq. 26–28 by exact root finding; T_ph
+of eq. 29 with the 984 K floor; the thin-layer heating of eq. 47 and 59
+with the Barnes et al. 2016 thermalisation at X = t/(1 − x²); the thin-layer
+temperatures T_i = T_ph (1 − x_i²)/(1 − x_ph²) of eq. 50; the shipped
+constants t0 = 3597 s, T0 = 4.17×10⁴ K, f_th0 = 0.866, β = 0.243; the
+Korobkin et al. 2012 heating law ε̇ = 1.95×10¹⁰ (t/1 d)^−1.3 erg s⁻¹ g⁻¹,
+xkn's "K" option), `paper4/phase1_benchmarks/build.py::build_p1_xkn`
+(the P1 secular ejecta, M = 2.64×10⁻² M⊙, v_rms = 0.06c, on a grid of 8
+coarse shells below x = 0.75 and 24 fine shells above; κ = 22.3 cm² g⁻¹,
+the Tanaka et al. 2020 Y_e = 0.2 value as implemented in xkn; the
+Gillanders Ye-0.21a pattern at X_lan = 0.11; singly ionized only; Boltzmann
+populations at the eq. 50 temperatures), `--model p1xkn` in
+`paper4/phase10_fontes/lightcurve.py`, tests in `tests/test_xkn.py` and
+`tests/test_timeslab.py`. Data `paper4/phase10_fontes/prod_record/p1xkn/`.
+
+**The design** (the PI's revision of 2026-09-11, verbatim in
+`paper4/plan_review.md`): the xkn diffusion solution supplies the optically
+thick photospheric boundary condition, and the ejecta outside the
+photosphere are evolved with resolved or coarse-grained line transport.
+Per slab [t_a, t_b] the state is rebuilt at t_a (ρ ∝ t⁻³; the photosphere
+x_ph(t_a); T_ph from L_thick; the thin shells' temperatures by eq. 50); the
+transport zone is the set of fine shells whose inner edge lies at or
+outside R_ph(t_a) — it grows inward as the photosphere recedes, and the
+packets carried over from the previous slab are inside it by
+construction; the inner boundary injects E_thick = ∫ L_thick dt with the
+Planck spectrum at T_ph(t_a), and each zone shell only its own deposited
+heating m_i ∫ ε̇ f_th(t, x_i) dt; there is no other source and no trapped
+field is injected for the zone at 2 d or for shells that join it later
+(the thin layers hold no reservoir in xkn); packets that return to the
+boundary are thermalised by the thick interior and re-emitted at T_ph
+(`core reemit`, the returned energy booked). The conventions decided and
+recorded in the state's metadata: the spherically consistent
+v_max = 1.915 v_rms = 0.1149c and the spherical M_thick (the xkn code's
+3 v_rms under its 1-D mass measure is the alternative; it moves x_ph from
+0.91 to 0.88 at 2 d), √(5/3) v_rms in the diffusion solution as in xkn, the
+exact photosphere root (xkn's parabola is an 8 % approximation). Epochs
+2 → 8 d in 30 logarithmic slabs (singly ionized lanthanides only: 1 d
+would need the Saha atom of the 27 ions), the fluorescence trio R₂ / B₂ /
+Bbin₂ at 3×10⁵ heating packets per slab (Bbin₂ at 0.3 of that), event cap
+3×10⁵. Closure per slab: E_carried_in + E_thick + E_heat,zone = E_esc +
+E_core + W + E_carried_out, to machine precision on every slab.
+
+**What the zone is.** At 2 d the photosphere sits at x_ph = 0.908, T_ph =
+3696 K, and the transported zone is the outer 8 of the 24 fine shells; its
+own deposited heating is 0.3 % of the energy that enters it per slab (the
+rest is the thick interior's luminosity through the boundary). The
+photosphere recedes to x_ph = 0.85 by 5 d, where T_ph = 2100 K and the zone
+holds 14 fine shells; the interactions per packet on the resolved leg fall
+from 5 at 2 d to below 1 by 5 d — the zone is line-thick only in the first
+days, which is where the reading is made.
+
+**Controls.** Slab convergence: the resolved leg over 2 → 2.5 d in 5 and
+10 slabs (5×10⁴ heating packets) agrees in escaped energy to 0.5 %, in
+expansion work to 1.5 %, in the energy still in flight to 2.4 %, within
+the packet noise. Free streaming: the same run with every line removed
+(`--f-min 1e30`) has W = 0 exactly, closure 2×10⁻¹⁶, and an escaping
+luminosity equal to xkn's own L_thick + L_thin after the first slab
+(the ratio L_esc / L_xkn is 0.68 in the first slab — the light-crossing
+delay of the thin zone — and 1.00–1.07 thereafter, the delayed arrival of
+a declining source). The pipeline reproduces the model it replaces when
+there is nothing to transport.
+
 ## 5. Findings register
 
 | # | Finding | Where |
