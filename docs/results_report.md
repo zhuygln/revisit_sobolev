@@ -5089,6 +5089,66 @@ delay of the thin zone — and 1.00–1.07 thereafter, the delayed arrival of
 a declining source). The pipeline reproduces the model it replaces when
 there is nothing to transport.
 
+**The three light curves** (fluorescence trio, L in 10⁴⁰ erg s⁻¹ in escape
+time; the g and r bands are starved at every epoch and i is starved on the
+line-binned leg after 3.7 d, so the colours are read in i, z, J, H, K where
+the bins hold ≥ 100 packets):
+
+| leg | t_peak (d) | L_peak | E_rad (10⁴⁶) | W (10⁴⁴) | ΔL_peak | median Δm i / z / J / H / K | median Δ(i−K) / Δ(z−K) / Δ(J−K) | max\|Δcolour\| | events per packet, first / last slab |
+|---|---|---|---|---|---|---|---|---|---|
+| R₂ (resolved) | 2.27 | 3.56 | 1.251 | 6.25 | — | — | — | — | 5.0 / 0.2 |
+| B₂ (expansion) | 2.28 | 3.59 | 1.261 | 5.30 | +0.9 % | −0.32 / −0.12 / −0.05 / −0.03 / +0.01 | −0.32 / −0.14 / −0.08 | 0.42 (i−J) | 4.8 / 0.3 |
+| Bbin₂ (line-binned) | 2.33 | 3.52 | 1.252 | 6.08 | −1.2 % | +0.36 / +0.08 / +0.07 / 0.00 / −0.11 | +0.51 / +0.18 / +0.17 | 0.46 (i−J) | 10 / 232 |
+
+Every leg's closure holds to 2×10⁻¹⁶; no packet reached the event cap
+(f_capped = 0 on every slab); no packet returned to the boundary (E_core = 0:
+at a photosphere the zone is too thin for a packet to walk back in). The
+escaping luminosity of every leg is xkn's own L_thick + L_thin to within
+the free-streaming ratio after the first slab: the transported zone
+redistributes the photospheric luminosity in frequency and delays it; it
+does not change how much comes out.
+
+**Readings** (pre-declared, `lightcurve.py --analyse`). (R2) the
+bolometric hierarchy under fluorescence: **Gray** by the rule — the
+peak-luminosity spread of the three treatments is 2.1 % against a Poisson
+noise of 1.6 % (expansion +0.9 %, line-binned −1.2 %), so no ordering can be
+read; what the gray says is that on this zone the three treatments give the
+same bolometric light curve. (R3) the colour residuals: the expansion
+closure is 0.32 mag too bright in i throughout, unchanged in K, so its
+i − K is 0.32 mag too blue (the grey blueward offset of F62 and F65, here
+concentrated in i because z–K are nearly transparent); the line-binned
+closure is 0.36 mag too faint in i and 0.11 mag too bright in K, so its
+i − K is 0.51 mag too red and its J − K 0.17 too red — larger than the
+expansion closure's in every colour that reaches K (i − K 0.51 against
+0.32, z − K 0.18 against 0.14, J − K 0.17 against 0.08) and of the opposite
+sign, while the two are comparable in the single statistic max|Δcolour|
+(0.46 against 0.42, both from the i − J colour at late, starved bins). The
+line-binned leg's events per packet climb from 10 in the first slab to 232
+in the last as the photosphere recedes and T_ph falls below 2000 K: the
+trapping pathology of §4.59, bounded here (no cap reached), growing where
+the resolved leg has become transparent.
+
+**F66 — On the published xkn secular-ejecta structure with the P1
+composition, evolved from 2 to 8 d with the xkn diffusion solution as the
+photospheric boundary condition and the outer ejecta under resolved,
+expansion or line-binned transport with explicit fluorescence, the three
+treatments give the same bolometric light curve (peak luminosities within
+2 %, inside the packet noise) and differ in colour: the expansion closure
+is a 0.3 mag blueward offset in i − K, the line-binned closure a 0.5 mag
+redward one, opposite in sign and larger, with the line-binned leg's
+interaction count growing twenty-fold over the run.** The hierarchy of
+F62–F65 on a multi-lanthanide composition: expansion ≈ resolved
+bolometrically with a grey-to-blue offset, line-binned the more
+chromatically displaced and of the other sign. Stated limits: the zone is
+line-thick only in the first days (five interactions per packet at 2 d,
+below one after 4 d; expansion work 19 % of the escaping energy in the
+first slab, 2 % by 8 d), so the closure difference is made in the first
+two days and the late curve is a free-streaming photosphere; the thick
+interior is xkn's diffusion solution, not a transport; singly ionized
+lanthanides only; the thin-layer temperatures are xkn's continuation, not
+an energy equation; the heating law is Korobkin's; the v_max convention
+is the spherical one. None of these differs between the three legs.
+
 ## 5. Findings register
 
 | # | Finding | Where |

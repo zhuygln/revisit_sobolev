@@ -17,9 +17,9 @@ FIG_DIR = HERE / "figures"
 
 REQUIRED_LABELS = [
     "sec:intro", "sec:method", "sec:states", "sec:results", "sec:closures", "sec:redistribution",
-    "sec:snapshot", "sec:lightcurve", "sec:macroatom", "sec:discussion", "sec:conclusions",
-    "fig:matrix", "fig:snapshot", "fig:lightcurve", "fig:macroatom",
-    "tab:matrix", "tab:lightcurve", "tab:grid",
+    "sec:snapshot", "sec:lightcurve", "sec:p1xkn", "sec:macroatom", "sec:discussion", "sec:conclusions",
+    "fig:matrix", "fig:snapshot", "fig:lightcurve", "fig:p1xkn", "fig:macroatom",
+    "tab:matrix", "tab:lightcurve", "tab:grid", "tab:p1xkn",
 ]
 MIN_WORDS = 60
 
@@ -71,7 +71,7 @@ def check_numbers_tex():
     h = json.loads(freeze.OUT.read_text())["headline"]
     out = []
     for name, fn in (("numbers.tex", lt.numbers_tex), ("tab_lightcurve.tex", lt.tab_lightcurve),
-                     ("tab_grid.tex", lt.tab_grid), ("tab_matrix.tex", lt.tab_matrix)):
+                     ("tab_grid.tex", lt.tab_grid), ("tab_matrix.tex", lt.tab_matrix), ("tab_p1xkn.tex", lt.tab_p1xkn)):
         p = HERE / name
         if not p.exists() or fn(h) != p.read_text():
             out.append(f"{name} is not the regeneration from FROZEN.json -- run `make tables`")

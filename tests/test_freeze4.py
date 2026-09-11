@@ -35,7 +35,7 @@ def test_macros_are_unique_and_the_fragments_are_committed():
     assert len(names) == len(set(names)) and len(names) >= 40
     assert set(lt.quoted_names(h)) <= set(names)
     for name, fn in (("numbers.tex", lt.numbers_tex), ("tab_lightcurve.tex", lt.tab_lightcurve),
-                     ("tab_grid.tex", lt.tab_grid), ("tab_matrix.tex", lt.tab_matrix)):
+                     ("tab_grid.tex", lt.tab_grid), ("tab_matrix.tex", lt.tab_matrix), ("tab_p1xkn.tex", lt.tab_p1xkn)):
         assert (ROOT / "docs/paper4" / name).read_text() == fn(h), f"{name} stale: run make tables"
     tex = lt.numbers_tex(h)
     assert tex.count("\\newcommand") == len(names) and "do not edit" in tex

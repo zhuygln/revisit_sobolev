@@ -3052,6 +3052,50 @@ Manuscript skeleton in docs/paper4/outline.md with the figure script
 (docs/figures/paper4/fig_f62..f65). Bbin2 rerun with a 3e5 cap to make
 R2 readable.
 
+## 9bg. The P1 composition as a light curve: the xkn photosphere as the boundary (2026-09-11)
+
+The PI rejected the first design (a tau = 30 boundary fed by an Arnett
+luminosity, a T^4 V injected into newly exposed shells, kappa = 10): it
+double-counts the outer material's heating and misnames xkn-diff. The
+revision, verbatim in plan_review.md: the xkn photosphere (tau_grey = 2/3
+at kappa = 22.3, the Tanaka Y_e = 0.2 value) is the moving inner boundary;
+only xkn's thick-ejecta luminosity L_thick(t) enters there with the
+photospheric Planck spectrum; the shells outside carry only their own
+deposited heating (eq. 47/59); no reservoir for newly exposed shells;
+temperatures by eq. 50; returning packets re-emitted at T_ph.
+
+Built: sobolev/xkn.py (the mode solution -- a trapezoid on the kernel
+diverged with the mode count, the exponential-Euler step converges: 1000
+modes within 0.7 % of 4000; exact photosphere root; eq. 24 rescale; eq.
+47/50/59), build_p1_xkn (8 coarse + 24 fine shells), timeslab.thick_energy
+/ thin_heating_energy, --model p1xkn in the driver (zone = fine shells with
+inner edge >= x_ph(t_a), grows inward; launch_core_frac carries L_thick).
+Pilot slab at 2 d: x_ph 0.908, T_ph 3696 K, 8 zone shells, the zone's own
+heating 0.3 % of what enters it. Production 30 slabs 2 -> 8 d, R2/B2/Bbin2,
+3e5 heating packets, in ~35 min (the builds dominate; transport seconds).
+
+Controls: 5 vs 10 slabs over 2 -> 2.5 d agree in E_rad to 0.5 %, W to
+1.5 %; the line-free run has W = 0, closure 2e-16, and L_esc / L_xkn =
+0.68 in the first slab (light crossing), 0.98-1.07 after (a declining
+source arriving late).
+
+Result (4.61, F66): the three treatments give the same bolometric curve
+(peaks within 2 %, noise 1.6 % -> R2 Gray by rule: nothing to order); the
+colours differ -- expansion i 0.32 too bright, K unchanged (i-K -0.32);
+line-binned i 0.36 too faint, K 0.11 too bright (i-K +0.51, J-K +0.17):
+opposite signs, line-binned larger in every colour that reaches K,
+comparable in max|dcolour| (0.46 vs 0.42, both at late starved bins).
+The zone is line-thick only in the first days (5 events per packet at
+2 d, < 1 after 4 d; W/E_esc 19 % -> 2 %): the difference is made early,
+the late curve is a free-streaming photosphere. Bbin2's events per packet
+climb 10 -> 232 as T_ph falls below 2000 K (the trapping of 4.59, bounded,
+no cap reached). No packet returned to the boundary (E_core = 0).
+
+The manuscript draft (docs/paper4/manuscript.tex, MNRAS, every number a
+macro from paper4/FROZEN.json; make check) carries F60-F66; one TODO
+stands until the high-cap Bbin2 rerun (prod/Bbin2_cap3e5, ~13 min per
+slab, 40 slabs) lands.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

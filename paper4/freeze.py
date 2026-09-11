@@ -148,9 +148,37 @@ def headline():
     p = ROOT / "paper4/phase10_fontes/prod_record/p1xkn/summary.json"
     if p.exists():
         d, rel, s = load("paper4/phase10_fontes/prod_record/p1xkn/summary.json"); note(rel, s)
-        h["lightcurve_p1xkn"] = {leg: dict(t_peak_d=o["t_peak_d"], L_peak=o["L_peak"], E_rad=o["E_rad"], W_tot=o["W_tot"],
-                                           dL_peak=o.get("dL_peak"), max_abs_dcolour=o.get("max_abs_dcolour"), f_capped_max=o["f_capped_max"])
-                                 for leg, o in d["legs"].items()}
+        r, rel, s = load("paper4/phase10_fontes/prod_record/p1xkn/run.json"); note(rel, s)
+        legs = {}
+        for leg, o in d["legs"].items():
+            e = dict(t_peak_d=o["t_peak_d"], L_peak=o["L_peak"], E_rad=o["E_rad"], W_tot=o["W_tot"], E_inj=o["E_inj"],
+                     dL_peak=o.get("dL_peak"), max_abs_dcolour=o.get("max_abs_dcolour"), f_capped_max=o["f_capped_max"],
+                     nan_band_cells=o["nan_band_cells"])
+            if "dm_vs_ref" in o:
+                dmv = {b: np.array([x[b] for x in o["dm_vs_ref"]], float) for b in BANDS}
+                e["median_dm"] = {b: (float(np.nanmedian(v)) if np.isfinite(v).any() else None) for b, v in dmv.items()}
+                for a, b in (("i", "K"), ("z", "K"), ("J", "K")):
+                    v = dmv[a] - dmv[b]
+                    e[f"median_d{a}{b}"] = float(np.nanmedian(v)); e[f"max_abs_d{a}{b}"] = float(np.nanmax(np.abs(v)))
+            T = r["tallies"][leg]
+            e["events_mean_first"] = T[0]["events_mean"]; e["events_mean_last"] = T[-1]["events_mean"]
+            e["W_over_esc_first"] = T[0]["W"] / T[0]["E_esc"]; e["E_core_returned"] = sum(x["E_core"] for x in T)
+            legs[leg] = e
+        T = r["tallies"]["R2"]
+        h["lightcurve_p1xkn"] = dict(legs=legs, readings=d["readings"], n_slabs=len(d["t_grid"]) - 1, config=r["config"],
+                                     zone=dict(x_ph_first=T[0]["x_ph"], T_ph_first=T[0]["T_ph"], n_zone_first=T[0]["n_zone"],
+                                               x_ph_last=T[-1]["x_ph"], T_ph_last=T[-1]["T_ph"], n_zone_last=T[-1]["n_zone"],
+                                               core_frac_first=T[0]["core_frac"], v_max_c=r["v_max_c"]))
+        ctrl = {}
+        for tag in ("conv5", "conv10", "free"):
+            q = f"paper4/phase10_fontes/prod_record/p1xkn_{tag}/summary.json"
+            if (ROOT / q).exists():
+                c, rel, s = load(q); note(rel, s); o = c["legs"]["R2"]
+                ctrl[tag] = dict(E_rad=o["E_rad"], W_tot=o["W_tot"], E_end=o["E_end"], closure=o["closure"], n_slabs=len(c["t_grid"]) - 1)
+                if tag == "free":
+                    ratio = np.array(o["L_esc"]) / np.array(o["L_xkn"])
+                    ctrl[tag]["L_ratio_first"] = float(ratio[0]); ctrl[tag]["L_ratio_min_after"] = float(ratio[1:].min()); ctrl[tag]["L_ratio_max_after"] = float(ratio[1:].max())
+        h["lightcurve_p1xkn"]["controls"] = ctrl
     return h
 
 
