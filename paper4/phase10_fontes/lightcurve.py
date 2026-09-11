@@ -130,7 +130,7 @@ def analyse(out_dir, cfg=None, phot_bins=10, n_min_band=100):
     cfg = run["config"]
     t_grid = np.array(run["t_grid"])
     n_slab = t_grid.size - 1
-    groups = np.array_split(np.arange(n_slab), phot_bins)
+    groups = [g for g in np.array_split(np.arange(n_slab), min(phot_bins, n_slab)) if g.size]
     t_phot = np.array([t_grid[g[0]] for g in groups] + [t_grid[-1]])
     edges = phot.nu_edges(*LAM_WIN, N_SPEC); nu_c = np.sqrt(edges[1:] * edges[:-1])
     lo_w, hi_w = float(edges[0]), float(edges[-1])
