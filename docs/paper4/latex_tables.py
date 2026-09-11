@@ -35,9 +35,10 @@ def rng2(v): return f"{v[0]:.2f}--{v[1]:.2f}"
 def rngabs2(v):
     lo, hi = sorted(abs(x) for x in v); return f"{lo:.2f}--{hi:.2f}"
 def intv(v): return f"{int(round(v))}"
+def abs2(v): return f"{abs(v):.2f}"
 def word(v): return str(v)
 
-FMT = dict(f1=f1, f2=f2, f3=f3, sf2=sf2, pct0=pct0, pct1=pct1, sci=sci, sci1=sci1, rng2=rng2, rngabs2=rngabs2, int=intv, word=word)
+FMT = dict(f1=f1, f2=f2, f3=f3, abs2=abs2, sf2=sf2, pct0=pct0, pct1=pct1, sci=sci, sci1=sci1, rng2=rng2, rngabs2=rngabs2, int=intv, word=word)
 
 # (macro, key into FROZEN["headline"] or a callable of headline, format, quoted)
 MACROS = [
@@ -67,11 +68,11 @@ MACROS = [
     ("MacroEvRatio", lambda h: h["macro"]["ev_R2M"] / h["macro"]["ev_R2"], "f1", True),
     # the Fontes snapshot (F64)
     ("FontesEpsBthRthRK", "fontes_snapshot.gsi_reflect.Bth_Rth_rK", "sf2", True),
-    ("FontesEpsBbinRthRK", "fontes_snapshot.gsi_reflect.Bbinth_Rth_rK", "sf2", True),
+    ("FontesEpsBbinRthRK", "fontes_snapshot.gsi_reflect.Bbinth_Rth_rK", "abs2", True),
     ("FontesFluBtwoRtwoRK", "fontes_snapshot.gsi_reflect.B2_R2_rK", "sf2", True),
     ("FontesFluBbinRtwoRK", "fontes_snapshot.gsi_reflect.Bbin2_R2_rK", "sf2", True),
     ("FontesFluBbinRtwoRKreemit", "fontes_snapshot.gsi_reemit.Bbin2_R2_rK", "sf2", True),
-    ("FontesJpltEpsBbinRthRK", "fontes_snapshot.jplt_reflect.Bbinth_Rth_rK", "sf2", True),
+    ("FontesJpltEpsBbinRthRK", "fontes_snapshot.jplt_reflect.Bbinth_Rth_rK", "abs2", True),
     ("FontesJpltNlines", "fontes_snapshot.jplt_reflect.n_lines", "int", True),
     ("FontesGsiNlines", "fontes_snapshot.gsi_reflect.n_lines", "int", True),
     # the light curve (F65)
@@ -130,6 +131,7 @@ MACROS = [
     ("PxEvFirst", "lightcurve_p1xkn.legs.R2.events_mean_first", "f1", True),
     ("PxEvLast", "lightcurve_p1xkn.legs.R2.events_mean_last", "f1", True),
     ("PxWfirst", "lightcurve_p1xkn.legs.R2.W_over_esc_first", "pct0", True),
+    ("PxBbinEvFirst", "lightcurve_p1xkn.legs.Bbin2.events_mean_first", "int", True),
     ("PxBbinEvLast", "lightcurve_p1xkn.legs.Bbin2.events_mean_last", "int", True),
     ("PxConvErad", lambda h: abs(h["lightcurve_p1xkn"]["controls"]["conv10"]["E_rad"] / h["lightcurve_p1xkn"]["controls"]["conv5"]["E_rad"] - 1), "pct1", True),
     ("PxConvW", lambda h: abs(h["lightcurve_p1xkn"]["controls"]["conv10"]["W_tot"] / h["lightcurve_p1xkn"]["controls"]["conv5"]["W_tot"] - 1), "pct1", True),
