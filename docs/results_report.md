@@ -4914,6 +4914,104 @@ explicit fluorescence is therefore not merely less accurate but, on a
 strong-lined forest, ill-posed without a per-line escape treatment — a
 result of the benchmark, stated as such.
 
+### 4.60 Phase 10b, the Fontes simplified problem as a light curve: three opacity treatments under ε = 1 and under fluorescence (F65)
+
+Instrument: `run_mc` in time slabs (`t_stop` / `resume` / `launch_energy` /
+`max_events`, worldline transport; the packets' own clocks, the homologous
+boundaries, the atom rebuilt per slab as ρ ∝ t⁻³ and T(t) change),
+`sobolev/timeslab.py`, driver `paper4/phase10_fontes/lightcurve.py`
+(checkpoints, atomic `run.json`, bit-reproducible resume, `--analyse` with
+pre-declared readings and gray outcomes); tests in `tests/test_timeslab.py`
+(a slab split reproduces the single run with the per-slab accounting
+exact; escape times; injection energy; pause exactness; the cap; the
+initial field; the driver end to end). Data `paper4/phase10_fontes/prod/`
+(`merged/summary.json`, `merged/lightcurve.png`, per-leg `run.json`).
+
+**The problem.** Fontes et al. (2020) Appendix C: pure Nd, ρ ∝ (1 − x²)³,
+v_max = 0.25c, 1.4×10⁻² M⊙, T0 = 5700 K at t0 = 4 d, ε̇ = 8.2×10⁸
+(t/t0)^−1.3 erg s⁻¹ g⁻¹ uniform in mass, lines with f > 10⁻³, bound-bound
+only, 64 uniform cells; here 40 log slabs from 4 to 16 d (Δt/t = 3.5 %; 5
+vs 10 slabs over 4–5.2 d agree in escaped energy to 2.6 %, in work to
+0.25 %), cells 1–63 transported with a lossless mirror at the edge of cell
+0 (2.5×10⁻⁵ of the mass dropped), the trapped field at 4 d (a T⁴ V per cell,
+6.49×10⁴⁶ erg) as the initial population and the heating (9.03×10⁴⁵ erg
+over 4–16 d) injected per slab in proportion to mass at the shell's own
+Planck spectrum; 2×10⁵ initial and 10⁵ heating packets (the line-binned
+and resolved-thermal legs at 0.2–0.35 of that, stated next to their
+numbers); `max_events` 2×10⁴ (10⁵ for the line-binned fluorescence leg).
+Temperature: the Appendix C initial profile scaled T ∝ t⁻¹ (adiabatic,
+radiation-dominated; no heating enters T; identical for all six legs),
+with the radiation-temperature feedback rule as a variant (below). What
+the snapshot could not give — trapping time, expansion-work loss, the
+release of stored radiation — is what this measures; what it still is not
+is SuperNu's LTE energy equation, and the light curves are the escaping
+luminosity in escape time (observer time is also recorded; it is complete
+to 12 d).
+
+**The six light curves** (L in 10⁴⁰ erg s⁻¹ in escape time; the g and r
+bands are starved of packets at these epochs and are not reported):
+
+| leg | t_peak (d) | L_peak | L at 4.5 / 5 / 6 / 8 / 12 / 16 d | E_rad (10⁴⁶) | W (10⁴⁶) | wall |
+|---|---|---|---|---|---|---|
+| Rth (resolved, ε = 1) | 4.75 | 7.23 | 6.41 / 7.12 / 6.49 / 6.02 / 3.44 / 1.28 | 4.477 | 2.690 | 1.8 h at 0.35 |
+| Bth (expansion, ε = 1) | 5.00 | 8.33 | 6.90 / 8.33 / 7.37 / 6.30 / 3.33 / 1.13 | 4.629 | 2.563 | 5 min |
+| Bbinth (line-binned, ε = 1) | 4.83 | 7.35 | 6.38 / 7.12 / 6.40 / 6.05 / 3.35 / 1.30 | 4.470 | 2.702 | 1.8 h at 0.3 |
+| R₂ (resolved, fluorescence) | 4.96 | 7.55 | 6.51 / 7.54 / 7.11 / 6.17 / 3.31 / 1.28 | 4.519 | 2.653 | 10 min |
+| B₂ (expansion, fluorescence) | 5.13 | 8.83 | 7.19 / 8.80 / 7.95 / 6.23 / 3.14 / 1.10 | 4.686 | 2.506 | 16 min |
+| Bbin₂ (line-binned, fluorescence) | 4.84 | 7.84 | 6.48 / 7.54 / 7.47 / 5.92 / 3.20 / 1.09 | 4.434 | 2.460 | 1.3 h at 0.2, f_capped ≤ 1.4 % |
+
+Every leg's global closure E_init + E_inj = E_rad + W + E_end holds to
+10⁻¹⁵. Of the 7.4×10⁴⁶ erg available, 61 % is radiated by 16 d, 34–37 % is
+lost to expansion work, 3 % is still trapped.
+
+**Closure − resolved, over the light curve** (max |Δm| per band over ten
+photometric time bins; Δm and Δcolour at the peak bin; the colour maximum):
+
+| closure | redistribution | ΔL_peak | Δt_peak | ΔE_rad | max\|Δm\| i / z / J / H / K | Δm at peak z / J / H / K | max\|Δcolour\| |
+|---|---|---|---|---|---|---|---|
+| expansion | ε = 1 | +15 % | +5 % | +3.4 % | — / 0.49 / 0.31 / 0.31 / 0.20 | −0.20 / −0.16 / −0.15 / −0.01 | 0.20 (J−K) |
+| line-binned | ε = 1 | +1.6 % | +1.8 % | −0.2 % | — / 0.29 / 0.11 / 0.17 / 0.12 | −0.20 / 0.00 / −0.10 / 0.00 | 0.13 (J−K) |
+| expansion | fluorescence | +17 % | +3 % | +3.7 % | 0.47 / 0.54 / 0.29 / 0.27 / 0.25 | −0.20 / −0.03 / −0.03 / +0.01 | 0.32 (i−J) |
+| line-binned | fluorescence | +3.8 % | −2.4 % | −1.9 % | — / 0.38 / 0.44 / 0.82 / 0.24 | — / +0.40 / +0.56 / −0.03 | 0.45 (J−K) |
+
+The radiation-temperature variant (T per shell from the packets present
+at each slab boundary, per leg; the resolved and expansion fluorescence
+legs): the resolved peak moves to 6.6 d (their 6.3 d) at 8.1×10⁴⁰, the
+expansion closure is +8 % at the peak and 15 % earlier, its maximum colour
+residual 0.22 mag — the same closure picture as under the prescribed T.
+
+**Readings** (pre-declared in the plan, each with its gray condition).
+(R1) ε = 1 peaks within 8 % with Sobolev > expansion > line-binned:
+**Red** — the spread is 15 % (expansion +15 %, line-binned +1.6 %; the
+noise on L_peak is 1.8 %), and the ordering here is expansion >
+line-binned > resolved. Their qualitative finding — the three agree
+reasonably well, expansion brighter than line-binned — is what this
+snapshot-free calculation also gives; the amplitude of the expansion
+excess is twice theirs, and the resolved leg is the lowest rather than
+the highest (it loses the most energy to expansion work: the most
+interactions per escape). (R2) the same under fluorescence: **Gray** by
+the rule, because the line-binned leg capped 1.4 % of its packets in the
+first slabs (the trapping pathology of §4.59, bounded but present); read
+past the gray, the numbers are expansion +17 %, line-binned +3.8 %, the
+same ordering. (R3) the colour residual: under ε = 1 line-binned 0.13 and
+expansion 0.20; under fluorescence expansion 0.32 and line-binned 0.45,
+with the line-binned closure 0.4–0.6 mag too faint in J and H at the peak
+and 0.8 mag off in H over the curve.
+
+**F65 — Over the Fontes light curve the bolometric ordering of the three
+treatments is the same under both redistributions (resolved lowest,
+line-binned within 2–4 %, expansion 15–17 % brighter at the peak), and the
+switch to explicit fluorescence changes the closures' colour errors, not
+their bolometric ones: the line-binned closure's colour error grows from
+0.13 to 0.45 mag (J and H 0.4–0.8 mag too faint), the expansion closure's
+from 0.20 to 0.32.** The snapshot's 1.4–1.7 mag (§4.59) becomes 0.45 mag
+once the light curve integrates over the escape-time distribution, and it
+stays a systematic difference between the two closures of the opposite
+sign from the expansion closure's; neither closure reproduces the resolved
+transport to the 0.1 mag level once fluorescence is retained, and the
+expansion closure misstates the peak luminosity by 15 % under either
+redistribution.
+
 ## 5. Findings register
 
 | # | Finding | Where |

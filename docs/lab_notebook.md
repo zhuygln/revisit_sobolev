@@ -3024,6 +3024,26 @@ processes (R2; B2 + Bth; Rth at 0.35; Bbinth at 0.3), Bbin2 at 0.3 to
 follow; then the radiation-temperature variant for R2 and B2; then
 `--analyse`.
 
+## 9bf. The light curve (2026-09-10/11)
+
+Six legs over 40 slabs, 4 -> 16 d, in 10 min (R2) to 1.8 h (Rth at 0.35,
+Bbinth at 0.3); Bbin2 at 0.2 with a 1e5 cap still capped 1.4 % of its
+packets in the first slabs (the trapping of 4.59, bounded). The B2
+feedback-T run crashed once in slab 8 with an out-of-range macroatom level
+that the same slab, resumed from its checkpoint with the same seed, did
+not reproduce; a clear range check now names the source if it recurs.
+
+Result (4.60, F65): resolved lowest, line-binned within 2-4 %, expansion
+15-17 % brighter at the peak, under both redistributions; fluorescence
+moves the colour errors (line-binned 0.13 -> 0.45 mag, J and H 0.4-0.8
+too faint; expansion 0.20 -> 0.32), not the bolometric ones. R1 Red
+(spread 15 % > 8 %, resolved lowest not highest), R2 Gray (the cap), R3 as
+above. The feedback-T variant moves the resolved peak to 6.6 d (their
+6.3) and leaves the closure picture. g and r are starved at these epochs.
+The snapshot's 1.4-1.7 mag is 0.45 mag over the light curve -- the PI's
+"do not insist" case, and still a systematic, opposite-sign difference
+between the two closures.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

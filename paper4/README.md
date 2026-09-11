@@ -72,7 +72,7 @@ of it. **PI decision (same day, verbatim in `plan_review.md`):** F62–F64 are t
 nucleus of the methods paper; one more experiment first — the Fontes
 benchmark as a time-dependent light curve (Phase 10b; notebook §9bd);
 Paper III carries a boxed correction (`paper3/CORRECTION.md`); PR #2 is
-merged after review. Open, at the PI's
+merged (main carries the fixed transport). **Phase 10b (F65, §4.60) is done:** the Fontes benchmark as a time-slab light curve gives the same bolometric ordering under both redistributions (line-binned within 2–4 %, expansion +15–17 %) and colour errors that fluorescence raises from 0.13 to 0.45 mag (line-binned) and 0.20 to 0.32 (expansion). Open, at the PI's
 discretion now that the effect is 0.2 mag: Phases 9–10 (estimators, full
 macroatom, B_eq − R_eq), the Phase 7 sensitivity table, Phase 11, Phase 12;
 and the Paper III erratum. Photon-number branching still moves
