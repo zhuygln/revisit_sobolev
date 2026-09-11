@@ -4881,10 +4881,17 @@ error is unchanged, while the line-binned closure's colour error opens to
 in K).**
 All three brackets of the inner boundary give the same pattern, so it is a
 property of the transported layers and not of the interior's treatment.
-The comoving-frame bracket releases about twice the energy of the other
-two (escaped fraction 0.78–0.87 against 0.37–0.60) because the receding
-boundary does work on the radiation that returns to it over the ~8
-boundary passes per packet; its colours agree with the others (line-binned
+**In the static snapshot the absolute escaped-energy fraction is not
+interpreted physically**, because a moving thermalising boundary can
+exchange work with the radiation field without a corresponding time
+evolution of the ejecta; the boundary brackets are used only to test the
+robustness of the emergent colours, and the energy accounting is
+interpreted physically in the light curve of §4.60, where the boundary
+motion, the elapsed time and the expansion work are all represented
+consistently. The comoving-frame bracket releases about twice the energy
+of the other two (escaped fraction 0.78–0.87 against 0.37–0.60) because
+the receding boundary does work on the radiation that returns to it over
+the ~8 boundary passes per packet; its colours agree with the others (line-binned
 fluorescence r − K +1.56 against +1.34 and +1.72; expansion −0.39 against
 −0.36 and −0.43; line-binned under ε = 1 within 0.16 mag), which is the
 reason the snapshot reports colours and not escaped energy. This is F62 re-found on an independent problem

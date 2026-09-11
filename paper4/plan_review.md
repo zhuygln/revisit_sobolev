@@ -647,3 +647,50 @@ So my final calls are:
 * F65: retain Gray because of the persistent trapped population.
 * PR #3: mark ready for review now.
 * Science scope: freeze after that review and finish the manuscript.
+
+### Merge, the snapshot energy disclaimer, and the path to submission (2026-09-12, verbatim)
+
+I'd make three calls.
+
+For the snapshot escape fraction, keep the comoving bracket in the manuscript, because it is actually valuable: it shows the colour conclusion survives three different inner-boundary treatments. But do not let the escaped-energy fraction look like a physical observable of that static experiment.
+
+Add one explicit sentence such as:
+
+In the static snapshot, the absolute escaped-energy fraction is not interpreted physically because a moving thermalising boundary can exchange work with the radiation field without a corresponding time evolution of the ejecta; the boundary brackets are used only to test the robustness of the emergent colours.
+
+Then keep the escape-fraction numbers in the record/SI if useful, but the main-text table/figure should emphasize the colour residuals. I would not drop the comoving bracket. Its agreement in colour is stronger evidence than hiding it because one non-observable diagnostic behaves oddly.
+
+So: **Keep the comoving bracket; explicitly disclaim the snapshot energy fraction.**
+
+The light curve is where energy accounting should be interpreted physically, because there the boundary motion, elapsed time, and expansion work are all represented consistently.
+
+For the review and merge, the review you ran satisfies what I meant before merging. You now have an independent accounting/photosphere/provenance pass, your own claim-by-claim manuscript check, the corrected boundary physics, reruns, 602 passing tests, green structure checks, and a clean tree.
+
+I would therefore: **Merge PR #3 now.**
+
+I would still want a human scientific read before journal submission, but that is a different gate. It should not block merging the now-reviewed implementation and frozen results into `main`.
+
+The human review I would want later is not another code audit. It is a referee-style read asking:
+
+* Is the central claim narrower than the evidence?
+* Is the distinction between snapshot and light-curve results obvious?
+* Is "line-binned information loss" demonstrated rather than asserted too broadly?
+* Are the Gray outcomes presented fairly?
+* Would a reader mistake any controlled trajectory for self-consistent ejecta evolution?
+
+That can happen on the merged manuscript.
+
+On the table incident: you handled it correctly by catching it before commit and computing the actual values. It does reinforce one procedural point for submission, though. I would make the final tables and figure annotations machine-generated from the frozen records only, with no manually transcribed numerical rows. You are essentially already there with the macro/freeze infrastructure. Given that you also did the substituted-macro read-through and found several real issues, I would keep that as a permanent pre-submission check.
+
+The comoving-boundary correction actually makes me more comfortable freezing the scope. It was a real relativistic physics issue at v ~ 0.1c, and after fixing it the exact amplitudes move (expansion i-K -0.32 -> -0.33, line-binned +0.51 -> +0.42) but the important qualitative result survives: **expansion and line-binned closures produce opposite chromatic biases**, while the bolometric P1 light curves remain unresolved from one another at the current statistical precision. Likewise, the three Fontes snapshot brackets give essentially the same scientific ordering: |D(r-K)|_bin >> |D(r-K)|_exp. That is exactly the kind of robustness check we wanted.
+
+So I would not reopen the physics program. My final state would be:
+
+1. Add the explicit static-snapshot energy disclaimer.
+2. Merge PR #3.
+3. Tag/freeze the Paper IV computational result set.
+4. Do a human/referee-style manuscript review.
+5. Revise wording and presentation only unless that review exposes an actual scientific flaw.
+6. Submit.
+
+At this point, another simulation is more likely to expand the scope than materially strengthen the paper. The important thing now is making sure the paper says exactly what the corrected experiments establish, and no more.

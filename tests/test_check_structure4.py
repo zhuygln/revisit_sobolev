@@ -31,3 +31,19 @@ def test_words_ignore_display_items_and_keys():
     cs = _load()
     t = "\\section{Results}\\label{sec:results} one two three \\citep{fontes2020} \\begin{figure}\\includegraphics[width=1in]{x}\\caption{a b c d}\\end{figure} four"
     assert cs.words(t) == 5
+
+
+def test_claim_check_substitutes_macros_and_flags_undefined_ones(tmp_path):
+    """docs/paper4/check_claims.py: the read-through substitutes the frozen
+    value into the sentence, and a macro that numbers.tex does not define is
+    a problem (it would typeset as nothing)."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("paper4_check_claims", ROOT / "docs/paper4/check_claims.py")
+    cc = importlib.util.module_from_spec(spec); spec.loader.exec_module(cc)
+    vals = {"LcBthDL": "15\\%", "PxBtwoIK": "-0.33"}
+    out, used = cc.substitute("The expansion closure is \\LcBthDL\\ brighter \\citep{x} and \\PxBtwoIK\\ mag in $i-K$.", vals)
+    assert out == "The expansion closure is [15%] brighter and [-0.33] mag in $i-K$."
+    assert used == ["LcBthDL", "PxBtwoIK"]
+    body = "\\begin{abstract}\nOne \\LcBthDL\\ here.\n\\begin{figure}\\caption{\\LcBthDL}\\end{figure}\nTwo sentences.\n"
+    ss = cc.sentences(body)
+    assert any("\\LcBthDL" in x for x in ss) and not any("caption" in x for x in ss)
