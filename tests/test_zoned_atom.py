@@ -120,3 +120,22 @@ def test_from_state_one_shell_equals_from_cached(tmp_path):
     # three shells: nested opacity sets, skip table non-trivial
     z3 = ZonedAtom.from_state(st, [0, 1, 2], tau_min=1e-3)
     assert z3.n_shell == 3 and z3.n_opacity == z3.n_opacity_shell.max()
+
+
+
+def test_tau_of_lines_is_the_shell_tau_inside_the_union_and_zero_outside():
+    """Two shells with the cascade toy at different densities: tau_of_lines
+    returns each shell's own tau for the pump (line 0) and the trapped
+    fluorescence line (1), and 0 for the cascade exit (line 2, no opacity)."""
+    fa = cascade_atom(3.0, 1.0, 2.0, tau32=6.0)
+    n_low = np.array([fa.n_lower_all, 0.5 * fa.n_lower_all]) if hasattr(fa, "n_lower_all") else None
+    a = dict(nu0=fa.nu0_all, f_osc=np.array([F_OSC, F_OSC, 0.0]), A=fa.A_all, lower=fa.lower_all, upper=fa.upper_all)
+    n1 = 3.0 / tau_sobolev(F_OSC, 1.0, C / NU_13, T_EXP); n2 = 6.0 / tau_sobolev(F_OSC, 1.0, C / NU_32, T_EXP)
+    n_lower = np.array([[n1, n2, 0.0], [0.5 * n1, 0.25 * n2, 0.0]])
+    r_edges = np.array([1.0e13, 2.0e13, 3.0e13])
+    za = ZonedAtom(a["nu0"], a["f_osc"], n_lower, np.zeros((2, 3)), a["A"], a["lower"], a["upper"], r_edges, T_EXP,
+                   tau_min=1e-6, stim=False, level_energy_cm=LEVEL_E, emis_cut=None)
+    tau = za.tau_of_lines(np.array([0, 1, 0, 1, 0]), np.array([0, 0, 1, 1, 2]))
+    assert np.isclose(tau[0], 3.0) and np.isclose(tau[1], 1.5) and np.isclose(tau[2], 6.0) and np.isclose(tau[3], 1.5)
+    assert tau[4] == 0.0
+    assert np.allclose(np.exp(-tau[:4]), np.exp(-za.op_tau[[0, 1, 0, 1], za.line_to_union[[0, 0, 1, 1]]]))

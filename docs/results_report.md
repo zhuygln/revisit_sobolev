@@ -4830,10 +4830,13 @@ cells (0.176c–0.25c, τ_grey(κ = 10) ≲ 0.7, 12 % of the mass) transported a
 the interior's 88 % of the heating arriving from the inner boundary;
 classical transport; 2 × 5×10⁴ packets. The interior is diffusive (240
 events and 21 boundary returns per packet from 0.16c inward), so the
-inner boundary is treated in **two brackets**: `reemit` (complete
+inner boundary is treated in **three brackets**: `reemit` (complete
 thermalisation: returning packets come back as the boundary's Planck
-spectrum) and `reflect` (a lossless mirror), each with a 200-return cap
-that books the remainder to the core — the escaped-energy fractions are
+spectrum, drawn in the lab frame), `reflect` (a lossless mirror) and,
+added in the review pass of 2026-09-11, `reemit_cm` (the same
+thermalising surface treated in its own comoving frame, so that the
+receding boundary does work on the radiation that returns to it); each
+with a 200-return cap that books the remainder to the core — the escaped-energy fractions are
 therefore cap-limited (0.37–0.40) and only the *spectral shapes* are the
 observable. A mirror run with a 2×10⁴-return cap
 (`fontes_t4_z45_reflect_lossless.json`, 2 × 2×10⁴ packets) escapes the same
@@ -4845,23 +4848,24 @@ adiabatic loss, not a light-curve luminosity; their 5–8 % peak
 differences are not reproducible by a static transport and are not
 claimed). The lossless run's colours agree with the capped brackets
 (r − K: resolved 6.26 / 6.10, expansion 6.12 / 5.89, line-binned 6.37 /
-7.74 under ε = 1 / fluorescence). Data `fontes_t4_z45_{reemit,reflect}.json`,
+7.74 under ε = 1 / fluorescence). Data `fontes_t4_z45_{reemit,reflect,reemit_cm}.json`,
 `fontes_t6.3_z45_*.json`, `fontes_t4_z45_jplt_*.json`.
 
-Closure − resolved (g, r, i, z, J, H, K), the two brackets side by side:
+Closure − resolved (g, r, i, z, J, H, K), the three brackets side by side:
 
-| redistribution | closure | reemit | reflect |
-|---|---|---|---|
-| ε = 1 | expansion − resolved | −0.12, −0.70, −0.66, −0.56, −0.64, −0.49, −0.52 | −0.20, −0.95, −0.89, −0.68, −0.70, −0.64, −0.66 |
-| ε = 1 | line-binned − resolved | −0.26, −0.06, −0.19, −0.20, −0.29, −0.25, −0.25 | −0.05, −0.39, −0.47, −0.35, −0.41, −0.40, −0.37 |
-| fluorescence | expansion − resolved | +0.05, −0.96, −0.77, −0.54, −0.60, −0.53, −0.53 | −0.58, −1.05, −0.81, −0.67, −0.70, −0.60, −0.69 |
-| fluorescence | line-binned − resolved | **+3.56, +1.39, +0.71, +0.14, +0.17, −0.13, −0.34** | **(g dark), +0.93, +0.59, +0.12, +0.11, −0.15, −0.42** |
-| | resolved: ε = 1 − fluorescence | +0.13, −0.14, +0.01, +0.03, −0.07, −0.04, +0.04 | +0.25, +0.05, +0.14, +0.04, −0.04, −0.01, +0.01 |
+| redistribution | closure | reemit | reflect | reemit_cm |
+|---|---|---|---|---|
+| ε = 1 | expansion − resolved | −0.12, −0.70, −0.66, −0.56, −0.64, −0.49, −0.52 | −0.20, −0.95, −0.89, −0.68, −0.70, −0.64, −0.66 | −1.09, −0.55, −0.46, −0.32, −0.36, −0.18, −0.16 |
+| ε = 1 | line-binned − resolved | −0.26, −0.06, −0.19, −0.20, −0.29, −0.25, −0.25 | −0.05, −0.39, −0.47, −0.35, −0.41, −0.40, −0.37 | −0.52, −0.20, −0.08, −0.03, −0.17, −0.06, −0.04 |
+| fluorescence | expansion − resolved | +0.05, −0.96, −0.77, −0.54, −0.60, −0.53, −0.53 | −0.58, −1.05, −0.81, −0.67, −0.70, −0.60, −0.69 | −0.20, −0.56, −0.48, −0.29, −0.31, −0.22, −0.17 |
+| fluorescence | line-binned − resolved | **+3.56, +1.39, +0.71, +0.14, +0.17, −0.13, −0.34** | **(g dark), +0.93, +0.59, +0.12, +0.11, −0.15, −0.42** | **+1.65, +1.45, +0.85, +0.34, +0.43, +0.09, −0.12** |
+| | resolved: ε = 1 − fluorescence | +0.13, −0.14, +0.01, +0.03, −0.07, −0.04, +0.04 | +0.25, +0.05, +0.14, +0.04, −0.04, −0.01, +0.01 | +0.98, +0.14, +0.10, +0.03, +0.00, −0.05, +0.03 |
 
-Colour r − K of each leg (reemit / reflect): resolved ε = 1 6.15 / 6.38,
-expansion ε = 1 5.97 / 6.09, line-binned ε = 1 6.34 / 6.36; resolved
-fluorescence 6.33 / 6.33, expansion fluorescence 5.90 / 5.98,
-**line-binned fluorescence 8.05 / 7.68**. Events per packet: resolved 71–81,
+Colour r − K of each leg (reemit / reflect / reemit_cm): resolved ε = 1
+6.15 / 6.38 / 6.42, expansion ε = 1 5.97 / 6.09 / 6.03, line-binned ε = 1
+6.34 / 6.36 / 6.26; resolved fluorescence 6.33 / 6.33 / 6.31, expansion
+fluorescence 5.90 / 5.98 / 5.92, **line-binned fluorescence 8.05 / 7.68 /
+7.87**. Events per packet: resolved 71–81,
 expansion 62–72, line-binned ε = 1 6700–7800 (a packet re-emitted
 thermally inside a Σ τ bin is re-absorbed by that bin almost surely),
 line-binned fluorescence 230–290.
@@ -4873,9 +4877,24 @@ too blue and brighter through r–K by 0.5–0.9 mag (their ordering:
 expansion brighter than line-binned, Sobolev between in colour); with the
 single change to energy-conserving fluorescence the expansion closure's
 error is unchanged, while the line-binned closure's colour error opens to
-1.4–1.7 mag in r − K (+1.4 in r, +3.6 in g, −0.3 to −0.4 in K).** Both
-brackets of the inner boundary give the same pattern, so it is a property
-of the transported layers. This is F62 re-found on an independent problem
+1.3–1.7 mag in r − K (+0.9 to +1.5 in r, +1.7 to +3.6 in g, −0.1 to −0.4
+in K).**
+All three brackets of the inner boundary give the same pattern, so it is a
+property of the transported layers and not of the interior's treatment.
+**In the static snapshot the absolute escaped-energy fraction is not
+interpreted physically**, because a moving thermalising boundary can
+exchange work with the radiation field without a corresponding time
+evolution of the ejecta; the boundary brackets are used only to test the
+robustness of the emergent colours, and the energy accounting is
+interpreted physically in the light curve of §4.60, where the boundary
+motion, the elapsed time and the expansion work are all represented
+consistently. The comoving-frame bracket releases about twice the energy
+of the other two (escaped fraction 0.78–0.87 against 0.37–0.60) because
+the receding boundary does work on the radiation that returns to it over
+the ~8 boundary passes per packet; its colours agree with the others (line-binned
+fluorescence r − K +1.56 against +1.34 and +1.72; expansion −0.39 against
+−0.36 and −0.43; line-binned under ε = 1 within 0.16 mag), which is the
+reason the snapshot reports colours and not escaped energy. This is F62 re-found on an independent problem
 with a single element: coarse-opacity closures validated under complete
 redistribution are not thereby validated under fluorescence, and the two
 closures fail in opposite ways — expansion by a nearly grey offset, line-
@@ -4913,6 +4932,282 @@ expansion closure). Under complete redistribution the same bins cost
 explicit fluorescence is therefore not merely less accurate but, on a
 strong-lined forest, ill-posed without a per-line escape treatment — a
 result of the benchmark, stated as such.
+
+### 4.60 Phase 10b, the Fontes simplified problem as a light curve: three opacity treatments under ε = 1 and under fluorescence (F65)
+
+Instrument: `run_mc` in time slabs (`t_stop` / `resume` / `launch_energy` /
+`max_events`, worldline transport; the packets' own clocks, the homologous
+boundaries, the atom rebuilt per slab as ρ ∝ t⁻³ and T(t) change),
+`sobolev/timeslab.py`, driver `paper4/phase10_fontes/lightcurve.py`
+(checkpoints, atomic `run.json`, bit-reproducible resume, `--analyse` with
+pre-declared readings and gray outcomes); tests in `tests/test_timeslab.py`
+(a slab split reproduces the single run with the per-slab accounting
+exact; escape times; injection energy; pause exactness; the cap; the
+initial field; the driver end to end). Data `paper4/phase10_fontes/prod/`
+(`merged/summary.json`, `merged/lightcurve.png`, per-leg `run.json`).
+
+**The problem.** Fontes et al. (2020) Appendix C: pure Nd, ρ ∝ (1 − x²)³,
+v_max = 0.25c, 1.4×10⁻² M⊙, T0 = 5700 K at t0 = 4 d, ε̇ = 8.2×10⁸
+(t/t0)^−1.3 erg s⁻¹ g⁻¹ uniform in mass, lines with f > 10⁻³, bound-bound
+only, 64 uniform cells; here 40 log slabs from 4 to 16 d (Δt/t = 3.5 %; 5
+vs 10 slabs over 4–5.2 d agree in escaped energy to 2.6 %, in work to
+0.25 %), cells 1–63 transported with a lossless mirror at the edge of cell
+0 (2.5×10⁻⁵ of the mass dropped), the trapped field at 4 d (a T⁴ V per cell,
+6.49×10⁴⁶ erg) as the initial population and the heating (9.03×10⁴⁵ erg
+over 4–16 d) injected per slab in proportion to mass at the shell's own
+Planck spectrum; 2×10⁵ initial and 10⁵ heating packets (the line-binned
+and resolved-thermal legs at 0.2–0.35 of that, stated next to their
+numbers); `max_events` 2×10⁴ (3×10⁵ for the line-binned fluorescence leg; its 10⁵-cap run is kept as `prod_record/merged_cap1e5` for the comparison below).
+Temperature: the Appendix C initial profile scaled T ∝ t⁻¹ (adiabatic,
+radiation-dominated; no heating enters T; identical for all six legs),
+with the radiation-temperature feedback rule as a variant (below). What
+the snapshot could not give — trapping time, expansion-work loss, the
+release of stored radiation — is what this measures; what it still is not
+is SuperNu's LTE energy equation, and the light curves are the escaping
+luminosity in escape time (observer time is also recorded; it is complete
+to 12 d).
+
+**The six light curves** (L in 10⁴⁰ erg s⁻¹ in escape time; the g and r
+bands are starved of packets at these epochs and are not reported):
+
+| leg | t_peak (d) | L_peak | L at 4.5 / 5 / 6 / 8 / 12 / 16 d | E_rad (10⁴⁶) | W (10⁴⁶) | wall |
+|---|---|---|---|---|---|---|
+| Rth (resolved, ε = 1) | 4.75 | 7.23 | 6.41 / 7.12 / 6.49 / 6.02 / 3.44 / 1.28 | 4.477 | 2.690 | 1.8 h at 0.35 |
+| Bth (expansion, ε = 1) | 5.00 | 8.33 | 6.90 / 8.33 / 7.37 / 6.30 / 3.33 / 1.13 | 4.629 | 2.563 | 5 min |
+| Bbinth (line-binned, ε = 1) | 4.83 | 7.35 | 6.38 / 7.12 / 6.40 / 6.05 / 3.35 / 1.30 | 4.470 | 2.702 | 1.8 h at 0.3 |
+| R₂ (resolved, fluorescence) | 4.96 | 7.55 | 6.51 / 7.54 / 7.11 / 6.17 / 3.31 / 1.28 | 4.519 | 2.653 | 10 min |
+| B₂ (expansion, fluorescence) | 5.13 | 8.83 | 7.19 / 8.80 / 7.95 / 6.23 / 3.14 / 1.10 | 4.686 | 2.506 | 16 min |
+| Bbin₂ (line-binned, fluorescence) | 5.36 | 7.83 | 6.23 / 7.79 / 7.09 / 5.86 / 3.20 / 1.12 | 4.482 | 2.511 | 3.5 h at 0.2, cap 3×10⁵, f_capped ≤ 1.2 % (the 10⁵-cap run: 4.84 / 7.84 / 4.434 / 2.460, f_capped ≤ 1.4 %) |
+
+Every leg's global closure E_init + E_inj = E_rad + W + E_end holds to
+10⁻¹⁵. Of the 7.4×10⁴⁶ erg available, 61 % is radiated by 16 d, 34–37 % is
+lost to expansion work, 3 % is still trapped.
+
+**Closure − resolved, over the light curve** (max |Δm| per band over ten
+photometric time bins; Δm and Δcolour at the peak bin; the colour maximum):
+
+| closure | redistribution | ΔL_peak | Δt_peak | ΔE_rad | max\|Δm\| i / z / J / H / K | Δm at peak z / J / H / K | max\|Δcolour\| |
+|---|---|---|---|---|---|---|---|
+| expansion | ε = 1 | +15 % | +5 % | +3.4 % | — / 0.49 / 0.31 / 0.31 / 0.20 | −0.20 / −0.16 / −0.15 / −0.01 | 0.20 (J−K) |
+| line-binned | ε = 1 | +1.6 % | +1.8 % | −0.2 % | — / 0.29 / 0.11 / 0.17 / 0.12 | −0.20 / 0.00 / −0.10 / 0.00 | 0.13 (J−K) |
+| expansion | fluorescence | +17 % | +3 % | +3.7 % | 0.47 / 0.54 / 0.29 / 0.27 / 0.25 | −0.20 / −0.03 / −0.03 / +0.01 | 0.32 (i−J) |
+| line-binned | fluorescence | +3.7 % | +7.9 % | −0.8 % | — / 0.60 / 0.39 / 0.81 / 0.20 | — / +0.18 / +0.09 / +0.12 | 0.51 (J−K) |
+
+The radiation-temperature variant (T per shell from the packets present
+at each slab boundary, per leg; the resolved and expansion fluorescence
+legs): the resolved peak moves to 6.6 d (their 6.3 d) at 8.1×10⁴⁰, the
+expansion closure is +8 % at the peak and 15 % earlier, its maximum colour
+residual 0.22 mag — the same closure picture as under the prescribed T.
+
+**Readings** (pre-declared in the plan, each with its gray condition).
+(R1) ε = 1 peaks within 8 % with Sobolev > expansion > line-binned:
+**Red** — the spread is 15 % (expansion +15 %, line-binned +1.6 %; the
+noise on L_peak is 1.8 %), and the ordering here is expansion >
+line-binned > resolved. Their qualitative finding — the three agree
+reasonably well, expansion brighter than line-binned — is what this
+snapshot-free calculation also gives; the amplitude of the expansion
+excess is twice theirs, and the resolved leg is the lowest rather than
+the highest (it loses the most energy to expansion work: the most
+interactions per escape). (R2) the same under fluorescence: **Gray** by
+the rule, because the line-binned leg caps packets in the first slabs (the
+trapping pathology of §4.59, bounded but present). **The high-cap rerun**
+(PI, 2026-09-11: "if below 1 % and unchanged, R2 leaves Gray; if it
+changes, a numerical limitation to understand, not to average away"):
+raising the cap from 10⁵ to 3×10⁵ events lowers the capped fraction in the
+first slab from 1.4 % to 1.2 % (2.8 % of the energy over the run, from
+4.2 %) while the mean interactions per packet in that slab grow from 1786
+to 4435 — the trapped packets absorb whatever budget they are given and do
+not terminate. The light curve is insensitive to the cap: escaped energy
++1.1 %, peak luminosity −0.1 %, per-slab luminosities within the leg's
+packet noise (one slab at 7.3 d differs by 11 %), max|Δcolour| 0.45 → 0.51
+(J − K). The tables carry the high-cap run. PI (2026-09-11): "the line-binned
+fluorescence light curve is numerically stable at the quoted level, but a
+small non-terminating packet population prevents interpreting the
+calculation as fully converged in the microscopic transport sense" — a
+structural limitation of attaching explicit fluorescence to this
+line-binned representation, not ordinary insufficient max_events; R2
+stays Gray. Read past the gray, the numbers are expansion
++17 %, line-binned +3.7 %, the same ordering.
+(R3) the colour residual: under ε = 1 line-binned 0.13 and
+expansion 0.20; under fluorescence expansion 0.32 and line-binned 0.45,
+with the line-binned closure up to 0.6 mag off in z and 0.8 mag in H over
+the curve.
+
+**Validation of the pipeline on the real state.** The same run with every
+line removed (`--f-min 1e30`, the resolved leg): no interaction, W = 0
+exactly, the closure E_init + E_heat = E_esc + E_end to 2×10⁻¹⁶, and the
+initial field free-streams out over the light-crossing time (half by
+5.3 d, 90 % by 6.5 d for a radius of one light-day at 4 d growing as
+0.25 c t) — the peak at 5 d in the opaque runs is therefore the release of
+the trapped field delayed by the forest, and the 34–37 % lost to
+expansion work is entirely interaction-borne.
+
+**F65 — Over the Fontes light curve the bolometric ordering of the three
+treatments is the same under both redistributions (resolved lowest,
+line-binned within 2–4 %, expansion 15–17 % brighter at the peak), and the
+switch to explicit fluorescence changes the closures' colour errors, not
+their bolometric ones: the line-binned closure's colour error grows from
+0.13 to 0.51 mag (z and H up to 0.6–0.8 mag off), the expansion closure's
+from 0.20 to 0.32.** The snapshot's 1.4–1.7 mag (§4.59) becomes 0.5 mag
+once the light curve integrates over the escape-time distribution, and it
+stays a systematic difference between the two closures of the opposite
+sign from the expansion closure's; neither closure reproduces the resolved
+transport to the 0.1 mag level once fluorescence is retained, and the
+expansion closure misstates the peak luminosity by 15 % under either
+redistribution.
+
+### 4.61 Phase 10c, the P1 composition as a light curve: a transport replacement test on the published xkn secular-ejecta structure (F66)
+
+Instrument: `sobolev/xkn.py` (the xkn-diff prescription of Ricigliano et
+al. 2024, MNRAS 529, 647: the thick-ejecta diffusion luminosity of their
+eq. 22–23 by an exponential-Euler mode integration, 1000 modes, within
+0.7 % of 4000; the M_thick rescale of eq. 24; the (1 − x²)³ profile of
+eq. 25; the photosphere τ_γ = 2/3 of eq. 26–28 by exact root finding; T_ph
+of eq. 29 with the 984 K floor; the thin-layer heating of eq. 47 and 59
+with the Barnes et al. 2016 thermalisation at X = t/(1 − x²); the thin-layer
+temperatures T_i = T_ph (1 − x_i²)/(1 − x_ph²) of eq. 50; the shipped
+constants t0 = 3597 s, T0 = 4.17×10⁴ K, f_th0 = 0.866, β = 0.243; the
+Korobkin et al. 2012 heating law ε̇ = 1.95×10¹⁰ (t/1 d)^−1.3 erg s⁻¹ g⁻¹,
+xkn's "K" option), `paper4/phase1_benchmarks/build.py::build_p1_xkn`
+(the P1 secular ejecta, M = 2.64×10⁻² M⊙, v_rms = 0.06c, on a grid of 8
+coarse shells below x = 0.75 and 24 fine shells above; κ = 22.3 cm² g⁻¹,
+the Tanaka et al. 2020 Y_e = 0.2 value as implemented in xkn; the
+Gillanders Ye-0.21a pattern at X_lan = 0.11; singly ionized only; Boltzmann
+populations at the eq. 50 temperatures), `--model p1xkn` in
+`paper4/phase10_fontes/lightcurve.py`, tests in `tests/test_xkn.py` and
+`tests/test_timeslab.py`. Data `paper4/phase10_fontes/prod_record/p1xkn/`.
+
+**The design** (the PI's revision of 2026-09-11, verbatim in
+`paper4/plan_review.md`): the xkn diffusion solution supplies the optically
+thick photospheric boundary condition, and the ejecta outside the
+photosphere are evolved with resolved or coarse-grained line transport.
+Per slab [t_a, t_b] the state is rebuilt at t_a (ρ ∝ t⁻³; the photosphere
+x_ph(t_a); T_ph from L_thick; the thin shells' temperatures by eq. 50); the
+transport zone is the set of fine shells whose inner edge lies at or
+outside R_ph(t_a) — it grows inward as the photosphere recedes, and the
+packets carried over from the previous slab are inside it by
+construction (the sliver between R_ph and the zone's inner edge, up to
+0.85 of a fine shell, is neither transported nor heated: its heating
+would be a fraction of the zone's 0.3 %, and L_thick is injected at the
+zone's inner edge rather than at R_ph itself); the inner boundary injects E_thick = ∫ L_thick dt with the
+Planck spectrum at T_ph(t_a), and each zone shell only its own deposited
+heating m_i ∫ ε̇ f_th(t, x_i) dt; there is no other source and no trapped
+field is injected for the zone at 2 d or for shells that join it later
+(the thin layers hold no reservoir in xkn); packets that return to the
+boundary are thermalised by the thick interior and re-emitted at T_ph in
+the photosphere's own frame (`core reemit_cm`: the arriving energy is
+transformed to the boundary frame, the packet leaves isotropically there
+with the comoving Planck spectrum and is aberrated to the lab, and the
+lab-energy change — the receding surface's work on the radiation that
+comes back to it — is booked with the expansion work; the identity still
+closes). The first production run used the lab-frame variant `reemit`
+(direction and Planck frequency drawn in the lab frame, lab energy kept),
+which the review of PR #3 identified as not the emission of a
+thermalising surface at 0.10c; it is kept as `prod_record/p1xkn_lab` and
+compared below. The conventions decided and
+recorded in the state's metadata: the spherically consistent
+v_max = 1.915 v_rms = 0.1149c and the spherical M_thick (the xkn code's
+3 v_rms under its 1-D mass measure is the alternative; it moves x_ph from
+0.91 to 0.88 at 2 d), √(5/3) v_rms in the diffusion solution as in xkn, the
+exact photosphere root (xkn's parabola is an 8 % approximation). Epochs
+2 → 8 d in 30 logarithmic slabs (singly ionized lanthanides only: 1 d
+would need the Saha atom of the 27 ions), the fluorescence trio R₂ / B₂ /
+Bbin₂ at 3×10⁵ heating packets per slab (Bbin₂ at 0.3 of that), event cap
+3×10⁵. Closure per slab: E_carried_in + E_thick + E_heat,zone = E_esc +
+E_core + W + E_carried_out, to machine precision on every slab.
+
+**What the zone is.** At 2 d the photosphere sits at x_ph = 0.908, T_ph =
+3696 K, and the transported zone is the outer 8 of the 24 fine shells; its
+own deposited heating is 0.3 % of the energy that enters it per slab (the
+rest is the thick interior's luminosity through the boundary). The
+photosphere recedes to x_ph = 0.85 by 5 d, where T_ph = 2100 K and the zone
+holds 14 fine shells; the interactions per packet on the resolved leg fall
+from 5 at 2 d to below 1 by 5 d — the zone is line-thick only in the first
+days, which is where the reading is made.
+
+**Controls.** Slab convergence: the resolved leg over 2 → 2.5 d in 5 and
+10 slabs (5×10⁴ heating packets, the comoving-frame boundary) agrees in
+escaped energy to 0.1 %, in work to 0.3 %, within the packet noise (the
+lab-frame boundary's pair: 0.5 % and 1.5 %, `prod_record/p1xkn_conv*_lab`). Free streaming: the same run with every line removed
+(`--f-min 1e30`) has W = 0 exactly, closure 2×10⁻¹⁶, and an escaping
+luminosity equal to xkn's own L_thick + L_thin after the first slab
+(the ratio L_esc / L_xkn is 0.68 in the first slab — the light-crossing
+delay of the thin zone — and 1.00–1.07 thereafter, the delayed arrival of
+a declining source). The pipeline reproduces the model it replaces when
+there is nothing to transport.
+
+**The three light curves** (fluorescence trio, L in 10⁴⁰ erg s⁻¹ in escape
+time; the g and r bands are starved at every epoch and i is starved on the
+line-binned leg after 3.7 d, so the colours are read in i, z, J, H, K where
+the bins hold ≥ 100 packets):
+
+| leg | t_peak (d) | L_peak | E_rad (10⁴⁶) | W (10⁴⁴) | ΔL_peak | median Δm i / z / J / H / K | median Δ(i−K) / Δ(z−K) / Δ(J−K) | max\|Δcolour\| | events per packet, first / last slab |
+|---|---|---|---|---|---|---|---|---|---|
+| R₂ (resolved) | 2.28 | 3.91 | 1.305 | 0.81 | — | — | — | — | 5.0 / 0.2 |
+| B₂ (expansion) | 2.28 | 3.94 | 1.307 | 0.68 | +0.9 % | −0.30 / −0.10 / −0.04 / −0.03 / +0.04 | −0.33 / −0.14 / −0.07 | 0.37 (i−J) | 4.8 / 0.3 |
+| Bbin₂ (line-binned) | 2.28 | 3.96 | 1.305 | 0.79 | +1.4 % | +0.34 / +0.09 / +0.03 / 0.00 / −0.07 | +0.42 / +0.16 / +0.11 | 0.47 (i−J) | 17 / 218 |
+
+The lab-frame boundary (`prod_record/p1xkn_lab`, otherwise identical):
+E_rad 4 % lower on every leg (1.251 / 1.261 / 1.252), W eight times larger
+(6.2 / 5.3 / 6.1 ×10⁴⁴: the lab-frame re-emission discards the work the
+receding photosphere does on the returning radiation), L_peak 10 % lower,
+and the same closure picture — B₂ i − K −0.32, Bbin₂ i − K +0.51 and
+J − K +0.17, max|Δcolour| 0.42 / 0.46. The boundary treatment moves the
+absolute light curve by 4 % and the closure differences by ≤ 0.09 mag.
+
+Every leg's closure holds to 2×10⁻¹⁶; no packet reached the event cap
+(f_capped = 0 on every slab); about one boundary pass per packet in the
+first slabs (E_core = 0: every return is re-emitted, none is booked to
+the core). The
+escaping luminosity of every leg is xkn's own L_thick + L_thin to within
+4–6 % after the first slab (the free-streaming ratio plus the boundary's
+work on the returning radiation): the transported zone
+redistributes the photospheric luminosity in frequency and delays it; it
+does not change how much comes out.
+
+**Readings** (pre-declared, `lightcurve.py --analyse`). (R2) the
+bolometric hierarchy under fluorescence: **Gray** by the rule — the
+peak-luminosity spread of the three treatments is 1.4 % against a Poisson
+noise of 1.6 % (expansion +0.9 %, line-binned +1.4 %), so no ordering can be
+read; what the gray says (PI, 2026-09-11: not "the zone is too thin to
+order") is that the closures are nearly indistinguishable bolometrically
+while they produce different colours with opposite signs — the closure
+choice can alter the SED without strongly changing the total light curve. (R3) the colour residuals: the expansion
+closure is 0.30 mag too bright in i throughout, within 0.04 in K, so its
+i − K is 0.33 mag too blue (the grey blueward offset of F62 and F65, here
+concentrated in i because z–K are nearly transparent); the line-binned
+closure is 0.34 mag too faint in i and 0.07 mag too bright in K, so its
+i − K is 0.42 mag too red and its J − K 0.11 too red — larger than the
+expansion closure's in every colour that reaches K (i − K 0.42 against
+0.33, z − K 0.16 against 0.14, J − K 0.11 against 0.07) and of the opposite
+sign, while the two are comparable in the single statistic max|Δcolour|
+(0.47 against 0.37, both from the i − J colour at late, starved bins). The
+line-binned leg's events per packet climb from 17 in the first slab to 218
+in the last as the photosphere recedes and T_ph falls below 2000 K: the
+trapping pathology of §4.59, bounded here (no cap reached), growing where
+the resolved leg has become transparent.
+
+**F66 — On the published xkn secular-ejecta structure with the P1
+composition, evolved from 2 to 8 d with the xkn diffusion solution as the
+photospheric boundary condition and the outer ejecta under resolved,
+expansion or line-binned transport with explicit fluorescence, no
+statistically resolved bolometric ordering is present (peak luminosities
+within 2 %, inside the packet noise) but the two closures produce distinct
+chromatic biases: the expansion closure
+is a 0.3 mag blueward offset in i − K, the line-binned closure a 0.4 mag
+redward one, opposite in sign and larger, with the line-binned leg's
+interaction count growing twenty-fold over the run.** The hierarchy of
+F62–F65 on a multi-lanthanide composition: expansion ≈ resolved
+bolometrically with a grey-to-blue offset, line-binned the more
+chromatically displaced and of the other sign. Stated limits: the zone is
+line-thick only in the first days (five interactions per packet at 2 d,
+below one after 4 d; net work 3 % of the escaping energy in the first
+slab once the photosphere's work on the returning radiation is counted), so the closure difference is made in the first
+two days and the late curve is a free-streaming photosphere; the thick
+interior is xkn's diffusion solution, not a transport; singly ionized
+lanthanides only; the thin-layer temperatures are xkn's continuation, not
+an energy equation; the heating law is Korobkin's; the v_max convention
+is the spherical one. None of these differs between the three legs.
 
 ## 5. Findings register
 

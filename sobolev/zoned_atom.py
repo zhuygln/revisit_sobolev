@@ -176,6 +176,10 @@ class ZonedMacroAtom:
         """The downward walk per packet from `levels` in `shells`; one uniform
         per active walker per step (exactly `DownwardMacroAtom.walk`)."""
         lev = np.array(levels, int, copy=True); shells = np.asarray(shells, int)
+        if lev.size and (lev.min() < 0 or lev.max() >= self.n_levels):
+            bad = np.flatnonzero((lev < 0) | (lev >= self.n_levels))
+            raise IndexError(f"macroatom walk: {bad.size} activation level(s) out of range, e.g. {lev[bad[0]]} "
+                             f"of {self.n_levels} at walker {bad[0]} (shell {shells[bad[0]]})")
         exit_line = np.full(lev.size, -1, np.int64)
         n_jumps = np.zeros(lev.size, np.int32)
         dead = np.zeros(lev.size, bool)
@@ -343,6 +347,15 @@ class ZonedAtom:
         the union opacity set, the shell's beta inside it."""
         lu = self.line_to_union[np.asarray(lines, int)]
         return np.where(lu >= 0, self.op_beta[np.asarray(shells, int), np.maximum(lu, 0)], 1.0)
+
+    def tau_of_lines(self, shells, lines):
+        """Sobolev optical depth of `lines` for packets in `shells`: the
+        shell's tau inside the union opacity set, 0 outside it (no opacity
+        -> escape probability 1, the convention of `beta_of_lines`). The
+        worldline thermal escape coin dilutes it by the packet's own epoch
+        factor (Paper IV Phase 10b)."""
+        lu = self.line_to_union[np.asarray(lines, int)]
+        return np.where(lu >= 0, self.op_tau[np.asarray(shells, int), np.maximum(lu, 0)], 0.0)
 
     # ---- builders ------------------------------------------------------
     @classmethod

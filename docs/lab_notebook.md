@@ -2982,6 +2982,174 @@ untouched -- everything additive.
 absolute injection energy, escape times, event cap) and the light-curve
 driver; pilot; production overnight; the feedback-T variant.
 
+## 9be. The time-slab transport, its tests, and the pilots (2026-09-10)
+
+*Machinery.* `run_mc` gained the slab contract behind four keywords
+(`t_stop`, `resume`, `launch_energy`, `max_events`; worldline only): a
+packet whose clock reaches C t_stop is paused exactly there (fate 4, r and
+mu advanced, ctime assigned, s_acc = 0, shell at the pause), carried
+packets keep w and nu, new packets are equal-energy packets summing to the
+slab's heating and are injected at a uniform time in the slab at the
+shell's radii of that epoch, emitted isotropically in the comoving frame
+and aberrated; escapes record ct_esc and mu_esc; fate 5 = capped. The
+golden histories did not move (every branch is behind the keywords).
+`sobolev/timeslab.py` holds the checkpoint population, the Fontes heating
+law in closed form, the trapped field as the initial population, the
+observables and the T_rad rule. Zoned thermal legs now run under worldline
+(`tau_of_lines`); one shell stays bit-identical to the single zone.
+
+*Tests.* A slab split of a frozen-atom run reproduces the single run
+(escaped energy within noise, spectrum chi^2) with the per-slab identity
+exact and E_carried_out(k) == E_carried_in(k+1); escape times along radial
+rays through an opacity-free zone; injection energy exact in the comoving
+frame with shell shares proportional to mass; pause exactness and
+bit-reproducible resume; the cap; the initial field and the T_rad round
+trip; the driver end to end (checkpoints, closure, a deleted slab rerun
+bit for bit). Suite 589.
+
+*Pilots (Fontes 64 cells, mirror at cell 1, 4 -> 4.14 d, 2e4 packets).*
+R2 6 s per slab, 39 events per packet (the design estimate was 200 s: the
+interior packets meet far fewer resonances per slab than assumed); B2 5 s,
+Bth 2 s; Rth 170 s (the thermal re-absorption chain); Bbin2 94 s with 525
+events per packet and 1.9 % of the packets at the 20000-event cap; Bbinth
+100 s with 3513 events per packet. Slab convergence over 4 -> 5.2 d, 5 vs
+10 slabs: escaped energy 5.54e45 vs 5.69e45 (2.6 %, inside the Poisson
+noise of ~2500 escapes), work 1.264e46 vs 1.261e46, carried 4.874e46 vs
+4.862e46. The initial trapped field is 6.4e46 erg against 8.9e45 of
+heating over 4-16 d; in the first slab 2.5 % of it goes to expansion work
+and 0.02 % escapes.
+
+*Production launched.* 40 log slabs 4 -> 16 d, n_init 2e5, n_heat 1e5, four
+processes (R2; B2 + Bth; Rth at 0.35; Bbinth at 0.3), Bbin2 at 0.3 to
+follow; then the radiation-temperature variant for R2 and B2; then
+`--analyse`.
+
+## 9bf. The light curve (2026-09-10/11)
+
+Six legs over 40 slabs, 4 -> 16 d, in 10 min (R2) to 1.8 h (Rth at 0.35,
+Bbinth at 0.3); Bbin2 at 0.2 with a 1e5 cap still capped 1.4 % of its
+packets in the first slabs (the trapping of 4.59, bounded). The B2
+feedback-T run crashed once in slab 8 with an out-of-range macroatom level
+that the same slab, resumed from its checkpoint with the same seed, did
+not reproduce; a clear range check now names the source if it recurs.
+
+Result (4.60, F65): resolved lowest, line-binned within 2-4 %, expansion
+15-17 % brighter at the peak, under both redistributions; fluorescence
+moves the colour errors (line-binned 0.13 -> 0.45 mag, J and H 0.4-0.8
+too faint; expansion 0.20 -> 0.32), not the bolometric ones. R1 Red
+(spread 15 % > 8 %, resolved lowest not highest), R2 Gray (the cap), R3 as
+above. The feedback-T variant moves the resolved peak to 6.6 d (their
+6.3) and leaves the closure picture. g and r are starved at these epochs.
+The snapshot's 1.4-1.7 mag is 0.45 mag over the light curve -- the PI's
+"do not insist" case, and still a systematic, opposite-sign difference
+between the two closures.
+
+*Validation.* The opacity-free run (no lines) gives W = 0, the closure to
+2e-16, and the initial field free-streaming out in ~1.3 d (half by 5.3 d,
+90 % by 6.5 d): the pipeline conserves lab energy in free flight and the
+peak of the opaque runs is the delayed release of the trapped field.
+Manuscript skeleton in docs/paper4/outline.md with the figure script
+(docs/figures/paper4/fig_f62..f65). Bbin2 rerun with a 3e5 cap to make
+R2 readable.
+
+## 9bg. The P1 composition as a light curve: the xkn photosphere as the boundary (2026-09-11)
+
+The PI rejected the first design (a tau = 30 boundary fed by an Arnett
+luminosity, a T^4 V injected into newly exposed shells, kappa = 10): it
+double-counts the outer material's heating and misnames xkn-diff. The
+revision, verbatim in plan_review.md: the xkn photosphere (tau_grey = 2/3
+at kappa = 22.3, the Tanaka Y_e = 0.2 value) is the moving inner boundary;
+only xkn's thick-ejecta luminosity L_thick(t) enters there with the
+photospheric Planck spectrum; the shells outside carry only their own
+deposited heating (eq. 47/59); no reservoir for newly exposed shells;
+temperatures by eq. 50; returning packets re-emitted at T_ph.
+
+Built: sobolev/xkn.py (the mode solution -- a trapezoid on the kernel
+diverged with the mode count, the exponential-Euler step converges: 1000
+modes within 0.7 % of 4000; exact photosphere root; eq. 24 rescale; eq.
+47/50/59), build_p1_xkn (8 coarse + 24 fine shells), timeslab.thick_energy
+/ thin_heating_energy, --model p1xkn in the driver (zone = fine shells with
+inner edge >= x_ph(t_a), grows inward; launch_core_frac carries L_thick).
+Pilot slab at 2 d: x_ph 0.908, T_ph 3696 K, 8 zone shells, the zone's own
+heating 0.3 % of what enters it. Production 30 slabs 2 -> 8 d, R2/B2/Bbin2,
+3e5 heating packets, in ~35 min (the builds dominate; transport seconds).
+
+Controls: 5 vs 10 slabs over 2 -> 2.5 d agree in E_rad to 0.5 %, W to
+1.5 %; the line-free run has W = 0, closure 2e-16, and L_esc / L_xkn =
+0.68 in the first slab (light crossing), 0.98-1.07 after (a declining
+source arriving late).
+
+Result (4.61, F66): the three treatments give the same bolometric curve
+(peaks within 2 %, noise 1.6 % -> R2 Gray by rule; the PI reads it as
+"no statistically resolved bolometric ordering, but distinct chromatic
+biases", not as a zone too thin to order); the
+colours differ -- expansion i 0.32 too bright, K unchanged (i-K -0.32);
+line-binned i 0.36 too faint, K 0.11 too bright (i-K +0.51, J-K +0.17):
+opposite signs, line-binned larger in every colour that reaches K,
+comparable in max|dcolour| (0.46 vs 0.42, both at late starved bins).
+The zone is line-thick only in the first days (5 events per packet at
+2 d, < 1 after 4 d; W/E_esc 19 % -> 2 %): the difference is made early,
+the late curve is a free-streaming photosphere. Bbin2's events per packet
+climb 10 -> 232 as T_ph falls below 2000 K (the trapping of 4.59, bounded,
+no cap reached). No packet returned to the boundary (E_core = 0).
+
+The manuscript draft (docs/paper4/manuscript.tex, MNRAS, every number a
+macro from paper4/FROZEN.json; make check) carries F60-F66; one TODO
+stood until the high-cap Bbin2 rerun landed.
+
+*The high-cap rerun (2026-09-11, late).* Cap 1e5 -> 3e5: f_capped in the
+first slab 1.4 -> 1.2 %, the capped energy 4.2 -> 2.8 %, the mean events per
+packet 1786 -> 4435 -- the trapped packets take whatever they are given
+(the 4.59 non-termination in bounded form). Light curve unchanged: E_rad
++1.1 %, L_peak -0.1 %, max|dcolour| 0.45 -> 0.51. By the PI's rule R2
+stays Gray; recorded as the closure's own limitation, not averaged. The
+merged record now carries the 3e5 run (the 1e5 merge kept as
+merged_cap1e5). F65's colour number is 0.51. Manuscript TODO resolved;
+make check green.
+
+## 9bh. The review pass: the re-emitting boundary was in the lab frame (2026-09-11, late)
+
+The PI froze the scope (title = the safer one; F66's Gray = "no
+statistically resolved bolometric ordering, but distinct chromatic
+biases"; F65 Gray kept; PR #3 ready for one review pass, then merge;
+verbatim in plan_review.md). The review pass (a read-only agent on the
+time-slab accounting, the moving photosphere and the provenance, plus a
+claim-by-claim read of every sentence quoting a macro) found:
+
+* core="reemit" drew the direction (sqrt(U)) and the Planck frequency in
+  the LAB frame and kept the lab energy. At the P1-xkn photosphere
+  (0.10c, ~0.9 boundary passes per packet in the first slabs) that is not
+  a thermalising surface: it discards the work the receding surface does
+  on the radiation that comes back to it (a head-on Doppler boost) and
+  re-emits an un-beamed, un-shifted spectrum. Fixed as core="reemit_cm"
+  (comoving thermalisation and re-emission, aberrated to the lab, the
+  lab-energy change booked with the interaction work; the identity still
+  closes; tests on the zoned toy, worldline and classical). Pilot on two
+  2-d slabs: E_esc +8 % on every leg, W/E_esc 0.15 -> 0.02, every band
+  0.03-0.12 mag brighter on every leg, the closures move <= 0.07 mag.
+  Production rerun (35 min): E_rad +4 %, W /8, L_peak +10 %; B2 i-K
+  -0.33 (was -0.32), Bbin2 i-K +0.42 (was +0.51), J-K +0.11 (was +0.17);
+  R2 still Gray (1.4 % < 1.6 %). The lab-frame records are kept as
+  prod_record/p1xkn_lab and p1xkn_conv*_lab. Convergence with the new
+  boundary: 0.1 % E_rad, 0.3 % W (5 vs 10 slabs).
+* the Fontes snapshot's "reemit" bracket (0.16c) had the same lab-frame
+  construction; a third bracket with reemit_cm (GSI, two seeds, 29 min)
+  is recorded next to the other two. It releases about twice the energy
+  (escaped fraction 0.78-0.87 against 0.37-0.60: the receding boundary
+  does work on the radiation over ~8 passes per packet), and its colours
+  agree with the other two -- line-binned fluorescence r-K +1.56 against
+  +1.34 and +1.72, expansion -0.39 against -0.36 and -0.43, line-binned
+  under eps=1 within 0.16 mag. F64's bracket range is now 1.3-1.7 mag.
+  This is why the snapshot reports colours and not escaped energy.
+* low: a failed slab now stops the leg (gray) instead of resuming a stale
+  checkpoint; the two hand-typed numbers in the prose became macros; the
+  merged run.json is hashed in the freeze; the photosphere sliver (up to
+  0.85 of a fine shell between R_ph and the zone's inner edge, neither
+  transported nor heated) is documented.
+* the claim read found one wrong macro (the P1-xkn interaction growth
+  quoted the resolved leg's first-slab count) and two signed "reproduces
+  to" numbers; fixed.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

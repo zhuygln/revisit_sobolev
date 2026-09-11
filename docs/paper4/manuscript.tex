@@ -1,0 +1,240 @@
+% Paper IV manuscript. Every result number is a macro from numbers.tex
+% (regenerated from paper4/FROZEN.json by latex_tables.py); nothing in the
+% prose is typed by hand. `make check` enforces this.
+\documentclass[fleqn,usenatbib]{mnras}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{xspace}
+\graphicspath{{figures/}}
+\input{numbers}
+\newcommand{\todo}[1]{\textbf{[TODO: #1]}}
+\newcommand{\Rres}{R\xspace}
+\newcommand{\Bexp}{B\xspace}
+\newcommand{\Bbin}{B$_{\rm bin}$\xspace}
+\newcommand{\Rth}{R$_\theta$\xspace}
+\newcommand{\Bth}{B$_\theta$\xspace}
+\newcommand{\Bbinth}{B$_{{\rm bin},\theta}$\xspace}
+\newcommand{\Rtwo}{R$_2$\xspace}
+\newcommand{\Btwo}{B$_2$\xspace}
+\newcommand{\Bbintwo}{B$_{{\rm bin},2}$\xspace}
+\newcommand{\Atwo}{A$_2$\xspace}
+\newcommand{\Rone}{R$_1$\xspace}
+\newcommand{\Bone}{B$_1$\xspace}
+\newcommand{\RtwoM}{R$_2^{\rm M}$\xspace}
+\newcommand{\BtwoM}{B$_2^{\rm M}$\xspace}
+\newcommand{\BbintwoM}{B$_{{\rm bin},2}^{\rm M}$\xspace}
+\newcommand{\Xlan}{X_{\rm lan}}
+\newcommand{\Msun}{{\rm M}_\odot}
+\newcommand{\tauS}{\tau_{\rm S}}
+\newcommand{\NdII}{Nd\,\textsc{ii}\xspace}
+\newcommand{\NdIII}{Nd\,\textsc{iii}\xspace}
+\newcommand{\Pone}{P1\xspace}
+\newcommand{\Ptwo}{P2\xspace}
+
+\title[Fluorescence and coarse line opacity in kilonovae]{Testing coarse line-opacity treatments with energy-conserving fluorescence in kilonova ejecta}
+\author[Y. Zhu]{Yonglin Zhu$^{1}$\thanks{E-mail: zhuygln@gmail.com}\\
+$^{1}$Independent researcher}
+\date{Accepted XXX. Received YYY; in original form ZZZ}
+\pubyear{2026}
+
+\begin{document}
+\label{firstpage}
+\pagerange{\pageref{firstpage}--\pageref{lastpage}}
+\maketitle
+
+\begin{abstract}
+Kilonova radiative-transfer calculations coarse-grain the r-process line forest either with the expansion-opacity formalism or with a line-binned (integrated Sobolev depth) opacity, and both constructions were validated against resolved line-by-line transport under complete thermal redistribution, where every absorbed packet is re-emitted from the local thermal emissivity. We ask whether that validation survives when the post-absorption physics is instead energy-conserving fluorescence, in which the absorbing transition determines the emitted frequency. Using one Sobolev Monte Carlo code, one line list and one set of ejecta states, we compare the resolved transport with the two coarse-grained treatments under both redistributions, on a lanthanide-rich secular-ejecta state, an AT2017gfo-like thin state, and the single-element benchmark problem of Fontes et al., both as a snapshot and as a light curve under a prescribed thermodynamic trajectory. Under complete redistribution we recover the published picture: the line-binned closure reproduces the resolved colours to within \BbinthRthPoneAbsmax\ mag on the lanthanide-rich states and the expansion closure sits \BthRthPone\ mag too bright. Switching only the redistribution to fluorescence leaves the expansion closure's error where it was (\BtwoRtwoZPone\ mag in $z$) but moves the line-binned closure to \BbinRtwoPone\ mag too faint, opens its $r-K$ colour error on the Fontes problem to \FontesFluBbinRtwoRK\ mag, and on a thinner line list makes its transport fail to terminate. Over the light curve the bolometric ordering of the three treatments is the same under both redistributions (expansion \LcBthDL\ to \LcBtwoDL\ brighter at the peak, line-binned within \LcBbintwoDL), while fluorescence raises the line-binned closure's maximum colour error from \LcBbinthColour\ to \LcBbintwoColour\ mag and the expansion closure's from \LcBthColour\ to \LcBtwoColour\ mag. On the lanthanide-rich state evolved above its own photosphere the three treatments give one bolometric light curve and the two closures are displaced in colour in opposite directions, the line-binned one further. A coarse opacity that retains only the integrated depth of a bin cannot retain which transition absorbed; under fluorescence that lost information is a systematic error in the colours.
+\end{abstract}
+
+\begin{keywords}
+radiative transfer -- opacity -- methods: numerical -- neutron star mergers -- transients: neutron star mergers
+\end{keywords}
+
+\section{Introduction}\label{sec:intro}
+
+The optical and near-infrared emission of a kilonova is shaped by tens of millions of bound--bound transitions of the r-process elements, above all the lanthanides, in ejecta that expand homologously at a tenth of the speed of light \citep{kasenbadnell2013,barneskasen2013,tanaka2020,metzger2020}. No transport calculation of a kilonova treats every one of those lines with its own Sobolev escape probability throughout a time-dependent, multi-dimensional model. Instead the forest is coarse-grained. Two constructions dominate the literature. The expansion-opacity formalism of \citet{karp1977} and \citet{eastman1993} replaces the lines in a frequency bin by an effective continuous opacity proportional to the sum of $1-{\rm e}^{-\tauS}$ over the bin, and is the basis of the opacity tables used by \textsc{sedona} \citep{sedona,kasen2017}, by the Tanaka--Kawaguchi line of models \citep{tanaka2020,kawaguchi2018} and by \textsc{possis} \citep{bulla2019}. The line-binned or ``area-preserving'' opacity used by \citet{fontes2020} and in the \textsc{supernu} models of \citet{wollaeger2018} instead integrates the Sobolev depth itself over the bin, so that the bin's total optical depth is preserved. Both replace a set of discrete transitions by a single number per bin.
+
+\citet{fontes2020} tested the two constructions against a resolved line-by-line calculation on a deliberately simple problem: a pure-neodymium sphere with a prescribed density and temperature structure, transported with the lines treated one by one, with the expansion opacity, and with the line-binned opacity. They found the three to agree to within several per cent in the peak luminosity, with the expansion treatment the brightest, and concluded that either coarse-graining is adequate for kilonova light-curve work. That benchmark, like the calculations it validated, was done under complete thermal redistribution: a packet absorbed in a line is re-emitted from the local thermal emissivity, so that the identity of the absorbing transition plays no role once the absorption has happened.
+
+Line-by-line codes do something different. In \textsc{artis} \citep{shingles2023,collins2023} and in the Lucy macroatom that underlies it \citep{lucy2002,lucy2003}, an absorption activates a specific upper level and the packet leaves through one of that level's downward transitions: the emitted frequency depends on which line absorbed, and energy is conserved through the cascade. \citet{shingles2023} argued on physical grounds that the fluorescence produced this way matters for the near-infrared spectra of kilonovae, and \citet{collins2026} and \citet{morag2026} have since made the case that the treatment of line opacity is among the largest uncontrolled choices in kilonova modelling. What has not been done is the controlled experiment: the same code, the same line list, the same ejecta state, the three opacity treatments, and the single change from complete redistribution to energy-conserving fluorescence.
+
+That experiment is the subject of this paper. The question is a methods question. A coarse-grained opacity records, for each frequency bin, how much is absorbed; it does not record by which transition. Under complete redistribution that information is not needed, because every absorption ends the same way. Under fluorescence it is needed, because the cascade that follows depends on it. The expansion opacity and the line-binned opacity lose that information differently, and the question is how much of the validated agreement of \citet{fontes2020} survives when the post-absorption physics is the one that line-by-line codes actually use.
+
+We answer it with a Sobolev Monte Carlo transport in which the three opacity treatments and the two redistributions are switches on one code path, so that any difference between legs is the difference in the physics and nothing else (Section~\ref{sec:method}). The ejecta states are two published structures and the Fontes problem itself (Section~\ref{sec:states}). Section~\ref{sec:results} gives the closures on the published states, the effect of the redistribution, the Fontes problem as a snapshot on two independent line lists, the same problem as a light curve under a prescribed thermodynamic trajectory, and a robustness test with a stronger fluorescence treatment. Section~\ref{sec:discussion} interprets the pattern and states what the calculation does not show.
+
+\section{Method}\label{sec:method}
+
+\subsection{Sobolev Monte Carlo transport with indivisible energy packets}
+
+The transport is a Monte Carlo solution of the line-transfer problem in the Sobolev approximation for homologous flow \citep{sobolev1960,castor1970,jeffery1993}, written for this project and available with the paper. Radiation is carried by indivisible packets of equal comoving-frame energy \citep{lucy2002,lucy2005}. A packet is launched at a position and frequency drawn from the source (the inner boundary with a Planck spectrum, or the volume with the local emissivity), travels in the lab frame, and redshifts in the comoving frame through the line list in order of decreasing frequency. At each line it meets, it interacts with probability $1-{\rm e}^{-\tauS}$, where $\tauS$ is the Sobolev depth of that line in the local shell. The comoving energy of a packet is conserved through every interaction; the lab-frame energy it carries out is smaller by the work done on the expanding flow, which the code books separately. The transport is exact in the Sobolev limit for the states considered here, and the packet accounting closes to machine precision on every run: the injected energy equals the escaped energy plus the energy returned to the inner boundary, plus the expansion work, plus what remains in flight when the run stops.
+
+Multi-shell states are transported with a zoned atom: one line list, with per-shell Sobolev depths and escape probabilities on the union of the shells' opacity sets, and per-shell macroatom tables. A single shell reproduces the single-zone code bit for bit, and a state split into more shells at the same physical structure reproduces the unsplit state within the Monte Carlo noise. The second property was the diagnostic that found an inversion error in the coarse-grained legs of an earlier version of this code, since corrected; all results below are on the corrected transport and the pre-correction histories are retained in the repository.
+
+\subsection{Three opacity treatments on one line list}
+
+The resolved treatment (\Rres) walks the lines one at a time. The expansion treatment (\Bexp) groups the lines into bins of fixed width in $\ln\nu$ and assigns each bin the expansion opacity of \citet{eastman1993}, $\kappa_{\rm exp}\propto\sum_i(1-{\rm e}^{-\tau_i})$, evaluated as a continuous opacity along the packet's path through the bin. The line-binned treatment (\Bbin) assigns each bin the integrated Sobolev depth $\sum_i\tau_i$, so that the bin's total attenuation is preserved. When a packet is absorbed in a bin of either coarse treatment and the redistribution requires the identity of the absorbing line, the line is drawn from the bin's members in proportion to the weight the treatment gave them: $1-{\rm e}^{-\tau_i}$ for \Bexp, $\tau_i$ for \Bbin. Both coarse treatments use the same bins, the same line list, and the same per-line depths as the resolved treatment, and reduce to it in the limit of one line per bin; a test on an uneven synthetic forest checks that both reproduce the analytic attenuation of the resolved forest. The closure error of a coarse treatment is its difference from \Rres in the same state under the same redistribution; the sensitivity of that error to the bin width, the depth cut and the packet count was checked over \ConvNsettings\ settings and is reported with the results.
+
+\subsection{Two redistributions}
+
+Under complete thermal redistribution (the subscript $\theta$) every absorbed packet is re-emitted at a frequency drawn from the local line emissivity in local thermodynamic equilibrium, independent of the line that absorbed it. This is the physics of the \citet{fontes2020} benchmark and of the opacity-table codes.
+
+Under fluorescence (the subscript 2) an absorption activates the upper level of the absorbing line, and the packet leaves by a downward transition drawn from that level's branching, each transition weighted by its net radiative rate $A\beta$ with $\beta$ the Sobolev escape probability; if the transition lands on an excited level, the cascade continues from there. This is the downward part of the \citet{lucy2002} macroatom, with energy conserved through the cascade. Its bookkeeping matters: the leg \Rone, in which the packet is re-emitted in the absorbing line, differs from \Rtwo by \RoneRtwoZ\ mag in $z$ on the lanthanide-rich state, and the coarse closures inherit the same shift (\Bone and \Rone differ by at most \BoneRoneAbsmax\ mag), so nothing below depends on it. A control leg \Atwo, which keeps the resolved opacity but groups the emission by level, differs from \Rtwo by at most \AtwoRtwoAbsmax\ mag.
+
+As a robustness test we also transport with a full macroatom (the superscript M) in which internal upward transitions are allowed under an imposed diluted Planck radiation field, $\bar J=W B_\nu(T)$ with $W=\tfrac12$, with the rates of \citet{lucy2003} and no collisions. This is not an equilibrium solution, since the field is imposed rather than solved for; it is the strongest fluorescence treatment that a fixed-state calculation can carry, and it is used to ask whether the conclusions depend on the downward table.
+
+\subsection{Time-slab light curves}
+
+For the light curve the transport runs in time slabs. Each packet carries its own clock; at the end of a slab the packets still in flight are paused at their exact positions and resumed in the next slab, in which the state has been rebuilt with the density scaled as $t^{-3}$ and the temperature of the prescribed trajectory. Heating is injected per slab as equal-energy packets in proportion to each shell's mass, at the shell's Planck spectrum, uniformly in time over the slab; the radiation stored in the ejecta at the start is injected as $aT^4V$ per shell. Escape times are recorded, and the light curve is the escaping luminosity in escape time (observer time is also recorded). The per-slab accounting is exact, and a run split into slabs reproduces the single run. Removing every line from the state gives the free-streaming control: no interaction, zero expansion work, and the initial field released over the light-crossing time; on the production state this control closes to $\LcFreeClosure$. What the light curve measures that a snapshot cannot is the trapping time, the loss to expansion work, and the release of stored radiation; what it does not do is solve an energy equation for the gas.
+
+\subsection{Photometry}
+
+Magnitudes are synthesised from the escaping packets in the $grizJHK$ bands. In the snapshots the packets are binned by frequency; in the light curves by escape time and frequency, with the photometric time bins chosen so that every reported band has at least a hundred packets. The Monte Carlo scatter on a band magnitude, from repeated seeds, is at most a few hundredths of a magnitude on every leg except the full-macroatom reference, where it is below a tenth.
+
+\section{Ejecta states and atomic data}\label{sec:states}
+
+\textbf{\Pone} is the lanthanide-rich secular ejecta of the \textsc{xkn} framework \citep{ricigliano2024}: $M=2.64\times10^{-2}\,\Msun$, $v_{\rm rms}=0.06c$ on the $(1-x^2)^3$ density profile with $x=v/v_{\rm max}$, $Y_{\rm e}=0.20$, and the composition of the $Y_{\rm e}=0.21$ trajectory of \citet{gillanders2022} with its lanthanide mass fraction rescaled to $\Xlan=0.11$ \citep{tanaka2020}. Its temperature run is the grey Eddington solution at the model's luminosity, and the closures are evaluated at the shell where the grey depth reaches $2/3$ and, in the multi-shell runs, on every shell above it. It is used at 1, 2, 3 and 5 d, with ionization from Saha equilibrium. Two variants test the composition pattern: the $Y_{\rm e}=0.21$ trajectory at its own $\Xlan=0.30$, and a solar r-process residual pattern at $\Xlan=0.11$.  % literal-ok
+
+\textbf{\Ptwo} is a thin, AT2017gfo-like state after \citet{gillanders2022}: a $v^{-3}$ density profile between $0.15c$ and $0.35c$ at 3.4 d, $T=3200$ K, with the $Y_{\rm e}=0.29$ trajectory's lanthanides reduced to $\Xlan=2.5\times10^{-3}$.
+
+\textbf{The Fontes problem} is Appendix C of \citet{fontes2020}: a pure-neodymium sphere of $1.4\times10^{-2}\,\Msun$ with $v_{\rm max}=0.25c$, density $\propto(1-x^2)^3$, temperature $\propto(1-x^2)$ with $5700$ K at the centre at 4 d, radioactive heating uniform in mass with their power law in time, bound--bound opacity only, and lines with oscillator strength above $10^{-3}$. Ionization is Saha (\NdIII inside, \NdII outside). As a snapshot at 4 d the outer cells, which hold the region of grey depth below unity, are transported explicitly with the interior's heating arriving through the inner boundary; because the interior is diffusive, the boundary is treated in two brackets, complete thermalisation of returning packets (re-emitted with the boundary's Planck spectrum) and a lossless mirror, and every conclusion is required to hold in both. As a light curve the same state is followed from 4 to 16 d in \LcSlabs\ logarithmic slabs, with the temperature of the initial profile scaled as $t^{-1}$ (adiabatic, radiation-dominated) and, as a variant, with the temperature of each shell reset at each slab boundary from the packets present in it. We call this a time-dependent extension of the Fontes benchmark under a prescribed thermodynamic trajectory; it is not a reproduction of their light curve, which solved an energy equation.
+
+\textbf{Atomic data.} The lanthanide states use the calibrated line list of \citet{gsi_atomic}; the Fontes problem uses its neodymium ions, \FontesGsiNlines\ lines above the oscillator-strength cut. As an independent check the Fontes snapshot is repeated with \NdII and \NdIII from the Japan--Lithuania opacity database \citep{jplt2021,kato2024}, an uncalibrated set with \FontesJpltNlines\ lines above the same cut, a forest four times thinner.
+
+\section{Results}\label{sec:results}
+
+\subsection{The closures on published states}\label{sec:closures}
+
+\begin{figure*}
+\includegraphics[width=\textwidth]{fig_f62_matrix}
+\caption{The closure error, coarse treatment minus resolved transport, per band, on \Pone at 1--5 d, its two composition variants and \Ptwo. Left column: the expansion treatment; right column: the line-binned treatment. Top row: complete thermal redistribution; bottom row: energy-conserving fluorescence. The two closures are within a few tenths of a magnitude of the resolved transport under complete redistribution; under fluorescence the expansion closure stays where it was and the line-binned closure moves to several tenths too faint at every epoch and pattern.}
+\label{fig:matrix}
+\end{figure*}
+
+Table~\ref{tab:matrix} and Fig.~\ref{fig:matrix} give the closure errors on \Pone, its composition variants and \Ptwo under both redistributions. Under fluorescence, the expansion closure is \BtwoRtwoZPone\ mag too bright in $z$ and \BtwoRtwoKPone\ in $K$ on \Pone at every epoch from 1 to 5 d and on both composition variants; on \Ptwo it is \BtwoRtwoPtwoG\ mag in $g$ and smaller in every redder band. The line-binned closure under fluorescence is \BbinRtwoPone\ mag too faint on \Pone, larger than the expansion closure's error and of the opposite sign in every band.
+
+\begin{table*}
+\caption{Closure minus resolved transport in $g$, $z$ and $K$ (mag) on the published states, under complete thermal redistribution ($\epsilon=1$) and under fluorescence.}
+\label{tab:matrix}
+\footnotesize
+\input{tab_matrix}
+\end{table*}
+
+These numbers do not depend on how the ejecta is divided. Table~\ref{tab:grid} lists the expansion and line-binned closure errors on \Pone at 2 d transported as a single photospheric shell and as 4, 6, 12 and 23 resolved shells above the photosphere: the expansion closure's $z$ error is \GridSingleZ\ on the single shell and \GridFourZ, \GridTwelveZ\ and \GridTwentythreeZ\ mag on the 4-, 12- and 23-shell grids, and a 4-shell grid with one shell split in three is bit-identical to the unsplit grid. Across the \ConvNsettings\ convergence settings (bin width over two decades, depth cut over two decades, packet count, emissivity cut) the same error spans \ConvZ\ mag in $z$. The closure error is a property of the coarse-graining, at the level of a few hundredths of a magnitude.
+
+\begin{table*}
+\caption{Grid invariance: closure minus resolved transport on \Pone at 2 d under fluorescence, on single shells around the photosphere and on multi-shell grids above it.}
+\label{tab:grid}
+\footnotesize
+\input{tab_grid}
+\end{table*}
+
+\subsection{Complete redistribution against fluorescence}\label{sec:redistribution}
+
+The upper row of Fig.~\ref{fig:matrix} is the \citet{fontes2020} experiment on the lanthanide-rich states: under complete thermal redistribution the line-binned closure reproduces the resolved transport to within \BbinthRthPoneAbsmax\ mag in every band on \Pone, and the expansion closure sits \BthRthPone\ mag too bright. This is their ordering, re-found with independent atomic data and a resolved Sobolev reference.
+
+The lower row is the same calculation with the single change to energy-conserving fluorescence. The expansion closure is unchanged within the noise. The line-binned closure moves from within \BbinthRthPoneAbsmax\ mag to \BbinRtwoPone\ mag too faint, at every epoch and on both composition variants; on the thin state \Ptwo neither closure moves beyond a few tenths in $g$ and both are within the noise redward. The redistribution itself moves the resolved transport by one to two magnitudes in the optical on \Pone: the choice of post-absorption physics is a larger effect than the choice of opacity closure, and the closures' validation is specific to the physics it was done under.
+
+\subsection{The Fontes problem as a snapshot, on two line lists}\label{sec:snapshot}
+
+\begin{figure*}
+\includegraphics[width=\textwidth]{fig_f64_snapshot}
+\caption{Closure minus resolved transport per band on the Fontes problem at 4 d, for both treatments of the diffusive inner boundary (re-emission and mirror) and both line lists (calibrated and Japan--Lithuania), under complete redistribution (left) and fluorescence (right). The line-binned closure under fluorescence on the Japan--Lithuania list did not terminate and is absent.}
+\label{fig:snapshot}
+\end{figure*}
+
+Fig.~\ref{fig:snapshot} shows the same experiment on a single element. Under complete redistribution the line-binned closure reproduces the resolved $r-K$ colour to \FontesEpsBbinRthRK\ mag and the expansion closure is \FontesEpsBthRthRK\ mag too blue, brighter than the resolved leg by half a magnitude or more through $r$ to $K$: the \citet{fontes2020} ordering, expansion brighter than line-binned with the resolved transport between them in colour. Under fluorescence the expansion closure's colour error is \FontesFluBtwoRtwoRK\ mag, unchanged within the bracket of the boundary treatment, while the line-binned closure's $r-K$ error opens to \FontesFluBbinRtwoRK\ mag with the mirror boundary and \FontesFluBbinRtwoRKreemit\ mag with re-emission: too faint by more than a magnitude in $r$ and by several in $g$, and slightly too bright in $K$. In the static snapshot the absolute escaped-energy fraction is not interpreted physically, because a moving thermalising boundary can exchange work with the radiation field without a corresponding time evolution of the ejecta; the boundary brackets are used only to test the robustness of the emergent colours, and the energy accounting is interpreted physically in the light curve of Section~\ref{sec:lightcurve}, where the boundary motion, the elapsed time and the expansion work are all represented consistently. Three treatments of the diffusive inner boundary give the pattern, so it is a property of the transported layers and not of the boundary: the mirror and the two thermalising surfaces, the second of which re-emits in the boundary's own comoving frame and so does work on the radiation that returns to it and so releases about twice the energy of the other two without changing what is observed: it leaves the line-binned closure's colour error at \FontesFluBbinRtwoRKcm\ mag, the expansion closure's at \FontesFluBtwoRtwoRKcm, and the line-binned closure within \FontesEpsBbinRthRKcm\ mag under complete redistribution.
+
+On the Japan--Lithuania line list the five legs that terminate repeat the pattern: line-binned within \FontesJpltEpsBbinRthRK\ mag of the resolved colour under complete redistribution and the expansion closure several tenths too blue under both. The line-binned closure under fluorescence did not terminate on this list, with either boundary treatment: packets remained in flight after a million transport steps. The mechanism is visible in the event counts. On the calibrated list the line-binned fluorescence leg needed \FontesBbinEvRatioR\ times as many interactions per packet as the resolved leg and \FontesBbinEvRatioB\ times as many as the expansion leg, and under complete redistribution the same bins cost thousands of interactions per packet and terminated. A packet re-emitted by the macroatom at the frequency of a saturated line lands in a bin whose integrated depth re-absorbs it with certainty; the walk re-enters the same upper level and leaves by the same line, and nothing in the closure plays the role of the Sobolev escape probability of the resolved transport or of the $1-{\rm e}^{-\tau}$ saturation of the expansion opacity. On a strong-lined forest the line-binned closure with explicit fluorescence is not merely less accurate but ill-posed without a per-line escape treatment.
+
+\subsection{The Fontes problem as a light curve}\label{sec:lightcurve}
+
+\begin{figure*}
+\includegraphics[width=\textwidth]{fig_f65_lightcurve}
+\caption{The Fontes problem as a light curve under a prescribed thermodynamic trajectory, 4 to 16 d. Left: the bolometric escaping luminosity of the three treatments under complete redistribution (solid) and fluorescence (dashed). Centre: closure minus resolved transport in $z$ (circles) and $H$ (triangles) per photometric time bin. Right: the $J-K$ colour residual. The $g$ and $r$ bands are starved of packets at these epochs and are not shown.}
+\label{fig:lightcurve}
+\end{figure*}
+
+Table~\ref{tab:lightcurve} and Fig.~\ref{fig:lightcurve} give the six light curves. Of the energy available (the stored field at 4 d is \LcInitHeatRatio\ times the heating deposited over 4 to 16 d), \LcEradFrac\ is radiated by 16 d and \LcWfrac\ is lost to expansion work, on every leg within a few per cent. The resolved transport peaks at \LcRthPeakD\ d under complete redistribution and \LcRtwoPeakD\ d under fluorescence, and is the lowest of the three treatments under both: it loses the most energy to work, because a packet that leaves a homologous flow after the most interactions has given the most of its lab-frame energy to the flow. The expansion closure is \LcBthDL\ brighter at the peak under complete redistribution and \LcBtwoDL\ under fluorescence; the line-binned closure is within \LcBbinthDL\ and \LcBbintwoDL. The ordering, expansion above line-binned above resolved, is the same under both redistributions. It is not the ordering \citet{fontes2020} reported, in which the resolved calculation was the brightest, and the expansion excess is larger than theirs; a prescribed thermodynamic trajectory does not reproduce an energy-equation light curve, and the comparison we make is between the closures, not with their curve.
+
+\begin{table*}
+\caption{The Fontes light curve: peak time and luminosity, radiated energy, expansion work, the peak-luminosity excess over the resolved transport and the maximum colour residual, for the three treatments under both redistributions.}
+\label{tab:lightcurve}
+\input{tab_lightcurve}
+\end{table*}
+
+Fluorescence changes the colours, not the bolometric ordering. The maximum colour residual of the line-binned closure over the light curve grows from \LcBbinthColour\ mag under complete redistribution to \LcBbintwoColour\ mag under fluorescence, with the closure up to \LcBbintwoHmax\ mag too faint in $H$; the expansion closure's grows from \LcBthColour\ to \LcBtwoColour\ mag. The snapshot's colour error of more than a magnitude becomes a few tenths once the light curve integrates over the distribution of escape times, and it remains a systematic difference of the opposite sign from the expansion closure's. The line-binned fluorescence leg is the bounded form of the trapping of Section~\ref{sec:snapshot}: with an interaction cap of $\LcCapOldEvents$ per packet, \LcCapOldFrac\ of its packets reached the cap in the first slab; raising the cap to $\LcCapNewEvents$ lowers that fraction only to \LcBbintwoCapped\ (\LcCapEnergyFrac\ of the energy over the run) while the mean number of interactions per packet in the first slab grows \LcCapEventsRatio\ times, so the trapped packets absorb whatever budget they are given and do not terminate. The light curve is insensitive to the cap, the escaped energy changing by \LcCapEradChange, the peak luminosity by \LcCapLpeakChange\ and the maximum colour residual from \LcCapOldColour\ to \LcBbintwoColour\ mag, and the numbers above are from the higher cap; the line-binned fluorescence light curve is therefore numerically stable at the quoted level, but the small non-terminating packet population prevents interpreting the calculation as fully converged in the microscopic transport sense, and by the pre-declared rule its bolometric reading stays Gray: a structural limitation of attaching explicit fluorescence to this line-binned representation, recorded and not averaged away.
+
+The variant in which each shell's temperature is reset at each slab boundary from the radiation present in it moves the resolved peak to \LcRadRtwoPeakD\ d, closer to the peak \citet{fontes2020} reported, and gives the same closure picture: the expansion closure \LcRadBtwoDL\ brighter at the peak with a maximum colour residual of \LcRadBtwoColour\ mag.
+
+\subsection{The lanthanide-rich state as a light curve: a transport replacement test}\label{sec:p1xkn}
+
+\begin{figure*}
+\includegraphics[width=\textwidth]{fig_f66_p1xkn}
+\caption{The \Pone composition on the published \textsc{xkn} secular-ejecta structure, 2 to 8 d, with the \textsc{xkn} diffusion solution as the photospheric boundary condition and the ejecta outside the photosphere transported with the three treatments under fluorescence. Left: the bolometric escaping luminosity. Centre: closure minus resolved transport in $z$ (circles) and $K$ (triangles). Right: the $J-K$ colour residual.}
+\label{fig:p1xkn}
+\end{figure*}
+
+The Fontes problem is a single element. To ask whether the pattern holds on a multi-lanthanide composition with its own heating history we perform a transport replacement test on the published \textsc{xkn} secular-ejecta structure of \citet{ricigliano2024}: their semi-analytic diffusion solution supplies the optically thick photospheric boundary condition, and the ejecta outside the photosphere are evolved with resolved or coarse-grained line transport. At each slab the photosphere is located at grey depth $2/3$ on the $(1-x^2)^3$ profile with their fixed opacity for $Y_{\rm e}=0.2$ \citep{tanaka2020}; the thick-ejecta luminosity of their diffusion solution enters at the photosphere with the photospheric Planck spectrum; the shells outside carry only their own deposited radioactive heating with the thermalisation of \citet{barnes2016} and the heating law of \citet{korobkin2012}, and take their temperatures from the \textsc{xkn} continuation of the photospheric temperature outward; no stored field is injected for shells that the receding photosphere exposes; packets that return to the photosphere are thermalised and re-emitted at its temperature in its own frame, isotropically there with the comoving Planck spectrum, and the work the receding surface does on that radiation is booked with the expansion work. The state is transported from 2 to 8 d in \PxSlabs\ slabs with singly ionized lanthanides, under fluorescence only. The photosphere recedes from $x=\PxXphFirst$ at \PxTphFirst\ K to $x=\PxXphLast$ at \PxTphLast\ K, and the transported zone grows from \PxZoneFirst\ to \PxZoneLast\ of the fine shells; the zone's own heating is \PxHeatFrac\ of the energy that enters it in the first slab. Two controls hold: halving the slab length changes the escaped energy by \PxConvErad\ and the expansion work by \PxConvW, and with every line removed the escaping luminosity is the \textsc{xkn} model's own luminosity to within \PxFreeRatioMin--\PxFreeRatioMax\ after the light-crossing delay of the first slab, with zero expansion work.  % literal-ok
+
+Table~\ref{tab:p1xkn} and Fig.~\ref{fig:p1xkn} give the result. No statistically resolved bolometric ordering is present: the light curves peak at \PxRtwoPeakD\ d, the peak luminosities of the expansion and line-binned closures differ from the resolved transport by \PxBtwoDL\ and \PxBbintwoDL, inside the packet noise of \PxNoise, and the escaping luminosity of every leg is the \textsc{xkn} luminosity redistributed in frequency and delayed. The two closures nevertheless produce distinct chromatic biases. The zone is line-thick only in the first days: the resolved transport has \PxEvFirst\ interactions per packet at 2 d and \PxEvLast\ at 8 d, and the net work, expansion work less the photosphere's work on the returning radiation, is \PxWfirst\ of the escaping energy in the first slab. The closures differ in colour. The expansion closure is \PxBtwoI\ mag in $i$ and \PxBtwoK\ in $K$ throughout, a blueward offset of \PxBtwoIK\ mag in $i-K$; the line-binned closure is \PxBbintwoI\ mag in $i$ and \PxBbintwoK\ in $K$, a redward offset of \PxBbintwoIK\ mag in $i-K$ and \PxBbintwoJK\ in $J-K$ against the expansion closure's \PxBtwoJK. The two closures are displaced in opposite directions, the line-binned one further in every colour that reaches $K$, while the single statistic of the maximum colour residual over all bins is comparable (\PxBbintwoColour\ against \PxBtwoColour\ mag, both set by late, packet-starved bins). The line-binned leg's interactions per packet grow from \PxBbinEvFirst\ to \PxBbinEvLast\ over the run as the photospheric temperature falls, the bounded form of the trapping of Section~\ref{sec:snapshot} on a zone where the resolved transport has become transparent.
+
+\begin{table*}
+\caption{The \Pone composition on the \textsc{xkn} structure under fluorescence: peak time and luminosity, radiated energy, expansion work, the peak excess over the resolved transport, and the median band and colour residuals over the photometric bins that hold at least a hundred packets.}
+\label{tab:p1xkn}
+\scriptsize
+\input{tab_p1xkn}
+\end{table*}
+
+\subsection{A stronger fluorescence treatment}\label{sec:macroatom}
+
+\begin{figure}
+\includegraphics[width=\columnwidth]{fig_f63_macroatom}
+\caption{Closure minus resolved transport per band on \Pone at 2 d under the downward macroatom (solid) and under the full macroatom with upward transitions driven by an imposed diluted Planck field (dashed), for the expansion (circles) and line-binned (squares) treatments.}
+\label{fig:macroatom}
+\end{figure}
+
+Under the full macroatom the resolved transport itself changes by \MacroRefShiftG\ mag in $g$ on \Pone at 2 d, brighter through $H$ with $K$ unchanged, at \MacroEvRatio\ times the interactions per packet: the imposed field pumps energy blueward through the upward transitions. The expansion closure's error stays where the downward macroatom put it, \MacroBtwoZ\ mag in $z$ and within \MacroBtwoAbsmax\ mag in every band (Fig.~\ref{fig:macroatom}). The line-binned closure keeps its \MacroBbinG\ mag error in $g$, loses its red excess and turns to \MacroBbinK\ mag in $K$. The pattern of Section~\ref{sec:redistribution} is not a property of the downward table: the expansion closure tracks the resolved transport to a few tenths whichever fluorescence treatment both are given, and the line-binned closure's error is larger and changes shape with the treatment.
+
+\section{Discussion}\label{sec:discussion}
+
+\subsection{Why the two closures fail differently}
+
+The expansion opacity weights each line in a bin by $1-{\rm e}^{-\tau}$, so a saturated line contributes at most one interaction's worth of opacity however deep it is; the line-binned opacity weights it by $\tau$. In a bin with one saturated line and many weak ones the two treatments therefore differ in how much they absorb, and in which line they attribute the absorption to. Under complete thermal redistribution the second difference is invisible: the energy is re-emitted from the thermal emissivity whichever line absorbed it, and only the first difference, the total attenuation, survives. The line-binned closure preserves the total attenuation by construction and is the closer of the two, as \citet{fontes2020} found and as Sections~\ref{sec:redistribution} and~\ref{sec:snapshot} re-find; the expansion closure under-absorbs in saturated bins and sits a few tenths too bright, an offset that is nearly grey because the saturated lines are spread across the bands.
+
+Under fluorescence the second difference becomes physical. The line-binned closure attributes its extra absorptions to lines in proportion to $\tau$, which on a saturated forest means the same few deep lines again and again; each activates an upper level whose cascade lands elsewhere in the spectrum than the thermal emissivity would have put the energy. The colours move, in the direction of the cascade: the near-infrared bands lose energy that the resolved transport re-emits there. The expansion closure attributes its absorptions in proportion to $1-{\rm e}^{-\tau}$, which on a saturated line is unity and on a weak line is small, so its distribution of activated levels is close to that of the resolved transport; its error stays the grey under-absorption offset it had before. The two closures fail in opposite ways, the expansion closure by a nearly grey offset and the line-binned closure by its colour, and the difference between them is the information the coarse-graining discarded.
+
+The non-termination on the thinner line list is the limiting case. A closure that integrates the depth over a bin has no escape probability for the individual line; a packet re-emitted at a saturated line's frequency inside its own bin is re-absorbed with certainty, and the walk closes on itself. Complete redistribution breaks the loop by moving the packet to another frequency; the downward macroatom, which returns the packet to the same line, does not. Any implementation of a line-binned opacity with explicit fluorescence needs a per-line escape treatment inside the bin, which is to say it needs to retain the information the binning removed.
+
+\subsection{What the light curve adds}
+
+The snapshot colour errors are larger than the light-curve colour errors because the light curve integrates over the distribution of escape times and because the closure's error changes sign between bands and epochs. What survives the integration is a systematic, opposite-signed difference between the two closures of a few tenths of a magnitude in the near-infrared colours, and a peak-luminosity excess of the expansion closure of a sixth under either redistribution. The resolved transport loses the most energy to expansion work in every case; a coarse opacity that lets packets out with fewer interactions is brighter for that reason, and the effect is bolometric rather than chromatic. The near agreement of the three treatments in the peak luminosity that \citet{fontes2020} reported is what this calculation also gives under complete redistribution; its amplitude here is larger, and its ordering different, because the thermodynamic trajectory is prescribed rather than solved.
+
+\subsection{What is not shown}
+
+The temperature is prescribed, or in one variant fed back from the radiation field, and there is no gas energy equation; the light curves are extensions of the benchmark under a fixed trajectory, not kilonova models. The full-macroatom test imposes its radiation field rather than solving for it. The Fontes problem is a single element, and the lanthanide states use a single calibrated line list with one uncalibrated list as a check on the neodymium ions only. The line-binned fluorescence light curves carry a small non-terminating packet population and are converged in their observables, not in the microscopic transport. The $g$ and $r$ bands are starved of packets in the light curves at the epochs shown. The multi-shell states hold the composition and ionization of the published models fixed and do not evolve them. None of these choices differs between the legs being compared, and every comparison is between legs that share everything but the switch under test; the numbers are the closure errors under those conditions, and their sizes should be read as such.
+
+\section{Conclusions}\label{sec:conclusions}
+
+On one code, one line list and one set of ejecta states, with the opacity treatment and the redistribution as the only switches, three statements hold.
+
+First, under complete thermal redistribution the resolved, expansion and line-binned treatments remain relatively close: on the lanthanide-rich state the line-binned closure is within \BbinthRthPoneAbsmax\ mag of the resolved transport and the expansion closure \BthRthPone\ mag too bright, on the Fontes problem the line-binned closure reproduces the resolved $r-K$ colour to \FontesEpsBbinRthRK\ mag, and over the light curve the three peak within \LcBthDL\ of each other. This is the connection to \citet{fontes2020}, re-found with independent atomic data and a resolved Sobolev reference.
+
+Second, with explicit energy-conserving fluorescence the expansion opacity remains close to the resolved transport in the tested states: \BtwoRtwoZPone\ mag in $z$ on the lanthanide-rich state at every epoch and pattern, invariant to the grid, within \MacroBtwoAbsmax\ mag under the stronger macroatom, \LcBtwoDL\ at the peak of the light curve with a colour error of \LcBtwoColour\ mag, and a \PxBtwoIK\ mag offset in $i-K$ on the lanthanide-rich state evolved above its own photosphere. Its error is a nearly grey, blueward offset that does not change with the redistribution.
+
+Third, the line-binned opacity develops larger and oppositely directed chromatic differences: \BbinRtwoPone\ mag too faint on the lanthanide-rich state, an $r-K$ error of \FontesFluBbinRtwoRK\ mag on the Fontes snapshot with a transport that does not terminate on a thinner line list, a colour error of \LcBbintwoColour\ mag over the light curve with a small non-terminating packet population, and a \PxBbintwoIK\ mag redward offset in $i-K$ on the multi-lanthanide state where the expansion closure is blueward. Binning by integrated depth has discarded the information needed to determine the post-absorption behaviour of the line, and fluorescence is where that information is used. The multi-lanthanide result shows this is not a property of a single element.
+
+Bolometric agreement therefore does not imply spectral agreement: on the lanthanide-rich state above its photosphere the three treatments give one bolometric light curve, within the packet noise, while the two closures are displaced in colour in opposite directions. Kilonova transport codes that use a line-binned opacity with a macroatom or other fluorescence treatment need a per-line escape treatment inside the bin; codes that use the expansion opacity with fluorescence inherit a grey offset of a few tenths of a magnitude that is stable across states, epochs, grids and the strength of the fluorescence treatment.
+
+\section*{Acknowledgements}
+The transport code, the run records from which every number in this paper is generated, and the pre-correction histories are available in the repository named below.
+
+\section*{Data availability}
+The code and all run records are at \url{https://github.com/zhuygln/revisit_sobolev}. The manuscript's numbers are generated from the frozen record \texttt{paper4/FROZEN.json}; the calibrated line list is that of \citet{gsi_atomic} and the Japan--Lithuania list is publicly available \citep{jplt2021}.
+
+\bibliographystyle{mnras}
+\bibliography{references}
+
+\label{lastpage}
+\end{document}
