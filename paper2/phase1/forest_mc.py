@@ -607,7 +607,7 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
            t_core=None, beta_on_expansion=False, exp_emit="bin",
            launch_weight="photon", eps=1.0, relativity=None,
            kernel=None, collect_events=False, line_memory=False, launch="core", launch_core_frac=0.0, macro_kw=None,
-           t_stop=None, resume=None, launch_energy=None, max_events=None,
+           t_stop=None, resume=None, launch_energy=None, max_events=None, launch_shell_weights=None,
            chain_max=10000, chain_overflow="raise", wall_s=None,
            packets="photon", core="absorb", core_max_passes=200,
            eps_k=0.0, thermal_k="reemit", a_cut=None, reprocess=None, tau_cap=None):
@@ -720,7 +720,9 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
         2020 simplified problem, Paper IV Phase 10). With `launch_core_frac`
         = f, a fraction f of the packets starts on the core instead (the
         heating of the interior that the transport zone does not contain,
-        arriving as the core's Planck spectrum), the rest in the volume.
+        arriving as the core's Planck spectrum), the rest in the volume;
+        `launch_shell_weights` (per shell) replaces the mass weighting of
+        the volume launch (the thin layers' heating of Phase 10c).
     emit_window : (nu_lo, nu_hi) to confine thermal re-emission to a window
         (SEDONA-like); None re-emits over the whole atom.
     Returns dict with nu_launch, nu_out, counts, and n_interactions (total
@@ -923,7 +925,8 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
         # shell in proportion to mass (uniform specific heating), position
         # uniform in the shell's volume, isotropic, Planck at the shell's T
         r3 = r_edges ** 3
-        m_sh = np.asarray(getattr(atom, "rho", np.ones(n_sh)), float) * (r3[1:] - r3[:-1])
+        m_sh = (np.asarray(launch_shell_weights, float) if launch_shell_weights is not None
+                else np.asarray(getattr(atom, "rho", np.ones(n_sh)), float) * (r3[1:] - r3[:-1]))
         shell_launch = rng.choice(n_sh, size=n_packets, p=m_sh / m_sh.sum())
         u3 = rng.uniform(0.0, 1.0, n_packets)
         r = np.cbrt(r3[shell_launch] + u3 * (r3[shell_launch + 1] - r3[shell_launch]))

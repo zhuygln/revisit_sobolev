@@ -115,6 +115,48 @@ def refine_above_photosphere(state, n_fine):
     return fine
 
 
+def build_p1_xkn(t_s, kappa=22.3, n_outer=24, x_lo=0.75, n_inner=8, model=None):
+    """The P1 ejecta on the published xkn secular structure at epoch t_s (s)
+    for the Phase 10c light curve: rho from the (1 - x^2)^3 profile at
+    v_max = 0.1149c (the spherical rms convention), the xkn photosphere at
+    kappa (the Tanaka Y_e = 0.2 opacity), T_ph from the xkn thick luminosity
+    (sobolev/xkn.py) and the thin layers' temperatures by xkn eq. 50; the P1
+    composition (Gillanders Ye-0.21a at X_lan = 0.11), II only. The grid has
+    `n_inner` coarse shells below x_lo and `n_outer` linear fine shells over
+    [x_lo, 1] so that the transported region (the shells outside the
+    photosphere) is resolved as it grows inward. The interior below the
+    photosphere is not transported: its temperatures are set to T_ph for
+    the record only. meta records every convention."""
+    from sobolev import xkn as xk
+    spec = dict(P1)
+    m_model = xk.XknSecular(m_msun=spec["m_msun"], v_rms_c=spec["v_rms_c"], kappa=kappa) if model is None else model
+    t = float(t_s)
+    m = spec["m_msun"] * MSUN
+    v_max = m_model.v_max_profile_c * C
+    x_edges = np.concatenate([np.linspace(0.0, x_lo, n_inner + 1)[:-1], np.linspace(x_lo, 1.0, n_outer + 1)])
+    v_edges = x_edges * v_max
+    rho = ej.shells_from_profile(m, t, v_edges, lambda v: (1.0 - (v / v_max) ** 2) ** 3)
+    n = rho.size
+    X, f_ion = composition(spec["x_lan"], spec["composition"], n)
+    x_mid = 0.5 * (x_edges[1:] + x_edges[:-1])
+    x_ph = m_model.x_ph(t); T_ph = float(m_model.T_ph(t)[0]); L_thick = float(m_model.L_thick(t)[0])
+    T = np.where(x_mid >= x_ph, m_model.thin_temperatures(t, np.minimum(x_mid, 1.0 - 1e-9)), T_ph)
+    T = np.maximum(T, m_model.T_floor)
+    s0 = int(np.searchsorted(x_edges, x_ph, side="left"))                  # first shell whose inner edge >= x_ph
+    s0 = min(max(s0, 0), n - 1)
+    st = ej.EjectaState(t=t, v_edges=v_edges, rho=rho, T_gas=T, T_rad=T.copy(), X=X, f_ion=f_ion, Y_e=spec["Y_e"],
+                        meta=dict(name="P1-xkn", m_msun=spec["m_msun"], v_rms_c=spec["v_rms_c"], Y_e=spec["Y_e"],
+                                  x_lan=spec["x_lan"], composition=spec["composition"], kappa=kappa,
+                                  T_floor=m_model.T_floor, v_max_c=m_model.v_max_profile_c, v_max_diff_c=m_model.v_max_diff_c,
+                                  heating=m_model.heating_name, t_d=t / DAY, n_shell=n, n_inner=n_inner, n_outer=n_outer,
+                                  x_lo=x_lo, x_ph=x_ph, r_ph=m_model.r_ph(t), photospheric_shell=s0, T_ph=T_ph,
+                                  L_thick=L_thick, L_thin_xkn=m_model.L_thin(t, x_edges),
+                                  source="Ricigliano et al. 2024, MNRAS 529, 647: the xkn-diff secular component with "
+                                         "the Tanaka et al. 2020 Y_e = 0.2 opacity; conventions in sobolev/xkn.py"))
+    st.check(m_target=m)
+    return st
+
+
 def build_p2(n_shell=N_SHELL):
     t = P2["t_d"] * DAY
     v_in, v_out = P2["v_in_c"] * C, P2["v_out_c"] * C

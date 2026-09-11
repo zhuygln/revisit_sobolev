@@ -203,3 +203,24 @@ def bin_light_curve(t, e, t_edges):
     h, _ = np.histogram(t, bins=t_edges, weights=e)
     n, _ = np.histogram(t, bins=t_edges)
     return h / np.diff(t_edges), n
+
+
+# ---------------------------------------------------------------------------
+# the xkn boundary condition (Phase 10c)
+# ---------------------------------------------------------------------------
+
+def thick_energy(model, t_a, t_b, n=200):
+    """int_{t_a}^{t_b} L_thick dt of an `xkn.XknSecular` (erg)."""
+    tt = np.linspace(t_a, t_b, n)
+    return float(np.trapezoid(model.L_thick(tt), tt))
+
+
+def thin_heating_energy(model, m_shell, x_shell, t_a, t_b, n=200):
+    """Local deposited heating of thin layers of mass m_shell at x_shell over
+    [t_a, t_b]: m_i int eps(t) f_th(t, x_i) dt (xkn eq. 47, 59); returns
+    (E_total, E_per_shell)."""
+    tt = np.linspace(t_a, t_b, n)
+    m_shell = np.asarray(m_shell, float); x_shell = np.asarray(x_shell, float)
+    rate = np.array([model.thin_heating_rate(tt, x) for x in x_shell])          # (n_shell, n)
+    per = m_shell * np.trapezoid(rate, tt, axis=1)
+    return float(per.sum()), per

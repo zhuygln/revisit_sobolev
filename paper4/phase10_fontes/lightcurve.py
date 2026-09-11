@@ -58,6 +58,18 @@ from observables import LAM_WIN, N_SPEC                           # noqa: E402
 from grid import PASSBANDS, rss_mb                                # noqa: E402
 import legs as L                                                  # noqa: E402
 import fontes                                                     # noqa: E402
+import build as p1build                                           # noqa: E402
+from sobolev import xkn as xk                                     # noqa: E402
+
+_XKN = {}
+
+
+def xkn_model(cfg):
+    """The published xkn secular component at the configured opacity (cached)."""
+    key = (cfg.get("kappa"), cfg.get("n_modes", 1000))
+    if key not in _XKN:
+        _XKN[key] = xk.XknSecular(kappa=cfg["kappa"], n_modes=cfg.get("n_modes", 1000))
+    return _XKN[key]
 
 DAY = 86400.0
 LEG_ID = {"R2": 1, "B2": 2, "Bbin2": 3, "Rth": 4, "Bth": 5, "Bbinth": 6}
@@ -83,32 +95,70 @@ def seed_for(base, leg, k):
 
 
 def build_state(cfg, t_s, T_override=None):
-    st = fontes.build_fontes(t_d=t_s / DAY, n_shell=cfg["n_shell"], saha=True, t_s=t_s, T_override=T_override)
-    return st
+    """The model's state at the exact epoch t_s: the Fontes Appendix C ejecta,
+    or the P1 composition on the published xkn secular structure (Phase 10c,
+    `paper4/phase1_benchmarks/build.py::build_p1_xkn`)."""
+    if cfg.get("model", "fontes") == "fontes":
+        return fontes.build_fontes(t_d=t_s / DAY, n_shell=cfg["n_shell"], saha=True, t_s=t_s, T_override=T_override)
+    if T_override is not None:
+        raise NotImplementedError("the xkn model prescribes its temperatures (eq. 50); no override")
+    return p1build.build_p1_xkn(t_s, kappa=cfg["kappa"], n_outer=cfg["n_outer"], x_lo=cfg["x_lo"], model=xkn_model(cfg))
+
+
+def zone_of(cfg, st):
+    """The transported shells of a state: fixed (`transport`, or 1..end) for
+    Fontes; the shells outside the xkn photosphere for p1xkn (grows inward)."""
+    if cfg.get("model", "fontes") == "p1xkn":
+        return list(range(int(st.meta["photospheric_shell"]), st.n_shell))
+    if cfg.get("transport"):
+        lo_, hi_ = (int(x) for x in cfg["transport"].split("-")); return list(range(lo_, hi_ + 1))
+    return list(range(1, st.n_shell))
+
+
+def slab_sources(cfg, st, shells, t_a, t_b):
+    """Energies injected in [t_a, t_b]: (E_boundary, E_heat_per_shell, weights,
+    core_frac, t_core). Fontes: the heating law uniform in mass, nothing at
+    the boundary. p1xkn: the xkn thick luminosity at the photosphere with
+    T_ph, and each thin shell's own deposited heating (xkn eq. 47, 59)."""
+    m_sh = st.shell_mass()[shells]
+    if cfg.get("model", "fontes") == "fontes":
+        E_heat, per = ts.heating_energy(m_sh, t_a, t_b)
+        return 0.0, per, None, 0.0, float(st.T_gas[shells[0]])
+    model = xkn_model(cfg)
+    x_mid = 0.5 * (st.v_edges[1:] + st.v_edges[:-1])[shells] / (st.meta["v_max_c"] * C)
+    E_thick = ts.thick_energy(model, t_a, t_b)
+    E_heat, per = ts.thin_heating_energy(model, m_sh, np.minimum(x_mid, 1.0 - 1e-9), t_a, t_b)
+    tot = E_thick + E_heat
+    return E_thick, per, per, (E_thick / tot if tot > 0 else 0.0), float(st.meta["T_ph"])
 
 
 def build_atom(cfg, st, shells):
-    return ZonedAtom.from_state(st, shells, stages=("II", "III"), tau_min=cfg["tau_min"], emis_cut=cfg["emis_cut"],
-                                f_min=cfg["f_min"], dataset=cfg["dataset"])
+    return ZonedAtom.from_state(st, shells, stages=tuple(cfg.get("stages", ("II", "III"))), tau_min=cfg["tau_min"],
+                                emis_cut=cfg["emis_cut"], f_min=cfg["f_min"], dataset=cfg["dataset"])
 
 
-def run_slab(cfg, st, atom, shells, leg, k, pop, E_heat_k, n_heat_k, t_a, t_b, out_dir):
+def run_slab(cfg, st, atom, shells, leg, k, pop, sources, n_heat_k, t_a, t_b, out_dir, e_next):
     spec = L.LEGS[leg]
+    E_bnd, E_heat_per, weights, core_frac, t_core = sources
+    E_inject = float(E_bnd + E_heat_per.sum())
     lo, hi = (float(x) for x in phot.nu_edges(*cfg["lam_transport"], 1))
     seed_k = seed_for(cfg["seed"], leg, k)
     t0 = time.time()
     res = run_mc(atom, atom.r_edges[0], atom.r_edges[-1], t_a, lo, hi, int(n_heat_k), spec["mode"], seed=seed_k,
-                 t_core=float(st.T_gas[shells[0]]), relativity="worldline", max_steps=cfg["max_steps"], packets="energy",
-                 launch_weight="energy", launch="volume", launch_energy=float(E_heat_k), t_stop=t_b,
+                 t_core=t_core, relativity="worldline", max_steps=cfg["max_steps"], packets="energy",
+                 launch_weight="energy", launch="volume", launch_energy=E_inject, t_stop=t_b,
+                 launch_core_frac=core_frac, launch_shell_weights=weights,
                  resume=pop.as_dict(), core=cfg["core"], core_max_passes=cfg["max_passes"],
                  max_events=cfg["max_events"], wall_s=cfg["wall_slab"], macro_kw=spec.get("macro_kw"))
     a = res["accounting"]
     obs = ts.escapes(res)
     np.savez(out_dir / f"esc_{leg}_{k:03d}.npz", **obs)
-    e_next = st.v_edges[shells[0]:shells[-1] + 2] * t_b
     pop_next = ts.carried_population(res, e_next)
     tally = dict(k=k, t_a=t_a, t_b=t_b, seed=seed_k, n_new=int(res["n_new"]), n_carried_in=int(pop.n),
-                 E_carried_in=a["E_carried_in"], E_inj_new=a["E_inj_new"], E_inj_cm=a["E_inj_cm"], E_heat=float(E_heat_k),
+                 E_carried_in=a["E_carried_in"], E_inj_new=a["E_inj_new"], E_inj_cm=a["E_inj_cm"], E_heat=E_inject,
+                 E_boundary_in=float(E_bnd), E_heat_zone=float(E_heat_per.sum()), core_frac=float(core_frac), t_core=float(t_core),
+                 n_zone=len(shells), s0=int(shells[0]), x_ph=float(st.meta.get("x_ph", np.nan)), T_ph=float(st.meta.get("T_ph", np.nan)),
+                 L_thick=float(st.meta.get("L_thick", np.nan)), L_thin_xkn=float(st.meta.get("L_thin_xkn", np.nan)),
                  E_esc=a["E_esc"], E_core=a["E_core"], E_abs=a["E_abs"], E_capped=a["E_capped"], E_dep_lab=a["E_dep_lab"],
                  W=a["W"], E_carried_out=a["E_carried_out"], identity=a["identity_residual"],
                  n_paused=int(res["n_paused"]), n_capped=int(res["n_capped"]), n_escaped=int(res["n_escaped"]),
@@ -195,7 +245,9 @@ def analyse(out_dir, cfg=None, phot_bins=10, n_min_band=100):
                                     mags=mags, t_peak_d=t_peak / DAY, L_peak=L_peak, E_rad=E_rad, W_tot=W_tot,
                                     E_init=E_init, E_inj=E_inj, E_core=E_core, E_abs=E_abs, E_capped=E_capped, E_end=E_end,
                                     closure=closure, f_capped_max=f_cap_max, failed_slabs=failed, nan_band_cells=nan_bands,
-                                    t_obs_complete_until_d=float(t_grid[-1] * (1 - fontes.FONTES["v_max_c"]) / DAY))
+                                    t_obs_complete_until_d=float(t_grid[-1] * (1 - run.get("v_max_c", fontes.FONTES["v_max_c"])) / DAY),
+                                    L_xkn=[(tl.get("L_thick", np.nan) + tl.get("L_thin_xkn", np.nan)) for tl in tallies],
+                                    E_boundary_in=sum(tl.get("E_boundary_in", 0.0) for tl in tallies))
     # residuals vs the resolved leg of each redistribution
     for leg in legs:
         ref = REF_OF[leg]
@@ -323,6 +375,10 @@ def main():
     ap.add_argument("--resume", action="store_true"); ap.add_argument("--analyse", action="store_true")
     ap.add_argument("--phot-bins", type=int, default=10); ap.add_argument("--n-min-band", type=int, default=100)
     ap.add_argument("--max-slabs", type=int, default=None, help="stop after this many slabs (pilots)")
+    ap.add_argument("--model", default="fontes", help="fontes | p1xkn (the P1 composition on the xkn secular structure)")
+    ap.add_argument("--kappa", type=float, default=22.3, help="p1xkn: the grey opacity of the xkn photosphere (Tanaka Y_e = 0.2: 22.3)")
+    ap.add_argument("--n-outer", type=int, default=24); ap.add_argument("--x-lo", type=float, default=0.75)
+    ap.add_argument("--stages", default=None, help="ion stages (default: II,III for fontes, II for p1xkn)")
     a = ap.parse_args()
     out_dir = Path(a.out); out_dir.mkdir(parents=True, exist_ok=True)
     if a.merge:
@@ -340,7 +396,9 @@ def main():
     n_scale = {l: 1.0 for l in legs}
     for kv in filter(None, a.n_scale.split(",")):
         k_, v_ = kv.split("="); n_scale[k_] = float(v_)
-    cfg = dict(t0=a.t0, t1=a.t1, n_slabs=a.n_slabs, n_shell=a.n_shell, transport=a.transport, core=a.core, max_passes=a.max_passes,
+    stages = tuple(a.stages.split(",")) if a.stages else (("II", "III") if a.model == "fontes" else ("II",))
+    cfg = dict(model=a.model, kappa=a.kappa, n_outer=a.n_outer, x_lo=a.x_lo, stages=list(stages),
+               t0=a.t0, t1=a.t1, n_slabs=a.n_slabs, n_shell=a.n_shell, transport=a.transport, core=a.core, max_passes=a.max_passes,
                legs=legs, n_scale=n_scale, n_init=a.n_init, n_heat=a.n_heat, init=a.init, temperature=a.temperature,
                max_events=a.max_events, max_steps=a.max_steps, wall_slab=a.wall_slab, seed=a.seed, dataset=a.dataset,
                tau_min=a.tau_min, emis_cut=None if a.emis_cut <= 0 else a.emis_cut, f_min=None if a.f_min <= 0 else a.f_min,
@@ -355,13 +413,16 @@ def main():
         run = dict(config=cfg, config_hash=config_hash({k: v for k, v in cfg.items() if k != "git"}), t_grid=t_grid.tolist(),
                    done={l: [] for l in legs}, tallies={l: [] for l in legs}, T_rad={l: {} for l in legs}, notes=[])
     st0 = build_state(cfg, float(t_grid[0]))
-    if a.transport:
-        lo_, hi_ = (int(x) for x in a.transport.split("-")); shells = list(range(lo_, hi_ + 1))
-    else:
-        shells = list(range(1, st0.n_shell))
+    shells = zone_of(cfg, st0)
     m_all = st0.shell_mass(); m_sh = m_all[shells]
     run["shells"] = shells; run["mass_dropped_frac"] = float(1.0 - m_sh.sum() / m_all.sum())
-    E_heat = np.array([ts.heating_energy(m_sh, t_grid[k], t_grid[k + 1])[0] for k in range(a.n_slabs)])
+    run["v_max_c"] = float(st0.meta.get("v_max_c", fontes.FONTES["v_max_c"]))
+    # the per-slab injected energies for the packet allocation (the p1xkn zone
+    # grows with time; the allocation uses the t0 zone's heating plus the
+    # boundary luminosity, the exact per-slab values are recomputed in the loop)
+    E_heat = np.array([sum(x for x in (slab_sources(cfg, st0, shells, t_grid[k], t_grid[k + 1])[0],
+                                        slab_sources(cfg, st0, shells, t_grid[k], t_grid[k + 1])[1].sum()))
+                       for k in range(a.n_slabs)])
     run["E_heat_per_slab"] = E_heat.tolist()
     lo, hi = (float(x) for x in phot.nu_edges(*cfg["lam_transport"], 1))
     n_last = a.n_slabs if a.max_slabs is None else min(a.n_slabs, a.max_slabs)
@@ -371,7 +432,15 @@ def main():
         if not pending:
             continue
         st = build_state(cfg, t_a) if cfg["temperature"] == "prescribed" or k == 0 else None
+        if st is not None:
+            shells = zone_of(cfg, st)
         atom_shared = build_atom(cfg, st, shells) if st is not None and cfg["temperature"] == "prescribed" else None
+        sources = slab_sources(cfg, st if st is not None else st0, shells, t_a, t_b)
+        if cfg.get("model", "fontes") == "p1xkn":
+            st_b = build_state(cfg, t_b); shells_next = zone_of(cfg, st_b)
+        else:
+            shells_next = shells
+        e_next = st0.v_edges[shells_next[0]:shells_next[-1] + 2] * t_b
         for leg in pending:
             if cfg["temperature"] == "radiation" and k > 0:
                 T_prev = run["T_rad"][leg].get(str(k - 1))
@@ -400,7 +469,7 @@ def main():
                 pop = ts.Population.from_npz(pop_path)
             n_heat_k = int(round(cfg["n_heat"] * n_scale[leg] * E_heat[k] / E_heat.sum()))
             try:
-                tally, pop_next = run_slab(cfg, st_leg, atom, shells, leg, k, pop, E_heat[k], n_heat_k, t_a, t_b, out_dir)
+                tally, pop_next = run_slab(cfg, st_leg, atom, shells, leg, k, pop, sources, n_heat_k, t_a, t_b, out_dir, e_next)
             except RuntimeError as e:
                 run["tallies"][leg].append(dict(k=k, status=f"failed: {str(e)[:120]}", t_a=t_a, t_b=t_b, f_capped=0.0, W=0.0, E_capped=0.0,
                                                 E_core=0.0, E_abs=0.0, E_inj_new=0.0, E_carried_in=0.0, E_carried_out=0.0))
