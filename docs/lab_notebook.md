@@ -3107,6 +3107,49 @@ merged record now carries the 3e5 run (the 1e5 merge kept as
 merged_cap1e5). F65's colour number is 0.51. Manuscript TODO resolved;
 make check green.
 
+## 9bh. The review pass: the re-emitting boundary was in the lab frame (2026-09-11, late)
+
+The PI froze the scope (title = the safer one; F66's Gray = "no
+statistically resolved bolometric ordering, but distinct chromatic
+biases"; F65 Gray kept; PR #3 ready for one review pass, then merge;
+verbatim in plan_review.md). The review pass (a read-only agent on the
+time-slab accounting, the moving photosphere and the provenance, plus a
+claim-by-claim read of every sentence quoting a macro) found:
+
+* core="reemit" drew the direction (sqrt(U)) and the Planck frequency in
+  the LAB frame and kept the lab energy. At the P1-xkn photosphere
+  (0.10c, ~0.9 boundary passes per packet in the first slabs) that is not
+  a thermalising surface: it discards the work the receding surface does
+  on the radiation that comes back to it (a head-on Doppler boost) and
+  re-emits an un-beamed, un-shifted spectrum. Fixed as core="reemit_cm"
+  (comoving thermalisation and re-emission, aberrated to the lab, the
+  lab-energy change booked with the interaction work; the identity still
+  closes; tests on the zoned toy, worldline and classical). Pilot on two
+  2-d slabs: E_esc +8 % on every leg, W/E_esc 0.15 -> 0.02, every band
+  0.03-0.12 mag brighter on every leg, the closures move <= 0.07 mag.
+  Production rerun (35 min): E_rad +4 %, W /8, L_peak +10 %; B2 i-K
+  -0.33 (was -0.32), Bbin2 i-K +0.42 (was +0.51), J-K +0.11 (was +0.17);
+  R2 still Gray (1.4 % < 1.6 %). The lab-frame records are kept as
+  prod_record/p1xkn_lab and p1xkn_conv*_lab. Convergence with the new
+  boundary: 0.1 % E_rad, 0.3 % W (5 vs 10 slabs).
+* the Fontes snapshot's "reemit" bracket (0.16c) had the same lab-frame
+  construction; a third bracket with reemit_cm (GSI, two seeds, 29 min)
+  is recorded next to the other two. It releases about twice the energy
+  (escaped fraction 0.78-0.87 against 0.37-0.60: the receding boundary
+  does work on the radiation over ~8 passes per packet), and its colours
+  agree with the other two -- line-binned fluorescence r-K +1.56 against
+  +1.34 and +1.72, expansion -0.39 against -0.36 and -0.43, line-binned
+  under eps=1 within 0.16 mag. F64's bracket range is now 1.3-1.7 mag.
+  This is why the snapshot reports colours and not escaped energy.
+* low: a failed slab now stops the leg (gray) instead of resuming a stale
+  checkpoint; the two hand-typed numbers in the prose became macros; the
+  merged run.json is hashed in the freeze; the photosphere sliver (up to
+  0.85 of a fine shell between R_ph and the zone's inner edge, neither
+  transported nor heated) is documented.
+* the claim read found one wrong macro (the P1-xkn interaction growth
+  quoted the resolved leg's first-slab count) and two signed "reproduces
+  to" numbers; fixed.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

@@ -4830,10 +4830,13 @@ cells (0.176c–0.25c, τ_grey(κ = 10) ≲ 0.7, 12 % of the mass) transported a
 the interior's 88 % of the heating arriving from the inner boundary;
 classical transport; 2 × 5×10⁴ packets. The interior is diffusive (240
 events and 21 boundary returns per packet from 0.16c inward), so the
-inner boundary is treated in **two brackets**: `reemit` (complete
+inner boundary is treated in **three brackets**: `reemit` (complete
 thermalisation: returning packets come back as the boundary's Planck
-spectrum) and `reflect` (a lossless mirror), each with a 200-return cap
-that books the remainder to the core — the escaped-energy fractions are
+spectrum, drawn in the lab frame), `reflect` (a lossless mirror) and,
+added in the review pass of 2026-09-11, `reemit_cm` (the same
+thermalising surface treated in its own comoving frame, so that the
+receding boundary does work on the radiation that returns to it); each
+with a 200-return cap that books the remainder to the core — the escaped-energy fractions are
 therefore cap-limited (0.37–0.40) and only the *spectral shapes* are the
 observable. A mirror run with a 2×10⁴-return cap
 (`fontes_t4_z45_reflect_lossless.json`, 2 × 2×10⁴ packets) escapes the same
@@ -4845,23 +4848,24 @@ adiabatic loss, not a light-curve luminosity; their 5–8 % peak
 differences are not reproducible by a static transport and are not
 claimed). The lossless run's colours agree with the capped brackets
 (r − K: resolved 6.26 / 6.10, expansion 6.12 / 5.89, line-binned 6.37 /
-7.74 under ε = 1 / fluorescence). Data `fontes_t4_z45_{reemit,reflect}.json`,
+7.74 under ε = 1 / fluorescence). Data `fontes_t4_z45_{reemit,reflect,reemit_cm}.json`,
 `fontes_t6.3_z45_*.json`, `fontes_t4_z45_jplt_*.json`.
 
-Closure − resolved (g, r, i, z, J, H, K), the two brackets side by side:
+Closure − resolved (g, r, i, z, J, H, K), the three brackets side by side:
 
-| redistribution | closure | reemit | reflect |
-|---|---|---|---|
-| ε = 1 | expansion − resolved | −0.12, −0.70, −0.66, −0.56, −0.64, −0.49, −0.52 | −0.20, −0.95, −0.89, −0.68, −0.70, −0.64, −0.66 |
-| ε = 1 | line-binned − resolved | −0.26, −0.06, −0.19, −0.20, −0.29, −0.25, −0.25 | −0.05, −0.39, −0.47, −0.35, −0.41, −0.40, −0.37 |
-| fluorescence | expansion − resolved | +0.05, −0.96, −0.77, −0.54, −0.60, −0.53, −0.53 | −0.58, −1.05, −0.81, −0.67, −0.70, −0.60, −0.69 |
-| fluorescence | line-binned − resolved | **+3.56, +1.39, +0.71, +0.14, +0.17, −0.13, −0.34** | **(g dark), +0.93, +0.59, +0.12, +0.11, −0.15, −0.42** |
-| | resolved: ε = 1 − fluorescence | +0.13, −0.14, +0.01, +0.03, −0.07, −0.04, +0.04 | +0.25, +0.05, +0.14, +0.04, −0.04, −0.01, +0.01 |
+| redistribution | closure | reemit | reflect | reemit_cm |
+|---|---|---|---|---|
+| ε = 1 | expansion − resolved | −0.12, −0.70, −0.66, −0.56, −0.64, −0.49, −0.52 | −0.20, −0.95, −0.89, −0.68, −0.70, −0.64, −0.66 | −1.09, −0.55, −0.46, −0.32, −0.36, −0.18, −0.16 |
+| ε = 1 | line-binned − resolved | −0.26, −0.06, −0.19, −0.20, −0.29, −0.25, −0.25 | −0.05, −0.39, −0.47, −0.35, −0.41, −0.40, −0.37 | −0.52, −0.20, −0.08, −0.03, −0.17, −0.06, −0.04 |
+| fluorescence | expansion − resolved | +0.05, −0.96, −0.77, −0.54, −0.60, −0.53, −0.53 | −0.58, −1.05, −0.81, −0.67, −0.70, −0.60, −0.69 | −0.20, −0.56, −0.48, −0.29, −0.31, −0.22, −0.17 |
+| fluorescence | line-binned − resolved | **+3.56, +1.39, +0.71, +0.14, +0.17, −0.13, −0.34** | **(g dark), +0.93, +0.59, +0.12, +0.11, −0.15, −0.42** | **+1.65, +1.45, +0.85, +0.34, +0.43, +0.09, −0.12** |
+| | resolved: ε = 1 − fluorescence | +0.13, −0.14, +0.01, +0.03, −0.07, −0.04, +0.04 | +0.25, +0.05, +0.14, +0.04, −0.04, −0.01, +0.01 | +0.98, +0.14, +0.10, +0.03, +0.00, −0.05, +0.03 |
 
-Colour r − K of each leg (reemit / reflect): resolved ε = 1 6.15 / 6.38,
-expansion ε = 1 5.97 / 6.09, line-binned ε = 1 6.34 / 6.36; resolved
-fluorescence 6.33 / 6.33, expansion fluorescence 5.90 / 5.98,
-**line-binned fluorescence 8.05 / 7.68**. Events per packet: resolved 71–81,
+Colour r − K of each leg (reemit / reflect / reemit_cm): resolved ε = 1
+6.15 / 6.38 / 6.42, expansion ε = 1 5.97 / 6.09 / 6.03, line-binned ε = 1
+6.34 / 6.36 / 6.26; resolved fluorescence 6.33 / 6.33 / 6.31, expansion
+fluorescence 5.90 / 5.98 / 5.92, **line-binned fluorescence 8.05 / 7.68 /
+7.87**. Events per packet: resolved 71–81,
 expansion 62–72, line-binned ε = 1 6700–7800 (a packet re-emitted
 thermally inside a Σ τ bin is re-absorbed by that bin almost surely),
 line-binned fluorescence 230–290.
@@ -4873,9 +4877,17 @@ too blue and brighter through r–K by 0.5–0.9 mag (their ordering:
 expansion brighter than line-binned, Sobolev between in colour); with the
 single change to energy-conserving fluorescence the expansion closure's
 error is unchanged, while the line-binned closure's colour error opens to
-1.4–1.7 mag in r − K (+1.4 in r, +3.6 in g, −0.3 to −0.4 in K).** Both
-brackets of the inner boundary give the same pattern, so it is a property
-of the transported layers. This is F62 re-found on an independent problem
+1.3–1.7 mag in r − K (+0.9 to +1.5 in r, +1.7 to +3.6 in g, −0.1 to −0.4
+in K).**
+All three brackets of the inner boundary give the same pattern, so it is a
+property of the transported layers and not of the interior's treatment.
+The comoving-frame bracket releases about twice the energy of the other
+two (escaped fraction 0.78–0.87 against 0.37–0.60) because the receding
+boundary does work on the radiation that returns to it over the ~8
+boundary passes per packet; its colours agree with the others (line-binned
+fluorescence r − K +1.56 against +1.34 and +1.72; expansion −0.39 against
+−0.36 and −0.43; line-binned under ε = 1 within 0.16 mag), which is the
+reason the snapshot reports colours and not escaped energy. This is F62 re-found on an independent problem
 with a single element: coarse-opacity closures validated under complete
 redistribution are not thereby validated under fluorescence, and the two
 closures fail in opposite ways — expansion by a nearly grey offset, line-
@@ -5107,9 +5119,9 @@ from 5 at 2 d to below 1 by 5 d — the zone is line-thick only in the first
 days, which is where the reading is made.
 
 **Controls.** Slab convergence: the resolved leg over 2 → 2.5 d in 5 and
-10 slabs (5×10⁴ heating packets) agrees in escaped energy to 0.5 %, in
-expansion work to 1.5 %, in the energy still in flight to 2.4 %, within
-the packet noise. Free streaming: the same run with every line removed
+10 slabs (5×10⁴ heating packets, the comoving-frame boundary) agrees in
+escaped energy to 0.1 %, in work to 0.3 %, within the packet noise (the
+lab-frame boundary's pair: 0.5 % and 1.5 %, `prod_record/p1xkn_conv*_lab`). Free streaming: the same run with every line removed
 (`--f-min 1e30`) has W = 0 exactly, closure 2×10⁻¹⁶, and an escaping
 luminosity equal to xkn's own L_thick + L_thin after the first slab
 (the ratio L_esc / L_xkn is 0.68 in the first slab — the light-crossing

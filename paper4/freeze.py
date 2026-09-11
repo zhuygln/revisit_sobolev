@@ -103,6 +103,7 @@ def headline():
     for tag, rel in (("gsi_reemit", "paper4/phase10_fontes/fontes_t4_z45_reemit.json"),
                      ("gsi_reflect", "paper4/phase10_fontes/fontes_t4_z45_reflect.json"),
                      ("gsi_reflect_lossless", "paper4/phase10_fontes/fontes_t4_z45_reflect_lossless.json"),
+                     ("gsi_reemit_cm", "paper4/phase10_fontes/fontes_t4_z45_reemit_cm.json"),
                      ("jplt_reemit", "paper4/phase10_fontes/fontes_t4_z45_jplt_reemit.json"),
                      ("jplt_reflect", "paper4/phase10_fontes/fontes_t4_z45_jplt_reflect.json")):
         d, rel_, s = load(rel); note(rel_, s); L = d["legs"]
