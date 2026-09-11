@@ -19,14 +19,14 @@ import test_forest_mc as tfm                                     # noqa: E402
 import test_zoned_run_mc as tz                                   # noqa: E402
 
 
-def _run(core, seed=3):
+def _run(core, seed=3, relativity="worldline"):
     fa, a = tz.forest()
     r_core = 0.6 * tfm.R_OUT
     r_edges = np.array([r_core, 0.75 * tfm.R_OUT, tfm.R_OUT])
     z2 = tz.zoned(a, 2, r_edges, scale=[1.0, 1.0]); z2.rho = np.array([1.0, 1.0])
     lo, hi = tfm.pump_band()
     return run_mc(z2, r_core, tfm.R_OUT, T_EXP, lo, hi, 20000, "sobolev_dmacro", seed=seed, packets="energy",
-                  t_core=6000.0, launch_weight="energy", relativity="worldline", core=core, core_max_passes=50,
+                  t_core=6000.0, launch_weight="energy", relativity=relativity, core=core, core_max_passes=50,
                   launch="volume")
 
 
@@ -47,3 +47,12 @@ def test_reemit_cm_closes_the_identity_and_does_boundary_work():
     gain = b["accounting"]["E_esc"] / a["accounting"]["E_esc"]
     passes = b["n_core_passes_total"] / b["n_packets"]
     assert 1.0 < gain < (1.0 + beta) ** (2.0 * passes + 2.0)
+
+
+def test_reemit_cm_runs_without_worldline_transport():
+    """The Fontes snapshots run the classical (non-worldline) transport; the
+    boundary speed is then r_core / (c t)."""
+    a = _run("reemit", relativity=None); b = _run("reemit_cm", relativity=None)
+    for res in (a, b):
+        assert abs(res["accounting"]["identity_residual"]) < 1e-10 and res["n_core_passes_total"] > 1000
+    assert b["accounting"]["E_esc"] > a["accounting"]["E_esc"]

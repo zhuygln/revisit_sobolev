@@ -1299,7 +1299,7 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
                     # frequency at t_core, and is aberrated to the lab; the
                     # lab-energy change is the work the moving boundary does
                     # on the radiation, booked with the interaction work
-                    b_b = (r[rl] / ctime[rl]) if wl else np.full(rl.size, b_core_v)
+                    b_b = (r[rl] / ctime[rl]) if wl else np.full(rl.size, float(r_core) / ct)
                     g_b = 1.0 / np.sqrt(1.0 - b_b * b_b)
                     e_cm = w[rl] * nu_old * g_b * (1.0 - b_b * mu[rl])       # / H
                     mu_c = np.sqrt(rng.uniform(0.0, 1.0, rl.size))
