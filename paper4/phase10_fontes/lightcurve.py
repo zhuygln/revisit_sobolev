@@ -254,9 +254,39 @@ def _figure(out_dir, summary):
     fig.tight_layout(); fig.savefig(out_dir / "lightcurve.png", dpi=120); plt.close(fig)
 
 
+def merge_runs(out_dir, sources):
+    """Combine per-leg run directories (one process per leg) into `out_dir`:
+    the esc files are copied, run.json is the union of done/tallies/T_rad
+    (the configs must share the grid; per-leg n_scale and caps are kept as
+    a table for the record)."""
+    import shutil
+    out_dir.mkdir(parents=True, exist_ok=True)
+    merged = None
+    for src in sources:
+        src = Path(src); r = json.loads((src / "run.json").read_text())
+        if merged is None:
+            merged = dict(r); merged["legs_config"] = {}; merged["config"] = dict(r["config"]); merged["config"]["legs"] = []
+            merged["done"] = {}; merged["tallies"] = {}; merged["T_rad"] = {}
+        assert np.allclose(merged["t_grid"], r["t_grid"]), f"{src}: a different time grid"
+        for leg in r["done"]:
+            if not r["done"][leg]:
+                continue
+            merged["config"]["legs"].append(leg)
+            merged["legs_config"][leg] = dict(n_scale=r["config"]["n_scale"].get(leg, 1.0), max_events=r["config"]["max_events"],
+                                              temperature=r["config"]["temperature"], source=str(src))
+            merged["done"][leg] = r["done"][leg]; merged["tallies"][leg] = r["tallies"][leg]; merged["T_rad"][leg] = r["T_rad"].get(leg, {})
+            for k in r["done"][leg]:
+                f = src / f"esc_{leg}_{k:03d}.npz"
+                if f.exists():
+                    shutil.copy(f, out_dir / f.name)
+    write_json_atomic(out_dir / "run.json", merged)
+    return merged
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", required=True)
+    ap.add_argument("--merge", default=None, help="comma list of per-leg run directories to combine into --out before --analyse")
     ap.add_argument("--t0", type=float, default=4.0); ap.add_argument("--t1", type=float, default=16.0)
     ap.add_argument("--n-slabs", type=int, default=40)
     ap.add_argument("--n-shell", type=int, default=64)
@@ -277,6 +307,9 @@ def main():
     ap.add_argument("--max-slabs", type=int, default=None, help="stop after this many slabs (pilots)")
     a = ap.parse_args()
     out_dir = Path(a.out); out_dir.mkdir(parents=True, exist_ok=True)
+    if a.merge:
+        merge_runs(out_dir, a.merge.split(","))
+        print(f"merged {a.merge} into {out_dir}")
     if a.analyse:
         s = analyse(out_dir)
         for k, v in s["readings"].items():
