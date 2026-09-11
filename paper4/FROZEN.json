@@ -1,6 +1,6 @@
 {
  "paper": "IV",
- "git_head": "55a7c91befe8e189b4bc33016445fccb348d5e12",
+ "git_head": "e0a5e8c94bb94c1bf848fd642aa3ea34451527d4",
  "headline": {
   "sources": {
    "paper4/phase9_final/legs_P1_t1.json": "24b118aa795f3052",
@@ -29,7 +29,10 @@
    "paper4/phase10_fontes/fontes_t4_z45_reflect_lossless.json": "882f6541042ffad4",
    "paper4/phase10_fontes/fontes_t4_z45_jplt_reemit.json": "9353e1f4de6e99fe",
    "paper4/phase10_fontes/fontes_t4_z45_jplt_reflect.json": "ecb514c51a36e42f",
-   "paper4/phase10_fontes/prod_record/merged/summary.json": "8dc2e2c0ef40173f",
+   "paper4/phase10_fontes/prod_record/merged/summary.json": "d00a233bdd98df3a",
+   "paper4/phase10_fontes/prod_record/Bbin2/run.json": "2784f1847974b7f1",
+   "paper4/phase10_fontes/prod_record/Bbin2_cap3e5/run.json": "894655fb10aa667b",
+   "paper4/phase10_fontes/prod_record/merged_cap1e5/summary.json": "8dc2e2c0ef40173f",
    "paper4/phase10_fontes/prod_record/merged_rad/summary.json": "8598ca65f7f55d89",
    "paper4/phase10_fontes/prod_record/free_R2/run.json": "84f6f4c7429ced53",
    "paper4/phase10_fontes/prod_record/p1xkn/summary.json": "65d3f65be297d53e",
@@ -1315,27 +1318,27 @@
      }
     },
     "Bbin2": {
-     "t_peak_d": 4.844208912768692,
-     "L_peak": 7.840271910362585e+40,
-     "E_rad": 4.4339723123135445e+46,
-     "W_tot": 2.46045466995371e+46,
+     "t_peak_d": 5.355999300403526,
+     "L_peak": 7.831404691664771e+40,
+     "E_rad": 4.482415881924076e+46,
+     "W_tot": 2.5113489768277456e+46,
      "E_init": 6.490180170571113e+46,
-     "E_inj": 9.030298841875079e+45,
-     "E_end": 1.878601736467496e+45,
-     "closure": 0.0,
-     "f_capped_max": 0.01443206021951053,
-     "dL_peak": 0.03796694998905692,
-     "dt_peak": -0.023691704716789275,
-     "dE_rad": -0.018901755429775235,
-     "max_abs_dcolour": 0.452590155994951,
+     "E_inj": 9.030298841875085e+45,
+     "E_end": 1.9027901003749082e+45,
+     "closure": 1.3716916909859033e-16,
+     "f_capped_max": 0.011910978871147232,
+     "dL_peak": 0.036793026424685404,
+     "dt_peak": 0.07945520944231044,
+     "dE_rad": -0.008182721173828567,
+     "max_abs_dcolour": 0.5094364631701538,
      "max_abs_dm": {
       "g": null,
       "r": null,
       "i": null,
-      "z": 0.3798393234593753,
-      "J": 0.4424644560434956,
-      "H": 0.8210408974719279,
-      "K": 0.23643116667742348
+      "z": 0.5962327535253777,
+      "J": 0.39436130678806336,
+      "H": 0.8128573691417316,
+      "K": 0.1970843917192795
      }
     }
    },
@@ -1356,6 +1359,29 @@
     "max_events": 20000,
     "temperature": "prescribed",
     "init": "radiation"
+   },
+   "bbin2_cap": {
+    "cap1e5": {
+     "max_events": 100000,
+     "f_capped_first": 0.01443206021951053,
+     "E_capped_frac": 0.042055196124786434,
+     "events_mean_first": 1785.739854215918,
+     "E_rad": 4.4339723123135445e+46,
+     "W_tot": 2.46045466995371e+46
+    },
+    "cap3e5": {
+     "max_events": 300000,
+     "f_capped_first": 0.011910978871147232,
+     "E_capped_frac": 0.028291660107057234,
+     "events_mean_first": 4435.428634751773,
+     "E_rad": 4.482415881924076e+46,
+     "W_tot": 2.5113489768277456e+46
+    },
+    "E_rad_change": 0.010925546259276109,
+    "L_ratio_max_dev": 0.11094970016496153,
+    "L_peak_change": -0.0011309835678140479,
+    "cap1e5_dL_peak": 0.03796694998905692,
+    "cap1e5_max_abs_dcolour": 0.452590155994951
    },
    "rad_variant": {
     "R2": {

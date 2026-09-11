@@ -3093,8 +3093,17 @@ no cap reached). No packet returned to the boundary (E_core = 0).
 
 The manuscript draft (docs/paper4/manuscript.tex, MNRAS, every number a
 macro from paper4/FROZEN.json; make check) carries F60-F66; one TODO
-stands until the high-cap Bbin2 rerun (prod/Bbin2_cap3e5, ~13 min per
-slab, 40 slabs) lands.
+stood until the high-cap Bbin2 rerun landed.
+
+*The high-cap rerun (2026-09-11, late).* Cap 1e5 -> 3e5: f_capped in the
+first slab 1.4 -> 1.2 %, the capped energy 4.2 -> 2.8 %, the mean events per
+packet 1786 -> 4435 -- the trapped packets take whatever they are given
+(the 4.59 non-termination in bounded form). Light curve unchanged: E_rad
++1.1 %, L_peak -0.1 %, max|dcolour| 0.45 -> 0.51. By the PI's rule R2
+stays Gray; recorded as the closure's own limitation, not averaged. The
+merged record now carries the 3e5 run (the 1e5 merge kept as
+merged_cap1e5). F65's colour number is 0.51. Manuscript TODO resolved;
+make check green.
 
 ## 10. Standing environment notes
 

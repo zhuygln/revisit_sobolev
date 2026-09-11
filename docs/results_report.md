@@ -4938,7 +4938,7 @@ vs 10 slabs over 4–5.2 d agree in escaped energy to 2.6 %, in work to
 over 4–16 d) injected per slab in proportion to mass at the shell's own
 Planck spectrum; 2×10⁵ initial and 10⁵ heating packets (the line-binned
 and resolved-thermal legs at 0.2–0.35 of that, stated next to their
-numbers); `max_events` 2×10⁴ (10⁵ for the line-binned fluorescence leg).
+numbers); `max_events` 2×10⁴ (3×10⁵ for the line-binned fluorescence leg; its 10⁵-cap run is kept as `prod_record/merged_cap1e5` for the comparison below).
 Temperature: the Appendix C initial profile scaled T ∝ t⁻¹ (adiabatic,
 radiation-dominated; no heating enters T; identical for all six legs),
 with the radiation-temperature feedback rule as a variant (below). What
@@ -4958,7 +4958,7 @@ bands are starved of packets at these epochs and are not reported):
 | Bbinth (line-binned, ε = 1) | 4.83 | 7.35 | 6.38 / 7.12 / 6.40 / 6.05 / 3.35 / 1.30 | 4.470 | 2.702 | 1.8 h at 0.3 |
 | R₂ (resolved, fluorescence) | 4.96 | 7.55 | 6.51 / 7.54 / 7.11 / 6.17 / 3.31 / 1.28 | 4.519 | 2.653 | 10 min |
 | B₂ (expansion, fluorescence) | 5.13 | 8.83 | 7.19 / 8.80 / 7.95 / 6.23 / 3.14 / 1.10 | 4.686 | 2.506 | 16 min |
-| Bbin₂ (line-binned, fluorescence) | 4.84 | 7.84 | 6.48 / 7.54 / 7.47 / 5.92 / 3.20 / 1.09 | 4.434 | 2.460 | 1.3 h at 0.2, f_capped ≤ 1.4 % |
+| Bbin₂ (line-binned, fluorescence) | 5.36 | 7.83 | 6.23 / 7.79 / 7.09 / 5.86 / 3.20 / 1.12 | 4.482 | 2.511 | 3.5 h at 0.2, cap 3×10⁵, f_capped ≤ 1.2 % (the 10⁵-cap run: 4.84 / 7.84 / 4.434 / 2.460, f_capped ≤ 1.4 %) |
 
 Every leg's global closure E_init + E_inj = E_rad + W + E_end holds to
 10⁻¹⁵. Of the 7.4×10⁴⁶ erg available, 61 % is radiated by 16 d, 34–37 % is
@@ -4972,7 +4972,7 @@ photometric time bins; Δm and Δcolour at the peak bin; the colour maximum):
 | expansion | ε = 1 | +15 % | +5 % | +3.4 % | — / 0.49 / 0.31 / 0.31 / 0.20 | −0.20 / −0.16 / −0.15 / −0.01 | 0.20 (J−K) |
 | line-binned | ε = 1 | +1.6 % | +1.8 % | −0.2 % | — / 0.29 / 0.11 / 0.17 / 0.12 | −0.20 / 0.00 / −0.10 / 0.00 | 0.13 (J−K) |
 | expansion | fluorescence | +17 % | +3 % | +3.7 % | 0.47 / 0.54 / 0.29 / 0.27 / 0.25 | −0.20 / −0.03 / −0.03 / +0.01 | 0.32 (i−J) |
-| line-binned | fluorescence | +3.8 % | −2.4 % | −1.9 % | — / 0.38 / 0.44 / 0.82 / 0.24 | — / +0.40 / +0.56 / −0.03 | 0.45 (J−K) |
+| line-binned | fluorescence | +3.7 % | +7.9 % | −0.8 % | — / 0.60 / 0.39 / 0.81 / 0.20 | — / +0.18 / +0.09 / +0.12 | 0.51 (J−K) |
 
 The radiation-temperature variant (T per shell from the packets present
 at each slab boundary, per leg; the resolved and expansion fluorescence
@@ -4990,13 +4990,25 @@ snapshot-free calculation also gives; the amplitude of the expansion
 excess is twice theirs, and the resolved leg is the lowest rather than
 the highest (it loses the most energy to expansion work: the most
 interactions per escape). (R2) the same under fluorescence: **Gray** by
-the rule, because the line-binned leg capped 1.4 % of its packets in the
-first slabs (the trapping pathology of §4.59, bounded but present); read
-past the gray, the numbers are expansion +17 %, line-binned +3.8 %, the
-same ordering. (R3) the colour residual: under ε = 1 line-binned 0.13 and
+the rule, because the line-binned leg caps packets in the first slabs (the
+trapping pathology of §4.59, bounded but present). **The high-cap rerun**
+(PI, 2026-09-11: "if below 1 % and unchanged, R2 leaves Gray; if it
+changes, a numerical limitation to understand, not to average away"):
+raising the cap from 10⁵ to 3×10⁵ events lowers the capped fraction in the
+first slab from 1.4 % to 1.2 % (2.8 % of the energy over the run, from
+4.2 %) while the mean interactions per packet in that slab grow from 1786
+to 4435 — the trapped packets absorb whatever budget they are given and do
+not terminate. The light curve is insensitive to the cap: escaped energy
++1.1 %, peak luminosity −0.1 %, per-slab luminosities within the leg's
+packet noise (one slab at 7.3 d differs by 11 %), max|Δcolour| 0.45 → 0.51
+(J − K). The tables carry the high-cap run; R2 stays Gray — not because
+the answer is uncertain but because the leg is the bounded form of the
+ill-posedness of §4.59. Read past the gray, the numbers are expansion
++17 %, line-binned +3.7 %, the same ordering.
+(R3) the colour residual: under ε = 1 line-binned 0.13 and
 expansion 0.20; under fluorescence expansion 0.32 and line-binned 0.45,
-with the line-binned closure 0.4–0.6 mag too faint in J and H at the peak
-and 0.8 mag off in H over the curve.
+with the line-binned closure up to 0.6 mag off in z and 0.8 mag in H over
+the curve.
 
 **Validation of the pipeline on the real state.** The same run with every
 line removed (`--f-min 1e30`, the resolved leg): no interaction, W = 0
@@ -5012,8 +5024,8 @@ treatments is the same under both redistributions (resolved lowest,
 line-binned within 2–4 %, expansion 15–17 % brighter at the peak), and the
 switch to explicit fluorescence changes the closures' colour errors, not
 their bolometric ones: the line-binned closure's colour error grows from
-0.13 to 0.45 mag (J and H 0.4–0.8 mag too faint), the expansion closure's
-from 0.20 to 0.32.** The snapshot's 1.4–1.7 mag (§4.59) becomes 0.45 mag
+0.13 to 0.51 mag (z and H up to 0.6–0.8 mag off), the expansion closure's
+from 0.20 to 0.32.** The snapshot's 1.4–1.7 mag (§4.59) becomes 0.5 mag
 once the light curve integrates over the escape-time distribution, and it
 stays a systematic difference between the two closures of the opposite
 sign from the expansion closure's; neither closure reproduces the resolved

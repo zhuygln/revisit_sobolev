@@ -132,6 +132,20 @@ def headline():
     h["lightcurve"] = dict(legs=lc, readings={k: (v.get("outcome") if isinstance(v, dict) else v) for k, v in d["readings"].items()},
                            t_grid_d=[float(t) / 86400.0 for t in d["t_grid"][:1] + d["t_grid"][-1:]], n_slabs=len(d["t_grid"]) - 1,
                            config={k: d["config"][k] for k in ("n_shell", "n_init", "n_heat", "max_events", "temperature", "init")})
+    # the line-binned fluorescence leg at the two event caps (the merged record carries the 3e5 run)
+    cap = {}
+    for tag, rel_run in (("cap1e5", "paper4/phase10_fontes/prod_record/Bbin2/run.json"), ("cap3e5", "paper4/phase10_fontes/prod_record/Bbin2_cap3e5/run.json")):
+        r, rel, s = load(rel_run); note(rel, s); T = r["tallies"]["Bbin2"]
+        E_in = T[0]["E_carried_in"] + sum(x["E_inj_new"] for x in T)
+        cap[tag] = dict(max_events=r["config"]["max_events"], f_capped_first=T[0]["f_capped"], E_capped_frac=sum(x["E_capped"] for x in T) / E_in,
+                        events_mean_first=T[0]["events_mean"], E_rad=sum(x["E_esc"] for x in T), W_tot=sum(x["W"] for x in T))
+    old, rel, s = load("paper4/phase10_fontes/prod_record/merged_cap1e5/summary.json"); note(rel, s)
+    Lo = np.array(old["legs"]["Bbin2"]["L_esc"]); Ln = np.array(d["legs"]["Bbin2"]["L_esc"])
+    cap["E_rad_change"] = cap["cap3e5"]["E_rad"] / cap["cap1e5"]["E_rad"] - 1.0
+    cap["L_ratio_max_dev"] = float(np.max(np.abs(Ln / Lo - 1.0)))
+    cap["L_peak_change"] = d["legs"]["Bbin2"]["L_peak"] / old["legs"]["Bbin2"]["L_peak"] - 1.0
+    cap["cap1e5_dL_peak"] = old["legs"]["Bbin2"]["dL_peak"]; cap["cap1e5_max_abs_dcolour"] = old["legs"]["Bbin2"]["max_abs_dcolour"]
+    h["lightcurve"]["bbin2_cap"] = cap
     try:
         d, rel, s = load("paper4/phase10_fontes/prod_record/merged_rad/summary.json"); note(rel, s)
         h["lightcurve"]["rad_variant"] = {leg: dict(t_peak_d=o["t_peak_d"], L_peak=o["L_peak"], dL_peak=o.get("dL_peak"), max_abs_dcolour=o.get("max_abs_dcolour"))
