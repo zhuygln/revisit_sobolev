@@ -120,38 +120,54 @@ def run_slab(cfg, st, atom, shells, leg, k, pop, E_heat_k, n_heat_k, t_a, t_b, o
     return tally, pop_next
 
 
-def analyse(out_dir, cfg=None):
+def analyse(out_dir, cfg=None, phot_bins=10, n_min_band=100):
+    """Light curves from the escape records. Bolometric quantities on the
+    slab grid; band photometry on `phot_bins` coarser time bins (groups of
+    consecutive slabs) so that the red spectrum's optical bands hold enough
+    packets; a band cell with fewer than `n_min_band` packets inside its
+    passband is NaN and counted."""
     run = json.loads((out_dir / "run.json").read_text())
     cfg = run["config"]
     t_grid = np.array(run["t_grid"])
+    n_slab = t_grid.size - 1
+    groups = np.array_split(np.arange(n_slab), phot_bins)
+    t_phot = np.array([t_grid[g[0]] for g in groups] + [t_grid[-1]])
     edges = phot.nu_edges(*LAM_WIN, N_SPEC); nu_c = np.sqrt(edges[1:] * edges[:-1])
     lo_w, hi_w = float(edges[0]), float(edges[-1])
+    band_w = {b: (pb.bin_weights(edges) > 0) for b, pb in PASSBANDS.items()}
     legs = [l for l in cfg["legs"] if run["done"].get(l)]
-    summary = dict(config=cfg, t_grid=t_grid.tolist(), legs={}, readings={}, cells_nan=0)
+    summary = dict(config=cfg, t_grid=t_grid.tolist(), t_phot=t_phot.tolist(), phot_bins=phot_bins, n_min_band=n_min_band,
+                   legs={}, readings={})
     for leg in legs:
-        ks = sorted(run["done"][leg])
-        L_esc = np.full(t_grid.size - 1, np.nan); L_win = np.full(t_grid.size - 1, np.nan)
-        L_obs = np.zeros(t_grid.size - 1); n_esc = np.zeros(t_grid.size - 1, int)
+        ks = set(run["done"][leg])
+        L_esc = np.full(n_slab, np.nan); L_win = np.full(n_slab, np.nan)
+        L_obs = np.zeros(n_slab); n_esc = np.zeros(n_slab, int)
         mags = []; nan_bands = 0
-        for k in ks:
-            f = out_dir / f"esc_{leg}_{k:03d}.npz"
-            if not f.exists():
-                mags.append({b: np.nan for b in phot.BANDS_PHOT}); continue
-            d = np.load(f)
-            dt = t_grid[k + 1] - t_grid[k]
-            L_esc[k] = d["e"].sum() / dt
-            inw = (d["nu"] >= lo_w) & (d["nu"] < hi_w)
-            L_win[k] = d["e"][inw].sum() / dt
-            n_esc[k] = d["e"].size
-            h, _ = np.histogram(d["t_obs"], bins=t_grid, weights=d["e"]); L_obs += h / np.diff(t_grid)
-            lnu = ts.lnu_absolute(d["nu"][inw], d["e"][inw], edges, dt)
-            m = phot.magnitudes(nu_c, lnu, PASSBANDS, phot.D_40MPC, edges) if inw.sum() >= 200 else {b: np.nan for b in phot.BANDS_PHOT}
-            # bands with too few packets in their passband -> NaN
-            for b, pb in PASSBANDS.items():
-                wb = pb.bin_weights(edges)
-                cnt, _ = np.histogram(d["nu"][inw], bins=edges)
-                if (cnt * (wb > 0)).sum() < 200:
-                    m[b] = np.nan; nan_bands += 1
+        for g in groups:
+            nu_g, e_g = [], []
+            for k in g:
+                f = out_dir / f"esc_{leg}_{k:03d}.npz"
+                if k not in ks or not f.exists():
+                    continue
+                d = np.load(f)
+                dt = t_grid[k + 1] - t_grid[k]
+                L_esc[k] = d["e"].sum() / dt
+                inw = (d["nu"] >= lo_w) & (d["nu"] < hi_w)
+                L_win[k] = d["e"][inw].sum() / dt
+                n_esc[k] = d["e"].size
+                h, _ = np.histogram(d["t_obs"], bins=t_grid, weights=d["e"]); L_obs += h / np.diff(t_grid)
+                nu_g.append(d["nu"][inw]); e_g.append(d["e"][inw])
+            dt_g = t_grid[g[-1] + 1] - t_grid[g[0]]
+            if nu_g:
+                nu_g = np.concatenate(nu_g); e_g = np.concatenate(e_g)
+                lnu = ts.lnu_absolute(nu_g, e_g, edges, dt_g)
+                m = phot.magnitudes(nu_c, lnu, PASSBANDS, phot.D_40MPC, edges)
+                cnt, _ = np.histogram(nu_g, bins=edges)
+                for b in PASSBANDS:
+                    if (cnt * band_w[b]).sum() < n_min_band:
+                        m[b] = np.nan; nan_bands += 1
+            else:
+                m = {b: np.nan for b in phot.BANDS_PHOT}; nan_bands += len(phot.BANDS_PHOT)
             mags.append(m)
         tallies = run["tallies"][leg]
         W_tot = sum(tl["W"] for tl in tallies); E_rad = float(np.nansum(L_esc * np.diff(t_grid)))
@@ -241,16 +257,17 @@ def _figure(out_dir, summary):
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     t = np.array(summary["t_grid"]); tm = np.sqrt(t[1:] * t[:-1]) / DAY
+    tp = np.array(summary["t_phot"]); tpm = np.sqrt(tp[1:] * tp[:-1]) / DAY
     fig, ax = plt.subplots(1, 3, figsize=(15, 4.2))
     for leg, o in summary["legs"].items():
         ax[0].plot(tm, o["L_esc"], label=leg)
         m = [d["z"] for d in o["mags"]]
-        ax[1].plot(tm, m, label=leg)
+        ax[1].plot(tpm, m, "o-", label=leg)
         if "dcolour_vs_ref" in o:
-            ax[2].plot(tm, [d["r-K"] if "r-K" in d else np.nan for d in o["dcolour_vs_ref"]], label=leg)
+            ax[2].plot(tpm, [d["i-J"] if "i-J" in d else np.nan for d in o["dcolour_vs_ref"]], "o-", label=leg)
     ax[0].set_yscale("log"); ax[0].set_xlabel("t [d]"); ax[0].set_ylabel("L_esc [erg/s]"); ax[0].legend(fontsize=7)
     ax[1].set_xlabel("t [d]"); ax[1].set_ylabel("z [AB mag at 40 Mpc]"); ax[1].invert_yaxis(); ax[1].legend(fontsize=7)
-    ax[2].set_xlabel("t [d]"); ax[2].set_ylabel("Δ(r−K) vs resolved [mag]"); ax[2].legend(fontsize=7)
+    ax[2].set_xlabel("t [d]"); ax[2].set_ylabel("Δ(i−J) vs resolved [mag]"); ax[2].legend(fontsize=7)
     fig.tight_layout(); fig.savefig(out_dir / "lightcurve.png", dpi=120); plt.close(fig)
 
 
@@ -304,6 +321,7 @@ def main():
     ap.add_argument("--f-min", type=float, default=1e-3)
     ap.add_argument("--lam-transport", default="1000,128000")
     ap.add_argument("--resume", action="store_true"); ap.add_argument("--analyse", action="store_true")
+    ap.add_argument("--phot-bins", type=int, default=10); ap.add_argument("--n-min-band", type=int, default=100)
     ap.add_argument("--max-slabs", type=int, default=None, help="stop after this many slabs (pilots)")
     a = ap.parse_args()
     out_dir = Path(a.out); out_dir.mkdir(parents=True, exist_ok=True)
@@ -311,7 +329,7 @@ def main():
         merge_runs(out_dir, a.merge.split(","))
         print(f"merged {a.merge} into {out_dir}")
     if a.analyse:
-        s = analyse(out_dir)
+        s = analyse(out_dir, phot_bins=a.phot_bins, n_min_band=a.n_min_band)
         for k, v in s["readings"].items():
             print(k, v)
         for leg, o in s["legs"].items():
