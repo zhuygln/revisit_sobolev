@@ -4998,6 +4998,15 @@ expansion 0.20; under fluorescence expansion 0.32 and line-binned 0.45,
 with the line-binned closure 0.4–0.6 mag too faint in J and H at the peak
 and 0.8 mag off in H over the curve.
 
+**Validation of the pipeline on the real state.** The same run with every
+line removed (`--f-min 1e30`, the resolved leg): no interaction, W = 0
+exactly, the closure E_init + E_heat = E_esc + E_end to 2×10⁻¹⁶, and the
+initial field free-streams out over the light-crossing time (half by
+5.3 d, 90 % by 6.5 d for a radius of one light-day at 4 d growing as
+0.25 c t) — the peak at 5 d in the opaque runs is therefore the release of
+the trapped field delayed by the forest, and the 34–37 % lost to
+expansion work is entirely interaction-borne.
+
 **F65 — Over the Fontes light curve the bolometric ordering of the three
 treatments is the same under both redistributions (resolved lowest,
 line-binned within 2–4 %, expansion 15–17 % brighter at the peak), and the

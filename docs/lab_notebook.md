@@ -3044,6 +3044,14 @@ The snapshot's 1.4-1.7 mag is 0.45 mag over the light curve -- the PI's
 "do not insist" case, and still a systematic, opposite-sign difference
 between the two closures.
 
+*Validation.* The opacity-free run (no lines) gives W = 0, the closure to
+2e-16, and the initial field free-streaming out in ~1.3 d (half by 5.3 d,
+90 % by 6.5 d): the pipeline conserves lab energy in free flight and the
+peak of the opaque runs is the delayed release of the trapped field.
+Manuscript skeleton in docs/paper4/outline.md with the figure script
+(docs/figures/paper4/fig_f62..f65). Bbin2 rerun with a 3e5 cap to make
+R2 readable.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,
