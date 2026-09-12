@@ -66,7 +66,7 @@ et al.'s picture, re-found on P1, P2, the Fontes problem and an
 independent line list); with the single switch to energy-conserving
 fluorescence the expansion closure is unchanged while the line-binned
 closure's colour error grows to 0.3–1.7 mag and, on a strong-lined
-forest, its transport does not terminate; the full macroatom moves the
+forest, its transport does not terminate; the radiation-field-driven macroatom moves the
 reference by 1.3–1.8 mag and leaves the expansion closure within 0.18 mag
 of it. **PI decision (same day, verbatim in `plan_review.md`):** F62–F64 are the
 nucleus of the methods paper; one more experiment first — the Fontes

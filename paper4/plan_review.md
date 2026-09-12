@@ -694,3 +694,32 @@ So I would not reopen the physics program. My final state would be:
 6. Submit.
 
 At this point, another simulation is more likely to expand the scope than materially strengthen the paper. The important thing now is making sure the paper says exactly what the corrected experiments establish, and no more.
+
+
+### Applied (2026-09-12): the six referee items
+
+All six are in commit 77d6152 on `claude/paper4-referee-revision`, PR #4.
+No numbers changed; `paper4/FROZEN.json`, `numbers.tex` and the table
+fragments are untouched and `paper4-freeze` was not moved.
+
+1. Fontes' ordering corrected in the Introduction (it was right in §4.4 and
+   wrong in §1) and in `literature_notes.md`; the snapshot section now says
+   "expansion brighter than line-binned, as in their calculation".
+2. The categorical opening replaced by the PI's sentence on cost and on what
+   line-by-line calculations demonstrate, citing ARTIS.
+3. Novelty as "to our knowledge"; the mechanism paragraphs now "consistent
+   with", closing with "the closure differences are the measured result;
+   the attribution mechanism is the interpretation consistent with them,
+   not a separately measured quantity".
+4. "full macroatom" -> "radiation-field-driven macroatom" in the manuscript,
+   the figure legend (regenerated), README.md and paper4/README.md; the
+   "strongest fluorescence treatment" claim narrowed.
+5. "ill-posed" -> "a line-binned opacity alone does not provide a closed
+   prescription for explicit line-dependent fluorescence; an additional
+   within-bin line or escape prescription is required" (both occurrences).
+6. The abstract carries the Gray qualifier; results_report.md's status block
+   is the current one (F1-F66, 603 tests, paper4-freeze) instead of the
+   August Phase-0 block.
+
+Remaining: the PI's final line-by-line read of the revised manuscript and
+the generated tables, then merge PR #4 and submit.

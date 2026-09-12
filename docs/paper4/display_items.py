@@ -107,11 +107,11 @@ def fig_lightcurve(out_dir):
 
 
 def fig_macroatom(out_dir):
-    """F63: the full macroatom check on P1 2 d."""
+    """F63: the radiation-field-driven macroatom check on P1 2 d."""
     d = json.load(open(ROOT / "paper4/phase10_fontes/macro_P1_t2_s28.json"))["legs"]
     fig, ax = plt.subplots(figsize=(6, 4))
     for a, r, lab, st in (("B2", "R2", "expansion, downward", "o-"), ("Bbin2", "R2", "line-binned, downward", "s-"),
-                          ("B2M", "R2M", "expansion, full macroatom", "o--"), ("Bbin2M", "R2M", "line-binned, full macroatom", "s--")):
+                          ("B2M", "R2M", "expansion, field-driven macroatom", "o--"), ("Bbin2M", "R2M", "line-binned, field-driven macroatom", "s--")):
         ax.plot(range(7), [d[a]["mags"][b] - d[r]["mags"][b] for b in BANDS], st, ms=4, label=lab)
     ax.axhline(0, color="k", lw=0.6); ax.set_xticks(range(7)); ax.set_xticklabels(list(BANDS)); ax.set_ylabel("closure − resolved [mag]")
     ax.set_title("P1, 2 d", fontsize=9); ax.legend(fontsize=7)
