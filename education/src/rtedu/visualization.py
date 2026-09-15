@@ -239,3 +239,72 @@ def animate_macroatom(atom, walks, fps=2):
             txt.set_text(""); 
         return [dot, txt, arr]
     return animation.FuncAnimation(fig, draw, frames=len(frames), interval=1000 / fps, blit=True)
+
+
+def animate_matrix_vs_T(Ts, Rs, fps=1.5, title="R(T): the redistribution matrix as the state changes"):
+    """Chapter 11: R heat maps morphing with temperature."""
+    fig, ax = plt.subplots(figsize=(4.6, 4.2))
+    im = ax.imshow(np.asarray(Rs[0]), cmap="viridis", vmin=0, vmax=1); ax.set_xlabel("emitted group j"); ax.set_ylabel("absorbed group i")
+    plt.colorbar(im, ax=ax, fraction=0.046); ttl = ax.set_title("", fontsize=9)
+    n = np.asarray(Rs[0]).shape[0]
+    texts = [[ax.text(j, i, "", ha="center", va="center", fontsize=8) for j in range(n)] for i in range(n)]
+
+    def draw(k):
+        R = np.asarray(Rs[k]); im.set_data(R); ttl.set_text(f"{title}\nT = {Ts[k]:.0f} K")
+        for i in range(n):
+            for j in range(n):
+                texts[i][j].set_text(f"{R[i, j]:.2f}"); texts[i][j].set_color("w" if R[i, j] < 0.5 else "k")
+        return [im, ttl] + [t for row in texts for t in row]
+    return animation.FuncAnimation(fig, draw, frames=len(Ts), interval=1000 / fps, blit=False)
+
+
+def animate_compare_models(nm, histories, labels, fps=2):
+    """Chapter 9: three packets' frequency histories side by side, one per
+    redistribution model: the line each packet sits in after each
+    interaction, until it escapes."""
+    fig, axes = plt.subplots(1, len(histories), figsize=(4 * len(histories), 3.6), sharey=True)
+    n_frames = max(len(h) for h in histories)
+    lines = []
+    for ax, h, lab in zip(axes, histories, labels):
+        ax.set_title(lab, fontsize=9); ax.set_xlabel("interaction"); ax.set_xlim(-0.5, n_frames - 0.5); ax.set_yscale("log")
+        ax.set_ylim(min(nm) * 0.9, max(nm) * 1.1); ax.set_yticks(sorted(nm)); ax.set_yticklabels([f"{v:.0f}" for v in sorted(nm)], fontsize=6)
+        for v in nm: ax.axhline(v, color="lightgrey", lw=0.5)
+        lines.append(ax.plot([], [], "o-", color=OI["blue"])[0])
+    axes[0].set_ylabel("line the packet is in [nm]")
+
+    def draw(k):
+        for l, h in zip(lines, histories):
+            j = min(k + 1, len(h)); l.set_data(np.arange(j), [nm[x] for x in h[:j]])
+        return lines
+    return animation.FuncAnimation(fig, draw, frames=n_frames, interval=1000 / fps, blit=True)
+
+
+def animate_full_packet(trace, nm, r_out_of_t, fps=2):
+    """Chapter 13: one packet from creation to escape: its projected path
+    in the expanding sphere (left) and the line it sits in against its own
+    time (right)."""
+    from . import DAY
+    fig, (ax, ax2) = plt.subplots(1, 2, figsize=(9.5, 4.2))
+    xs = np.array([p[0] for p in trace]); ts = np.array([p[1] for p in trace]); ls = [p[2] for p in trace]
+    R_end = r_out_of_t(ts[-1])
+    ax.set_xlim(-1.1 * R_end, 1.1 * R_end); ax.set_ylim(-1.1 * R_end, 1.1 * R_end); ax.set_aspect("equal"); ax.set_xticks([]); ax.set_yticks([])
+    circ = plt.Circle((0, 0), r_out_of_t(ts[0]), fc="#fff3e0", ec=OI["black"], lw=1); ax.add_patch(circ)
+    path, = ax.plot([], [], "-", color=OI["blue"], lw=1.2); dot, = ax.plot([], [], "o", ms=7, color=OI["blue"])
+    ax.set_title("the packet's path (x-y projection); the sphere grows with time", fontsize=8)
+    ax2.set_yscale("log"); ax2.set_ylim(min(nm) * 0.9, max(nm) * 1.1); ax2.set_yticks(sorted(nm)); ax2.set_yticklabels([f"{v:.0f}" for v in sorted(nm)], fontsize=6)
+    ax2.set_xlim(ts[0] / DAY, ts[-1] / DAY * 1.02); ax2.set_xlabel("the packet's own time [d]"); ax2.set_ylabel("line [nm]")
+    steps, = ax2.plot([], [], "o-", color=OI["red"]); ax2.set_title("the line it was last emitted in, against its clock", fontsize=8)
+    lam = [nm[l] if l >= 0 else np.nan for l in ls]
+    cur = 0
+    for i, l in enumerate(ls):
+        if l >= 0: cur = nm[l]
+        if np.isnan(lam[i]): lam[i] = cur if i > 0 else np.nan
+
+    def draw(k):
+        j = k + 1
+        circ.set_radius(r_out_of_t(ts[k])); path.set_data(xs[:j, 0], xs[:j, 1]); dot.set_data([xs[k, 0]], [xs[k, 1]])
+        tt = ts[:j] / DAY; ll = [v for v in lam[:j]]
+        keep = [i for i in range(j) if not np.isnan(ll[i])]
+        steps.set_data([tt[i] for i in keep], [ll[i] for i in keep])
+        return [circ, path, dot, steps]
+    return animation.FuncAnimation(fig, draw, frames=len(trace), interval=1000 / fps, blit=False)

@@ -76,3 +76,39 @@ So I would consider the proposed **`education: milestone E1` PR ready to impleme
 ## Continuation (2026-09-15)
 
 After E1 was delivered as PR #5 the PI wrote: "continue to finish this plan". E2, E3 and E4 are therefore built in sequence as stacked PRs without waiting for the between-stage reviews; each stage keeps its own PR so the exit-criterion reviews can still happen per stage. For the chapter-12 surrogate the plan's default (a numpy MLP, no torch) is used.
+
+## Implementation notes on E3 and E4 (2026-09-15)
+
+Three design corrections were made while building Part III, recorded here
+because they change what the chapters measure:
+
+1. **Chapters 11–13 use full-resolution matrices** (one group per line, ten
+   groups). With four groups the binning error of chapter 10 (a spectrum L1
+   error of about 0.34 at the same state) dominated any state dependence,
+   so a comparison of R(T₁) against R(T₂) measured the binning, not the
+   state. At full resolution the binning error is below the noise and only
+   the state remains.
+2. **Row errors are weighted by row usage.** The transport absorbs about
+   91 % of its events in the reddest ground-state line; several rows of a
+   ten-line matrix are used a handful of times in thousands of packets and
+   are pure noise. An unweighted mean row error (about 0.3–0.6 between two
+   seeds at the same temperature) said nothing; the usage-weighted one
+   isolates the rows that matter (0.007–0.015 across 2500–7000 K). The
+   chapter says so: which rows matter is set by the transport, not by the
+   atom.
+3. **Chapter 13's error-against-complexity curve is a colour error.** The
+   bolometric light curves of ε*, R(T) and the macroatom agree within the
+   Poisson noise on this toy (as Paper IV's F66 did on the xkn state); the
+   closures differ in colour, so that is the quantity the curve reports,
+   with the bolometric error shown alongside.
+
+Also: `rtedu.results.load` falls back to a chapter's generated file while a
+build is in progress, so that a later notebook can read an earlier one's
+values (chapter 13 reads chapter 9's ε*).
+
+The honest outcome of Part III on this atom: a matrix is required (ε* is
+five times worse in the emergent spectrum), its state dependence is weak in
+the observable over 2500–7000 K, and a learned surrogate is therefore not
+justified here; the bridge chapter shows the toy Sobolev depth equal to the
+production formula to 10⁻¹⁰ and the toy macroatom's probabilities equal to
+`sobolev/macroatom.py::DownwardMacroAtom`'s digit for digit.
