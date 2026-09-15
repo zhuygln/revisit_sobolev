@@ -1,0 +1,96 @@
+# Bridge to the research code {#sec-bridge}
+
+## Question
+
+Every toy in this book has a production counterpart in `revisit_sobolev`.
+Where exactly, and what does the production version add? This is the only
+chapter that imports the research code.
+
+## The map
+
+| educational object | chapter | production equivalent |
+|---|---|---|
+| slab opacity, Beer–Lambert | 1 | the ejecta opacity of `sobolev/ejecta.py`; the analytic line attenuation `sobolev/sobolev_leg.py::sobolev_attenuation` |
+| the draw $\tau = -\ln\xi$ | 2 | the continuous-opacity draw in `paper2/phase1/forest_mc.py::run_mc` (expansion-opacity legs) |
+| three frequency groups | 3 | the wavelength groups of `paper3/redistribution/kernel.py` and the photometric bands of `sobolev/photometry.py` |
+| discrete toy lines, the toy $\tau_S$ | 4 | the GSI and Japan–Lithuania line lists (`sobolev/atomic_cache.py`); `sobolev/optical_depth.py::tau_sobolev` |
+| the resonance sweep and the coin $1 - e^{-\tau_S}$ | 4 | the crossing loop of `run_mc` with `relativity="worldline"`; `ForestAtom.op_p = -expm1(-op_tau)` |
+| the scalar ε | 5 | the `*_tla` modes of `run_mc` (`eps`); the complete-redistribution `*_thermal` legs of Paper IV are ε = 1 with a real thermal sampler |
+| the five-level atom and its cascade | 6 | the La, Ce, Nd level networks; `ForestAtom.branch_cum`, the `*_branch` legs |
+| photon-number versus energy packets | 7 | `run_mc(packets="photon"|"energy")`; the contract in `sobolev/energy_packets.py`; finding F50 |
+| the toy macroatom | 8 | `sobolev/macroatom.py::DownwardMacroAtom` (the same weights, β once, dead ends); `MacroAtom` adds upward jumps under an imposed field; the `*_dmacro` and `*_macro` legs |
+| $R_{ij}$ from events; transport with $R$ alone | 9 | `RedistributionKernel.from_branching_mc`, `sample_nu_out`; the `sobolev_group` leg (Paper III's leg A) |
+| error against $N_g$ and rank | 10 | `paper3/phase1_groups/compression.py`, `paper3/phase7_rank/rank.py` |
+| $R(T)$ and interpolation | 11 | Paper III's temperature and epoch transfer; the $(T, \rho, J_\nu)$ grid of the Paper B plan |
+| the numpy surrogate, whole states withheld | 12 | not in the production code; the Paper B plan's emulator question and its test design |
+| the toy light curve in three dimensions with time | 13 | the time-slab transport of Paper IV (`t_stop`/`resume`/`launch_energy` in `run_mc`, `sobolev/timeslab.py`, `paper4/phase10_fontes/lightcurve.py`), the Fontes and xkn benchmarks |
+
+## What the production versions add
+
+Real atoms: thousands of levels and up to a million lines per ion, with
+Saha–Boltzmann populations and stimulated emission in the depths. Exact
+Doppler factors and a clock carried by each packet, so that the expansion
+work is booked, not ignored. Multi-shell states with a density and
+temperature structure from published models, transported as a union of the
+shells' line sets. Two coarse-grained opacities, expansion and line-binned,
+whose closures against the resolved transport are Paper IV's subject. And
+the discipline that this book borrows: every number in a manuscript
+generated from a frozen record; every reading pre-declared with a gray
+outcome; a claim read through with the numbers substituted before
+submission.
+
+## The same numbers, side by side
+
+```{python}
+#| echo: true
+#| code-fold: false
+import sys, pathlib
+root = pathlib.Path("../..").resolve()
+sys.path.insert(0, str(root)); sys.path.insert(0, str(root / "paper2/phase1")); sys.path.insert(0, str(pathlib.Path("../src").resolve()))
+import numpy as np
+from sobolev.optical_depth import tau_sobolev                 # the production formula
+from rtedu.sobolev import tau_sobolev_toy, toy_line_list      # the toy
+L = toy_line_list()
+tau_prod = tau_sobolev(L["f_osc"], L["n_l"], 2.99792458e10 / L["nu_lines"], L["t"])
+print("toy      :", np.round(L["tau"][:4], 4))
+print("production:", np.round(tau_prod[:4], 4))
+print("identical to", float(np.max(np.abs(tau_prod - L["tau"]) / L["tau"])), "relative")
+```
+
+```{python}
+#| echo: true
+#| code-fold: false
+from sobolev.macroatom import DownwardMacroAtom               # the production macroatom
+from rtedu.atom import five_level_atom
+from rtedu.macroatom import ToyMacroAtom
+a = five_level_atom()
+prod = DownwardMacroAtom(a.nu, a.A, a.lower, a.upper, np.ones(a.n_lines), a.E)
+toy = ToyMacroAtom(a)
+k, p_de, p_jp = toy.probabilities(4)
+ul, pd_, pi_ = prod.probabilities(4)
+print("toy de-activation  :", np.round(p_de, 4))
+print("production         :", np.round(pd_, 4))
+print("toy jump           :", np.round(p_jp, 4))
+print("production         :", np.round(pi_, 4))
+```
+
+The two macroatoms are given the same five-level atom and the same escape
+probabilities; the production one is the class the Paper IV fluorescence
+legs use. If the four rows above agree, the toy of chapter 8 and the
+research code share their physics to the last digit, and the difference
+between this book and Paper IV is only the atom.
+
+## What would fail if our assumption were wrong?
+
+If the production macroatom used different weights, or booked energy
+differently from chapter 7, the numbers above would not agree and the
+reader could not trust that the toy taught the right thing. That is why
+this chapter runs, rather than describes, the comparison.
+
+## Exercises
+
+1. Replace the five-level atom in the second cell by a real ion from the
+   cache (`ForestAtom.from_cached`) and print the number of levels and
+   lines the production macroatom then carries.
+2. Find, in `paper2/phase1/forest_mc.py`, the line where the coin of
+   chapter 4 is flipped.
