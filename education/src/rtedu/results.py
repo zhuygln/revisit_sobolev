@@ -53,6 +53,13 @@ def merge(generated=GENERATED, results=RESULTS):
     return out
 
 
-def load(chapter, results=RESULTS):
-    """The chapter's values from results.json (the merged, current build)."""
-    return json.loads(Path(results).read_text())[chapter]
+def load(chapter, results=RESULTS, generated=GENERATED):
+    """The chapter's values from results.json (the merged, current build).
+    During a build the merge has not happened yet, so a later notebook that
+    needs an earlier one's values reads that chapter's generated file."""
+    results = Path(results)
+    if results.exists():
+        d = json.loads(results.read_text())
+        if chapter in d:
+            return d[chapter]
+    return json.loads((Path(generated) / f"{chapter}.json").read_text())

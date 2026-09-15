@@ -29,4 +29,4 @@ happens to the packet's energy once it has hit an atom (chapters 5–8). Part
 III derives the effective model, the redistribution matrix, and asks when it
 works (chapters 9–12). Part IV puts everything back into a transport
 calculation and bridges to the production code (chapter 13 and the bridge).
-This build contains Part I.
+All four parts are in this build.
