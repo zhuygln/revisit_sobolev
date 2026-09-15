@@ -1,0 +1,32 @@
+# Preface {.unnumbered}
+
+This is a small executable textbook. It starts from the transfer equation
+and a slab with one opacity, and it ends, four milestones later, with a toy
+radiative-transfer calculation that produces a light curve three ways: with
+a scalar thermalisation parameter, with an effective redistribution matrix,
+and with an explicit atom. Along the way every idea is implemented twice: in
+twenty to fifty transparent lines inside a notebook, and once more as a small
+reusable function in the `rtedu` package, with a test that states the physics
+the function must satisfy.
+
+**What it is not.** Nothing here is publication evidence. The demos teach and
+validate concepts; the research code in `revisit_sobolev` (`sobolev/`,
+`paper2/phase1/forest_mc.py`, `paper3/redistribution/kernel.py`) implements
+the same ideas with real atomic data and controlled physics, and the last
+chapter of the book maps every toy object to its production counterpart.
+
+**How it is built.** Every number quoted in the text comes from the
+notebooks, through a results file the build regenerates from scratch; every
+figure and animation is produced by code from a fixed seed. The eleven-section
+template of each chapter is the same: *Question, Theory, Limiting cases,
+Numerical model, Demo, Visualization, Validation, What approximation did we
+introduce?, How does this map to `revisit_sobolev`?, What would fail if our
+assumption were wrong?, Exercises.*
+
+**The four parts.** Part I learns radiative transfer from zero (chapters 0–4)
+and ends where a packet finds its next line interaction. Part II asks what
+happens to the packet's energy once it has hit an atom (chapters 5–8). Part
+III derives the effective model, the redistribution matrix, and asks when it
+works (chapters 9–12). Part IV puts everything back into a transport
+calculation and bridges to the production code (chapter 13 and the bridge).
+This build contains Part I.
