@@ -71,3 +71,8 @@ With those refinements, I would **freeze E1 scope exactly where you have it**. D
 I also agree with creating the `paperB/` stubs now but leaving them deliberately skeletal. We should not start filling the PRL claims from educational results. The book establishes understanding and validation infrastructure; the later production campaign establishes publication evidence.
 
 So I would consider the proposed **`education: milestone E1` PR ready to implement**, with the eight adjustments above incorporated into the implementation notes.
+
+
+## Continuation (2026-09-15)
+
+After E1 was delivered as PR #5 the PI wrote: "continue to finish this plan". E2, E3 and E4 are therefore built in sequence as stacked PRs without waiting for the between-stage reviews; each stage keeps its own PR so the exit-criterion reviews can still happen per stage. For the chapter-12 surrogate the plan's default (a numpy MLP, no torch) is used.

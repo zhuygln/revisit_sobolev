@@ -53,8 +53,8 @@ embedded frames (`scripts/check_determinism.py`).
 
 | stage | chapters | exit criterion (PI) | state |
 |---|---|---|---|
-| E1 | 0–4 | you can derive and implement how a packet finds its next line interaction: ν_com(r), the next resonance, its τ_S, the coin P_int = 1 − e^{−τ_S} (the chapter-4 exercise) | this PR |
-| E2 | 5–8 | you can explain precisely what ε approximates and why a macroatom is more physical | |
+| E1 | 0–4 | you can derive and implement how a packet finds its next line interaction: ν_com(r), the next resonance, its τ_S, the coin P_int = 1 − e^{−τ_S} (the chapter-4 exercise) | PR #5 |
+| E2 | 5–8 | you can explain precisely what ε approximates and why a macroatom is more physical | this PR |
 | E3 | 9–12 | you can derive R_ij, identify the information it discards, and explain when a neural surrogate would be justified | |
 | E4 | 13 + bridge | one complete toy RT simulation produces an SED and light curve with ε, R and the macroatom | |
 
