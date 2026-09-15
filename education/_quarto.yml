@@ -18,6 +18,12 @@ book:
         - chapters/02_monte_carlo_packets.qmd
         - chapters/03_frequency_dependent_rt.qmd
         - chapters/04_expanding_sobolev.qmd
+    - part: "Part II — What happens after a line interaction"
+      chapters:
+        - chapters/05_scalar_epsilon.qmd
+        - chapters/06_atomic_cascades.qmd
+        - chapters/07_energy_packets.qmd
+        - chapters/08_macroatom.qmd
 
 execute:
   freeze: false

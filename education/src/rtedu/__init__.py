@@ -23,3 +23,5 @@ E_ESU = 4.80320425e-10     # esu
 M_E = 9.1093837e-28        # g
 SIGMA_CLASSICAL = 3.141592653589793 * E_ESU ** 2 / (M_E * C)   # pi e^2 / (m_e c), cm^2 s^-1
 DAY = 86400.0
+SEEDS.update({"ch05": 105, "ch06": 106, "ch07": 107, "ch08": 108})
+SEEDS.update({"ch09": 109, "ch10": 110, "ch11": 111, "ch12": 112, "ch13": 113})

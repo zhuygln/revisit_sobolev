@@ -45,8 +45,15 @@ def save_animation(anim, name, out_dir=VIDEO_DIR, fps=8, html_dpi=60):
     written.append(gif)
     html = out_dir / f"{name}.html"
     dpi0 = anim._fig.get_dpi(); anim._fig.set_dpi(html_dpi)        # smaller embedded frames for the page
-    html.write_text(anim.to_jshtml(fps=fps, embed_frames=True, default_mode="loop"))
+    text = anim.to_jshtml(fps=fps, embed_frames=True, default_mode="loop")
     anim._fig.set_dpi(dpi0)
+    # matplotlib names the player's elements after a fresh uuid; replace it
+    # by a name-derived id so the fragment is byte-stable across builds
+    ids = set(re.findall(r"[0-9a-f]{32}", text))
+    fixed = hashlib.sha256(name.encode()).hexdigest()[:32]
+    for u in ids:
+        text = text.replace(u, fixed)
+    html.write_text(text)
     written.append(html)
     if animation.writers.is_available("ffmpeg"):
         mp4 = out_dir / f"{name}.mp4"
@@ -145,3 +152,90 @@ def animate_resonance(nu_lab, nu_lines, tau_lines, r_out, t, crossings, fps=8, n
                 fl.set_data([], []); ht.set_data([], [])
         return [dot, trail] + flashes + hits
     return animation.FuncAnimation(fig, draw, frames=n_frames, interval=1000 / fps, blit=True)
+
+
+def level_diagram(ax, atom, label_lines=True):
+    """The energy-level diagram of a ToyAtom with every allowed transition
+    as a faint arrow; returns the arrow artists keyed by line index."""
+    E = atom.E
+    for i, e in enumerate(E):
+        ax.hlines(e, 0.1, 0.9, color=OI["black"], lw=1.5)
+        ax.text(0.92, e, f"$E_{i}$", va="center", fontsize=9)
+    arrows = {}
+    xs = np.linspace(0.2, 0.8, atom.n_lines)
+    for k in range(atom.n_lines):
+        u, l = atom.upper[k], atom.lower[k]
+        arrows[k] = FancyArrowPatch((xs[k], E[u]), (xs[k], E[l]), arrowstyle="-|>", mutation_scale=9, lw=0.8, color="grey", alpha=0.5)
+        ax.add_patch(arrows[k])
+        if label_lines:
+            ax.text(xs[k], (E[u] + E[l]) / 2, f"{1e7 * atom.lam_cm[k]:.0f}", fontsize=6, ha="left", color="grey")
+    ax.set_xlim(0, 1); ax.set_ylim(-0.05 * E[-1], 1.12 * E[-1]); ax.set_xticks([]); ax.set_ylabel("energy [cm$^{-1}$]")
+    return arrows
+
+
+def animate_cascades(atom, cascades, fps=2, title="explicit cascades from the top level"):
+    """Chapter 6: one cascade after another on the level diagram; each step
+    highlights the current level, draws the transition and names the
+    emitted photon's wavelength."""
+    fig, ax = plt.subplots(figsize=(5.2, 5))
+    arrows = level_diagram(ax, atom); ax.set_title(title, fontsize=9)
+    frames = []
+    for c in cascades:
+        level = int(atom.upper[c[0]])
+        frames.append(("activate", level, None))
+        for k in c:
+            frames.append(("emit", int(atom.upper[k]), int(k)))
+        frames.append(("done", 0, None))
+    dot, = ax.plot([], [], "o", ms=12, color=OI["orange"])
+    txt = ax.text(0.5, 1.06 * atom.E[-1], "", ha="center", fontsize=9, color=OI["red"])
+    hi = [FancyArrowPatch((0, 0), (0, 0), arrowstyle="-|>", mutation_scale=14, lw=2.5, color=OI["red"]) for _ in range(1)]
+    for h in hi: ax.add_patch(h); h.set_visible(False)
+
+    def draw(i):
+        kind, level, k = frames[i]
+        dot.set_data([0.05], [atom.E[level]])
+        if kind == "activate":
+            txt.set_text(f"absorbed: activated at $E_{level}$"); hi[0].set_visible(False)
+        elif kind == "emit":
+            u, l = atom.upper[k], atom.lower[k]; x = np.linspace(0.2, 0.8, atom.n_lines)[k]
+            hi[0].set_positions((x, atom.E[u]), (x, atom.E[l])); hi[0].set_visible(True)
+            txt.set_text(f"emit {1e7 * atom.lam_cm[k]:.0f} nm  ($E_{u} \\to E_{l}$)")
+        else:
+            txt.set_text("back at the ground: the cascade is over"); hi[0].set_visible(False)
+        return [dot, txt] + hi
+    return animation.FuncAnimation(fig, draw, frames=len(frames), interval=1000 / fps, blit=True)
+
+
+def animate_macroatom(atom, walks, fps=2):
+    """Chapter 8: the macroatom as a Markov process on the level diagram:
+    internal jumps in blue (the packet's energy stays inside), the
+    de-activation in red (one packet leaves with all the energy)."""
+    fig, ax = plt.subplots(figsize=(5.2, 5))
+    level_diagram(ax, atom, label_lines=False); ax.set_title("the macroatom: jump (blue) or de-activate (red)", fontsize=9)
+    frames = []
+    for w in walks:                                    # w: list of ('jump', level) / ('deactivate', line), starting level first
+        frames.append(("activate", w[0], None))
+        cur = w[0]
+        for kind, x in w[1:]:
+            frames.append((kind, cur, x)); cur = x if kind == "jump" else cur
+        frames.append(("done", 0, None))
+    dot, = ax.plot([], [], "o", ms=12, color=OI["orange"])
+    txt = ax.text(0.5, 1.06 * atom.E[-1], "", ha="center", fontsize=9)
+    arr = FancyArrowPatch((0, 0), (0, 0), arrowstyle="-|>", mutation_scale=14, lw=2.5, color=OI["blue"]); ax.add_patch(arr); arr.set_visible(False)
+
+    def draw(i):
+        kind, level, x = frames[i]
+        dot.set_data([0.05], [atom.E[level]]); arr.set_visible(False)
+        if kind == "activate":
+            txt.set_text(f"activated at $E_{level}$ with energy $E$"); txt.set_color(OI["black"])
+        elif kind == "jump":
+            arr.set_positions((0.5, atom.E[level]), (0.5, atom.E[x])); arr.set_color(OI["blue"]); arr.set_visible(True)
+            txt.set_text(f"internal jump $E_{level} \\to E_{x}$: the energy stays in the atom"); txt.set_color(OI["blue"])
+        elif kind == "deactivate":
+            u, l = atom.upper[x], atom.lower[x]
+            arr.set_positions((0.5, atom.E[u]), (0.5, atom.E[l])); arr.set_color(OI["red"]); arr.set_visible(True)
+            txt.set_text(f"de-activate in {1e7 * atom.lam_cm[x]:.0f} nm: one packet leaves with all of $E$"); txt.set_color(OI["red"])
+        else:
+            txt.set_text(""); 
+        return [dot, txt, arr]
+    return animation.FuncAnimation(fig, draw, frames=len(frames), interval=1000 / fps, blit=True)
