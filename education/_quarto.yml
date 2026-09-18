@@ -26,7 +26,8 @@ execute:
 
 format:
   html:
-    theme: cosmo
+    theme: [default, theme.scss]
+    mainfont: Newsreader
     toc: true
     number-sections: true
     code-fold: true
