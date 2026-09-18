@@ -1,0 +1,37 @@
+project:
+  type: book
+  output-dir: _book
+  resources:
+    - figures
+    - videos
+
+book:
+  title: "From Photon Random Walks to Effective Atomic Fluorescence"
+  subtitle: "A Computational Introduction to Kilonova Radiative Transfer"
+  author: "revisit_sobolev"
+  chapters:
+    - index.qmd
+    - part: "Part I — Radiative transfer from zero"
+      chapters:
+        - chapters/00_full_chain.qmd
+        - chapters/01_transfer_equation.qmd
+        - chapters/02_monte_carlo_packets.qmd
+        - chapters/03_frequency_dependent_rt.qmd
+        - chapters/04_expanding_sobolev.qmd
+
+execute:
+  freeze: false
+  echo: false
+  warning: false
+
+format:
+  html:
+    theme: [default, theme.scss]
+    mainfont: Newsreader
+    toc: true
+    number-sections: true
+    code-fold: true
+    html-math-method: mathjax
+    embed-resources: false
+
+jupyter: python3

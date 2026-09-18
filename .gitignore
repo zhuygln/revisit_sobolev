@@ -70,3 +70,12 @@ docs/paper4/*.blg
 docs/paper4/*.log
 docs/paper4/*.out
 docs/paper4/*.toc
+
+# education book build products
+education/_book/
+education/_freeze/
+education/.quarto/
+education/notebooks/executed/
+education/data/generated/
+education/data/.determinism.json
+education/videos/*.mp4
