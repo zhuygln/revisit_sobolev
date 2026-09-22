@@ -145,7 +145,14 @@ paper3/        Paper III campaign: the reduced redistribution closure
 paper4/        Paper IV campaign: does the closure error survive
                energy-conserving transport? plan, review and gates as
                received; phases appear as they run -- see paper4/README.md
-tests/         516 tests pinning the physics of every module
+education/     the executable textbook "From Photon Random Walks to
+               Effective Atomic Fluorescence" (Quarto book, the rtedu toy
+               package, notebooks, tests as physics); educational demos are
+               not publication evidence -- see education/README.md
+paperB/        placeholder for the effective-redistribution (PRL) campaign
+               that the education milestones lead to; deliberately skeletal
+tests/         603 tests pinning the physics of every module (the
+               education tests run separately: `make -C education education-test`)
 docs/          results report, lab notebook, planning inputs, and one
                directory per manuscript: paper/ (Paper I), paper2/,
                paper3/ (the write-up half of paper3/ above)

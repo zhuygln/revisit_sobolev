@@ -16,6 +16,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest", "jupyterlab"]
+education = ["quarto-cli", "jupyter", "nbconvert", "nbformat", "pillow", "pytest"]
 
 [tool.setuptools]
 packages = ["sobolev"]

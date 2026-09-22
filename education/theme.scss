@@ -1,0 +1,151 @@
+/*-- scss:defaults --*/
+// The book's visual identity: warm paper, a serif text face, sans labels,
+// one madder accent. Fonts load from Google Fonts; the fallbacks are metric-close.
+@import url("https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap");
+
+$paper:   #f6f2ea;
+$paper-2: #fbf8f2;
+$ink:     #221d18;
+$ink-2:   #5c5246;
+$ink-3:   #8a7f70;
+$rule:    #d9d0c2;
+$madder:  #9a3a1a;
+$madder-2:#6f2810;
+
+$font-family-sans-serif: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+$font-family-serif:      "Newsreader", Georgia, "Times New Roman", serif;
+$font-family-monospace:  "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+$font-family-base:       $font-family-serif;
+$headings-font-family:   $font-family-serif;
+$font-size-base:         1.0625rem;   // 17px
+$line-height-base:       1.55;
+$headings-font-weight:   500;
+
+$body-bg:    $paper;
+$body-color: $ink;
+$link-color: $madder;
+$link-hover-color: $madder-2;
+$link-decoration: none;
+$code-color: $ink;
+$code-bg:    $paper-2;
+$border-color: $rule;
+
+$sidebar-bg: $paper;
+$sidebar-fg: $ink-2;
+$sidebar-hl: $ink;
+$toc-color:  $ink-2;
+$toc-active-border: $madder;
+$toc-inactive-border: $rule;
+
+$navbar-bg: $paper;
+
+/*-- scss:rules --*/
+@mixin label { font-family: $font-family-sans-serif; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; }
+
+body { background: $paper; }
+code, pre { font-family: $font-family-monospace; font-size: 0.85em; }
+pre { background: $paper-2; border: 1px solid $rule; border-radius: 0; padding: 0.9rem 1.1rem; }
+p code { background: none; padding: 0; color: $ink; }
+
+// ---------- left sidebar: the book's contents ----------
+.sidebar.sidebar-navigation {
+  font-family: $font-family-sans-serif;
+  border-right: 1px solid $rule !important;
+  background: $paper;
+
+  .sidebar-title, .sidebar-title a { font-family: $font-family-serif; font-size: 1.15rem; font-weight: 600; line-height: 1.2; color: $ink; }
+  .sidebar-header { padding-bottom: 0.5rem; margin-bottom: 0.75rem; }
+  .sidebar-search { display: none; }
+
+  .sidebar-item-section > .sidebar-item-container { margin-top: 1.25rem; margin-bottom: 0.35rem; }
+  .sidebar-item-section > .sidebar-item-container .sidebar-item-text,
+  .sidebar-item-section > .sidebar-item-container .sidebar-item-toggle { @include label; color: $ink-3; font-weight: 500; }
+  .sidebar-item-section > .sidebar-item-container .sidebar-item-toggle { display: none; }
+
+  .sidebar-item .sidebar-item-text { font-size: 0.85rem; color: $ink-2; padding: 0.3rem 0; }
+  .sidebar-item .sidebar-item-text .chapter-number { color: #a89c8b; font-variant-numeric: tabular-nums; margin-right: 0.6em; display: inline-block; min-width: 1em; }
+  .sidebar-item .sidebar-item-text:hover { color: $ink; }
+  .sidebar-item .sidebar-item-text.active { color: $ink; font-weight: 600; border-left: 2px solid $madder; margin-left: -0.75rem; padding-left: calc(0.75rem - 2px); }
+  .sidebar-item .sidebar-item-text.active .chapter-number { color: $madder; }
+}
+
+// ---------- right rail: on this page ----------
+#quarto-margin-sidebar {
+  font-family: $font-family-sans-serif;
+  #toc-title { @include label; color: $ink-3; font-weight: 500; margin-bottom: 0.6rem; }
+  .toc-actions, .quarto-alternate-formats { font-size: 0.8rem; }
+  ul { border-left: 1px solid $rule; }
+  ul li a.nav-link { font-size: 0.82rem; color: $ink-2; padding: 0.3rem 0.75rem; border-left: 2px solid transparent; margin-left: -1px; }
+  ul li a.nav-link .header-section-number { display: none; }
+  ul li a.nav-link.active { color: $ink; font-weight: 600; border-left-color: $madder; }
+  ul li a.nav-link:hover { color: $ink; }
+}
+
+// ---------- chapter header ----------
+#quarto-document-content, .quarto-title-block {
+  .quarto-page-breadcrumbs, .quarto-title-breadcrumbs { @include label; color: $madder; margin-bottom: 0.4rem;
+    .breadcrumb-item + .breadcrumb-item::before { color: $ink-3; }
+    a { color: $madder; }
+  }
+  h1.title, h1.unnumbered {
+    font-size: 2.6rem; font-weight: 500; line-height: 1.08; letter-spacing: -0.01em; text-wrap: balance;
+    .chapter-number { display: block; @include label; color: $madder; font-weight: 600; letter-spacing: 0.14em; margin-bottom: 0.6rem; }
+    .chapter-number::before { content: "Chapter "; }
+    &::after { content: ""; display: block; width: 64px; height: 2px; background: $ink; margin-top: 1.1rem; }
+  }
+  .subtitle.lead { font-style: italic; color: $ink-2; font-size: 1.25rem; }
+  .quarto-title-meta { display: none; }
+}
+
+// ---------- sections: the eleven-section template as small-caps labels ----------
+#quarto-document-content {
+  h2 {
+    @include label; color: $ink-3; font-weight: 600; letter-spacing: 0.12em;
+    border-bottom: none; margin-top: 2.6rem; margin-bottom: 0.7rem; padding-bottom: 0;
+    .header-section-number { margin-right: 0.5em; }
+    .header-section-number::before { content: "§ "; }
+    &::after { content: none; }
+  }
+  h3 { font-size: 1.15rem; font-weight: 600; margin-top: 1.6rem; }
+  // the opening question is set larger and in italic, the way a monograph poses it
+  h2[data-anchor-id="question"] + p { font-size: 1.3rem; line-height: 1.4; font-style: italic; }
+  p { text-wrap: pretty; }
+  .math.display { margin: 1.1rem 0; }
+}
+
+// ---------- the result box: every number in it is computed ----------
+.result {
+  background: $paper-2;
+  border-top: 3px double $ink;
+  border-bottom: 1px solid $ink;
+  padding: 1rem 1.35rem 1.1rem;
+  margin: 1.4rem 0;
+  font-size: 0.97em;
+  &::before {
+    content: "Result \00a0\00a0·\00a0\00a0 computed from data/results.json";
+    display: block; @include label; color: $madder; font-weight: 600; margin-bottom: 0.55rem;
+  }
+  p:last-child { margin-bottom: 0; }
+}
+
+// ---------- figures and animations ----------
+.quarto-figure, .cell-output-display {
+  img.figure-img, img { border: 1px solid $rule; background: #fff; }
+  figcaption, .figure-caption {
+    font-family: $font-family-sans-serif; font-size: 0.8rem; line-height: 1.5; color: $ink-2; text-align: left; margin-top: 0.6rem;
+    strong { color: $ink; }
+  }
+}
+.animation { font-family: $font-family-sans-serif; font-size: 0.8rem; color: $ink-2; }
+
+// ---------- exercises, navigation, misc ----------
+ol li { padding-left: 0.2rem; margin-bottom: 0.5rem; }
+.page-navigation { font-family: $font-family-sans-serif; font-size: 0.85rem; border-top: 1px solid $rule; padding-top: 1rem; margin-top: 3rem;
+  .nav-page-text { color: $ink-2; }
+  a:hover .nav-page-text { color: $madder; }
+}
+.quarto-secondary-nav { background: $paper; border-bottom: 1px solid $rule; font-family: $font-family-sans-serif; }
+#quarto-header { background: $paper; }
+.anchorjs-link { color: $rule; }
+table { font-family: $font-family-sans-serif; font-size: 0.85rem; }
+hr { border-top: 1px solid $rule; opacity: 1; }

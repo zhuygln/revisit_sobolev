@@ -73,3 +73,11 @@ docs/paper4/*.toc
 
 # Paper B kernels (the R matrices are in the gate records)
 paperB/gate1/kernels/
+# education book build products
+education/_book/
+education/_freeze/
+education/.quarto/
+education/notebooks/executed/
+education/data/generated/
+education/data/.determinism.json
+education/videos/*.mp4
