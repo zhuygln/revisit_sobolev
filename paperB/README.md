@@ -25,7 +25,9 @@ is not the preregistered experiment. Tests: `tests/test_paperB_gate1.py`.
 ## Where it stands
 
 G1 was frozen at f9cfbff and run on 2026-09-22 (`docs/results_report.md`
-§4.62, F67): **Yellow** — La II N_g* = 2 (too thin to discriminate), Ce II
-N_g* = 16 with ε* 1.40 mag off, Nd II Gray on the precision rule (its 10⁶-
-packet rerun pending). The PI decides with the numbers in hand; G2–G4 are
-detailed in `prl_gate.md` only after that decision.
+§4.62, F67): N_g* = 2 (La II), 16 (Ce II), 2 (Nd II, after its
+preregistered 10⁶-packet rerun cleared the precision gray); ε* is the
+coherent limit and 1.1–1.4 mag off on the dense ions. **B1 Green, B2
+Green, B3 Yellow → continue toward the PRL.** La II at its P1 partial
+density is too thin to discriminate. G2 (why: locality vs rank) is the
+next gate, to be detailed in `prl_gate.md` before it runs.

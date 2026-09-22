@@ -3175,8 +3175,15 @@ The event-level loss stays 0.16-0.42 at 32 groups while the observables
 are converged: what the binning discards mostly does not reach the light.
 
 A lesson in preregistration: the run took 129 s (La), 16 min (Ce), 55 min
-(Nd) and the Yellow is a genuine "the PI decides", not a failure -- one
-ion compresses to two groups, one needs sixteen, one cannot be read.
+(Nd) and the first Yellow was a genuine "the PI decides", not a failure.
+
+*The Nd rerun (2.9 h at 1e6 packets/seed) cleared the gray:* g's seed
+scatter 0.063 -> 0.005, all seven bands live, N_g* = 2 (0.086 mag; 0.022
+at eight groups), eps* = 0 at 1.06 mag. With three readable ions the gate
+reads B1 GREEN (two ions at <= 8 groups, the third at 32), B2 GREEN (Ce,
+Nd), B3 YELLOW (0.001-0.01 wiggles) -> CONTINUE toward the PRL. The exit
+tables grew with the corpus (86,187 samples, 2.0 MB) while the matrix did
+not: the honest-complexity point of the PI's change 5, in numbers.
 
 ## 10. Standing environment notes
 

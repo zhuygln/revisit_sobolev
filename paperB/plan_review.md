@@ -75,3 +75,13 @@ The overall experimental logic is excellent: same resolved opacity + {ε\*, R_N,
 PI: "run it". The preregistration `paperB/prl_gate.md` is frozen at commit
 f9cfbff (the seven changes applied); the production run of G1 starts from
 that commit, three ions sequentially, `paperB/gate1/run_<ion>.log`.
+
+
+## G1 read (2026-09-22)
+
+At 3×10⁵ packets Nd II fired gray condition 2 (g's seed scatter 0.063); the
+preregistered remedy (the whole Nd grid at 10⁶ packets per seed) was run,
+the 3×10⁵ record kept, and the gate read on the three ions: B1 Green, B2
+Green, B3 Yellow → CONTINUE. Nothing in `prl_gate.md` was edited; the
+analysis was changed only to accept a raised (never a lowered) packet
+count and to read the highest-count record per ion.
