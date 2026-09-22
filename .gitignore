@@ -70,3 +70,6 @@ docs/paper4/*.blg
 docs/paper4/*.log
 docs/paper4/*.out
 docs/paper4/*.toc
+
+# Paper B kernels (the R matrices are in the gate records)
+paperB/gate1/kernels/

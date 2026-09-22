@@ -165,15 +165,23 @@ def run_legs(zone, atom, n, legs=LADDER, seeds=SEEDS, ng=NG, relativity="worldli
                       reprocess=spec.get("reprocess"), thermal_k=thermal_k, eps_k=eps_k,
                       macro_kw=spec.get("macro_kw"), **kw)
 
+    # `legs` is a sequence of LEGS tags, or (Paper B) a dict {tag: spec} of
+    # its own specs; a spec may carry `ng` (its own group count), `eps` (the
+    # tla thermalisation parameter) and `kernel_only=True` (build the kernel
+    # from the source leg's events, record it, transport nothing).
+    specs = dict(legs) if isinstance(legs, dict) else {l: LEGS[l] for l in legs}
     kernels, results = {}, {}
-    order = [l for l in legs if "kernel" not in LEGS[l]] + [l for l in legs if "kernel" in LEGS[l]]
+    row["kernels"] = {}
+    order = [l for l in specs if "kernel" not in specs[l]] + [l for l in specs if "kernel" in specs[l]]
     for tag in order:
-        spec = LEGS[tag]
+        spec = specs[tag]
         tl = time.time()
         kw = {}
+        if "eps" in spec:
+            kw["eps"] = float(spec["eps"])
         if "kernel" in spec:
-            src = spec["kernel"]
-            if src not in kernels:
+            src = spec["kernel"]; ng_leg = int(spec.get("ng", ng))
+            if (src, ng_leg) not in kernels:
                 if src not in results:
                     raise ValueError(f"leg {tag} needs the events of {src}; add it to the legs")
                 ev = [r["events"] for r in results[src]]
@@ -181,10 +189,17 @@ def run_legs(zone, atom, n, legs=LADDER, seeds=SEEDS, ng=NG, relativity="worldli
                 w_in = np.concatenate([e[2] for e in ev])
                 w_out = np.concatenate([e[3] for e in ev]) if len(ev[0]) == 4 else None
                 k_lo, k_hi = atom.op_nu.min() * 0.995, atom.op_nu.max() * 1.005
-                kernels[src] = RedistributionKernel.from_branching_mc(
-                    nu_in, nu_out, w_in, ng, nu_lo=k_lo, nu_hi=k_hi, w_out=w_out)
-            kw["kernel"] = kernels[src]
-        collect = tag in ("R1", "R2")
+                kernels[(src, ng_leg)] = RedistributionKernel.from_branching_mc(
+                    nu_in, nu_out, w_in, ng_leg, nu_lo=k_lo, nu_hi=k_hi, w_out=w_out)
+            kern = kernels[(src, ng_leg)]
+            row["kernels"][tag] = dict(source=src, ng=ng_leg, n_events=int(kern.counts.sum()),
+                                       empty_rows=int(kern.empty_rows.sum()), validate_energy=kern.validate_energy(),
+                                       edges=kern.edges.tolist(), R=kern.R.tolist(), counts=kern.counts.tolist())
+            if spec.get("kernel_only"):
+                row["timing"][tag] = time.time() - tl
+                continue
+            kw["kernel"] = kern
+        collect = tag in ("R1", "R2") or spec.get("collect_events", False)
         res = [mc(spec, s, collect_events=collect, **kw) for s in seeds]
         results[tag] = res
         o = photometer(observe(res, l_core, spec["scale"]), edges, nu_c, phot.D_40MPC)
@@ -199,6 +214,10 @@ def run_legs(zone, atom, n, legs=LADDER, seeds=SEEDS, ng=NG, relativity="worldli
         o["events_per_packet"] = float(np.mean([r["n_events"].mean() for r in res]))
         o["reabs_per_packet"] = float(np.mean([r["n_reabs"].mean() for r in res]))
         o["n_trapped"] = int(sum(r["n_trapped"] for r in res))
+        o["n_coherent_fallback"] = int(sum(r.get("n_coherent_fallback", 0) for r in res))
+        o["n_interactions"] = int(sum(r["n_interactions"] for r in res))
+        if "eps" in spec:
+            o["eps"] = float(spec["eps"])
         o["mode"] = spec["mode"]; o["scale"] = spec["scale"]
         o["t_wall"] = row["timing"][tag] = time.time() - tl
         row["legs"][tag] = o

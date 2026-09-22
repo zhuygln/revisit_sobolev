@@ -1025,6 +1025,7 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
     n_events = np.zeros(n_packets, np.int32)   # interaction events (chains)
     n_reabs = np.zeros(n_packets, np.int32)    # re-absorptions inside emitting lines
     n_trapped = 0                               # chains cut by chain_overflow="absorb"
+    n_coherent_fallback = 0                     # kernel draws that hit an empty row (group legs)
     nu_final = np.full(n_packets, np.nan)      # lab frequency at death (escape/core/absorb)
     first_line = np.full(n_packets, -1, np.int64)   # E7: first absorbing line (-1 expansion)
     last_line = np.full(n_packets, -1, np.int64)    # E7: last emitting line
@@ -1405,6 +1406,7 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
             coh_k = ~np.isfinite(nu_rest)
             if coh_k.any():
                 nu_rest[coh_k] = nu_abs_cm[coh_k]
+            n_coherent_fallback += int(coh_k.sum())
             if wl:
                 mu_c = rng.uniform(-1.0, 1.0, hi.size)
                 bl = r[hi] / ctime[hi]
@@ -1696,6 +1698,7 @@ def run_mc(atom, r_core, r_out, t_exp, nu_min, nu_max, n_packets, mode,
                 packets=packets, core=core, w_launch=w_launch, exit_energy=exit_energy,
                 n_core_passes=n_core_passes, n_core_passes_total=int(n_core_passes.sum()),
                 n_kpackets=n_kpackets, n_dead_end=n_dead_end,
+                n_coherent_fallback=n_coherent_fallback,
                 zoned=zoned,
                 ct_esc=ct_esc, mu_esc=mu_esc, carried=carried, n_new=n_new,
                 n_paused=int(np.sum(fate == 4)), n_capped=int(np.sum(fate == 5)), t_stop=t_stop,
