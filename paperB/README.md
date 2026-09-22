@@ -14,10 +14,12 @@ is not edited after the run.
     .venv/bin/python paperB/gate1/figure.py                       # docs/figures/paperB/gate1_error_vs_complexity
 
 `run_gate1.py` runs one ion alone on the P1 2 d photospheric state through
-the reference macroatom (`R2`), R_ij at N_g = 2, 4, 8, 16, 32 (kernels from
-R2's own events, discrete within-group tables, energy rows), the 128-group
-kernel for the event-level metric, and ε = 0 … 1 in steps of 0.05, with
-3 seeds × 3×10⁵ energy packets per leg. `analyse.py` refuses a record that
+the energy-conserving downward macroatom reference (`R2`, evaluation seeds
+1–3), R_ij at N_g = 2, 4, 8, 16, 32 (kernels built from a separate
+reference run on build seeds 101–103, discrete within-group tables, energy
+rows, transported on the evaluation seeds), the independent 128-group
+matrix for the event-level metric, and ε = 0 … 1 in steps of 0.05, with
+3×10⁵ energy packets per seed. `analyse.py` refuses a record that
 is not the preregistered experiment. Tests: `tests/test_paperB_gate1.py`.
 
 ## Where it stands

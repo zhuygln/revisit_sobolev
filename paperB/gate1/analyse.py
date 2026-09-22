@@ -18,18 +18,19 @@ from sobolev.photometry import COLORS                      # noqa: E402
 import verdict as V                                         # noqa: E402
 
 # ---- the preregistration, as numbers (prl_gate.md is the text of record) ----
-PREREG = dict(state="paper4/phase1_benchmarks/P1_t2.json", shell=28, n=300_000, seeds=[1, 2, 3],
+PREREG = dict(state="paper4/phase1_benchmarks/P1_t2.json", shell=28, n=300_000, seeds=[1, 2, 3], build_seeds=[101, 102, 103],
               ng_grid=[2, 4, 8, 16, 32], ng_fine=128, eps_grid=[round(0.05 * k, 2) for k in range(21)],
               dm_max=0.10, dcolour_max=0.10, eps_substantial=0.20, eps_ratio_green=3.0, eps_ratio_red=1.5,
-              gray_min_live=2, gray_seed_std=0.05, gray_identity=1e-10, gray_kernel_energy=1e-12,
-              gray_trapped_frac=0.01, gray_fallback_frac=0.01, green_ng=8, max_ng=32)
+              live_frac=0.01, live_seed_std=0.05,
+              gray_min_live=2, gray_dropped_frac=0.01, gray_identity=1e-10, gray_kernel_energy=1e-12,
+              gray_trapped_frac=0.01, gray_fallback_frac=0.01, green_ng=8, max_ng=32, b3_lo=8, b3_hi=32)
 IONS = ("57LaII", "58CeII", "60NdII")
 
 
 def check_prereg(row, strict=True):
     """The record must be the preregistered experiment."""
     bad = []
-    for k in ("state", "shell", "n", "ng_grid", "ng_fine", "eps_grid"):
+    for k in ("state", "shell", "n", "ng_grid", "ng_fine", "eps_grid", "build_seeds"):
         if row.get(k) != PREREG[k]:
             bad.append(f"{k}: {row.get(k)!r} != {PREREG[k]!r}")
     if row.get("seeds") != PREREG["seeds"]:
@@ -61,22 +62,29 @@ def block_expand(R_coarse, edges_coarse, edges_fine):
 
 
 def m_event(kern_coarse, kern_fine):
-    """Usage-weighted L1 between the coarse energy matrix (block-expanded)
-    and the fine one, both from the same events."""
-    Rf = np.asarray(kern_fine["R"]); cf = np.asarray(kern_fine["counts"], float)
+    """The expected total-variation loss of the outgoing redistribution
+    distribution for an energy-weighted incoming interaction:
+    m = sum_i W_i d_i / sum_i W_i, d_i = 1/2 sum_j |R^N_ij - R^128_ij|,
+    W_i the energy absorbed in fine row i; the coarse matrix block-expanded
+    onto the fine edges, the fine matrix from INDEPENDENT events (the
+    evaluation seeds). In [0, 1]."""
+    Rf = np.asarray(kern_fine["R"]); W = np.asarray(kern_fine["E_in"], float)
     Rc = block_expand(np.asarray(kern_coarse["R"]), kern_coarse["edges"], kern_fine["edges"])
-    rows = cf > 0
-    d = np.abs(Rc[rows] - Rf[rows]).sum(axis=1)
-    return float((d * cf[rows]).sum() / cf[rows].sum())
+    rows = W > 0
+    d = 0.5 * np.abs(Rc[rows] - Rf[rows]).sum(axis=1)
+    return float((d * W[rows]).sum() / W[rows].sum())
 
 
-def m_sed(leg, ref):
+def m_sed(leg, ref, dnu):
+    """Integrated: sum_b |L_nu - L_nu^R2| dnu_b / sum_b L_nu^R2 dnu_b."""
     a, b = np.asarray(leg["L_nu"], float), np.asarray(ref["L_nu"], float)
-    return float(np.abs(a - b).sum() / b.sum())
+    return float((np.abs(a - b) * dnu).sum() / (b * dnu).sum())
 
 
 def m_band(leg, ref, live):
     dm = [leg["mags"][b] - ref["mags"][b] for b in live]
+    if not dm:                                             # no live band: the ion is gray (condition 1); nothing to read
+        return dict(max=float("nan"), mean=float("nan"), per_band={})
     return dict(max=float(np.max(np.abs(dm))), mean=float(np.mean(np.abs(dm))), per_band={b: float(d) for b, d in zip(live, dm)})
 
 
@@ -88,6 +96,23 @@ def m_colour(leg, ref, live):
     return dict(max=float(max(abs(v) for v in out.values())) if out else float("nan"), per_colour=out)
 
 
+def live_bands(row, leg="R2"):
+    """G1's rule: finite magnitude, >= 1 % of the window luminosity, and an
+    acceptable Monte Carlo precision (seed scatter <= 0.05 mag). The 40 Mpc
+    detectability of Paper IV is reported separately, not applied."""
+    frac = V.band_fractions(row, leg); o = row["legs"][leg]
+    live, dropped = [], []
+    for b in "grizJHK":
+        if not np.isfinite(o["mags"].get(b, np.nan)) or frac[b] < PREREG["live_frac"]:
+            continue
+        if o["mags_seed_std"].get(b, np.nan) > PREREG["live_seed_std"]:
+            dropped.append(b)
+        else:
+            live.append(b)
+    detectable = [b for b in live if o["mags"][b] <= V.MAG_LIMIT[b]]
+    return live, dropped, detectable
+
+
 def seed_noise(row, live):
     """R2's seed scatter, and the noise on a difference of two legs (sqrt 2 x)."""
     s = row["legs"]["R2"]["mags_seed_std"]
@@ -96,22 +121,25 @@ def seed_noise(row, live):
 
 def metrics(row):
     ref = row["legs"]["R2"]
-    live = V.live_bands(row, "R2")
+    live, dropped, detectable = live_bands(row, "R2")
     noise = seed_noise(row, live)
-    fine = row["kernels"][f"K{row['ng_fine']}"]
-    out = dict(live_bands=live, seed_std_R2=noise, legs={})
-    n_int_ref = max(ref.get("n_interactions", 0), 1)
+    fine = row["kernels"][f"K{row['ng_fine']}"]                         # from the evaluation seeds: independent of every kernel
+    fine_build = row["kernels"].get(f"K{row['ng_fine']}build")
+    edges = V.nu_edges(*row["lam_window"], row["n_spec"]); dnu = np.diff(edges)
+    out = dict(live_bands=live, dropped_for_precision=dropped, detectable_40mpc=detectable, seed_std_R2=noise, legs={},
+               fine_in_vs_out_of_sample=m_event(fine_build, fine) if fine_build else None)
     for tag, leg in row["legs"].items():
         m = dict(mode=leg["mode"], identity=abs(leg["energy"]["identity_residual"]),
-                 trapped_frac=leg["n_trapped"] / (row["n"] * len(row["seeds"])),
+                 trapped_frac=leg["n_trapped"] / (row["n"] * len(leg.get("seeds", row["seeds"]))),
                  fallback_frac=leg.get("n_coherent_fallback", 0) / max(leg.get("n_interactions", 0), 1),
-                 events_per_packet=leg["events_per_packet"], t_wall=leg["t_wall"])
-        if tag != "R2":
-            m["band"] = m_band(leg, ref, live); m["sed"] = m_sed(leg, ref); m["colour"] = m_colour(leg, ref, live)
+                 events_per_packet=leg["events_per_packet"], t_wall=leg["t_wall"], seeds=leg.get("seeds", row["seeds"]))
+        if tag not in ("R2", "R2build"):
+            m["band"] = m_band(leg, ref, live); m["sed"] = m_sed(leg, ref, dnu); m["colour"] = m_colour(leg, ref, live)
         if tag in row["kernels"]:
             k = row["kernels"][tag]
-            m.update(ng=k["ng"], n_params=k["ng"] ** 2, table_kb=k.get("table_kb"), kernel_energy=k["validate_energy"],
-                     empty_rows=k["empty_rows"], event=m_event(k, fine) if tag != f"K{row['ng_fine']}" else 0.0)
+            m.update(ng=k["ng"], n_matrix_dof=k["ng"] ** 2, n_exit_samples=k.get("n_exit_samples"), table_kb=k.get("table_kb"),
+                     kernel_energy=k["validate_energy"], empty_rows=k["empty_rows"], kernel_source=k["source"],
+                     event=m_event(k, fine) if not tag.startswith(f"K{row['ng_fine']}") else 0.0)
         if "eps" in leg:
             m["eps"] = leg["eps"]
         out["legs"][tag] = m
@@ -123,7 +151,7 @@ def eps_star(M, row):
     edge minimum whose neighbour is within the seed noise."""
     grid = sorted((m["eps"], tag) for tag, m in M["legs"].items() if "eps" in m)
     curve = [(e, M["legs"][t]["band"]["mean"], M["legs"][t]["band"]["max"]) for e, t in grid]
-    k = int(np.argmin([c[1] for c in curve]))
+    k = int(np.nanargmin([c[1] for c in curve])) if any(np.isfinite(c[1]) for c in curve) else 0
     e_star, tag = grid[k]
     noise = float(np.sqrt(2.0) * np.mean(list(M["seed_std_R2"].values()))) if M["seed_std_R2"] else float("nan")
     edge = k in (0, len(curve) - 1)
@@ -138,9 +166,8 @@ def gray_checks(row, M):
     P = PREREG; fired = []
     if len(M["live_bands"]) < P["gray_min_live"]:
         fired.append(f"1: {len(M['live_bands'])} live bands")
-    bad = [b for b, s in M["seed_std_R2"].items() if s > P["gray_seed_std"]]
-    if bad:
-        fired.append(f"2: R2 seed scatter > {P['gray_seed_std']} in {bad}")
+    if M["dropped_for_precision"]:
+        fired.append(f"2: band(s) {M['dropped_for_precision']} carry >= 1 % of L_bol but exceed the precision rule (seed scatter > {P['live_seed_std']}): raise the packet count")
     for tag, m in M["legs"].items():
         if m["identity"] > P["gray_identity"]:
             fired.append(f"3: {tag} identity residual {m['identity']:.1e}")
@@ -165,17 +192,23 @@ def readings(records):
         ng_star = next((n for n in ngs if by_ng[n]["band"]["max"] <= P["dm_max"] and by_ng[n]["colour"]["max"] <= P["dcolour_max"]), None)
         e_R = by_ng[ng_star]["band"]["max"] if ng_star is not None else by_ng[max(ngs)]["band"]["max"]
         noise = es["noise_on_dm"]
-        mono = {}
+        conv = {}
         for key, get in (("band", lambda m: m["band"]["max"]), ("sed", lambda m: m["sed"]), ("event", lambda m: m["event"])):
-            vals = [get(by_ng[n]) for n in ngs]
+            vals = {n: get(by_ng[n]) for n in ngs}
             tol = noise if key == "band" else 0.0
-            rises = [vals[i + 1] - vals[i] for i in range(len(vals) - 1)]
-            mono[key] = dict(values=vals, monotone=all(r <= tol for r in rises), max_rise=float(max(rises)) if rises else 0.0)
-        per_ion[ion] = dict(gray=gray, live_bands=M["live_bands"], seed_std_R2=M["seed_std_R2"], ng_star=ng_star,
-                            e_eps=es["max_dm"], e_R=e_R, eps_star=es, monotone=mono,
-                            table=[dict(ng=n, n_params=n * n, table_kb=by_ng[n].get("table_kb"), band_max=by_ng[n]["band"]["max"],
-                                        band_mean=by_ng[n]["band"]["mean"], sed=by_ng[n]["sed"], event=by_ng[n]["event"],
-                                        colour_max=by_ng[n]["colour"]["max"], events_per_packet=by_ng[n]["events_per_packet"]) for n in ngs],
+            v = [vals[n] for n in ngs]; rises = [v[i + 1] - v[i] for i in range(len(v) - 1)]
+            lo, hi = P["b3_lo"], P["b3_hi"]
+            conv[key] = dict(values=vals, local_non_monotone=any(r > tol for r in rises), max_rise=float(max(rises)) if rises else 0.0,
+                             degrades_lo_hi=bool(lo in vals and hi in vals and vals[hi] > vals[lo] + tol),
+                             converges_lo_hi=bool(lo in vals and hi in vals and vals[hi] <= vals[lo] + tol))
+        per_ion[ion] = dict(gray=gray, live_bands=M["live_bands"], dropped_for_precision=M["dropped_for_precision"],
+                            detectable_40mpc=M["detectable_40mpc"], seed_std_R2=M["seed_std_R2"], ng_star=ng_star,
+                            e_eps=es["max_dm"], e_R=e_R, eps_star=es, convergence=conv,
+                            fine_in_vs_out_of_sample=M["fine_in_vs_out_of_sample"],
+                            table=[dict(ng=n, n_matrix_dof=n * n, n_exit_samples=by_ng[n].get("n_exit_samples"), table_kb=by_ng[n].get("table_kb"),
+                                        band_max=by_ng[n]["band"]["max"], band_mean=by_ng[n]["band"]["mean"], sed=by_ng[n]["sed"],
+                                        event=by_ng[n]["event"], colour_max=by_ng[n]["colour"]["max"], fallback_frac=by_ng[n]["fallback_frac"],
+                                        events_per_packet=by_ng[n]["events_per_packet"]) for n in ngs],
                             R2=dict(events_per_packet=M["legs"]["R2"]["events_per_packet"], t_wall=M["legs"]["R2"]["t_wall"]))
     live_ions = [i for i, r in per_ion.items() if not r["gray"]]
     out = dict(prereg=PREREG, per_ion=per_ion, ions_read=live_ions, ions_gray=[i for i in per_ion if per_ion[i]["gray"]])
@@ -204,13 +237,16 @@ def readings(records):
             verdicts.append("YELLOW")
         r["B2"] = verdicts[-1]
     B2 = "RED" if verdicts.count("RED") >= 2 or (verdicts.count("RED") == 1 and len(verdicts) == 2) else "GREEN" if verdicts.count("GREEN") >= 2 else "YELLOW"
-    # B3
+    # B3 (revised 2026-09-22): the event-level metric is the structural diagnostic;
+    # Red only for a representation pathology: m_event not converging from 8 to 32
+    # groups, or a persistent worsening of BOTH observables from 8 to 32 beyond the
+    # noise; an innocent local wiggle in an observable is Yellow.
     b3 = "GREEN"
     for i in live_ions:
-        mo = per_ion[i]["monotone"]
-        if not mo["band"]["monotone"] and mo["band"]["max_rise"] > per_ion[i]["eps_star"]["noise_on_dm"]:
+        cv = per_ion[i]["convergence"]
+        if cv["event"]["degrades_lo_hi"] or (cv["band"]["degrades_lo_hi"] and cv["sed"]["degrades_lo_hi"]):
             b3 = "RED"; break
-        if not all(mo[k]["monotone"] for k in mo):
+        if cv["band"]["local_non_monotone"] or cv["sed"]["local_non_monotone"] or not cv["event"]["converges_lo_hi"]:
             b3 = "YELLOW"
     decision = "CONTINUE" if (B1 == "GREEN" and B2 == "GREEN" and b3 != "RED") else "STOP" if (B1 == "RED" or B2 == "RED") else "YELLOW"
     out.update(B1=B1, B2=B2, B3=b3, decision=decision)
@@ -228,11 +264,12 @@ def main():
     out = readings(records)
     (HERE / "gate1_verdict.json").write_text(json.dumps(out, indent=1, default=float) + "\n")
     for ion, r in out["per_ion"].items():
-        print(f"\n{ion}: live {r['live_bands']}, R2 seed std {{{', '.join(f'{b} {s:.3f}' for b, s in r['seed_std_R2'].items())}}}"
+        print(f"\n{ion}: live {r['live_bands']} (dropped {r['dropped_for_precision']}, detectable at 40 Mpc {r['detectable_40mpc']}), "
+              f"R2 seed std {{{', '.join(f'{b} {s:.3f}' for b, s in r['seed_std_R2'].items())}}}, fine matrix in- vs out-of-sample {r['fine_in_vs_out_of_sample']:.4f}"
               + (f"  GRAY: {r['gray']}" if r["gray"] else ""))
-        print("   N_g  params  band_max  band_mean   sed    event  colour_max  ev/pkt")
+        print("   N_g  N_g^2  exit_samples  kB    band_max  band_mean   sed    event  colour_max  fallback  ev/pkt")
         for t in r["table"]:
-            print(f"  {t['ng']:4d}  {t['n_params']:6d}   {t['band_max']:.3f}     {t['band_mean']:.3f}   {t['sed']:.3f}  {t['event']:.3f}    {t['colour_max']:.3f}   {t['events_per_packet']:.1f}")
+            print(f"  {t['ng']:4d}  {t['n_matrix_dof']:5d}  {t['n_exit_samples']:11d}  {t['table_kb']:6.1f}  {t['band_max']:.3f}     {t['band_mean']:.3f}   {t['sed']:.3f}  {t['event']:.4f}   {t['colour_max']:.3f}     {t['fallback_frac']:.4f}   {t['events_per_packet']:.1f}")
         es = r["eps_star"]
         print(f"  eps* = {es['eps']:.2f}: band_max {es['max_dm']:.3f} mean {es['mean_dm']:.3f} sed {es['sed']:.3f} colour {es['colour_max']:.3f}"
               f" (interior {es['interior']}); N_g* = {r['ng_star']}; B2 {r.get('B2', '-')}")

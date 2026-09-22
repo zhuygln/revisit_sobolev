@@ -192,15 +192,22 @@ def run_legs(zone, atom, n, legs=LADDER, seeds=SEEDS, ng=NG, relativity="worldli
                 kernels[(src, ng_leg)] = RedistributionKernel.from_branching_mc(
                     nu_in, nu_out, w_in, ng_leg, nu_lo=k_lo, nu_hi=k_hi, w_out=w_out)
             kern = kernels[(src, ng_leg)]
+            gi = kern.group_index(nu_in)
+            E_in = np.bincount(gi, weights=w_in * nu_in, minlength=ng_leg)      # energy absorbed per row (h omitted)
+            n_exit = int(kern.disc_vals.size) if kern.disc_vals is not None else 0
+            import io as _io
+            buf = _io.BytesIO(); kern.save(buf)
             row["kernels"][tag] = dict(source=src, ng=ng_leg, n_events=int(kern.counts.sum()),
                                        empty_rows=int(kern.empty_rows.sum()), validate_energy=kern.validate_energy(),
-                                       edges=kern.edges.tolist(), R=kern.R.tolist(), counts=kern.counts.tolist())
+                                       edges=kern.edges.tolist(), R=kern.R.tolist(), counts=kern.counts.tolist(),
+                                       E_in=E_in.tolist(), n_exit_samples=n_exit, serialized_bytes=int(buf.getbuffer().nbytes))
             if spec.get("kernel_only"):
                 row["timing"][tag] = time.time() - tl
                 continue
             kw["kernel"] = kern
         collect = tag in ("R1", "R2") or spec.get("collect_events", False)
-        res = [mc(spec, s, collect_events=collect, **kw) for s in seeds]
+        seeds_leg = tuple(spec.get("seeds", seeds))          # a leg may run on its own seeds (Paper B: the kernel-build reference)
+        res = [mc(spec, s, collect_events=collect, **kw) for s in seeds_leg]
         results[tag] = res
         o = photometer(observe(res, l_core, spec["scale"]), edges, nu_c, phot.D_40MPC)
         # per-seed magnitudes: the Monte Carlo noise floor of this leg
@@ -219,6 +226,7 @@ def run_legs(zone, atom, n, legs=LADDER, seeds=SEEDS, ng=NG, relativity="worldli
         if "eps" in spec:
             o["eps"] = float(spec["eps"])
         o["mode"] = spec["mode"]; o["scale"] = spec["scale"]
+        o["seeds"] = list(seeds_leg)
         o["t_wall"] = row["timing"][tag] = time.time() - tl
         row["legs"][tag] = o
         if verbose:
