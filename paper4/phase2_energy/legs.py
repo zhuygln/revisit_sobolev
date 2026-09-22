@@ -192,9 +192,10 @@ def run_legs(zone, atom, n, legs=LADDER, seeds=SEEDS, ng=NG, relativity="worldli
         """Every kernel leg that names `src` as its source is built as soon as
         `src` has run, and `src`'s events are then released (Paper B: the
         Nd II 10^6-packet run held every collected leg's events for the whole
-        run and peaked at 17 GB). A spec's `transform` (a callable kernel ->
-        kernel) derives the transported operator from the built one; the
-        built kernel's metadata carries what it did."""
+        run and peaked at 17 GB). A spec's `transform` (a callable
+        (kernel, events dict) -> kernel) derives the transported operator
+        from the built one; the derived kernel's metadata["transform"]
+        records what it did."""
         ev = [r["events"] for r in results[src]]
         nu_in = np.concatenate([e[0] for e in ev]); nu_out = np.concatenate([e[1] for e in ev])
         w_in = np.concatenate([e[2] for e in ev])
@@ -210,7 +211,7 @@ def run_legs(zone, atom, n, legs=LADDER, seeds=SEEDS, ng=NG, relativity="worldli
                     nu_in, nu_out, w_in, ng_leg, nu_lo=k_lo, nu_hi=k_hi, w_out=w_out)
             kern = kernels[(src, ng_leg)]
             if spec.get("transform") is not None:
-                kern = spec["transform"](kern)
+                kern = spec["transform"](kern, dict(nu_in=nu_in, nu_out=nu_out, w_in=w_in, w_out=w_out))
                 kernels[(src, ng_leg, tag)] = kern
             kernel_record(tag, kern, src, ng_leg, nu_in, w_in)
         for r in results[src]:
