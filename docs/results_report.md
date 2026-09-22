@@ -5216,6 +5216,100 @@ lanthanides only; the thin-layer temperatures are xkn's continuation, not
 an energy equation; the heating law is Korobkin's; the v_max convention
 is the spherical one. None of these differs between the three legs.
 
+### 4.62 Paper B gate G1: does the compression survive correct energy physics? (F67)
+
+Preregistered in `paperB/prl_gate.md`, frozen at f9cfbff with the PI's
+seven pre-run changes (`paperB/plan_review.md`), run 2026-09-22 from that
+commit. State: P1 2 d shell 28, each ion alone at its P1 density. Reference:
+the energy-conserving downward macroatom `R2` on the evaluation seeds 1–3;
+kernels built from `R2build` on the build seeds 101–103 (pooled), discrete
+within-group exit tables, energy rows; the independent 128-group matrix
+from R2's own events for the event-level metric; ε on the 21-value grid;
+3×10⁵ energy packets per seed (Nd II: 10⁶, the preregistered gray remedy,
+see below). Records `paperB/gate1/gate1_<ion>.json`,
+`gate1_verdict.json`, figure `docs/figures/paperB/gate1_error_vs_complexity.png`.
+
+**Per ion** (columns: N_g, N_g², stored exit samples, serialized kernel kB,
+max |Δm| over the live bands, mean |Δm|, integrated SED L1, energy-weighted
+event-level total-variation loss against the independent fine matrix, max
+|Δcolour|; the last row is the best scalar):
+
+La II (live g r i z J H K; R2 seed scatter ≤ 0.029 mag; K128 in- vs
+out-of-sample 0.024; 0.7 events per packet):
+
+| N_g | N_g² | exit samples | kB | band max | band mean | SED | event | colour |
+|---|---|---|---|---|---|---|---|---|
+| 2 | 4 | 524 | 16 | 0.036 | 0.006 | 0.006 | 0.737 | 0.035 |
+| 4 | 16 | 524 | 16 | 0.021 | 0.004 | 0.006 | 0.614 | 0.021 |
+| 8 | 64 | 524 | 17 | 0.013 | 0.003 | 0.006 | 0.521 | 0.020 |
+| 16 | 256 | 524 | 22 | 0.009 | 0.002 | 0.005 | 0.456 | 0.009 |
+| 32 | 1024 | 524 | 36 | 0.010 | 0.002 | 0.005 | 0.421 | 0.007 |
+| ε* = 0.20 | 1 | — | — | 0.068 | 0.016 | 0.014 | — | 0.067 |
+
+Ce II (live r i z J H K; R2 seed scatter ≤ 0.033; K128 in/out
+0.010; 5.4 events per packet):
+
+| N_g | N_g² | exit samples | kB | band max | band mean | SED | event | colour |
+|---|---|---|---|---|---|---|---|---|
+| 2 | 4 | 12,510 | 296 | 0.236 | 0.115 | 0.042 | 0.530 | 0.224 |
+| 4 | 16 | 12,510 | 297 | 0.140 | 0.075 | 0.036 | 0.478 | 0.097 |
+| 8 | 64 | 12,510 | 298 | 0.122 | 0.062 | 0.037 | 0.334 | 0.103 |
+| 16 | 256 | 12,510 | 303 | 0.060 | 0.028 | 0.028 | 0.245 | 0.084 |
+| 32 | 1024 | 12,510 | 317 | 0.025 | 0.016 | 0.029 | 0.188 | 0.038 |
+| ε* = 0.00 | 1 | — | — | 1.397 | 1.074 | 0.882 | — | 1.434 |
+
+Nd II at 3×10⁵ was **Gray on condition 2**: g carries ≥ 1 % of the
+luminosity but its R2 seed scatter was 0.063 > 0.05 mag. The preregistered
+remedy — the whole Nd grid at a higher packet count, never one leg — was
+run at 10⁶ packets per seed (2.9 h; `gate1_60NdII_n1e6.json`; the 3×10⁵
+record is kept): g's scatter fell to 0.005, all seven bands are live,
+nothing is gray. K128 in/out 0.005; 8.2 events per packet:
+
+| N_g | N_g² | exit samples | kB | band max | band mean | SED | event | colour |
+|---|---|---|---|---|---|---|---|---|
+| 2 | 4 | 86,187 | 2023 | 0.086 | 0.019 | 0.015 | 0.489 | 0.065 |
+| 4 | 16 | 86,187 | 2024 | 0.054 | 0.014 | 0.013 | 0.404 | 0.052 |
+| 8 | 64 | 86,187 | 2025 | 0.022 | 0.011 | 0.012 | 0.256 | 0.026 |
+| 16 | 256 | 86,187 | 2029 | 0.013 | 0.007 | 0.012 | 0.196 | 0.018 |
+| 32 | 1024 | 86,187 | 2044 | 0.023 | 0.008 | 0.012 | 0.161 | 0.017 |
+| ε* = 0.00 | 1 | — | — | 1.058 | 0.499 | 0.562 | — | 1.054 |
+
+**Readings (as preregistered).** N_g* is the smallest N_g with band max
+≤ 0.10 and colour max ≤ 0.10: **La II 2, Ce II 16, Nd II 2**. B1 **Green**:
+two ions reach the threshold by 8 groups (both by 2) and the third by 32.
+B2: Ce II **Green** (ε* = 0, pure resonant scattering, is the best scalar
+and it is 1.40 mag off, 23 times the 16-group matrix's 0.060); Nd II
+**Green** (ε* = 0 at 1.06 mag against the 2-group matrix's 0.086); La II
+**Yellow** (ε* = 0.20 is 0.068 mag off, under the 0.20 mag "substantial"
+floor and 1.9 times the 2-group matrix's 0.036: on this thin ion nothing is
+far from anything); two Greens → **Green**. B3 **Yellow**: every metric
+converges from 8 to 32 groups on every ion and the event metric is
+monotone everywhere, but the letter of the rule counts an 0.001 wiggle in
+Ce II's SED error (16 → 32) and Nd II's band error rising 0.013 → 0.023 at
+32 groups, at the edge of its 0.01 mag noise. **Decision: CONTINUE toward
+the PRL** — B1 Green, B2 Green, B3 not Red — and the next step is G2, why.
+
+**What the numbers say, beyond the readings.** (i) On the two dense ions
+the scalar ε is not a closure at all: its best value is the coherent
+limit and it misses by 0.95–1.40 mag in the worst live band, while a
+16-group matrix is within 0.060 (Ce) and a 2-group matrix within 0.025
+(Nd). (ii) The compression is real but ion-dependent, as Paper III found
+under photon packets: Nd II compresses to two groups (0.086 mag; 0.022 at
+eight), Ce II needs sixteen for 0.1 mag and thirty-two for 0.025. (iii) The serialized kernel is not
+N_g² numbers: the discrete exit tables dominate it (Ce 12,510 samples,
+297 kB at every N_g; Nd 86,187 samples at 10⁶ packets, 2.0 MB — the table
+grows with the event corpus, the matrix does not), and the matrix adds
+1–8 %.
+The compact object is the transition matrix; the whole representation is
+not compact, exactly the distinction the PI's change 5 asked to keep.
+(iv) The event-level loss falls monotonically but stays large (0.16–0.42
+at 32 groups, against a sampling floor of 0.005–0.024) while the
+observables are already converged: most of the
+information the binning discards does not reach the light. (v) La II at
+its P1 partial density is too thin to discriminate anything (0.7
+interactions per packet; every closure within 0.07 mag), as the pre-run
+characterisation said it would be.
+
 ## 5. Findings register
 
 | # | Finding | Where |

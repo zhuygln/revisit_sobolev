@@ -71,6 +71,8 @@ docs/paper4/*.log
 docs/paper4/*.out
 docs/paper4/*.toc
 
+# Paper B kernels (the R matrices are in the gate records)
+paperB/gate1/kernels/
 # education book build products
 education/_book/
 education/_freeze/

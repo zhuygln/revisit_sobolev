@@ -3150,6 +3150,41 @@ claim-by-claim read of every sentence quoting a macro) found:
   quoted the resolved leg's first-slab count) and two signed "reproduces
   to" numbers; fixed.
 
+## 9bi. Paper B gate G1: preregistered, frozen, run (2026-09-21/22)
+
+The PI returned to the research track: Paper B, the PRL attempt (R_ij vs
+eps* vs the energy-conserving macroatom). G1 was preregistered in
+paperB/prl_gate.md (PR #9), then revised on the PI's seven pre-run changes
+before any number existed -- the reference named as the DOWNWARD
+macroatom, a build/evaluation seed split (kernels from R2build on seeds
+101-103, everything scored on seeds 1-3), an integrated SED metric, an
+energy-weighted event metric against the independent fine matrix, the
+serialized kernel size recorded next to N_g^2, B3 softened to a
+convergence criterion, sigma_comp instead of sigma_nuclear, and a
+live-band rule without the 40 Mpc cut -- frozen at f9cfbff, and run.
+
+Outcome: Yellow. La II is too thin at its P1 partial density to
+discriminate (0.7 events/packet, everything within 0.07 mag; N_g* = 2,
+eps* = 0.2 only 1.9x worse). Ce II: N_g* = 16, eps* = 0 (the coherent
+limit) at 1.40 mag -- B2 Green. Nd II: N_g* = 2 and eps* = 0 at 0.95 mag,
+but GRAY on the precision rule (g band seed scatter 0.063 > 0.05); the
+preregistered remedy, the whole Nd grid at 1e6 packets per seed, is
+running (~3 h). Serialized kernels are dominated by the discrete exit
+tables (Ce 297 kB, Nd 1.4 MB at every N_g); the matrix is 1-8 % of it.
+The event-level loss stays 0.16-0.42 at 32 groups while the observables
+are converged: what the binning discards mostly does not reach the light.
+
+A lesson in preregistration: the run took 129 s (La), 16 min (Ce), 55 min
+(Nd) and the first Yellow was a genuine "the PI decides", not a failure.
+
+*The Nd rerun (2.9 h at 1e6 packets/seed) cleared the gray:* g's seed
+scatter 0.063 -> 0.005, all seven bands live, N_g* = 2 (0.086 mag; 0.022
+at eight groups), eps* = 0 at 1.06 mag. With three readable ions the gate
+reads B1 GREEN (two ions at <= 8 groups, the third at 32), B2 GREEN (Ce,
+Nd), B3 YELLOW (0.001-0.01 wiggles) -> CONTINUE toward the PRL. The exit
+tables grew with the corpus (86,187 samples, 2.0 MB) while the matrix did
+not: the honest-complexity point of the PI's change 5, in numbers.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,
