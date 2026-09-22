@@ -153,7 +153,7 @@ def _g2(ion, dm_global, dm_trunc, rho_trunc, ev_global, ref_off=0.0, ctrl_off=0.
         legs[f"T_f{f:g}"] = _leg([m + dm for m in ref])
         kernels[f"T_f{f:g}"] = _kernel(128, "R2build", n_exit=int(1000 * rho_trunc[f]),
                                        transform=dict(kind="truncate", f=f, n_exit_kept=int(1000 * rho_trunc[f]), n_exit_total=1000, archetypes=128, n_params=128 ** 2))
-    return dict(ion=ion, n=G2.PREREG["n"][ion], seeds=[1, 2, 3], build_seeds=[101, 102, 103], k_grid=[1, 2, 4, 8, 16, 32], f_grid=[0.5, 0.9, 0.99, 0.999],
+    return dict(ion=ion, n=G2.PREREG["n"][ion], seeds=[1, 2, 3], build_seeds=[101, 102, 103], k_grid=[1, 2, 4, 8, 16, 32], f_grid=[0.1, 0.2, 0.5, 0.9, 0.99, 0.999],
                 ng_control=8, ng_fine=128, state="paper4/phase1_benchmarks/P1_t2.json", shell=28, lam_window=[1000.0, 30000.0], n_spec=200,
                 legs=legs, kernels=kernels)
 

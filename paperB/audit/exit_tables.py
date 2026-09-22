@@ -34,7 +34,7 @@ for p in (ROOT, ROOT / "paperB/gate1", ROOT / "paper2/phase1", ROOT / "paper3", 
 
 from redistribution import RedistributionKernel                    # noqa: E402
 
-FRACTIONS = (0.5, 0.9, 0.99, 0.999)
+FRACTIONS = (0.1, 0.2, 0.5, 0.9, 0.99, 0.999)
 G1_N = {"57LaII": 300_000, "58CeII": 300_000, "60NdII": 1_000_000}   # the packet count of each ion's final G1 record
 
 
@@ -162,7 +162,8 @@ def figure(records, out_dir=ROOT / "docs/figures/paperB"):
         c = COL[ion]
         axes[0].plot([d["events"] for d in r["discovery"]], [d["distinct"] for d in r["discovery"]], "o-", color=c, label=f"{NAME[ion]} ({r['n_lines']:,} lines)")
         fr = sorted(float(k) for k in r["concentration"]); axes[1].plot([r["concentration"][f"{f:g}"] for f in fr], fr, "o-", color=c, label=NAME[ion])
-        axes[2].bar([f"{NAME[ion]}\nmatrix", f"{NAME[ion]}\ntables"], [r["K128"]["bytes_matrix"] / 1024, r["K128"]["bytes_tables"] / 1024], color=[c, c], alpha=[0.5, 1.0])
+        axes[2].bar([f"{NAME[ion]}\nmatrix"], [r["K128"]["bytes_matrix"] / 1024], color=c, alpha=0.5)
+        axes[2].bar([f"{NAME[ion]}\ntables"], [r["K128"]["bytes_tables"] / 1024], color=c)
     axes[0].set_xscale("log"); axes[0].set_yscale("log"); axes[0].set_xlabel("events drawn"); axes[0].set_ylabel("distinct exit lines"); axes[0].set_title("discovery of exit lines", fontsize=9); axes[0].legend(fontsize=7)
     axes[1].set_xscale("log"); axes[1].set_xlabel("exit lines, largest energy first"); axes[1].set_ylabel("fraction of the exit energy"); axes[1].set_title("energy concentration", fontsize=9); axes[1].legend(fontsize=7)
     axes[2].set_yscale("log"); axes[2].set_ylabel("kB"); axes[2].set_title("the 128-group kernel as saved", fontsize=9)
@@ -191,5 +192,31 @@ def main():
             print("wrote", p)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__" and "--markdown" not in sys.argv:
     main()
+
+
+def markdown(records=None):
+    """The report's table, machine-generated from exit_tables.json."""
+    records = records or json.loads((HERE / "exit_tables.json").read_text())
+    NAME = {"57LaII": "La II", "58CeII": "Ce II", "60NdII": "Nd II"}
+    L = ["| ion | packets × seeds | events | lines in the list | opacity lines | distinct exit lines | exact rest frequencies | exit energy in opacity lines | lines carrying 50 / 90 / 99 / 99.9 % | kept per group at f = 0.1 / 0.2 / 0.5 / 0.9 / 0.99 / 0.999 | K128 kB: total = matrix + tables | G1 record | K at N_g*: kB (tables) |",
+         "|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
+    for ion, a in records.items():
+        c = a["concentration"]; k = a["kept_per_group"]; K = a["K128"]; s = a["K_ng_star"]
+        L.append(f"| {NAME[ion]} | {a['n']:,} × {len(a['build_seeds'])} | {a['n_events']:,} | {a['n_lines']:,} | {a['n_opacity']:,} | {a['n_distinct_exit_lines']:,} | {a['exact_line_fraction']:.3f} | "
+                 f"{a['exit_energy_in_opacity_lines']:.3f} | {c['0.5']:,} / {c['0.9']:,} / {c['0.99']:,} / {c['0.999']:,} | "
+                 " / ".join(f"{k[f]['kept']:,}" for f in ("0.1", "0.2", "0.5", "0.9", "0.99", "0.999") if f in k) + " | "
+                 f"{K['bytes_total']/1024:.0f} = {K['bytes_matrix']/1024:.0f} + {K['bytes_tables']/1024:.0f} | {K['g1_record_bytes']/1024:.0f} kB, {K['g1_record_n_exit']:,} | "
+                 + (f"N_g* = {s['ng']}: {s['bytes_total']/1024:.0f} ({s['bytes_tables']/1024:.0f}) |" if s else "— |"))
+    L += ["", "| ion | distinct exit lines after 10⁴ / 10⁵ / 10⁶ / all events |", "|---|---|"]
+    for ion, a in records.items():
+        d = a["discovery"]
+        def at(n):
+            return next((x["distinct"] for x in d if x["events"] >= n), d[-1]["distinct"])
+        L.append(f"| {NAME[ion]} | {at(1e4):,} / {at(1e5):,} / {at(1e6):,} / {d[-1]['distinct']:,} (of {d[-1]['events']:,} events) |")
+    return "\n".join(L)
+
+
+if __name__ == "__main__" and "--markdown" in sys.argv:
+    print(markdown())

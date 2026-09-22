@@ -21,7 +21,7 @@ import analyse as A                                          # noqa: E402  (G1's
 
 PREREG = dict(state="paper4/phase1_benchmarks/P1_t2.json", shell=28, seeds=[1, 2, 3], build_seeds=[101, 102, 103],
               n={"57LaII": 300_000, "58CeII": 300_000, "60NdII": 1_000_000},
-              k_grid=[1, 2, 4, 8, 16, 32], f_grid=[0.5, 0.9, 0.99, 0.999], ng_control=8, ng_fine=128,
+              k_grid=[1, 2, 4, 8, 16, 32], f_grid=[0.1, 0.2, 0.5, 0.9, 0.99, 0.999], ng_control=8, ng_fine=128,
               dm_max=0.10, dcolour_max=0.10, h1_red_ratio=4.0, h2_rho_green=0.10,
               nmf_conv_max=1e-4, control_sigma=2.0, ref_match=1e-6, decisive=["58CeII", "60NdII"])
 IONS = A.IONS

@@ -74,12 +74,22 @@
    }
   ],
   "concentration": {
+   "0.1": 5,
+   "0.2": 11,
    "0.5": 35,
    "0.9": 138,
    "0.99": 249,
    "0.999": 343
   },
   "kept_per_group": {
+   "0.1": {
+    "kept": 80,
+    "max_in_group": 1
+   },
+   "0.2": {
+    "kept": 92,
+    "max_in_group": 2
+   },
    "0.5": {
     "kept": 146,
     "max_in_group": 5
@@ -114,7 +124,7 @@
    "bytes_tables": 13598,
    "n_exit": 524
   },
-  "t_wall": 2.1129636764526367
+  "t_wall": 1.947474718093872
  },
  "58CeII": {
   "ion": "58CeII",
@@ -191,12 +201,22 @@
    }
   ],
   "concentration": {
+   "0.1": 10,
+   "0.2": 58,
    "0.5": 349,
    "0.9": 2356,
    "0.99": 6495,
    "0.999": 9981
   },
   "kept_per_group": {
+   "0.1": {
+    "kept": 285,
+    "max_in_group": 25
+   },
+   "0.2": {
+    "kept": 535,
+    "max_in_group": 53
+   },
    "0.5": {
     "kept": 1482,
     "max_in_group": 150
@@ -231,6 +251,133 @@
    "bytes_tables": 301374,
    "n_exit": 12510
   },
-  "t_wall": 23.15668225288391
+  "t_wall": 20.133429288864136
+ },
+ "60NdII": {
+  "ion": "60NdII",
+  "n": 1000000,
+  "build_seeds": [
+   101,
+   102,
+   103
+  ],
+  "n_events": 24638694,
+  "n_packets_total": 3000000,
+  "n_lines": 3336077,
+  "n_opacity": 88611,
+  "n_distinct_exit_lines": 86187,
+  "exact_line_fraction": 1.0,
+  "distinct_over_lines": 0.025834835347025863,
+  "exit_energy_in_opacity_lines": 0.9762229668770342,
+  "discovery": [
+   {
+    "events": 10000,
+    "distinct": 3439
+   },
+   {
+    "events": 18234,
+    "distinct": 4708
+   },
+   {
+    "events": 33249,
+    "distinct": 6389
+   },
+   {
+    "events": 60629,
+    "distinct": 8630
+   },
+   {
+    "events": 110554,
+    "distinct": 11336
+   },
+   {
+    "events": 201589,
+    "distinct": 14785
+   },
+   {
+    "events": 367588,
+    "distinct": 19213
+   },
+   {
+    "events": 670279,
+    "distinct": 24617
+   },
+   {
+    "events": 1222219,
+    "distinct": 31271
+   },
+   {
+    "events": 2228655,
+    "distinct": 39158
+   },
+   {
+    "events": 4063840,
+    "distinct": 48695
+   },
+   {
+    "events": 7410207,
+    "distinct": 59602
+   },
+   {
+    "events": 13512136,
+    "distinct": 72081
+   },
+   {
+    "events": 24638694,
+    "distinct": 86187
+   }
+  ],
+  "concentration": {
+   "0.1": 28,
+   "0.2": 93,
+   "0.5": 476,
+   "0.9": 4061,
+   "0.99": 22922,
+   "0.999": 61529
+  },
+  "kept_per_group": {
+   "0.1": {
+    "kept": 366,
+    "max_in_group": 17
+   },
+   "0.2": {
+    "kept": 697,
+    "max_in_group": 37
+   },
+   "0.5": {
+    "kept": 2027,
+    "max_in_group": 118
+   },
+   "0.9": {
+    "kept": 9742,
+    "max_in_group": 607
+   },
+   "0.99": {
+    "kept": 33822,
+    "max_in_group": 2031
+   },
+   "0.999": {
+    "kept": 66045,
+    "max_in_group": 3216
+   }
+  },
+  "populated_output_groups": 114,
+  "K128": {
+   "bytes_total": 2354078,
+   "bytes_matrix": 283560,
+   "bytes_tables": 2070518,
+   "n_exit": 86187,
+   "bytes_per_exit": 24.02355343613306,
+   "g1_record_bytes": 2354078,
+   "g1_record_n_exit": 86187
+  },
+  "K_ng_star": {
+   "ng": 2,
+   "bytes_total": 2071838,
+   "bytes_matrix": 2328,
+   "bytes_tables": 2069510,
+   "n_exit": 86187
+  },
+  "t_wall": 196.89801144599915
  }
 }

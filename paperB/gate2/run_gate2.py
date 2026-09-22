@@ -25,7 +25,7 @@ from run_gate1 import build, IONS, STATE, SHELL, TAU_MIN, SEEDS, BUILD_SEEDS, NG
 import operators as OP                                                     # noqa: E402
 
 K_GRID = (1, 2, 4, 8, 16, 32)
-F_GRID = (0.5, 0.9, 0.99, 0.999)
+F_GRID = (0.1, 0.2, 0.5, 0.9, 0.99, 0.999)
 NG_CONTROL = 8
 N_PACKETS = {"57LaII": 300_000, "58CeII": 300_000, "60NdII": 1_000_000}   # each ion's final G1 record
 

@@ -22,6 +22,24 @@ matrix for the event-level metric, and ε = 0 … 1 in steps of 0.05, with
 3×10⁵ energy packets per seed. `analyse.py` refuses a record that
 is not the preregistered experiment. Tests: `tests/test_paperB_gate1.py`.
 
+## After G1: R2M robustness, the exit-table audit, G2 (preregistered, not run)
+
+    .venv/bin/python paperB/r2m/run_r2m.py --ion 57LaII          # then 58CeII, 60NdII (10 s / 2.5 min / 6 min at 3e5)
+    .venv/bin/python paperB/r2m/analyse_r2m.py                    # survives? per ion -> r2m_verdict.json; --markdown for the report's tables
+    .venv/bin/python paperB/audit/exit_tables.py --ion 57LaII     # representation audit (no transport scored); --figure; --markdown
+    .venv/bin/python paperB/gate2/run_gate2.py --ion 58CeII       # G2: NOT before the PI approves prl_gate.md's G2 section
+    .venv/bin/python paperB/gate2/analyse.py                      # H1/H2, gray first -> gate2_verdict.json; figure.py
+
+`r2m/` is the post-pass robustness check of G1's own text (the
+radiation-field-driven macroatom as the reference, the 8-group operator
+rebuilt from its events; not a gate). `audit/` measures what the discrete
+exit tables hold (distinct exit lines, exact rest frequencies, discovery
+curve, energy concentration, what a truncation keeps, size split).
+`gate2/` holds the operator families (`operators.py`: local on shared
+128-group tables, rank-k NMF, exit-table truncation), the runner, the
+readings H1/H2 and the figure. Tests: `tests/test_paperB_r2m.py`,
+`test_paperB_audit.py`, `test_paperB_gate2.py`.
+
 ## Where it stands
 
 G1 was frozen at f9cfbff and run on 2026-09-22 (`docs/results_report.md`
@@ -29,5 +47,16 @@ G1 was frozen at f9cfbff and run on 2026-09-22 (`docs/results_report.md`
 preregistered 10⁶-packet rerun cleared the precision gray); ε* is the
 coherent limit and 1.1–1.4 mag off on the dense ions. **B1 Green, B2
 Green, B3 Yellow → continue toward the PRL.** La II at its P1 partial
-density is too thin to discriminate. G2 (why: locality vs rank) is the
-next gate, to be detailed in `prl_gate.md` before it runs.
+density is too thin to discriminate.
+
+After G1 (§4.63, F68, 2026-09-22): **the compression survives the
+radiation-field-driven macroatom** on all three ions (the 8-group
+operator rebuilt from its events within 0.015–0.046 mag, the reference
+itself moving by up to 2.1 mag; the downward-trained operator reproduces
+the downward reference it came from). The exit tables are already the
+exact aggregate over distinct exit lines; their size is the number of
+exit lines the sample discovers, and 90 % of the exit energy sits in
+5–26 % of them. **G2 is preregistered** (H1 locality vs global low rank
+at matched archetype count on shared exit tables; H2 the fraction of exit
+lines the light needs) and waits for the PI's approval of its criteria
+before any run.

@@ -3185,6 +3185,56 @@ Nd), B3 YELLOW (0.001-0.01 wiggles) -> CONTINUE toward the PRL. The exit
 tables grew with the corpus (86,187 samples, 2.0 MB) while the matrix did
 not: the honest-complexity point of the PI's change 5, in numbers.
 
+## 9bj. Paper B after G1: R2M now, the exit tables audited, G2 preregistered (2026-09-22)
+
+The PI read G1 as a real pass and reframed the path: the observable
+compression is far stronger than the event-level one (m_event 0.16-0.42
+at 32 groups, magnitudes converged), so G2 must ask which microscopic
+degrees of freedom survive into the light; and "compact" is not earned
+while the exit tables dominate the kernel. Order given: R2M robustness
+now, audit the exit tables (no physics), then freeze G2 with two
+hypotheses. Recorded verbatim in paperB/plan_review.md.
+
+Before writing code: kernel.py already aggregates exits by unique
+frequency (np.unique + summed weights), and a 2e4-packet probe showed
+every exit is an exact line rest frequency. So the PI's proposed
+aggregation IS the implementation; the stored count is the number of
+distinct exit lines discovered (Nd 59k at 3e5 packets, 86k at 1e6, of
+3.3M lines). The audit became: discovery curve, energy concentration,
+size split, and what a per-group truncation keeps -- exit_tables.py.
+
+R2M (preregistered as its own section, then run: La 10 s, Ce 151 s, Nd
+6 min at 3e5): survives on all three ions -- R_8 rebuilt from R2M's
+events within 0.015/0.026/0.046 mag of R2M, while R2-trained R_8 scored
+against R2M reproduces R2 (Ce 1.97 vs the 2.09 shift). The operator
+carries the physics it was built from. F68.
+
+The runner change that made Nd feasible: run_legs now builds every
+kernel that names a source leg as soon as that leg has run, records it,
+and drops the events (the G1 Nd 1e6 run held all legs' events and peaked
+at 17.4 GB; the R2M Nd run peaked at 3.8 GB). Numbers unchanged (the
+audit's kernels reproduce G1's recorded K128build bytes exactly).
+
+G2 preregistered (prl_gate.md, not run): every operator a 128-group
+energy matrix on SHARED 128-group exit tables; local family = G1's A2
+legs (with an L128_ng8 control that must match A2_ng8 within 2 sigma of
+the difference), global family = rank-k NMF (k = 1..32, Lee-Seung 600
+iterations, rows rescaled), truncation family T(f). The matched axis is
+the archetype count, not parameters (N_g^2 vs 2*128*k are recorded, not
+plotted against each other). H1 Green iff k* >= N_g* on Ce and Nd AND
+the global operator fits the events better at matched k; Red iff k* <=
+N_g*/4 (only Ce, N_g* = 16, can fire it). H2 Green iff the light needs
+<= 10 % of the exit lines on Ce and Nd. The f grid was extended to 0.1
+and 0.2 after the audit showed Ce keeps 12 % of its lines at f = 0.5 --
+a Green that the grid could not reach would have been a preregistration
+defect, caught before the run. Machinery: kernel.with_matrix,
+kernel.truncate_exits, legs.py transform hook, paperB/gate2/*, 10 tests.
+Smoke-run only; the PI approves the criteria before the run.
+
+Lesson: the prereg of a threshold on a derived quantity (rho_exit) needs
+the audit's numbers to check reachability -- do the representation
+audit before freezing a representation gate.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

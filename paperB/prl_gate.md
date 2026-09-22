@@ -292,7 +292,7 @@ change of 2026-09-22).
 | `A2_ng8` | G1's 8-group kernel (coarse tables), rerun | 8 | 64 |
 | `L128_ng8` | **local control**: the 8-group energy matrix expanded onto the 128 groups, each coarse column's mass spread by the fine exit-energy marginal within it, on the 128-group tables. Sampling-equivalent to `A2_ng8` by construction (both draw the exit line with probability ∝ its exit energy within the coarse output group); transported to verify that the local family of G1 (`A2_ng2 … A2_ng32`, read from the G1 records) is the local family on shared tables | 8 | 64 |
 | `G_k1 … G_k32` | **global family**: rank-k non-negative factorisation W H of the populated rows of the 128-group energy matrix (Lee–Seung multiplicative updates, 600 iterations, initialisation seed 0), rows rescaled to their original sums (energy exact), empty rows kept empty; k ∈ {1, 2, 4, 8, 16, 32}. k = 1 is the fully non-local null: one exit distribution for every input | k | 2·128·k |
-| `T_f0.5 … T_f0.999` | **truncation family**: the full 128×128 matrix with each output group's exit table cut to the highest-energy-weight lines carrying fraction f of that group's exit energy (at least one per populated group), both weight tables renormalised over the kept lines; f ∈ {0.5, 0.9, 0.99, 0.999} | 128 | 128² |
+| `T_f0.1 … T_f0.999` | **truncation family**: the full 128×128 matrix with each output group's exit table cut to the highest-energy-weight lines carrying fraction f of that group's exit energy (at least one per populated group), both weight tables renormalised over the kept lines; f ∈ {0.1, 0.2, 0.5, 0.9, 0.99, 0.999}. The grid was set after the exit-table audit (§4.63) so that H2's Green is reachable: per-group truncation keeps, of the distinct exit lines, Ce II 2.3 / 4.3 / 12 / 36 / 67 / 87 % and Nd II 0.4 / 0.8 / 2.4 / 11 / 39 / 77 % at these f, so ρ_exit ≤ 0.10 needs f* ≤ 0.2 on Ce II | 128 | 128² |
 | `K128`, `K128build` | kernel only: the independent fine matrix (evaluation seeds) and the in-sample one | | |
 
 The local family's curve is G1's `A2_ng{N}` legs, N ∈ {2, 4, 8, 16, 32},
@@ -354,7 +354,7 @@ numbers); Yellow is the PI's call. H2 sets the wording of "compact": Green
 — the operator's information content is the matrix plus the top ρ_exit of
 the exit lines; Red — the exit table is physics, not representation.
 
-**What may not change after the run:** the k and f grids, the control
+**What may not change after the run:** the k and f grids (the f grid was extended to 0.1 and 0.2 on 2026-09-22 after the audit, before any G2 transport), the control
 rule, the thresholds (G1's), the archetype-count axis, the NMF settings
 (600 iterations, seed 0, rescaled rows). What may: the packet count upward
 on a Gray (the whole ion rerun), and bug fixes with the run repeated.

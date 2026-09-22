@@ -117,5 +117,30 @@ def main():
     return out
 
 
-if __name__ == "__main__":
+if __name__ == "__main__" and "--markdown" not in sys.argv:
     main()
+
+
+def markdown(out=None):
+    """The report's tables, machine-generated from r2m_verdict.json."""
+    out = out or json.loads((HERE / "r2m_verdict.json").read_text())
+    NAME = {"57LaII": "La II", "58CeII": "Ce II", "60NdII": "Nd II"}
+    lines = ["| ion | live bands | R2M − R2 (g r i z J H K) | max shift | events/packet R2M vs R2 | E_esc / E_core / W (R2M) | survives |", "|---|---|---|---|---|---|---|"]
+    for ion, r in out["per_ion"].items():
+        sh = " ".join(f"{r['shift_R2M_minus_R2'][b]:+.2f}" for b in "grizJHK" if b in r["shift_R2M_minus_R2"])
+        lg = r["ledger"]["R2M"]
+        lines.append(f"| {NAME[ion]} | {' '.join(r['live_bands'])} | {sh} | {r['shift_max']:.2f} | {r['events_per_packet']['R2M']:.1f} vs {r['events_per_packet']['R2']:.1f} | "
+                     f"{lg['E_esc']:.3f} / {lg['E_core']:.3f} / {lg['W']:.3f} | **{r['survives']}** |")
+    lines += ["", "| ion | operator (scored against R2M) | max abs dm | mean abs dm | max abs dcolour | SED L1 | m_event vs K128M | exit lines | kB |", "|---|---|---|---|---|---|---|---|---|"]
+    for ion, r in out["per_ion"].items():
+        for tag, lab in (("A2M_ng8", "R_8 from R2M's events"), ("A2_ng8", "R_8 from R2's events (downward-trained)"), ("R2", "R2 itself (the downward macroatom)")):
+            m = r["legs"][tag]
+            ev = f"{m['event_vs_K128M']:.3f}" if "event_vs_K128M" in m else "—"
+            ne = m.get("n_exit_samples") or "—"; kb = f"{m['table_kb']:.0f}" if m.get("table_kb") else "—"
+            lines.append(f"| {NAME[ion]} | {lab} | {m['band']['max']:.3f} | {m['band']['mean']:.3f} | {m['colour']['max']:.3f} | {m['sed']:.3f} | {ev} | {ne} | {kb} |")
+        lines.append(f"| {NAME[ion]} | K128Mbuild vs K128M (sampling floor) | | | | | {r['fine_in_vs_out_of_sample']:.3f} | {r['n_exit_K128M']} | {r['table_kb_K128M']:.0f} |")
+    return "\n".join(lines)
+
+
+if __name__ == "__main__" and "--markdown" in sys.argv:
+    print(markdown())
