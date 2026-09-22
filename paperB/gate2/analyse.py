@@ -26,6 +26,7 @@ A = _ilu.module_from_spec(_spec); _spec.loader.exec_module(A)   # G1's metrics, 
 PREREG = dict(state="paper4/phase1_benchmarks/P1_t2.json", shell=28, seeds=[1, 2, 3], build_seeds=[101, 102, 103],
               n={"57LaII": 300_000, "58CeII": 300_000, "60NdII": 1_000_000},
               k_grid=[1, 2, 4, 8, 16, 32], f_grid=[0.1, 0.2, 0.5, 0.9, 0.99, 0.999], ng_control=8, ng_fine=128,
+              ng_local=[2, 4, 8, 16, 32],
               dm_max=0.10, dcolour_max=0.10, h1_red_ratio=4.0,
               h2_green=0.10, h2_yellow=0.25, h2_red=0.50,
               nmf_conv_max=1e-4, control_sigma=2.0, ref_match=1e-6, decisive=["58CeII", "60NdII"])
@@ -35,7 +36,7 @@ GATE1 = ROOT / "paperB/gate1"
 
 def check_prereg(row, strict=True):
     bad = []
-    for k in ("state", "shell", "seeds", "build_seeds", "k_grid", "f_grid", "ng_control", "ng_fine"):
+    for k in ("state", "shell", "seeds", "build_seeds", "k_grid", "f_grid", "ng_control", "ng_fine", "ng_local"):
         if row.get(k) != PREREG[k]:
             bad.append(f"{k}: {row.get(k)!r} != {PREREG[k]!r}")
     if row.get("n") != PREREG["n"][row.get("ion")]:
@@ -63,21 +64,32 @@ def read_ion(row, g1):
     ref_dev = max((abs(row["legs"]["R2"]["mags"][b] - g1["legs"]["R2"]["mags"][b]) for b in live), default=0.0) if g1 else float("nan")
     if not g1 or not np.isfinite(ref_dev) or ref_dev > P["ref_match"]:
         gray.append(f"6: R2 differs from G1's record by {ref_dev:.2e} mag (or no G1 record)")
-    # the local control: L128 must equal A2 within the noise on a difference of two legs
+    # The L128 control against G1's coarse kernel. Under the preregistration
+    # this gated the use of G1's A2 legs as the local family; it fired on both
+    # decisive ions (2026-09-22), so the declared remedy applies and the local
+    # family is the L128 family transported here. The comparison stays in the
+    # record as a diagnostic, with the per-band differences that drove it.
     ctrl = f"L128_ng{row['ng_control']}"; a2 = f"A2_ng{row['ng_control']}"
-    dev = max((abs(row["legs"][ctrl]["mags"][b] - row["legs"][a2]["mags"][b]) / (np.sqrt(2.0) * max(noise[b], 1e-9)) for b in live), default=0.0)
-    if dev > P["control_sigma"]:
-        gray.append(f"7: the L128 control differs from A2 by {dev:.1f} sigma of the difference")
+    per_band = {b: float(row["legs"][ctrl]["mags"][b] - row["legs"][a2]["mags"][b]) for b in live}
+    dev = max((abs(d) / (np.sqrt(2.0) * max(noise[b], 1e-9)) for b, d in per_band.items()), default=0.0)
+    control = dict(sigma=float(dev), max_abs_mag=float(max((abs(d) for d in per_band.values()), default=0.0)),
+                   per_band=per_band, fired=bool(dev > P["control_sigma"]),
+                   local_family="L128 (the preregistered remedy: the control fired)" if dev > P["control_sigma"] else "L128")
     # the families
+    # The local family is the L128 family transported in THIS run: the
+    # preregistered remedy when the L128 control fails (it did, on both
+    # decisive ions, 2026-09-22), and in any case it puts both families on
+    # identical 128-group exit tables and identical row occupancy. G1's own
+    # A2_ng{N} legs are read alongside as `local_coarse`, reported only.
     G1M = A.metrics(g1) if g1 else None
-    local = {}
+    local_coarse = {}
     if G1M:
         for tag, m in G1M["legs"].items():
             if tag.startswith("A2_ng") and "band" in m:
-                local[int(m["ng"])] = dict(archetypes=int(m["ng"]), n_params=int(m["ng"]) ** 2, band_max=m["band"]["max"], band_mean=m["band"]["mean"],
-                                           colour_max=m["colour"]["max"], sed=m["sed"], event=m["event"], n_exit=m["n_exit_samples"], table_kb=m["table_kb"],
-                                           passes=passes(m))
-    glob, trunc, nmf_gray = {}, {}, []
+                local_coarse[int(m["ng"])] = dict(archetypes=int(m["ng"]), n_params=int(m["ng"]) ** 2, band_max=m["band"]["max"],
+                                                  band_mean=m["band"]["mean"], colour_max=m["colour"]["max"], sed=m["sed"], event=m["event"],
+                                                  n_exit=m["n_exit_samples"], table_kb=m["table_kb"], passes=passes(m))
+    local, glob, trunc, nmf_gray = {}, {}, {}, []
     for tag, m in M["legs"].items():
         tr = row["kernels"].get(tag, {}).get("transform")
         if not tr or "band" not in m:
@@ -85,7 +97,9 @@ def read_ion(row, g1):
         entry = dict(archetypes=tr["archetypes"], n_params=tr["n_params"], band_max=m["band"]["max"], band_mean=m["band"]["mean"],
                      colour_max=m["colour"]["max"], sed=m["sed"], event=m["event"], n_exit=m["n_exit_samples"], table_kb=m["table_kb"],
                      in_sample_tv=tr.get("in_sample_tv"), passes=passes(m), fallback_frac=m["fallback_frac"])
-        if tr["kind"] == "nmf":
+        if tr["kind"] == "local":
+            local[int(tr["n_coarse"])] = entry
+        elif tr["kind"] == "nmf":
             entry.update(rel_frobenius=tr["rel_frobenius"], rel_change_tail=tr["rel_change_tail"])
             if tr["rel_change_tail"] > P["nmf_conv_max"]:
                 nmf_gray.append(tr["k"]); entry["gray"] = "nmf not converged"
@@ -125,8 +139,8 @@ def read_ion(row, g1):
         h2 = "GREEN"
     else:
         h2 = "YELLOW"
-    return dict(gray=gray, live_bands=live, seed_std_R2=noise, ref_dev_from_G1=ref_dev, control_sigma=float(dev),
-                local=local, global_nmf=glob, truncation=trunc, k_local=k_local, k_global=k_global, ng_star=k_local,
+    return dict(gray=gray, live_bands=live, seed_std_R2=noise, ref_dev_from_G1=ref_dev, control_sigma=float(dev), control=control,
+                local=local, local_coarse=local_coarse, global_nmf=glob, truncation=trunc, k_local=k_local, k_global=k_global, ng_star=k_local,
                 k_star=k_global, diagnostic=diag, H1=h1 if not gray else "GRAY",
                 f_star=f_star, L_star=L_star, rho_exit=L_star, event_at_k_local=local[k_local]["event"] if k_local in local else None,
                 H2=h2 if not gray else "GRAY", fine_in_vs_out_of_sample=M["fine_in_vs_out_of_sample"])
@@ -175,5 +189,41 @@ def main():
     return out
 
 
-if __name__ == "__main__":
+if __name__ == "__main__" and "--markdown" not in sys.argv:
     main()
+
+
+def markdown(out=None):
+    """The report's tables, machine-generated from gate2_verdict.json."""
+    out = out or json.loads((HERE / "gate2_verdict.json").read_text())
+    NAME = {"57LaII": "La II", "58CeII": "Ce II", "60NdII": "Nd II"}
+    L = []
+    for ion, r in out["per_ion"].items():
+        tag = NAME[ion] + (" (control)" if ion not in out["decisive"] else "")
+        L += [f"{tag}, live bands {' '.join(r['live_bands'])}; the local control differs from the coarse kernel by "
+              f"{r['control_sigma']:.1f} σ; K*_local = {r['k_local']}, K*_global = {r['k_global']}, L* = "
+              + (f"{r['L_star']:.3f}" if r["L_star"] is not None else "undefined") + f"; **H1 {r['H1']}, H2 {r['H2']}**"
+              + (f"; gray: {'; '.join(r['gray'])}" if r["gray"] else "") + ":", "",
+              "| family | archetypes | matrix parameters | max abs dm | mean abs dm | max abs dcolour | SED L1 | m_event | exit lines kept | fallback |",
+              "|---|---|---|---|---|---|---|---|---|---|"]
+        for n, m in sorted(r["local"].items()):
+            L.append(f"| local, N_g = {n} | {n} | {n * n} | {m['band_max']:.3f} | {m['band_mean']:.3f} | {m['colour_max']:.3f} | "
+                     f"{m['sed']:.3f} | {m['event']:.3f} | all | — |")
+        for k, m in sorted(r["global_nmf"].items()):
+            L.append(f"| global, rank {k} | {k} | {m['n_params']:,} | {m['band_max']:.3f} | {m['band_mean']:.3f} | {m['colour_max']:.3f} | "
+                     f"{m['sed']:.3f} | {m['event']:.3f} | all | {m['fallback_frac']:.4f} |")
+        for f, m in sorted(r["truncation"].items()):
+            L.append(f"| truncation, f = {f:g} | 128 | 16,384 | {m['band_max']:.3f} | {m['band_mean']:.3f} | {m['colour_max']:.3f} | "
+                     f"{m['sed']:.3f} | {m['event']:.3f} | {m['n_exit']:,} ({m['rho_exit']:.3f}) | {m['fallback_frac']:.4f} |")
+        d = r["diagnostic"]
+        if d:
+            L += ["", f"Diagnostic at the matched count k = {d['k']}: the global operator's event-level loss is "
+                      f"{d['event_global']:.3f} against the local operator's {d['event_local']:.3f}, and its band error "
+                      f"{d['band_global']:.3f} against {d['band_local']:.3f} — `events_vs_observables` "
+                      f"**{str(d['events_vs_observables']).lower()}**."]
+        L.append("")
+    return "\n".join(L)
+
+
+if __name__ == "__main__" and "--markdown" in sys.argv:
+    print(markdown())

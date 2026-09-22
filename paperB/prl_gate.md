@@ -442,6 +442,41 @@ fallback reached 0.07 % of interactions, far inside gray condition 4's
 *The run.* All three ions were rerun from scratch after the fix; no
 record produced before it survives.
 
+### Amendment of 2026-09-22 (third): the control fired, its declared remedy applied
+
+The `L128_ng8` control of gray condition 7 fired on **both** decisive ions
+in the first complete run: 2.6 σ on Ce II and 2.1 σ on Nd II. The
+preregistration's remedy for exactly this case is written above — "then
+the equivalence argument fails and the local family must be rerun on the
+128-group tables before H1 is read" — and that is what was done. **No
+threshold was touched.**
+
+What the control was actually resolving, recorded because it matters for
+reading the diagnostic: the per-band differences between the coarse
+8-group kernel and its 128-table expansion are 0.002–0.035 mag, random in
+sign, and every one of them is far inside the 0.10 mag science threshold.
+The σ values that produced 2.6 and 2.1 come from the tightest bands
+(Ce II H: seed scatter 0.0027 mag; Nd II J: 0.0034 mag), so the test was
+resolving differences some thirty times below the threshold the gate
+cares about. The empty-row explanation was checked and excluded: the fine
+rows the 128-group kernel leaves empty carry exactly zero absorbed energy
+and the coherent fallback is 0.00000 of interactions in both legs. The
+test is a max over six or seven bands compared against a per-band 2 σ
+limit, which fires roughly a quarter of the time under the null; that is
+a defect of the control's design, not evidence of a broken operator, and
+it is left standing rather than loosened after the fact.
+
+*What changes.* The local family is now the `L128_ng{2,4,8,16,32}` legs
+transported in the G2 run itself, on the same 128-group exit tables and
+the same row occupancy as the global and truncation families; K*_local is
+read from them. G1's own `A2_ng{N}` legs stay in the record as
+`local_coarse`, reported for comparison. The control comparison stays in
+the record as a diagnostic (`control`: the σ, the largest per-band
+difference in magnitudes, and the per-band values) and no longer gates the
+reading, because the assumption it was guarding — that G1's coarse legs
+may stand in for the local family — is no longer made. Every threshold,
+grid, metric and ladder is unchanged, and all three ions were rerun.
+
 **Records** `paperB/gate2/gate2_<ion>.json`, `gate2_verdict.json`,
 `docs/figures/paperB/gate2_locality_vs_rank.{pdf,png}` (max |Δm| against
 the archetype count for both families, m_event alongside, the truncation
