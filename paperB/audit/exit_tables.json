@@ -1,0 +1,383 @@
+{
+ "57LaII": {
+  "ion": "57LaII",
+  "n": 300000,
+  "build_seeds": [
+   101,
+   102,
+   103
+  ],
+  "n_events": 671241,
+  "n_packets_total": 900000,
+  "n_lines": 17743,
+  "n_opacity": 2004,
+  "n_distinct_exit_lines": 524,
+  "exact_line_fraction": 1.0,
+  "distinct_over_lines": 0.029532773488136165,
+  "exit_energy_in_opacity_lines": 0.9997219511015597,
+  "discovery": [
+   {
+    "events": 10000,
+    "distinct": 306
+   },
+   {
+    "events": 13820,
+    "distinct": 319
+   },
+   {
+    "events": 19101,
+    "distinct": 335
+   },
+   {
+    "events": 26398,
+    "distinct": 345
+   },
+   {
+    "events": 36485,
+    "distinct": 360
+   },
+   {
+    "events": 50424,
+    "distinct": 372
+   },
+   {
+    "events": 69690,
+    "distinct": 393
+   },
+   {
+    "events": 96317,
+    "distinct": 406
+   },
+   {
+    "events": 133116,
+    "distinct": 423
+   },
+   {
+    "events": 183976,
+    "distinct": 439
+   },
+   {
+    "events": 254267,
+    "distinct": 463
+   },
+   {
+    "events": 351414,
+    "distinct": 477
+   },
+   {
+    "events": 485679,
+    "distinct": 494
+   },
+   {
+    "events": 671241,
+    "distinct": 524
+   }
+  ],
+  "concentration": {
+   "0.1": 5,
+   "0.2": 11,
+   "0.5": 35,
+   "0.9": 138,
+   "0.99": 249,
+   "0.999": 343
+  },
+  "kept_per_group": {
+   "0.1": {
+    "kept": 80,
+    "max_in_group": 1
+   },
+   "0.2": {
+    "kept": 92,
+    "max_in_group": 2
+   },
+   "0.5": {
+    "kept": 146,
+    "max_in_group": 5
+   },
+   "0.9": {
+    "kept": 264,
+    "max_in_group": 10
+   },
+   "0.99": {
+    "kept": 347,
+    "max_in_group": 15
+   },
+   "0.999": {
+    "kept": 427,
+    "max_in_group": 18
+   }
+  },
+  "populated_output_groups": 80,
+  "K128": {
+   "bytes_total": 298158,
+   "bytes_matrix": 283552,
+   "bytes_tables": 14606,
+   "n_exit": 524,
+   "bytes_per_exit": 27.874045801526716,
+   "g1_record_bytes": 298158,
+   "g1_record_n_exit": 524
+  },
+  "K_ng_star": {
+   "ng": 2,
+   "bytes_total": 15918,
+   "bytes_matrix": 2320,
+   "bytes_tables": 13598,
+   "n_exit": 524
+  },
+  "t_wall": 1.947474718093872
+ },
+ "58CeII": {
+  "ion": "58CeII",
+  "n": 300000,
+  "build_seeds": [
+   101,
+   102,
+   103
+  ],
+  "n_events": 4884220,
+  "n_packets_total": 900000,
+  "n_lines": 408639,
+  "n_opacity": 59918,
+  "n_distinct_exit_lines": 12510,
+  "exact_line_fraction": 1.0,
+  "distinct_over_lines": 0.03061381806435509,
+  "exit_energy_in_opacity_lines": 0.9927253028209361,
+  "discovery": [
+   {
+    "events": 10000,
+    "distinct": 2723
+   },
+   {
+    "events": 16100,
+    "distinct": 3399
+   },
+   {
+    "events": 25921,
+    "distinct": 4166
+   },
+   {
+    "events": 41734,
+    "distinct": 4936
+   },
+   {
+    "events": 67192,
+    "distinct": 5789
+   },
+   {
+    "events": 108181,
+    "distinct": 6616
+   },
+   {
+    "events": 174173,
+    "distinct": 7446
+   },
+   {
+    "events": 280422,
+    "distinct": 8288
+   },
+   {
+    "events": 451484,
+    "distinct": 9062
+   },
+   {
+    "events": 726898,
+    "distinct": 9872
+   },
+   {
+    "events": 1170318,
+    "distinct": 10584
+   },
+   {
+    "events": 1884232,
+    "distinct": 11280
+   },
+   {
+    "events": 3033645,
+    "distinct": 11913
+   },
+   {
+    "events": 4884220,
+    "distinct": 12510
+   }
+  ],
+  "concentration": {
+   "0.1": 10,
+   "0.2": 58,
+   "0.5": 349,
+   "0.9": 2356,
+   "0.99": 6495,
+   "0.999": 9981
+  },
+  "kept_per_group": {
+   "0.1": {
+    "kept": 285,
+    "max_in_group": 25
+   },
+   "0.2": {
+    "kept": 535,
+    "max_in_group": 53
+   },
+   "0.5": {
+    "kept": 1482,
+    "max_in_group": 150
+   },
+   "0.9": {
+    "kept": 4474,
+    "max_in_group": 380
+   },
+   "0.99": {
+    "kept": 8314,
+    "max_in_group": 644
+   },
+   "0.999": {
+    "kept": 10873,
+    "max_in_group": 802
+   }
+  },
+  "populated_output_groups": 90,
+  "K128": {
+   "bytes_total": 585826,
+   "bytes_matrix": 283556,
+   "bytes_tables": 302270,
+   "n_exit": 12510,
+   "bytes_per_exit": 24.162270183852918,
+   "g1_record_bytes": 585826,
+   "g1_record_n_exit": 12510
+  },
+  "K_ng_star": {
+   "ng": 16,
+   "bytes_total": 309858,
+   "bytes_matrix": 8484,
+   "bytes_tables": 301374,
+   "n_exit": 12510
+  },
+  "t_wall": 20.133429288864136
+ },
+ "60NdII": {
+  "ion": "60NdII",
+  "n": 1000000,
+  "build_seeds": [
+   101,
+   102,
+   103
+  ],
+  "n_events": 24638694,
+  "n_packets_total": 3000000,
+  "n_lines": 3336077,
+  "n_opacity": 88611,
+  "n_distinct_exit_lines": 86187,
+  "exact_line_fraction": 1.0,
+  "distinct_over_lines": 0.025834835347025863,
+  "exit_energy_in_opacity_lines": 0.9762229668770342,
+  "discovery": [
+   {
+    "events": 10000,
+    "distinct": 3439
+   },
+   {
+    "events": 18234,
+    "distinct": 4708
+   },
+   {
+    "events": 33249,
+    "distinct": 6389
+   },
+   {
+    "events": 60629,
+    "distinct": 8630
+   },
+   {
+    "events": 110554,
+    "distinct": 11336
+   },
+   {
+    "events": 201589,
+    "distinct": 14785
+   },
+   {
+    "events": 367588,
+    "distinct": 19213
+   },
+   {
+    "events": 670279,
+    "distinct": 24617
+   },
+   {
+    "events": 1222219,
+    "distinct": 31271
+   },
+   {
+    "events": 2228655,
+    "distinct": 39158
+   },
+   {
+    "events": 4063840,
+    "distinct": 48695
+   },
+   {
+    "events": 7410207,
+    "distinct": 59602
+   },
+   {
+    "events": 13512136,
+    "distinct": 72081
+   },
+   {
+    "events": 24638694,
+    "distinct": 86187
+   }
+  ],
+  "concentration": {
+   "0.1": 28,
+   "0.2": 93,
+   "0.5": 476,
+   "0.9": 4061,
+   "0.99": 22922,
+   "0.999": 61529
+  },
+  "kept_per_group": {
+   "0.1": {
+    "kept": 366,
+    "max_in_group": 17
+   },
+   "0.2": {
+    "kept": 697,
+    "max_in_group": 37
+   },
+   "0.5": {
+    "kept": 2027,
+    "max_in_group": 118
+   },
+   "0.9": {
+    "kept": 9742,
+    "max_in_group": 607
+   },
+   "0.99": {
+    "kept": 33822,
+    "max_in_group": 2031
+   },
+   "0.999": {
+    "kept": 66045,
+    "max_in_group": 3216
+   }
+  },
+  "populated_output_groups": 114,
+  "K128": {
+   "bytes_total": 2354078,
+   "bytes_matrix": 283560,
+   "bytes_tables": 2070518,
+   "n_exit": 86187,
+   "bytes_per_exit": 24.02355343613306,
+   "g1_record_bytes": 2354078,
+   "g1_record_n_exit": 86187
+  },
+  "K_ng_star": {
+   "ng": 2,
+   "bytes_total": 2071838,
+   "bytes_matrix": 2328,
+   "bytes_tables": 2069510,
+   "n_exit": 86187
+  },
+  "t_wall": 196.89801144599915
+ }
+}

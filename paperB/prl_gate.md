@@ -202,3 +202,206 @@ from this file.
   the nuclear-model ensemble; the name σ_nuclear is reserved for the
   future experiment that runs an external nuclear-realisation ensemble
   through the same transport.
+
+---
+
+## R2M robustness (post-pass; fixed 2026-09-22 before the run; the G1 sections above are unchanged)
+
+The check the post-pass paragraph of "Legs per ion" announces, run now on
+the PI's instruction. **Not a gate**: it asks whether the compression G1
+found is tied to the downward macroatom, and reports.
+
+- State, atoms, transport, window, live-band rule, thresholds: G1's.
+- Packets: 3×10⁵ per seed for all three ions. Nd II's G1 remedy (10⁶) is
+  not repeated here because the 10⁶ downward run peaked at 17.4 GB of
+  resident memory on the 24 GB machine (every collected leg's events stay
+  in memory for the run) and the radiation-field-driven macroatom carries
+  about 3.5 times the events per packet (F63). Remedy if Gray condition 2
+  fires on R2M: rerun the whole R2M leg set at 10⁶ once the runner releases
+  a source leg's events after its kernels are built (a memory change to
+  `run_legs`, no change to any number), never a smaller live set.
+- Legs per ion (build seeds 101–103; evaluation seeds 1–3; every leg
+  energy packets):
+
+  | tag | mode | what |
+  |---|---|---|
+  | `R2build`, `R2` | `sobolev_dmacro` | G1's reference pair, rerun on the same seeds so that R2M − R2 is measured seed for seed |
+  | `A2_ng8` | `sobolev_group` | G1's downward-trained 8-group operator (kernel from `R2build`), scored here against R2M: the reference dependence of the operator |
+  | `R2Mbuild` | `sobolev_macro`, W = ½, T_rad = T_zone | the radiation-field-driven macroatom on the build seeds, `collect_events` |
+  | `R2M` | `sobolev_macro`, W = ½ | **the reference of this section**, evaluation seeds, `collect_events` |
+  | `A2M_ng8` | `sobolev_group` | the 8-group operator rebuilt from `R2Mbuild`'s events, transported on the evaluation seeds |
+  | `K128M`, `K128Mbuild` | kernel only | the 128-group energy matrices from `R2M` and `R2Mbuild` (the independent fine reference and the in-sample one) |
+
+- Readings per ion, Gray first (G1's conditions 1–4 applied with R2M as
+  the reference leg):
+  1. the reference shift: R2M − R2 per band live on R2M, and its maximum
+     (F63 gave 1.3–1.8 mag on the 13-ion blend);
+  2. **survives** iff `A2M_ng8` vs R2M has max |Δm| ≤ 0.10 mag over R2M's
+     live bands and max |Δcolour| ≤ 0.10 mag (G1's thresholds, unchanged);
+  3. the reference dependence: `A2_ng8` (downward-trained) vs R2M, the same
+     two numbers, reported;
+  4. m_event of the R2M-trained 8-group kernel against `K128M`, of the
+     downward-trained one against `K128M`, and the `K128Mbuild` vs `K128M`
+     floor.
+- The statement made from it: "the compression survives (or does not
+  survive) the radiation-field-driven macroatom at N_g = 8 for ion X",
+  with the reference shift alongside. No claim about full macroatomic
+  physics.
+- Records `paperB/r2m/r2m_<ion>.json`, `paperB/r2m/r2m_verdict.json`;
+  `analyse_r2m.py` refuses a record whose state, seeds, packet count, N_g
+  or W differ from this section.
+
+---
+
+## G2 — locality vs rank, and the observable-relevant dimension (preregistered 2026-09-22; not run until the PI approves this section)
+
+**The two hypotheses** (the PI's, `plan_review.md` 2026-09-22):
+
+- **H1.** The success of R_ij is caused by local smoothness in frequency,
+  not by a globally low-rank microscopic redistribution law.
+- **H2.** Transport observables occupy a much smaller effective information
+  space than the underlying fluorescence-event distribution.
+
+**Design principle.** Every G2 operator is a 128-group energy matrix on G1's
+edges (`op_nu.min×0.995 … max×1.005`, log-spaced) carrying **the same
+128-group discrete exit tables**, built from `R2build`'s events on the
+build seeds; every operator is transported through `sobolev_group`
+(`rows="energy"`) on the evaluation seeds and scored against G1's `R2` with
+G1's live-band rule, metrics and thresholds. The families differ only in
+what they do to the group-to-group matrix (or, for H2, to the tables), so
+the comparison isolates that. The matched axis of H1 is the **number of
+archetypal exit distributions**: a local operator at N_g says "the exit
+distribution is one of N_g, chosen by which contiguous frequency block the
+absorbed frequency falls in"; a global rank-k operator says "it is a free
+non-negative mixture of k, with the weights free per fine input group". At
+equal count the global family is the more expressive; the parameter counts
+(N_g² against 2·128·k) are recorded alongside, never used as the axis.
+
+**State, packets, seeds.** G1's; La II and Ce II at 3×10⁵, Nd II at 10⁶
+(each ion's final G1 record); evaluation seeds 1–3, build seeds 101–103.
+`R2build` and `R2` are rerun in the G2 run (deterministic: `R2`'s
+magnitudes must equal G1's record's to 10⁻⁶ mag, else Gray) so the fine
+matrices and the reference are the same objects as G1's. The runner
+releases a source leg's events after its kernels are built (the memory
+change of 2026-09-22).
+
+**Legs per ion** (`paperB/gate2/run_gate2.py`, families in `operators.py`):
+
+| tag | operator | archetypes | matrix parameters |
+|---|---|---|---|
+| `A2_ng8` | G1's 8-group kernel (coarse tables), rerun | 8 | 64 |
+| `L128_ng8` | **local control**: the 8-group energy matrix expanded onto the 128 groups, each coarse column's mass spread by the fine exit-energy marginal within it, on the 128-group tables. Sampling-equivalent to `A2_ng8` by construction (both draw the exit line with probability ∝ its exit energy within the coarse output group); transported to verify that the local family of G1 (`A2_ng2 … A2_ng32`, read from the G1 records) is the local family on shared tables | 8 | 64 |
+| `G_k1 … G_k32` | **global family**: rank-k non-negative factorisation W H of the populated rows of the 128-group energy matrix (Lee–Seung multiplicative updates, 600 iterations, initialisation seed 0), rows rescaled to their original sums (energy exact), empty rows kept empty; k ∈ {1, 2, 4, 8, 16, 32}. k = 1 is the fully non-local null: one exit distribution for every input | k | 2·128·k |
+| `T_f0.1 … T_f0.999` | **truncation family**: the full 128×128 matrix with each output group's exit table cut, by the selection rule fixed under H2 below (ranked by accumulated training-event energy within the group, retained until their share first reaches f, at least one per populated group, both weight tables renormalised); f ∈ {0.1, 0.2, 0.5, 0.9, 0.99, 0.999}. The grid was set after the exit-table audit (§4.63) so that H2's Green is reachable: per-group truncation retains, of the distinct exit lines, Ce II 2.3 / 4.3 / 12 / 36 / 67 / 87 % and Nd II 0.4 / 0.8 / 2.4 / 11 / 39 / 77 % at these f | 128 | 128² |
+| `K128`, `K128build` | kernel only: the independent fine matrix (evaluation seeds) and the in-sample one | | |
+
+The local family's curve is G1's `A2_ng{N}` legs, N ∈ {2, 4, 8, 16, 32},
+against G1's `R2` — the same reference, seed for seed.
+
+**Metrics** per operator: G1's m_band (max and mean |Δm| over the live
+bands), m_colour, m_sed, m_event against `K128`; plus the archetype count,
+the matrix parameter count, the in-sample TV distance of the derived
+matrix from the fine one it was derived from, the number of stored exit
+lines, the serialized size; for the NMF the relative Frobenius
+reconstruction error and its relative change over the last 100 iterations.
+
+**Readings** (Gray first). Ce II and Nd II decide; La II is reported and
+never counted (0.7 interactions per packet at its P1 density: every
+operator is close).
+
+Gray, per ion: G1's conditions 1–4 on every leg; (6) `R2` differs from
+G1's record by more than 10⁻⁶ mag in a live band; (7) the control
+`L128_ng8` differs from `A2_ng8` by more than 2 σ of the difference of two
+legs (σ_diff = √2 × R2's seed scatter) in any live band — then the
+equivalence argument fails and the local family must be rerun on the
+128-group tables before H1 is read; (8) an NMF rank whose relative
+reconstruction change over the last 100 iterations exceeds 10⁻⁴ is
+excluded from the k* search and reported; (9) no N_g* in G1's record.
+
+**H1 — locality, not global low rank.** Per ion, two numbers on the same
+transport criterion (G1's: max |Δm| ≤ 0.10 mag over the live bands and
+max |Δcolour| ≤ 0.10 mag against `R2`):
+
+    K*_local  = min { N_g in {2,4,8,16,32} : the local operator passes }   (G1's N_g*)
+    K*_global = min { k  in {1,2,4,8,16,32} : the rank-k operator passes }
+
+both undefined if no member of the family passes. The comparison is of
+**archetype counts, not parameter counts**: at equal count the global
+family holds many more free numbers (2·128·k against N_g²), so needing no
+fewer archetypes than the local family is evidence for locality.
+
+- Green: K*_global ≥ K*_local for **both** Ce II and Nd II (undefined
+  counts as ≥: a global family that never passes is the strongest form of
+  this).
+- Red: the global family passes with K*_global ≤ K*_local/4 on **either**
+  Ce II or Nd II.
+- Yellow: everything between.
+- Overall: Red if either decisive ion is Red; Green if both are Green;
+  Yellow otherwise; Gray if either is Gray.
+
+At G1's numbers only Ce II (K*_local = 16) can fire Red, at K*_global ≤ 4;
+Nd II's K*_local = 2 puts Red out of its reach, and its informative
+outcomes are Green (K*_global ≥ 2) and Yellow (K*_global = 1, the fully
+non-local null passing where two local blocks are needed).
+
+**The event-level fit is a mechanistic diagnostic, not part of the pass/
+fail logic** (the PI's amendment of 2026-09-22). Reported per operator
+alongside the readings: m_event against the independent 128-group matrix
+and the in-sample TV distance from the matrix it was derived from. The
+outcome of interest — *the global model fits the microscopic events
+better while the local model reproduces the transport better* — is
+recorded as a named diagnostic (`events_vs_observables`, true when at the
+matched count k = K*_local the global operator's m_event is the smaller
+and its max |Δm| the larger). It supports the reading that
+microscopic-distribution fidelity is not observable-relevant fidelity; it
+is a stronger and more specific claim than the locality hypothesis and is
+therefore never required for Green.
+
+**H2 — the observable-relevant dimension of the exit spectrum.** Per ion,
+
+    L* = min { retained fraction of the distinct exit lines : the truncated
+               operator passes the same transport criterion }
+
+where the retained fraction is (exit lines kept) / (exit lines in
+`K128build`), evaluated on the f grid; undefined if no f < 1 passes.
+
+- Green: L* ≤ 0.10 for **both** Ce II and Nd II.
+- Yellow: Green fails but at least one of them has L* ≤ 0.25.
+- Red: either Ce II or Nd II requires L* > 0.50 (undefined counts as > 0.50).
+- Residual band (both ions between 0.25 and 0.50, neither above it):
+  Yellow, reported with the values. The ladder is read Red first, then
+  Green, then Yellow.
+- La II is reported as a control and **does not decide H2**: G1 showed it
+  too thin at its P1 partial density to discriminate closures.
+
+**The selection rule is fixed here and is a function of the
+kernel-building sample alone.** Within each output group of the
+`R2build` 128-group kernel, the distinct exit lines are ranked by their
+accumulated training-event energy weight in that group's exit table; the
+highest-ranked are retained until their share of the group's exit energy
+first reaches f (at least one line per populated group); both the photon
+and the energy weight tables are renormalised over the retained lines.
+Nothing about transport enters the choice, and no subset is reselected
+after seeing which preserves the light: the only freedom is f, and its
+grid is frozen above.
+
+**Decision.** The PRL's mechanism claim ("locality, not rank") is written
+iff H1 is Green; H1 Red reframes the claim (the PI decides what, with the
+numbers); Yellow is the PI's call. H2 sets the wording of "compact": with
+H1 and H2 both Green, both layers of the effective operator are compact —
+the group-to-group matrix and the within-group exit spectrum — and the
+"the matrix is small but the table is not" objection is answered.
+
+**Amended 2026-09-22** on the PI's review of PR #10, before any G2 transport existed: the event-level fit left H1's pass/fail logic and became a diagnostic; H1's comparison stated as archetype counts K*_local and K*_global; H2 read on the retained fraction L* with a three-level ladder and Ce II / Nd II decisive; the selection rule written out as a function of the build sample alone. The f grid had been extended to 0.1 and 0.2 earlier the same day, after the audit.
+
+**What may not change after the run:** the k and f grids, the control
+rule, the thresholds (G1's), the archetype-count axis, the NMF settings
+(600 iterations, seed 0, rescaled rows). What may: the packet count upward
+on a Gray (the whole ion rerun), and bug fixes with the run repeated.
+
+**Records** `paperB/gate2/gate2_<ion>.json`, `gate2_verdict.json`,
+`docs/figures/paperB/gate2_locality_vs_rank.{pdf,png}` (max |Δm| against
+the archetype count for both families, m_event alongside, the truncation
+curve against the fraction of exit lines kept, and every operator on the
+(m_event, max |Δm|) plane). `analyse.py` refuses a record whose state,
+seeds, packet count, grids or control differ from this section.

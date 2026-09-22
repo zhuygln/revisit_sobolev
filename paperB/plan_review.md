@@ -85,3 +85,149 @@ the 3×10⁵ record kept, and the gate read on the three ions: B1 Green, B2
 Green, B3 Yellow → CONTINUE. Nothing in `prl_gate.md` was edited; the
 analysis was changed only to accept a raised (never a lowered) packet
 count and to read the highest-count record per ion.
+
+## G1 reading and the path to G2 (2026-09-22)
+
+PI, verbatim (the message was pasted from a rendered page, so each display
+formula appears twice — once as rendered text, once as its LaTeX source;
+nothing has been edited):
+
+> This is a real G1 pass, not a marginal one. The preregistered decision is satisfied: B1 is Green, B2 is Green on Ce and Nd, and B3 is Yellow rather than Red, so the project should proceed to G2 exactly as planned. The physically important result is that the energy-conserving redo preserves the compression phenomenon: La II and Nd II meet the 0.1-mag criterion already at Ng=2N_g=2, while Ce II reaches it at Ng=16N_g=16. At the same time, the best scalar is essentially useless for Ce and Nd—ϵ⋆=0\epsilon^\star=0 still misses by about 1–1.4 mag.
+> The strongest new scientific statement from F67 is therefore narrower and better than the old Paper III claim:
+> Under physical P1 conditions and energy-conserving fluorescence,a low-dimensional frequency-group closure reproduces observablesthat no scalar ϵ can reproduce.\boxed{ \text{Under physical P1 conditions and energy-conserving fluorescence,} \quad \text{a low-dimensional frequency-group closure reproduces observables} \quad \text{that no scalar }\epsilon\text{ can reproduce.} }
+> That is enough to justify G2.
+> There are, however, two things in F67 that materially change how I would frame the next stage.
+> First, the observable compression is much stronger than the event-level compression. Even at 32 groups, the event-level total-variation loss remains around 0.16−0.420.16{-}0.42, while the photometric errors are already at the few-hundredths-of-a-magnitude level. The report itself notes that most of the information discarded by the binning never reaches the light.
+> That is potentially a deeper result than "the matrix is small." It suggests that the transport problem has an observable-relevant effective dimension much smaller than the microscopic event distribution. I would explicitly carry that into G2. The question becomes not just
+> local coarse graining vs low rank\text{local coarse graining vs low rank}
+> but
+> Which microscopic degrees of freedom actually survive transport into observables?\boxed{ \text{Which microscopic degrees of freedom actually survive transport into observables?} }
+> That is a very PRL-like question.
+> Second, the current implementation exposes a serious issue with the word compact. The matrix itself is tiny, but the discrete exit tables dominate storage: Ce has about 12,50012{,}500 stored exit samples and Nd about 86,00086{,}000, with Nd's serialized kernel around 2 MB. The report correctly says that the whole representation is not yet compact; only the group-to-group transition matrix is.
+> I would not treat that as a failure of the science yet, because it may be an implementation representation issue rather than a fundamental information requirement. If the exit tables literally store repeated Monte Carlo event frequencies, then one obvious next check is whether identical exit frequencies can be aggregated exactly into unique line frequencies plus accumulated weights. That would preserve the empirical discrete distribution while replacing an O(Nevents)O(N_{\rm events}) table with something closer to O(Nunique exit lines)O(N_{\rm unique\,exit\,lines}). If that is true in the implementation, it should be done before we make any final statement about the memory complexity of the operator. This is an inference from the reported table sizes, not something the report itself establishes.
+> I would therefore proceed in this order:
+>
+> 1. Do the preregistered R2M robustness check now. Before investing in G2, rerun the three ions with the radiation-field-driven macroatom/upward transitions and rebuild the Ng=8N_g=8 operator from those events, as already specified. G1 does not depend on this, but it tells us whether the compression result is tied specifically to the downward macroatom.
+> 2. Audit the exit-table representation. Determine how many stored samples are duplicates of the same physical exit line and whether exact aggregation by νout\nu_{\rm out} and accumulated energy weight is possible. Do not change the physics or the G1 result; this is a representation audit.
+> 3. Then freeze G2. Use the energy-conserving 128-group operator and compare local frequency coarsening with a non-negative constrained global factorization at matched complexity. Score both on transport observables, not only row distance. Given G1, the important comparison is whether a representation with worse event-level fidelity can nevertheless preserve the observable-relevant structure.
+> 4. Keep La in G2, but don't let it drive the interpretation. At its physical P1 abundance it has only about 0.7 interactions per packet, so every model is close. Ce and Nd are the discriminating ions. The report explicitly recognizes La as too thin to distinguish the closures strongly.
+>
+> The central G2 hypothesis I would now preregister as:
+> The success of Rij is caused by local smoothness in frequency,̸ by a globally low-rank microscopic redistribution law.\boxed{ \text{The success of }R_{ij}\text{ is caused by local smoothness in frequency,} \not \text{ by a globally low-rank microscopic redistribution law.} }
+> But I would add an even more interesting secondary hypothesis suggested directly by G1:
+> Transport observables occupy a much smaller effective information space than the underlying fluorescence-event distribution.\boxed{ \text{Transport observables occupy a much smaller effective information space} \text{ than the underlying fluorescence-event distribution.} }
+> That second statement is supported by the striking mismatch between the still-large event TV distance and the already-converged magnitudes. If G2 shows that local coarsening preserves observables while equal-parameter global factorization does not, despite both losing large amounts of microscopic event information, then we have something conceptually stronger than a numerical surrogate.
+> So my reading is: G1 did exactly what we needed it to do. Continue. But the path to PRL is now less about proving that a matrix can approximate fluorescence—we have that—and more about explaining why so much microscopic information can be discarded without changing the observable radiation field.
+
+Decisions taken from it, in the PI's order:
+
+1. **R2M robustness now**, exactly as the post-pass paragraph of
+   `prl_gate.md` specifies (the radiation-field-driven macroatom, W = ½,
+   the 8-group operator rebuilt from its events); its run parameters are
+   fixed in a new section of `prl_gate.md` before the run. Not a gate.
+2. **Exit-table audit**, representation only. Checked before any code was
+   written: `RedistributionKernel.from_branching_mc` already aggregates the
+   exits by unique frequency (`np.unique(nu_out)`, weights summed), and
+   every stored exit is an exact line rest frequency; the stored count is
+   the number of *distinct exit lines the sample discovered*, which grows
+   with the sample (Nd II 59,270 at 3×10⁵ packets, 86,187 at 10⁶, of 3.34 M
+   lines). The audit therefore reports the discovery curve, the energy
+   concentration across exit lines and the size decomposition; any further
+   shrinking changes the sampled distribution and is an experiment (G2's
+   second hypothesis), not a representation fix.
+3. **G2 preregistered** with the two hypotheses (H1 locality vs global
+   low rank at matched archetype count on shared 128-group exit tables;
+   H2 the observable-relevant dimension, by exit-table truncation), scored
+   on transport observables against G1's reference; the PI approves the
+   criteria before the run.
+4. **La II stays in G2 and is reported, never counted** in H1/H2; Ce II
+   and Nd II decide.
+
+## The PI's review of PR #10: G2 amended, merge, tag, run (2026-09-22)
+
+PI, verbatim (pasted from a rendered page: each display formula appears
+once as rendered text and once as its LaTeX source; nothing edited):
+
+> I would merge PR #10 after one small preregistration amendment, then run G2. The F68 result is exactly the robustness check we needed: the compression follows the redistribution physics of the reference, not a peculiarity of the downward macroatom. The Ce II case is especially decisive: changing the reference by 2.09 mag but recovering the new reference to 0.026 mag with a freshly trained R_8, while the old kernel stays ~1.97 mag away, is a very clean demonstration.
+> For G2, I approve the basic design—shared 128-group exit tables, only the transition matrix varying, and comparing local frequency coarse-graining to a global archetype/NMF representation. I would keep the archetype-count comparison rather than reverting to nominal parameter count, because the global model actually gets many more free numbers for the same number of archetypes. If it still needs as many archetypes as the local representation, that is strong evidence for locality.
+> I would make one amendment to H1: do not require the global model to "fit the events better" as part of the Green condition. Make event fit a mechanistic diagnostic, not part of the pass/fail logic. The central comparison should be the minimum number of archetypes needed to meet the same transport threshold:
+>
+> K_{\rm local}^\star
+> =
+> \min\{N:\text{G1 transport criterion passes}\},
+>
+> K_{\rm global}^\star
+> =
+> \min\{k:\text{same transport criterion passes}\}.
+>
+> Then I would preregister:
+>
+> * Green: K_{\rm global}^\star \ge K_{\rm local}^\star for both Ce II and Nd II.
+> * Red: the global model passes on either Ce or Nd with
+>     K_{\rm global}^\star \le K_{\rm local}^\star/4.
+> * Yellow: everything between those cases.
+>
+> Alongside that, report event-level TV/L1. The particularly interesting outcome would be
+>
+> \boxed{
+> \text{global model fits microscopic events better}
+> \quad\text{but}\quad
+> \text{local model reproduces transport better}.
+> }
+>
+> That would directly support the emerging G1 story: microscopic-distribution fidelity is not the same as observable-relevant fidelity. I would not make that circumstance necessary for Green, though, because it is a stronger and more specific result than the actual locality hypothesis.
+> For H2, I like the new exit-table truncation experiment, and the extension to f=0.1,0.2 is legitimate because it followed the audit and preceded any G2 transport. I would keep the headline threshold of 10% of distinct exit lines, but define the reading across the two informative ions:
+>
+> L^\star_a =
+> \text{minimum retained fraction of unique exit lines satisfying G1 transport thresholds}.
+>
+> Then:
+>
+> * Green: L^\star\le 0.10 for both Ce II and Nd II.
+> * Yellow: at least one is \le0.25, but Green fails.
+> * Red: either requires >0.50 of its exit lines.
+>
+> La can be reported as a control but should not decide H2, because G1 already showed it is too thin to discriminate closures strongly.
+> There is one implementation detail I would freeze explicitly before running H2: line selection must be based only on the kernel-building sample, never on transport performance. For example, rank unique exit lines by their accumulated training-event energy contribution within the relevant exit table, retain according to the preregistered f, and renormalize. Do not choose different subsets after seeing which preserve the light best.
+> The scientific logic after these changes is very clean:
+>
+> \boxed{
+> \text{H1: Is the transition structure locally smooth rather than globally low-rank?}
+> }
+>
+> \boxed{
+> \text{H2: Is the discrete within-group exit spectrum itself highly compressible?}
+> }
+>
+> If both go Green, then the earlier concern about "the matrix is small but the exit table is not" largely disappears. You would then have evidence that both layers of the effective operator are compact.
+> F68 also changes my view of the potential paper slightly. The reference-physics shift is large—especially Ce's 2.09 mag—but a small freshly constructed operator follows it. That is stronger than merely saying "a small matrix reproduces one macroatom." It suggests
+>
+> \boxed{
+> R_{ij}\text{ is a compact representation of the chosen microscopic fluorescence physics,}
+> }
+>
+> not a fortuitous calibration to one particular cascade prescription.
+> I would therefore make the sequence:
+>
+> 1. Amend H1 as above and make the H2 selection rule explicit.
+> 2. Merge PR #10.
+> 3. Tag/freeze the G2 preregistration state.
+> 4. Run G2.
+> 5. Do not touch G3 until the G2 verdict is written.
+>
+> On your other open items, I would not let the education PRs #5–#8 block this research run; they are valuable but orthogonal. I also would keep the Paper IV MNRAS submission moving independently—the fact that Paper B is getting stronger is not a reason to hold a completed, frozen Paper IV. The report already treats Paper IV as complete on the corrected transport and tagged paper4-freeze. results_report.md
+>
+> So my decision is: approve G2 with the H1 amendment above; merge PR #10; run G2.
+
+Applied before any G2 transport existed (`prl_gate.md`, "Amended
+2026-09-22"): H1 reads on the archetype counts K*_local and K*_global
+alone, with the event-level fit demoted to a named diagnostic
+(`events_vs_observables`); H2 reads on the retained fraction L* with the
+three-level ladder and Ce II / Nd II decisive, La II a control; the H2
+selection rule written out as a function of the build sample alone. One
+residual band the PI's three cases leave open — both decisive ions
+between 0.25 and 0.50 — is preregistered as Yellow and reported with its
+values, the ladder read Red first, then Green, then Yellow.
+
+Sequence as instructed: amend, merge PR #10, tag the G2 preregistration
+state, run G2, leave G3 untouched until the G2 verdict is written.

@@ -259,6 +259,52 @@ class RedistributionKernel:
                    disc_vals=disc_vals, disc_cum=disc_cum,
                    disc_off=np.array(off_out, int))
 
+    # ---- derived operators (Paper B, G2) --------------------------------
+    def with_matrix(self, R_new, metadata=None):
+        """A copy with the ENERGY matrix replaced (the energy rows E_cum follow
+        from it); the photon rows, the exit tables and the row occupancy are
+        untouched. Rows never populated stay empty (transport scatters those
+        coherently) whatever R_new holds there."""
+        R_new = np.asarray(R_new, float)
+        if R_new.shape != self.R.shape:
+            raise ValueError(f"R_new must be {self.R.shape}, got {R_new.shape}")
+        R_new = np.where(self.empty_rows[:, None], 0.0, R_new)
+        return RedistributionKernel(self.edges, R_new, self.N_cum, self.q_dep, self.sub_cum, self.counts,
+                                    dict(self.metadata, **(metadata or {})), disc_vals=self.disc_vals,
+                                    disc_cum=self.disc_cum, disc_off=self.disc_off, disc_cum_E=self.disc_cum_E)
+
+    def truncate_exits(self, f, metadata=None):
+        """A copy whose discrete exit table keeps, per OUTPUT group, only the
+        highest-energy-weight exit lines carrying fraction f of that group's
+        exit energy (at least one line per populated group), both weight
+        tables renormalised over the kept lines; the matrix is untouched.
+        Returns (kernel, n_kept). f = 1 keeps every line."""
+        if self.disc_vals is None:
+            raise ValueError("no discrete exit tables to truncate")
+        vals, cum, off = [], [], [0]
+        cumE = []
+        for j in range(self.n_groups):
+            a, b = self.disc_off[j], self.disc_off[j + 1]
+            if b <= a:
+                off.append(off[-1]); continue
+            w_p = np.diff(np.hstack([0.0, self.disc_cum[a:b]]))
+            w_e = np.diff(np.hstack([0.0, (self.disc_cum_E if self.disc_cum_E is not None else self.disc_cum)[a:b]]))
+            order = np.argsort(-w_e, kind="stable")
+            c = np.cumsum(w_e[order]) / w_e.sum()
+            k = int(np.searchsorted(c, min(float(f), 1.0) - 1e-12, side="left") + 1) if f < 1 else w_e.size
+            keep = np.sort(order[:k])                   # frequency order within the group, as stored
+            vals.append(self.disc_vals[a:b][keep])
+            cum.append(np.cumsum(w_p[keep]) / w_p[keep].sum())
+            cumE.append(np.cumsum(w_e[keep]) / w_e[keep].sum())
+            off.append(off[-1] + k)
+        md = dict(self.metadata, **(metadata or {}))
+        k_new = RedistributionKernel(self.edges, self.R, self.N_cum, self.q_dep, self.sub_cum, self.counts, md,
+                                     disc_vals=np.concatenate(vals) if vals else np.zeros(0),
+                                     disc_cum=np.concatenate(cum) if cum else np.zeros(0),
+                                     disc_off=np.array(off, int),
+                                     disc_cum_E=np.concatenate(cumE) if cumE else np.zeros(0))
+        return k_new, int(off[-1])
+
     # ---- validation / io ----------------------------------------------
     def validate_energy(self):
         """max |sum_j R_ij + q_dep_i - 1| over populated rows (exact up to
