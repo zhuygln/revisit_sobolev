@@ -83,13 +83,33 @@ def test_nmf_rank_one_is_an_outer_product_and_error_falls_with_rank():
     live = ~k.empty_rows; V = k.R[live]
     W1, H1, c1 = OP.nmf(V, 1); W4, H4, c4 = OP.nmf(V, 4)
     assert np.linalg.matrix_rank(W1 @ H1) == 1 and c4["rel_frobenius"] < c1["rel_frobenius"]
+    assert c1["converged"] and c4["converged"] and c4["iters"] <= c4["max_iters"]
     g = OP.nmf_rank(4)(k, ev)
     tr = g.metadata["transform"]
     assert tr["kind"] == "nmf" and tr["archetypes"] == 4 and tr["n_params"] == 2 * k.n_groups * 4 and g.validate_energy() < 1e-12
     assert np.allclose(g.R[live].sum(axis=1), V.sum(axis=1)) and 0.0 <= tr["in_sample_tv"] <= 1.0
-    # more archetypes reproduce the events better, and the full rank reproduces them exactly
-    tv = [OP.nmf_rank(kk, iters=800)(k, ev).metadata["transform"]["in_sample_tv"] for kk in (1, 2, 8)]
+    assert tr["n_rows_zeroed"] == 0 and tr["zeroed_energy_share"] == 0.0
+    # more archetypes reproduce the events better
+    tv = [OP.nmf_rank(kk)(k, ev).metadata["transform"]["in_sample_tv"] for kk in (1, 2, 8)]
     assert tv[0] >= tv[1] >= tv[2]
+
+
+def test_a_row_the_factorisation_zeroes_becomes_empty_and_energy_still_closes():
+    """The G2 defect found on the La II control: rank 1 and 2 sent one live
+    row to zero, the row sum no longer matched q_dep and validate_energy
+    returned 1.0 (gray condition 3). Such a row is now declared empty, so
+    transport falls back to coherent scattering there, and the identity
+    holds exactly."""
+    ev, _ = _events(); k = _fine(ev)
+    live = np.flatnonzero(~k.empty_rows)
+    R = k.R.copy()
+    g = k.with_matrix(R)
+    assert g.validate_energy() < 1e-12
+    counts = k.counts.copy(); counts[live[0]] = 0.0
+    g2 = k.with_matrix(R, counts=counts)
+    assert g2.empty_rows[live[0]] and np.all(g2.R[live[0]] == 0) and g2.validate_energy() < 1e-12
+    out = g2.sample_nu_out(np.full(200, np.sqrt(g2.edges[live[0]] * g2.edges[live[0] + 1])), np.random.default_rng(0), rows="energy")
+    assert np.all(np.isnan(out))                       # the caller scatters these coherently
 
 
 def test_local_on_fine_tables_is_sampling_equivalent_to_the_coarse_kernel():

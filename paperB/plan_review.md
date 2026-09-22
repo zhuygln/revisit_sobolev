@@ -231,3 +231,33 @@ values, the ladder read Red first, then Green, then Yellow.
 
 Sequence as instructed: amend, merge PR #10, tag the G2 preregistration
 state, run G2, leave G3 untouched until the G2 verdict is written.
+
+## G2 run, first attempt: two implementation defects, disclosed and repeated (2026-09-22)
+
+Not a PI statement: a record of a decision I took while executing the
+approved sequence, because it required touching a tagged preregistration
+after part of a run existed.
+
+The G2 run was launched from `paperB-g2-prereg`. La II finished; reading
+its record showed `G_k1` and `G_k2` failing the energy identity
+(`validate_energy` = 1.0, gray condition 3) because the factorisation sent
+one live row to exactly zero, and `G_k16`/`G_k32` failing the convergence
+condition (gray 8) because 600 Lee–Seung iterations left the relative
+Frobenius error falling by ~3×10⁻³ per 100 iterations. Both are failures
+to compute the preregistered object, not properties of it, so the
+preregistration's own remedy applies: fix and repeat the run.
+
+I stopped the run with Ce II in progress, deleted every G2 record unread
+except La II's (which had already been inspected and which decides
+neither reading), fixed both defects, recorded the amendment in
+`prl_gate.md` — including exactly what had been seen, and the direction
+in which the zeroed-row convention leans — and reran all three ions.
+
+The judgement call worth recording: the zeroed row could be repaired
+either by declaring it empty (coherent fallback, the kernel's standing
+convention for a row with no information) or by falling back to its own
+un-factorised distribution. The first leans toward H1 Green, the second
+toward Red and also leaks information the rank-k model does not contain.
+I chose the first and wrote the bias into the preregistration rather than
+leaving it implicit; on La II the row carried 1.5×10⁻⁶ of the absorbed
+energy.

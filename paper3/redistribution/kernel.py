@@ -260,16 +260,22 @@ class RedistributionKernel:
                    disc_off=np.array(off_out, int))
 
     # ---- derived operators (Paper B, G2) --------------------------------
-    def with_matrix(self, R_new, metadata=None):
+    def with_matrix(self, R_new, metadata=None, counts=None):
         """A copy with the ENERGY matrix replaced (the energy rows E_cum follow
-        from it); the photon rows, the exit tables and the row occupancy are
-        untouched. Rows never populated stay empty (transport scatters those
-        coherently) whatever R_new holds there."""
+        from it); the photon rows, the exit tables and (unless `counts` is
+        given) the row occupancy are untouched. Rows never populated stay
+        empty (transport scatters those coherently) whatever R_new holds
+        there. `counts` lets a derived operator declare further rows empty --
+        a row its approximation leaves with no exit distribution at all --
+        so that transport falls back to coherent scattering there instead of
+        sampling a degenerate cumulative."""
         R_new = np.asarray(R_new, float)
         if R_new.shape != self.R.shape:
             raise ValueError(f"R_new must be {self.R.shape}, got {R_new.shape}")
-        R_new = np.where(self.empty_rows[:, None], 0.0, R_new)
-        return RedistributionKernel(self.edges, R_new, self.N_cum, self.q_dep, self.sub_cum, self.counts,
+        cnt = self.counts if counts is None else np.asarray(counts, float)
+        empty = cnt <= 0
+        R_new = np.where(empty[:, None], 0.0, R_new)
+        return RedistributionKernel(self.edges, R_new, self.N_cum, self.q_dep, self.sub_cum, cnt,
                                     dict(self.metadata, **(metadata or {})), disc_vals=self.disc_vals,
                                     disc_cum=self.disc_cum, disc_off=self.disc_off, disc_cum_E=self.disc_cum_E)
 

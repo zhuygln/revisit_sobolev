@@ -291,7 +291,7 @@ change of 2026-09-22).
 |---|---|---|---|
 | `A2_ng8` | G1's 8-group kernel (coarse tables), rerun | 8 | 64 |
 | `L128_ng8` | **local control**: the 8-group energy matrix expanded onto the 128 groups, each coarse column's mass spread by the fine exit-energy marginal within it, on the 128-group tables. Sampling-equivalent to `A2_ng8` by construction (both draw the exit line with probability ∝ its exit energy within the coarse output group); transported to verify that the local family of G1 (`A2_ng2 … A2_ng32`, read from the G1 records) is the local family on shared tables | 8 | 64 |
-| `G_k1 … G_k32` | **global family**: rank-k non-negative factorisation W H of the populated rows of the 128-group energy matrix (Lee–Seung multiplicative updates, 600 iterations, initialisation seed 0), rows rescaled to their original sums (energy exact), empty rows kept empty; k ∈ {1, 2, 4, 8, 16, 32}. k = 1 is the fully non-local null: one exit distribution for every input | k | 2·128·k |
+| `G_k1 … G_k32` | **global family**: rank-k non-negative factorisation W H of the populated rows of the 128-group energy matrix (Lee–Seung multiplicative updates, initialisation seed 0, iterated to convergence: the relative Frobenius error is checked every 100 iterations and the loop stops when its relative change over that block reaches 10⁻⁶, capped at 20,000 iterations), rows rescaled to their original sums (energy exact); a live row the factorisation sends to zero is declared **empty**, so transport applies the kernel's standing convention for a row carrying no information — coherent scattering, counted in the fallback fraction and limited by gray condition 4 — and the number of such rows and the energy share they carry are recorded; k ∈ {1, 2, 4, 8, 16, 32}. k = 1 is the fully non-local null: one exit distribution for every input | k | 2·128·k |
 | `T_f0.1 … T_f0.999` | **truncation family**: the full 128×128 matrix with each output group's exit table cut, by the selection rule fixed under H2 below (ranked by accumulated training-event energy within the group, retained until their share first reaches f, at least one per populated group, both weight tables renormalised); f ∈ {0.1, 0.2, 0.5, 0.9, 0.99, 0.999}. The grid was set after the exit-table audit (§4.63) so that H2's Green is reachable: per-group truncation retains, of the distinct exit lines, Ce II 2.3 / 4.3 / 12 / 36 / 67 / 87 % and Nd II 0.4 / 0.8 / 2.4 / 11 / 39 / 77 % at these f | 128 | 128² |
 | `K128`, `K128build` | kernel only: the independent fine matrix (evaluation seeds) and the in-sample one | | |
 
@@ -396,8 +396,51 @@ the group-to-group matrix and the within-group exit spectrum — and the
 
 **What may not change after the run:** the k and f grids, the control
 rule, the thresholds (G1's), the archetype-count axis, the NMF settings
-(600 iterations, seed 0, rescaled rows). What may: the packet count upward
+(seed 0, the convergence rule above, rescaled rows). What may: the packet count upward
 on a Gray (the whole ion rerun), and bug fixes with the run repeated.
+
+### Amendment of 2026-09-22 (second): two implementation defects, the run repeated
+
+Declared here in full because it was made **after part of a G2 run existed**.
+
+*What was defective.* (1) At k = 1 and k = 2 the factorisation sent one
+live row to exactly zero; the row's energy sum no longer matched its
+`q_dep`, so `validate_energy()` returned 1.0 and gray condition 3 fired
+on those two legs. (2) The preregistered 600 iterations did not compute
+the preregistered object: at k = 16 and k = 32 the relative Frobenius
+error was still falling by ~3×10⁻³ per 100 iterations, so gray condition
+8 fired on those two legs. Neither is a property of the physics; both are
+failures to compute the rank-k factorisation, and the preregistration's
+standing remedy for a bug is to fix it and repeat the run.
+
+*What had been seen when the defects were found.* The **La II** record
+was complete and was inspected: its local family (max |Δm| 0.036 / 0.021
+/ 0.013 / 0.009 / 0.010 at N_g = 2 … 32), its global family (0.97 / 0.07
+/ 0.185 / 0.033 / 0.063 / 0.055 at k = 1 … 32, two legs gray on the
+energy identity and two on convergence), its truncation family, and the
+derived K*_local = 2, K*_global = 2, L* = 0.50. **La II decides neither
+H1 nor H2** — it is the preregistered control, too thin at its P1 partial
+density to discriminate closures (G1, F67). The **Ce II** run was in
+progress and its partial record was deleted unread; **Nd II** had not
+started. No decisive ion's numbers were seen before this amendment, and
+no threshold, grid or reading was changed by it.
+
+*The changes.* The NMF is iterated to convergence (relative change ≤ 10⁻⁶
+over a 100-iteration block, cap 20,000, seed 0 unchanged) instead of a
+fixed 600; gray condition 8 stays as the backstop at 10⁻⁴. A live row the
+factorisation zeroes is declared empty and scatters coherently, as above.
+
+*The direction of the second change, stated so it can be judged.* Zeroing
+such a row makes the low-k global operators slightly worse, which pushes
+K*_global up and so leans **toward** H1 Green. The alternative — falling
+back to the row's own un-factorised distribution — leans toward Red and
+would leak information the rank-k model does not contain. On La II the
+affected row carried 1.5×10⁻⁶ of the absorbed energy and the coherent
+fallback reached 0.07 % of interactions, far inside gray condition 4's
+1 % limit; both numbers are recorded per leg for every ion.
+
+*The run.* All three ions were rerun from scratch after the fix; no
+record produced before it survives.
 
 **Records** `paperB/gate2/gate2_<ion>.json`, `gate2_verdict.json`,
 `docs/figures/paperB/gate2_locality_vs_rank.{pdf,png}` (max |Δm| against

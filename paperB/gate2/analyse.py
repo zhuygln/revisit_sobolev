@@ -15,9 +15,13 @@ import numpy as np
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
-for p in (ROOT, ROOT / "paperB/gate1"):
-    sys.path.insert(0, str(p))
-import analyse as A                                          # noqa: E402  (G1's metrics, live bands, gray conditions)
+sys.path.insert(0, str(ROOT))
+# G1's analyse.py by explicit path: both gates call their analysis module
+# `analyse`, so a plain import resolves to whichever directory comes first
+# on the path -- this file itself when it is imported from elsewhere.
+import importlib.util as _ilu                                 # noqa: E402
+_spec = _ilu.spec_from_file_location("paperB_gate1_analyse", ROOT / "paperB/gate1/analyse.py")
+A = _ilu.module_from_spec(_spec); _spec.loader.exec_module(A)   # G1's metrics, live bands, gray conditions
 
 PREREG = dict(state="paper4/phase1_benchmarks/P1_t2.json", shell=28, seeds=[1, 2, 3], build_seeds=[101, 102, 103],
               n={"57LaII": 300_000, "58CeII": 300_000, "60NdII": 1_000_000},
