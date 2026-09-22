@@ -292,7 +292,7 @@ change of 2026-09-22).
 | `A2_ng8` | G1's 8-group kernel (coarse tables), rerun | 8 | 64 |
 | `L128_ng8` | **local control**: the 8-group energy matrix expanded onto the 128 groups, each coarse column's mass spread by the fine exit-energy marginal within it, on the 128-group tables. Sampling-equivalent to `A2_ng8` by construction (both draw the exit line with probability ∝ its exit energy within the coarse output group); transported to verify that the local family of G1 (`A2_ng2 … A2_ng32`, read from the G1 records) is the local family on shared tables | 8 | 64 |
 | `G_k1 … G_k32` | **global family**: rank-k non-negative factorisation W H of the populated rows of the 128-group energy matrix (Lee–Seung multiplicative updates, 600 iterations, initialisation seed 0), rows rescaled to their original sums (energy exact), empty rows kept empty; k ∈ {1, 2, 4, 8, 16, 32}. k = 1 is the fully non-local null: one exit distribution for every input | k | 2·128·k |
-| `T_f0.1 … T_f0.999` | **truncation family**: the full 128×128 matrix with each output group's exit table cut to the highest-energy-weight lines carrying fraction f of that group's exit energy (at least one per populated group), both weight tables renormalised over the kept lines; f ∈ {0.1, 0.2, 0.5, 0.9, 0.99, 0.999}. The grid was set after the exit-table audit (§4.63) so that H2's Green is reachable: per-group truncation keeps, of the distinct exit lines, Ce II 2.3 / 4.3 / 12 / 36 / 67 / 87 % and Nd II 0.4 / 0.8 / 2.4 / 11 / 39 / 77 % at these f, so ρ_exit ≤ 0.10 needs f* ≤ 0.2 on Ce II | 128 | 128² |
+| `T_f0.1 … T_f0.999` | **truncation family**: the full 128×128 matrix with each output group's exit table cut, by the selection rule fixed under H2 below (ranked by accumulated training-event energy within the group, retained until their share first reaches f, at least one per populated group, both weight tables renormalised); f ∈ {0.1, 0.2, 0.5, 0.9, 0.99, 0.999}. The grid was set after the exit-table audit (§4.63) so that H2's Green is reachable: per-group truncation retains, of the distinct exit lines, Ce II 2.3 / 4.3 / 12 / 36 / 67 / 87 % and Nd II 0.4 / 0.8 / 2.4 / 11 / 39 / 77 % at these f | 128 | 128² |
 | `K128`, `K128build` | kernel only: the independent fine matrix (evaluation seeds) and the in-sample one | | |
 
 The local family's curve is G1's `A2_ng{N}` legs, N ∈ {2, 4, 8, 16, 32},
@@ -318,43 +318,83 @@ equivalence argument fails and the local family must be rerun on the
 reconstruction change over the last 100 iterations exceeds 10⁻⁴ is
 excluded from the k* search and reported; (9) no N_g* in G1's record.
 
-**H1.** Per ion, N_g* (G1's) and k* = the smallest k in the grid whose
-`G_k` has max |Δm| ≤ 0.10 mag over the live bands and max |Δcolour| ≤ 0.10
-mag; undefined if none does.
+**H1 — locality, not global low rank.** Per ion, two numbers on the same
+transport criterion (G1's: max |Δm| ≤ 0.10 mag over the live bands and
+max |Δcolour| ≤ 0.10 mag against `R2`):
 
-- Green: k* ≥ N_g* (undefined counts as ≥) **and**, at the matched count
-  k = N_g*, the global operator's m_event is smaller than the local one's
-  (it fits the events better and is still not better on the light — the
-  "despite" the PI asked for).
-- Red: k* ≤ N_g*/4 — a free mixture of four times fewer archetypes
-  reproduces the observables: the structure R_ij exploits is rank, not
-  locality.
-- Yellow: otherwise (in particular the case k* = 1 < N_g*: the single
-  non-local archetype already passes; at G1's numbers this is the only
-  non-Green outcome open to Nd II, whose N_g* = 2 puts Red out of reach;
-  Ce II with N_g* = 16 carries the sharp test, Red iff k* ≤ 4).
-- Overall: Green iff Ce II and Nd II are both Green; Red iff either is Red;
+    K*_local  = min { N_g in {2,4,8,16,32} : the local operator passes }   (G1's N_g*)
+    K*_global = min { k  in {1,2,4,8,16,32} : the rank-k operator passes }
+
+both undefined if no member of the family passes. The comparison is of
+**archetype counts, not parameter counts**: at equal count the global
+family holds many more free numbers (2·128·k against N_g²), so needing no
+fewer archetypes than the local family is evidence for locality.
+
+- Green: K*_global ≥ K*_local for **both** Ce II and Nd II (undefined
+  counts as ≥: a global family that never passes is the strongest form of
+  this).
+- Red: the global family passes with K*_global ≤ K*_local/4 on **either**
+  Ce II or Nd II.
+- Yellow: everything between.
+- Overall: Red if either decisive ion is Red; Green if both are Green;
   Yellow otherwise; Gray if either is Gray.
 
-**H2.** Per ion, f* = the smallest f in the grid whose `T_f` passes the same
-thresholds; ρ_exit = (exit lines kept at f*) / (exit lines in
-`K128build`).
+At G1's numbers only Ce II (K*_local = 16) can fire Red, at K*_global ≤ 4;
+Nd II's K*_local = 2 puts Red out of its reach, and its informative
+outcomes are Green (K*_global ≥ 2) and Yellow (K*_global = 1, the fully
+non-local null passing where two local blocks are needed).
 
-- Green: ρ_exit ≤ 0.10 for both Ce II and Nd II — at least 90 % of the
-  stored exit lines are invisible to the observables at the 0.1 mag level.
-  Recorded alongside as the event-level counterpart: G1's m_event at N_g*
-  (0.16–0.42 at 32 groups, F67).
-- Red: no f < 1 passes for Ce II or Nd II — the full table is part of the
-  physics the light sees.
-- Yellow: otherwise.
+**The event-level fit is a mechanistic diagnostic, not part of the pass/
+fail logic** (the PI's amendment of 2026-09-22). Reported per operator
+alongside the readings: m_event against the independent 128-group matrix
+and the in-sample TV distance from the matrix it was derived from. The
+outcome of interest — *the global model fits the microscopic events
+better while the local model reproduces the transport better* — is
+recorded as a named diagnostic (`events_vs_observables`, true when at the
+matched count k = K*_local the global operator's m_event is the smaller
+and its max |Δm| the larger). It supports the reading that
+microscopic-distribution fidelity is not observable-relevant fidelity; it
+is a stronger and more specific claim than the locality hypothesis and is
+therefore never required for Green.
+
+**H2 — the observable-relevant dimension of the exit spectrum.** Per ion,
+
+    L* = min { retained fraction of the distinct exit lines : the truncated
+               operator passes the same transport criterion }
+
+where the retained fraction is (exit lines kept) / (exit lines in
+`K128build`), evaluated on the f grid; undefined if no f < 1 passes.
+
+- Green: L* ≤ 0.10 for **both** Ce II and Nd II.
+- Yellow: Green fails but at least one of them has L* ≤ 0.25.
+- Red: either Ce II or Nd II requires L* > 0.50 (undefined counts as > 0.50).
+- Residual band (both ions between 0.25 and 0.50, neither above it):
+  Yellow, reported with the values. The ladder is read Red first, then
+  Green, then Yellow.
+- La II is reported as a control and **does not decide H2**: G1 showed it
+  too thin at its P1 partial density to discriminate closures.
+
+**The selection rule is fixed here and is a function of the
+kernel-building sample alone.** Within each output group of the
+`R2build` 128-group kernel, the distinct exit lines are ranked by their
+accumulated training-event energy weight in that group's exit table; the
+highest-ranked are retained until their share of the group's exit energy
+first reaches f (at least one line per populated group); both the photon
+and the energy weight tables are renormalised over the retained lines.
+Nothing about transport enters the choice, and no subset is reselected
+after seeing which preserves the light: the only freedom is f, and its
+grid is frozen above.
 
 **Decision.** The PRL's mechanism claim ("locality, not rank") is written
 iff H1 is Green; H1 Red reframes the claim (the PI decides what, with the
-numbers); Yellow is the PI's call. H2 sets the wording of "compact": Green
-— the operator's information content is the matrix plus the top ρ_exit of
-the exit lines; Red — the exit table is physics, not representation.
+numbers); Yellow is the PI's call. H2 sets the wording of "compact": with
+H1 and H2 both Green, both layers of the effective operator are compact —
+the group-to-group matrix and the within-group exit spectrum — and the
+"the matrix is small but the table is not" objection is answered.
 
-**What may not change after the run:** the k and f grids (the f grid was extended to 0.1 and 0.2 on 2026-09-22 after the audit, before any G2 transport), the control
+**Amended 2026-09-22** on the PI's review of PR #10, before any G2 transport existed: the event-level fit left H1's pass/fail logic and became a diagnostic; H1's comparison stated as archetype counts K*_local and K*_global; H2 read on the retained fraction L* with a three-level ladder and Ce II / Nd II decisive; the selection rule written out as a function of the build sample alone. The f grid had been extended to 0.1 and 0.2 earlier the same day, after the audit.
+
+**What may not change after the run:** the k and f grids, the control
 rule, the thresholds (G1's), the archetype-count axis, the NMF settings
 (600 iterations, seed 0, rescaled rows). What may: the packet count upward
 on a Gray (the whole ion rerun), and bug fixes with the run repeated.

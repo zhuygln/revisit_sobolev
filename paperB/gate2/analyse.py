@@ -22,7 +22,8 @@ import analyse as A                                          # noqa: E402  (G1's
 PREREG = dict(state="paper4/phase1_benchmarks/P1_t2.json", shell=28, seeds=[1, 2, 3], build_seeds=[101, 102, 103],
               n={"57LaII": 300_000, "58CeII": 300_000, "60NdII": 1_000_000},
               k_grid=[1, 2, 4, 8, 16, 32], f_grid=[0.1, 0.2, 0.5, 0.9, 0.99, 0.999], ng_control=8, ng_fine=128,
-              dm_max=0.10, dcolour_max=0.10, h1_red_ratio=4.0, h2_rho_green=0.10,
+              dm_max=0.10, dcolour_max=0.10, h1_red_ratio=4.0,
+              h2_green=0.10, h2_yellow=0.25, h2_red=0.50,
               nmf_conv_max=1e-4, control_sigma=2.0, ref_match=1e-6, decisive=["58CeII", "60NdII"])
 IONS = A.IONS
 GATE1 = ROOT / "paperB/gate1"
@@ -90,29 +91,40 @@ def read_ion(row, g1):
             trunc[float(tr["f"])] = entry
     for k in nmf_gray:
         gray.append(f"8: G_k{k} NMF not converged (relative change over the last 100 iterations > {P['nmf_conv_max']})")
-    # H1
-    ng_star = next((n for n in sorted(local) if local[n]["passes"]), None)
-    k_star = next((k for k in sorted(glob) if glob[k]["passes"] and "gray" not in glob[k]), None)
-    matched = None
-    if ng_star is not None and ng_star in glob and ng_star in local:
-        matched = dict(k=ng_star, event_global=glob[ng_star]["event"], event_local=local[ng_star]["event"],
-                       global_fits_events_better=bool(glob[ng_star]["event"] < local[ng_star]["event"]))
-    if ng_star is None:
-        h1 = "GRAY"; gray.append("9: no N_g* in G1's record")
-    elif k_star is not None and k_star <= ng_star / P["h1_red_ratio"]:
+    # ---- H1: archetype counts only (the PI's amendment of 2026-09-22) ----
+    # K*_local = G1's N_g*, K*_global = the smallest passing rank; the
+    # event-level fit is a DIAGNOSTIC and never enters this logic.
+    k_local = next((n for n in sorted(local) if local[n]["passes"]), None)
+    k_global = next((k for k in sorted(glob) if glob[k]["passes"] and "gray" not in glob[k]), None)
+    diag = None
+    if k_local is not None and k_local in glob and k_local in local:
+        g, l = glob[k_local], local[k_local]
+        diag = dict(k=k_local, event_global=g["event"], event_local=l["event"], band_global=g["band_max"], band_local=l["band_max"],
+                    global_fits_events_better=bool(g["event"] < l["event"]), local_reproduces_transport_better=bool(g["band_max"] > l["band_max"]),
+                    events_vs_observables=bool(g["event"] < l["event"] and g["band_max"] > l["band_max"]))
+    if k_local is None:
+        h1 = "GRAY"; gray.append("9: no K*_local in G1's record (the local family never passes)")
+    elif k_global is not None and k_global <= k_local / P["h1_red_ratio"]:
         h1 = "RED"
-    elif (k_star is None or k_star >= ng_star) and matched and matched["global_fits_events_better"]:
+    elif k_global is None or k_global >= k_local:
         h1 = "GREEN"
     else:
         h1 = "YELLOW"
-    # H2
-    f_star = next((f for f in sorted(trunc) if trunc[f]["passes"]), None)
-    rho = trunc[f_star]["rho_exit"] if f_star is not None else None
-    h2 = "RED" if f_star is None else "GREEN" if rho <= P["h2_rho_green"] else "YELLOW"
-    event_at_ng_star = local[ng_star]["event"] if ng_star in local else None
+    # ---- H2: the retained fraction of distinct exit lines ----
+    # L* = the smallest retained fraction that passes; the ladder is read
+    # Red first, then Green, then Yellow. La II is a control, never decisive.
+    passing = [(m["rho_exit"], f) for f, m in trunc.items() if m["passes"]]
+    L_star, f_star = min(passing) if passing else (None, None)
+    if L_star is None or L_star > P["h2_red"]:
+        h2 = "RED"
+    elif L_star <= P["h2_green"]:
+        h2 = "GREEN"
+    else:
+        h2 = "YELLOW"
     return dict(gray=gray, live_bands=live, seed_std_R2=noise, ref_dev_from_G1=ref_dev, control_sigma=float(dev),
-                local=local, global_nmf=glob, truncation=trunc, ng_star=ng_star, k_star=k_star, matched=matched,
-                H1=h1 if not gray else "GRAY", f_star=f_star, rho_exit=rho, event_at_ng_star=event_at_ng_star,
+                local=local, global_nmf=glob, truncation=trunc, k_local=k_local, k_global=k_global, ng_star=k_local,
+                k_star=k_global, diagnostic=diag, H1=h1 if not gray else "GRAY",
+                f_star=f_star, L_star=L_star, rho_exit=L_star, event_at_k_local=local[k_local]["event"] if k_local in local else None,
                 H2=h2 if not gray else "GRAY", fine_in_vs_out_of_sample=M["fine_in_vs_out_of_sample"])
 
 
@@ -126,6 +138,8 @@ def readings(records, g1_records):
         out.update(H1="GRAY", H2="GRAY", decision="GRAY", reason=f"decisive ions readable: {readable}")
         return out
     h1s = [per_ion[i]["H1"] for i in readable]; h2s = [per_ion[i]["H2"] for i in readable]
+    # both ladders: Red if either decisive ion is Red, Green if both are, else Yellow.
+    # The decisive ions are Ce II and Nd II; La II is reported and never counted.
     H1 = "RED" if "RED" in h1s else "GREEN" if all(h == "GREEN" for h in h1s) else "YELLOW"
     H2 = "RED" if "RED" in h2s else "GREEN" if all(h == "GREEN" for h in h2s) else "YELLOW"
     decision = "WRITE" if H1 == "GREEN" else "REFRAME" if H1 == "RED" else "PI"
@@ -143,10 +157,15 @@ def main():
     out = readings(records, g1s)
     (HERE / "gate2_verdict.json").write_text(json.dumps(out, indent=1, default=float) + "\n")
     for ion, r in out["per_ion"].items():
-        print(f"\n{ion}: live {r['live_bands']} gray {r['gray'] or 'none'}; N_g* {r['ng_star']}  k* {r['k_star']}  f* {r['f_star']}  rho_exit {r['rho_exit']}")
+        L = f"{r['L_star']:.3f}" if r["L_star"] is not None else "—"
+        print(f"\n{ion}: live {r['live_bands']} gray {r['gray'] or 'none'}; K*_local {r['k_local']}  K*_global {r['k_global']}  f* {r['f_star']}  L* {L}")
         print("  local  N : " + "  ".join(f"{n}:{m['band_max']:.3f}/{m['event']:.2f}" for n, m in sorted(r["local"].items())))
         print("  global k : " + "  ".join(f"{k}:{m['band_max']:.3f}/{m['event']:.2f}" for k, m in sorted(r["global_nmf"].items())) + "   (max|dm| / m_event)")
-        print("  trunc  f : " + "  ".join(f"{f:g}:{m['band_max']:.3f}/{m['rho_exit']:.3f}" for f, m in sorted(r["truncation"].items())) + "   (max|dm| / rho_exit)")
+        print("  trunc  f : " + "  ".join(f"{f:g}:{m['band_max']:.3f}/{m['rho_exit']:.3f}" for f, m in sorted(r["truncation"].items())) + "   (max|dm| / retained fraction)")
+        d = r["diagnostic"]
+        if d:
+            print(f"  diagnostic at k = {d['k']}: m_event global {d['event_global']:.3f} vs local {d['event_local']:.3f}; "
+                  f"max|dm| global {d['band_global']:.3f} vs local {d['band_local']:.3f} -> events_vs_observables {d['events_vs_observables']}")
         print(f"  H1 {r['H1']}  H2 {r['H2']}  control {r['control_sigma']:.1f} sigma  ref dev {r['ref_dev_from_G1']:.1e}")
     print(f"\nH1 {out['H1']}  H2 {out['H2']}  -> {out['decision']}")
     return out

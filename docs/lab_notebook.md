@@ -3221,10 +3221,10 @@ legs (with an L128_ng8 control that must match A2_ng8 within 2 sigma of
 the difference), global family = rank-k NMF (k = 1..32, Lee-Seung 600
 iterations, rows rescaled), truncation family T(f). The matched axis is
 the archetype count, not parameters (N_g^2 vs 2*128*k are recorded, not
-plotted against each other). H1 Green iff k* >= N_g* on Ce and Nd AND
-the global operator fits the events better at matched k; Red iff k* <=
-N_g*/4 (only Ce, N_g* = 16, can fire it). H2 Green iff the light needs
-<= 10 % of the exit lines on Ce and Nd. The f grid was extended to 0.1
+plotted against each other). H1 Green iff K*_global >= K*_local on Ce
+and Nd; Red iff K*_global <= K*_local/4 (only Ce, K*_local = 16, can fire
+it). H2 Green iff the light needs <= 10 % of the distinct exit lines on
+Ce and Nd, Yellow if one is <= 25 %, Red if either needs > 50 %. The f grid was extended to 0.1
 and 0.2 after the audit showed Ce keeps 12 % of its lines at f = 0.5 --
 a Green that the grid could not reach would have been a preregistration
 defect, caught before the run. Machinery: kernel.with_matrix,
@@ -3234,6 +3234,22 @@ Smoke-run only; the PI approves the criteria before the run.
 Lesson: the prereg of a threshold on a derived quantity (rho_exit) needs
 the audit's numbers to check reachability -- do the representation
 audit before freezing a representation gate.
+
+*The PI's review of PR #10 (same day, before any G2 transport):* approve,
+with one amendment -- the event-level fit leaves H1's pass/fail logic and
+becomes a diagnostic. H1 now compares archetype counts alone, K*_local vs
+K*_global. The PI's reason is worth keeping: requiring "the global model
+fits the events better" makes Green a stronger and more specific claim
+than the locality hypothesis itself, so it belongs in the reporting, not
+the gate. The interesting combination (global fits the microscopic events
+better, local reproduces the light better) is recorded as a named
+diagnostic, events_vs_observables. H2 reads on L*, the minimum retained
+fraction of DISTINCT EXIT LINES that passes, with Green <= 0.10 on both
+Ce and Nd, Yellow if one is <= 0.25, Red if either needs > 0.50; the
+selection rule (rank by accumulated training-event energy within the
+group, retain to f, renormalise, never reselect after seeing the light)
+is written into the prereg. La is a control in both. Then: merge PR #10,
+tag the prereg state, run G2, leave G3 alone until G2 is read.
 
 ## 10. Standing environment notes
 

@@ -164,66 +164,118 @@ def _equal_band_fractions(monkeypatch):
     monkeypatch.setattr(G2.A.V, "nu_edges", lambda lo, hi, n: np.geomspace(1e14, 3e15, n + 1))
 
 
-LOCAL_DM = {2: 0.5, 4: 0.3, 8: 0.2, 16: 0.06, 32: 0.04}                   # N_g* = 16 (a Ce-like ion)
+LOCAL_DM = {2: 0.5, 4: 0.3, 8: 0.2, 16: 0.06, 32: 0.04}                   # K*_local = 16 (a Ce-like ion)
 LOCAL_EV = {2: 0.6, 4: 0.5, 8: 0.4, 16: 0.3, 32: 0.2}
-ND_DM = {2: 0.05, 4: 0.04, 8: 0.03, 16: 0.02, 32: 0.02}                    # N_g* = 2 (an Nd-like ion)
+ND_DM = {2: 0.05, 4: 0.04, 8: 0.03, 16: 0.02, 32: 0.02}                    # K*_local = 2 (an Nd-like ion)
+TRUNC_DM = {0.1: 0.5, 0.2: 0.08, 0.5: 0.05, 0.9: 0.04, 0.99: 0.03, 0.999: 0.03}
+TRUNC_RHO = {0.1: 0.02, 0.2: 0.04, 0.5: 0.12, 0.9: 0.36, 0.99: 0.67, 0.999: 0.87}   # Ce II's audited curve
 
 
-def _green_case(ion, local_dm):
-    dm_g = {1: 0.9, 2: 0.6, 4: 0.5, 8: 0.4, 16: 0.08, 32: 0.05}           # k* = 16
-    ev_g = {1: 0.5, 2: 0.4, 4: 0.3, 8: 0.2, 16: 0.1, 32: 0.05}             # global fits the events better than local at matched k
-    return _g2(ion, dm_g, {0.5: 0.5, 0.9: 0.08, 0.99: 0.05, 0.999: 0.03}, {0.5: 0.02, 0.9: 0.06, 0.99: 0.3, 0.999: 0.6}, ev_g)
+def _case(ion, dm_g, ev_g, dm_t=None, rho_t=None, **kw):
+    return _g2(ion, dm_g, dm_t or TRUNC_DM, rho_t or TRUNC_RHO, ev_g, **kw)
 
 
-def test_h1_green_when_global_needs_no_fewer_archetypes_despite_fitting_events_better():
+GLOBAL_16 = {1: 0.9, 2: 0.6, 4: 0.5, 8: 0.4, 16: 0.08, 32: 0.05}           # K*_global = 16
+EV_GLOBAL_BETTER = {1: 0.5, 2: 0.4, 4: 0.3, 8: 0.2, 16: 0.1, 32: 0.05}     # the global family fits the events better
+
+
+def test_h1_green_on_archetype_counts_alone():
+    """Green needs only K*_global >= K*_local on both decisive ions; the
+    event-level fit is a diagnostic (the PI's amendment of 2026-09-22)."""
     g1 = {i: _g1(LOCAL_DM, LOCAL_EV) for i in G2.IONS}; g1["60NdII"] = _g1(ND_DM, LOCAL_EV)
-    g2 = {"58CeII": _green_case("58CeII", LOCAL_DM), "60NdII": _green_case("60NdII", ND_DM), "57LaII": _green_case("57LaII", LOCAL_DM)}
+    g2 = {i: _case(i, GLOBAL_16, EV_GLOBAL_BETTER) for i in G2.IONS}
     out = G2.readings(g2, g1)
     ce = out["per_ion"]["58CeII"]
-    assert ce["ng_star"] == 16 and ce["k_star"] == 16 and ce["matched"]["global_fits_events_better"] and ce["H1"] == "GREEN"
-    assert ce["f_star"] == 0.9 and abs(ce["rho_exit"] - 0.06) < 1e-12 and ce["H2"] == "GREEN"
+    assert ce["k_local"] == 16 and ce["k_global"] == 16 and ce["H1"] == "GREEN"
+    assert ce["diagnostic"]["events_vs_observables"] is True                    # global fits events better, local the light
     nd = out["per_ion"]["60NdII"]
-    assert nd["ng_star"] == 2 and nd["k_star"] == 16 and nd["H1"] == "GREEN"
-    assert out["H1"] == "GREEN" and out["H2"] == "GREEN" and out["decision"] == "WRITE" and not out["ions_gray"]
+    assert nd["k_local"] == 2 and nd["k_global"] == 16 and nd["H1"] == "GREEN"
+    assert out["H1"] == "GREEN" and out["decision"] == "WRITE" and not out["ions_gray"]
+
+
+def test_h1_green_even_when_the_global_family_fits_the_events_worse():
+    """The amendment's substance: the diagnostic may be False and Green stands."""
+    g1 = {i: _g1(LOCAL_DM, LOCAL_EV) for i in G2.IONS}; g1["60NdII"] = _g1(ND_DM, LOCAL_EV)
+    ev_worse = {k: 0.9 for k in GLOBAL_16}                                      # global fits the events WORSE at every k
+    g2 = {i: _case(i, GLOBAL_16, ev_worse) for i in G2.IONS}
+    out = G2.readings(g2, g1)
+    ce = out["per_ion"]["58CeII"]
+    assert ce["diagnostic"]["global_fits_events_better"] is False and ce["diagnostic"]["events_vs_observables"] is False
+    assert ce["H1"] == "GREEN" and out["H1"] == "GREEN" and out["decision"] == "WRITE"
+
+
+def test_h1_green_when_the_global_family_never_passes():
+    g1 = {i: _g1(LOCAL_DM, LOCAL_EV) for i in G2.IONS}; g1["60NdII"] = _g1(ND_DM, LOCAL_EV)
+    never = {k: 0.9 for k in GLOBAL_16}
+    g2 = {i: _case(i, never, EV_GLOBAL_BETTER) for i in G2.IONS}
+    out = G2.readings(g2, g1)
+    assert out["per_ion"]["58CeII"]["k_global"] is None and out["H1"] == "GREEN"
 
 
 def test_h1_red_when_a_low_rank_law_passes_with_four_times_fewer_archetypes():
     g1 = {i: _g1(LOCAL_DM, LOCAL_EV) for i in G2.IONS}
-    dm_g = {1: 0.9, 2: 0.6, 4: 0.05, 8: 0.04, 16: 0.03, 32: 0.02}          # k* = 4 <= 16 / 4
-    ev_g = {k: 0.1 for k in dm_g}
-    g2 = {i: _g2(i, dm_g, {0.5: 0.5, 0.9: 0.3, 0.99: 0.2, 0.999: 0.15}, {0.5: 0.02, 0.9: 0.06, 0.99: 0.3, 0.999: 0.6}, ev_g) for i in G2.IONS}
+    dm_g = {1: 0.9, 2: 0.6, 4: 0.05, 8: 0.04, 16: 0.03, 32: 0.02}              # K*_global = 4 <= 16 / 4
+    g2 = {i: _case(i, dm_g, {k: 0.1 for k in dm_g}) for i in G2.IONS}
     out = G2.readings(g2, g1)
     assert out["per_ion"]["58CeII"]["H1"] == "RED" and out["H1"] == "RED" and out["decision"] == "REFRAME"
-    assert out["per_ion"]["58CeII"]["f_star"] is None and out["H2"] == "RED"
 
 
 def test_h1_yellow_when_the_single_archetype_null_passes_on_the_nd_like_ion():
-    g1 = {i: _g1(ND_DM, LOCAL_EV) for i in G2.IONS}
-    dm_g = {1: 0.05, 2: 0.04, 4: 0.03, 8: 0.02, 16: 0.02, 32: 0.02}        # k* = 1 >= N_g*/4 = 0.5: not Red, but a global null passes
-    ev_g = {k: 0.1 for k in dm_g}
-    g2 = {i: _g2(i, dm_g, {0.5: 0.5, 0.9: 0.3, 0.99: 0.08, 0.999: 0.05}, {0.5: 0.02, 0.9: 0.06, 0.99: 0.3, 0.999: 0.6}, ev_g) for i in G2.IONS}
+    g1 = {i: _g1(ND_DM, LOCAL_EV) for i in G2.IONS}                             # K*_local = 2: Red is out of reach
+    dm_g = {1: 0.05, 2: 0.04, 4: 0.03, 8: 0.02, 16: 0.02, 32: 0.02}             # K*_global = 1 < 2
+    g2 = {i: _case(i, dm_g, {k: 0.1 for k in dm_g}) for i in G2.IONS}
     out = G2.readings(g2, g1)
     nd = out["per_ion"]["60NdII"]
-    assert nd["k_star"] == 1 and nd["H1"] == "YELLOW" and out["H1"] == "YELLOW" and out["decision"] == "PI"
-    assert nd["f_star"] == 0.99 and nd["H2"] == "YELLOW"
+    assert nd["k_global"] == 1 and nd["H1"] == "YELLOW" and out["H1"] == "YELLOW" and out["decision"] == "PI"
+
+
+def test_h2_ladder_green_yellow_red_on_the_retained_fraction():
+    g1 = {i: _g1(LOCAL_DM, LOCAL_EV) for i in G2.IONS}
+    # Green: the smallest passing retained fraction is 0.02 <= 0.10
+    out = G2.readings({i: _case(i, GLOBAL_16, EV_GLOBAL_BETTER) for i in G2.IONS}, g1)
+    ce = out["per_ion"]["58CeII"]
+    assert ce["f_star"] == 0.2 and abs(ce["L_star"] - 0.04) < 1e-12 and ce["H2"] == "GREEN" and out["H2"] == "GREEN"
+    # Yellow: nothing passes below 0.12
+    dm_t = {0.1: 0.5, 0.2: 0.4, 0.5: 0.08, 0.9: 0.04, 0.99: 0.03, 0.999: 0.03}
+    out = G2.readings({i: _case(i, GLOBAL_16, EV_GLOBAL_BETTER, dm_t=dm_t) for i in G2.IONS}, g1)
+    assert abs(out["per_ion"]["58CeII"]["L_star"] - 0.12) < 1e-12 and out["H2"] == "YELLOW"
+    # Red: the first passing fraction is 0.67 > 0.50
+    dm_t = {0.1: 0.5, 0.2: 0.4, 0.5: 0.3, 0.9: 0.2, 0.99: 0.05, 0.999: 0.03}
+    out = G2.readings({i: _case(i, GLOBAL_16, EV_GLOBAL_BETTER, dm_t=dm_t) for i in G2.IONS}, g1)
+    assert abs(out["per_ion"]["58CeII"]["L_star"] - 0.67) < 1e-12 and out["H2"] == "RED"
+    # Red also when no truncation passes at all
+    dm_t = {f: 0.9 for f in TRUNC_DM}
+    out = G2.readings({i: _case(i, GLOBAL_16, EV_GLOBAL_BETTER, dm_t=dm_t) for i in G2.IONS}, g1)
+    assert out["per_ion"]["58CeII"]["L_star"] is None and out["H2"] == "RED"
+
+
+def test_la_is_a_control_and_does_not_decide_either_reading():
+    g1 = {i: _g1(LOCAL_DM, LOCAL_EV) for i in G2.IONS}
+    g2 = {i: _case(i, GLOBAL_16, EV_GLOBAL_BETTER) for i in G2.IONS}
+    dm_g_bad = {1: 0.02, 2: 0.02, 4: 0.02, 8: 0.02, 16: 0.02, 32: 0.02}         # La alone would read Red
+    g2["57LaII"] = _case("57LaII", dm_g_bad, {k: 0.1 for k in dm_g_bad}, dm_t={f: 0.9 for f in TRUNC_DM})
+    out = G2.readings(g2, g1)
+    assert out["per_ion"]["57LaII"]["H1"] == "RED" and out["per_ion"]["57LaII"]["H2"] == "RED"
+    assert out["decisive"] == ["58CeII", "60NdII"] and out["H1"] == "GREEN" and out["H2"] == "GREEN"
 
 
 def test_gray_on_reference_mismatch_control_and_nmf_convergence():
     g1 = {i: _g1(LOCAL_DM, LOCAL_EV) for i in G2.IONS}
-    g2 = {i: _green_case(i, LOCAL_DM) for i in G2.IONS}
-    g2["58CeII"] = _g2("58CeII", {1: 0.9, 16: 0.08}, {0.9: 0.08}, {0.9: 0.06}, {1: 0.5, 16: 0.1}, ref_off=1e-3)
+    g2 = {i: _case(i, GLOBAL_16, EV_GLOBAL_BETTER) for i in G2.IONS}
+    g2["58CeII"] = _case("58CeII", GLOBAL_16, EV_GLOBAL_BETTER, ref_off=1e-3)
     out = G2.readings(g2, g1)
     assert any(f.startswith("6:") for f in out["per_ion"]["58CeII"]["gray"]) and out["decision"] == "GRAY"
-    g2["58CeII"] = _g2("58CeII", {1: 0.9, 16: 0.08}, {0.9: 0.08}, {0.9: 0.06}, {1: 0.5, 16: 0.1}, ctrl_off=0.2)
+    g2["58CeII"] = _case("58CeII", GLOBAL_16, EV_GLOBAL_BETTER, ctrl_off=0.2)
     out = G2.readings(g2, g1)
     assert any(f.startswith("7:") for f in out["per_ion"]["58CeII"]["gray"])
-    g2["58CeII"] = _g2("58CeII", {1: 0.9, 16: 0.08}, {0.9: 0.08}, {0.9: 0.06}, {1: 0.5, 16: 0.1}, conv=1e-2)
+    g2["58CeII"] = _case("58CeII", GLOBAL_16, EV_GLOBAL_BETTER, conv=1e-2)
     out = G2.readings(g2, g1)
     assert any(f.startswith("8:") for f in out["per_ion"]["58CeII"]["gray"])
+    assert all(r["H1"] == "GRAY" and r["H2"] == "GRAY" for i, r in out["per_ion"].items() if r["gray"])
 
 
 def test_prereg_check():
-    row = _green_case("58CeII", LOCAL_DM); assert G2.check_prereg(row) == []
+    row = _case("58CeII", GLOBAL_16, EV_GLOBAL_BETTER); assert G2.check_prereg(row) == []
     row["n"] = 100_000
     with pytest.raises(ValueError):
         G2.check_prereg(row)
