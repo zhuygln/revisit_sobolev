@@ -24,6 +24,8 @@ is not the preregistered experiment. Tests: `tests/test_paperB_gate1.py`.
 
 ## Where it stands
 
-G1 is preregistered and its code is in place; the production run follows
-the PI's approval of the criteria. G2–G4 are named in `prl_gate.md` and are
-detailed only after G1 is read.
+G1 was frozen at f9cfbff and run on 2026-09-22 (`docs/results_report.md`
+§4.62, F67): **Yellow** — La II N_g* = 2 (too thin to discriminate), Ce II
+N_g* = 16 with ε* 1.40 mag off, Nd II Gray on the precision rule (its 10⁶-
+packet rerun pending). The PI decides with the numbers in hand; G2–G4 are
+detailed in `prl_gate.md` only after that decision.

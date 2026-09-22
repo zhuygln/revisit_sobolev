@@ -30,9 +30,11 @@ IONS = ("57LaII", "58CeII", "60NdII")
 def check_prereg(row, strict=True):
     """The record must be the preregistered experiment."""
     bad = []
-    for k in ("state", "shell", "n", "ng_grid", "ng_fine", "eps_grid", "build_seeds"):
+    for k in ("state", "shell", "ng_grid", "ng_fine", "eps_grid", "build_seeds"):
         if row.get(k) != PREREG[k]:
             bad.append(f"{k}: {row.get(k)!r} != {PREREG[k]!r}")
+    if row.get("n", 0) < PREREG["n"]:                     # the packet count may only be raised (a gray remedy), never lowered
+        bad.append(f"n: {row.get('n')} < {PREREG['n']}")
     if row.get("seeds") != PREREG["seeds"]:
         bad.append(f"seeds: {row.get('seeds')} != {PREREG['seeds']}")
     if bad and strict:
@@ -256,9 +258,11 @@ def readings(records):
 def main():
     records = {}
     for ion in IONS:
-        p = HERE / f"gate1_{ion}.json"
-        if p.exists():
-            row = json.loads(p.read_text()); check_prereg(row); records[ion] = row
+        # the record at the highest packet count wins: a gray remedy reruns the whole grid at more packets
+        cands = sorted(HERE.glob(f"gate1_{ion}*.json"), key=lambda q: json.loads(q.read_text()).get("n", 0))
+        if cands:
+            row = json.loads(cands[-1].read_text()); check_prereg(row); records[ion] = row
+            print(f"{ion}: {cands[-1].name} (n = {row['n']:,})")
     if not records:
         print("no records"); return 1
     out = readings(records)
