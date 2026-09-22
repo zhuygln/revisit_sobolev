@@ -202,3 +202,51 @@ from this file.
   the nuclear-model ensemble; the name σ_nuclear is reserved for the
   future experiment that runs an external nuclear-realisation ensemble
   through the same transport.
+
+---
+
+## R2M robustness (post-pass; fixed 2026-09-22 before the run; the G1 sections above are unchanged)
+
+The check the post-pass paragraph of "Legs per ion" announces, run now on
+the PI's instruction. **Not a gate**: it asks whether the compression G1
+found is tied to the downward macroatom, and reports.
+
+- State, atoms, transport, window, live-band rule, thresholds: G1's.
+- Packets: 3×10⁵ per seed for all three ions. Nd II's G1 remedy (10⁶) is
+  not repeated here because the 10⁶ downward run peaked at 17.4 GB of
+  resident memory on the 24 GB machine (every collected leg's events stay
+  in memory for the run) and the radiation-field-driven macroatom carries
+  about 3.5 times the events per packet (F63). Remedy if Gray condition 2
+  fires on R2M: rerun the whole R2M leg set at 10⁶ once the runner releases
+  a source leg's events after its kernels are built (a memory change to
+  `run_legs`, no change to any number), never a smaller live set.
+- Legs per ion (build seeds 101–103; evaluation seeds 1–3; every leg
+  energy packets):
+
+  | tag | mode | what |
+  |---|---|---|
+  | `R2build`, `R2` | `sobolev_dmacro` | G1's reference pair, rerun on the same seeds so that R2M − R2 is measured seed for seed |
+  | `A2_ng8` | `sobolev_group` | G1's downward-trained 8-group operator (kernel from `R2build`), scored here against R2M: the reference dependence of the operator |
+  | `R2Mbuild` | `sobolev_macro`, W = ½, T_rad = T_zone | the radiation-field-driven macroatom on the build seeds, `collect_events` |
+  | `R2M` | `sobolev_macro`, W = ½ | **the reference of this section**, evaluation seeds, `collect_events` |
+  | `A2M_ng8` | `sobolev_group` | the 8-group operator rebuilt from `R2Mbuild`'s events, transported on the evaluation seeds |
+  | `K128M`, `K128Mbuild` | kernel only | the 128-group energy matrices from `R2M` and `R2Mbuild` (the independent fine reference and the in-sample one) |
+
+- Readings per ion, Gray first (G1's conditions 1–4 applied with R2M as
+  the reference leg):
+  1. the reference shift: R2M − R2 per band live on R2M, and its maximum
+     (F63 gave 1.3–1.8 mag on the 13-ion blend);
+  2. **survives** iff `A2M_ng8` vs R2M has max |Δm| ≤ 0.10 mag over R2M's
+     live bands and max |Δcolour| ≤ 0.10 mag (G1's thresholds, unchanged);
+  3. the reference dependence: `A2_ng8` (downward-trained) vs R2M, the same
+     two numbers, reported;
+  4. m_event of the R2M-trained 8-group kernel against `K128M`, of the
+     downward-trained one against `K128M`, and the `K128Mbuild` vs `K128M`
+     floor.
+- The statement made from it: "the compression survives (or does not
+  survive) the radiation-field-driven macroatom at N_g = 8 for ion X",
+  with the reference shift alongside. No claim about full macroatomic
+  physics.
+- Records `paperB/r2m/r2m_<ion>.json`, `paperB/r2m/r2m_verdict.json`;
+  `analyse_r2m.py` refuses a record whose state, seeds, packet count, N_g
+  or W differ from this section.
