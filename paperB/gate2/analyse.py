@@ -206,14 +206,15 @@ def markdown(out=None):
               + (f"; gray: {'; '.join(r['gray'])}" if r["gray"] else "") + ":", "",
               "| family | archetypes | matrix parameters | max abs dm | mean abs dm | max abs dcolour | SED L1 | m_event | exit lines kept | fallback |",
               "|---|---|---|---|---|---|---|---|---|---|"]
-        for n, m in sorted(r["local"].items()):
+        for n, m in sorted(r["local"].items(), key=lambda kv: int(kv[0])):
+            n = int(n)
             L.append(f"| local, N_g = {n} | {n} | {n * n} | {m['band_max']:.3f} | {m['band_mean']:.3f} | {m['colour_max']:.3f} | "
                      f"{m['sed']:.3f} | {m['event']:.3f} | all | — |")
-        for k, m in sorted(r["global_nmf"].items()):
-            L.append(f"| global, rank {k} | {k} | {m['n_params']:,} | {m['band_max']:.3f} | {m['band_mean']:.3f} | {m['colour_max']:.3f} | "
+        for k, m in sorted(r["global_nmf"].items(), key=lambda kv: int(kv[0])):
+            L.append(f"| global, rank {int(k)} | {k} | {m['n_params']:,} | {m['band_max']:.3f} | {m['band_mean']:.3f} | {m['colour_max']:.3f} | "
                      f"{m['sed']:.3f} | {m['event']:.3f} | all | {m['fallback_frac']:.4f} |")
-        for f, m in sorted(r["truncation"].items()):
-            L.append(f"| truncation, f = {f:g} | 128 | 16,384 | {m['band_max']:.3f} | {m['band_mean']:.3f} | {m['colour_max']:.3f} | "
+        for f, m in sorted(r["truncation"].items(), key=lambda kv: float(kv[0])):
+            L.append(f"| truncation, f = {float(f):g} | 128 | 16,384 | {m['band_max']:.3f} | {m['band_mean']:.3f} | {m['colour_max']:.3f} | "
                      f"{m['sed']:.3f} | {m['event']:.3f} | {m['n_exit']:,} ({m['rho_exit']:.3f}) | {m['fallback_frac']:.4f} |")
         d = r["diagnostic"]
         if d:

@@ -3251,6 +3251,57 @@ group, retain to f, renormalise, never reselect after seeing the light)
 is written into the prereg. La is a control in both. Then: merge PR #10,
 tag the prereg state, run G2, leave G3 alone until G2 is read.
 
+## 9bk. Paper B gate G2: locality beats rank, and the exit spectrum only half compresses (2026-09-22)
+
+Preregistered, approved with the PI's H1 amendment, tagged
+paperB-g2-prereg, then run three times. The first two runs are worth
+recording because both failures were mine and both were caught by the
+gate's own machinery before any decisive number was read.
+
+Run 1 died on the La II control: rank 1 and 2 sent a live row to exactly
+zero (validate_energy 1.0, gray 3), and 600 Lee-Seung iterations left
+rank 16 and 32 short of the optimum (gray 8). Neither is physics -- both
+are failures to COMPUTE the preregistered object -- so: fix and repeat,
+which the prereg already provides for. A zeroed row now becomes an empty
+row (coherent fallback, the kernel's standing convention), and the NMF
+iterates to a convergence criterion. The zeroed-row choice has a
+direction -- it leans toward H1 Green -- so I wrote that into the prereg
+rather than leaving it implicit. The row carried 1.5e-6 of the energy.
+
+Run 2 died on gray 7: the L128_ng8 control differed from G1's coarse
+A2_ng8 by 2.6 sigma (Ce) and 2.1 (Nd). Diagnosis before action: per-band
+differences 0.002-0.035 mag, random in sign, all far inside the 0.10 mag
+threshold; the sigma came from bands whose seed scatter is 0.003 mag, so
+the test resolved differences ~30x below what the gate cares about. The
+empty-row explanation was checked and excluded (those rows carry exactly
+zero absorbed energy, fallback 0.00000). The condition is a max over 6-7
+bands against a per-band 2 sigma limit, which fires ~25 % of the time
+under the null: my error in writing it. I did NOT loosen it. The prereg
+names the remedy -- rerun the local family on the 128-group tables -- so
+run 3 transports L128_ng{2,4,8,16,32} and reads K*_local from those. That
+is also better science: both families then sit on identical tables and
+identical row occupancy, and the equivalence assumption disappears.
+
+Run 3, clean on all three ions, no gray. H1 GREEN: K*_local 2 / 16 / 2
+and K*_global 2 / 32 / undefined (La / Ce / Nd). Nd is the sharp one --
+two contiguous frequency blocks reach 0.069 mag while a rank-32 mixture
+with 8,192 free numbers against 1,024 never reaches 0.10 at all. H2
+YELLOW: L* = 0.358 (Ce) and 0.113 (Nd), so the exit spectrum compresses,
+but not to the 10 % headline. La's L* = 0.504 is a grid artifact (524
+lines, saturated, the coarsest truncation already keeps 15 %) and it
+decides nothing, as preregistered.
+
+The diagnostic, in its strong form at 32 archetypes on every ion: global
+m_event 0.093 / 0.058 / 0.075 vs local 0.311 / 0.138 / 0.132 -- it fits
+the microscopic redistribution 2-4x better -- while its band error is
+0.034 / 0.081 / 0.162 mag vs local 0.004 / 0.032 / 0.008. The PI's boxed
+statement, measured. The preregistered matched-count flag (evaluated at
+k = K*_local) is true on Ce and false on La and Nd, where K*_local = 2 is
+too coarse a count for the comparison to bite -- a reminder that a flag
+evaluated at one point is weaker than the curve it summarises.
+
+Cost: La 41 s, Ce 6 min, Nd 56 min (20 legs x 3 seeds x 1e6, 7 GB peak).
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

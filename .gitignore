@@ -81,3 +81,6 @@ education/notebooks/executed/
 education/data/generated/
 education/data/.determinism.json
 education/videos/*.mp4
+
+# Paper B per-run completion markers (the record itself is committed)
+paperB/*/*.done

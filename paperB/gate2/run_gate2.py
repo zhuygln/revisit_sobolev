@@ -66,6 +66,9 @@ def run(ion, n=None, seeds=SEEDS, build_seeds=BUILD_SEEDS, k_grid=K_GRID, f_grid
         k["table_kb"] = k["serialized_bytes"] / 1024.0
     out = Path(out) if out else HERE / f"gate2_{ion}.json"
     out.write_text(json.dumps(row, indent=1, default=float) + "\n")
+    # a per-run completion marker: a sentinel appended to a log survives the
+    # next run's start and once made a finished flag look like a fresh one
+    (out.parent / f"{out.stem}.done").write_text(f"{row['git']} {row['t_wall_total']:.0f}s {row['n']}\n")
     if verbose:
         print(f"wrote {out} in {row['t_wall_total']:.0f} s (rss {row['rss_mb']:.0f} MB)", flush=True)
     return row
