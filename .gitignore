@@ -90,3 +90,9 @@ docs/paperB/manuscript.pdf
 docs/paperB/manuscript.aux
 docs/paperB/manuscript.log
 docs/paperB/manuscript.out
+
+# Paper IV Phase 9/10 run scratch (the committed records live in prod_record/)
+paper4/phase10_fontes/prod/
+paper4/phase10_fontes/pilot/
+paper4/phase10_fontes/*.state.json
+paper4/phase9_final/prefix/
