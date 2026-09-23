@@ -83,13 +83,33 @@ def test_nmf_rank_one_is_an_outer_product_and_error_falls_with_rank():
     live = ~k.empty_rows; V = k.R[live]
     W1, H1, c1 = OP.nmf(V, 1); W4, H4, c4 = OP.nmf(V, 4)
     assert np.linalg.matrix_rank(W1 @ H1) == 1 and c4["rel_frobenius"] < c1["rel_frobenius"]
+    assert c1["converged"] and c4["converged"] and c4["iters"] <= c4["max_iters"]
     g = OP.nmf_rank(4)(k, ev)
     tr = g.metadata["transform"]
     assert tr["kind"] == "nmf" and tr["archetypes"] == 4 and tr["n_params"] == 2 * k.n_groups * 4 and g.validate_energy() < 1e-12
     assert np.allclose(g.R[live].sum(axis=1), V.sum(axis=1)) and 0.0 <= tr["in_sample_tv"] <= 1.0
-    # more archetypes reproduce the events better, and the full rank reproduces them exactly
-    tv = [OP.nmf_rank(kk, iters=800)(k, ev).metadata["transform"]["in_sample_tv"] for kk in (1, 2, 8)]
+    assert tr["n_rows_zeroed"] == 0 and tr["zeroed_energy_share"] == 0.0
+    # more archetypes reproduce the events better
+    tv = [OP.nmf_rank(kk)(k, ev).metadata["transform"]["in_sample_tv"] for kk in (1, 2, 8)]
     assert tv[0] >= tv[1] >= tv[2]
+
+
+def test_a_row_the_factorisation_zeroes_becomes_empty_and_energy_still_closes():
+    """The G2 defect found on the La II control: rank 1 and 2 sent one live
+    row to zero, the row sum no longer matched q_dep and validate_energy
+    returned 1.0 (gray condition 3). Such a row is now declared empty, so
+    transport falls back to coherent scattering there, and the identity
+    holds exactly."""
+    ev, _ = _events(); k = _fine(ev)
+    live = np.flatnonzero(~k.empty_rows)
+    R = k.R.copy()
+    g = k.with_matrix(R)
+    assert g.validate_energy() < 1e-12
+    counts = k.counts.copy(); counts[live[0]] = 0.0
+    g2 = k.with_matrix(R, counts=counts)
+    assert g2.empty_rows[live[0]] and np.all(g2.R[live[0]] == 0) and g2.validate_energy() < 1e-12
+    out = g2.sample_nu_out(np.full(200, np.sqrt(g2.edges[live[0]] * g2.edges[live[0] + 1])), np.random.default_rng(0), rows="energy")
+    assert np.all(np.isnan(out))                       # the caller scatters these coherently
 
 
 def test_local_on_fine_tables_is_sampling_equivalent_to_the_coarse_kernel():
@@ -124,6 +144,15 @@ def _kernel(ng, source, R=None, transform=None, n_exit=1000):
     return d
 
 
+def _local_legs(legs, kernels, ref, dm_by_ng, ev_by_ng):
+    """The transported L128 local family: one leg and one derived kernel per N."""
+    for ng, dm in dm_by_ng.items():
+        legs[f"L128_ng{ng}"] = _leg([m + dm for m in ref])
+        e = ev_by_ng[ng]; R = (1 - e) * np.eye(128) + e * np.full((128, 128), 1 / 128)
+        kernels[f"L128_ng{ng}"] = _kernel(128, "R2build", R=R,
+                                          transform=dict(kind="local", n_coarse=ng, archetypes=ng, n_params=ng * ng, in_sample_tv=e))
+
+
 def _g1(dm_by_ng, ev_by_ng):
     ref = [20.0] * 7
     legs = {"R2": _leg(ref, "sobolev_dmacro"), "R2build": _leg(ref, "sobolev_dmacro")}; legs["R2build"]["seeds"] = [101, 102, 103]
@@ -136,13 +165,15 @@ def _g1(dm_by_ng, ev_by_ng):
     return row
 
 
-def _g2(ion, dm_global, dm_trunc, rho_trunc, ev_global, ref_off=0.0, ctrl_off=0.0, conv=1e-6):
+def _g2(ion, dm_global, dm_trunc, rho_trunc, ev_global, ref_off=0.0, ctrl_off=0.0, conv=1e-6,
+        dm_local=None, ev_local=None):
+    dm_local = dm_local or LOCAL_DM; ev_local = ev_local or LOCAL_EV
     ref = [20.0 + ref_off] * 7
-    legs = {"R2": _leg(ref, "sobolev_dmacro"), "R2build": _leg(ref, "sobolev_dmacro"), "A2_ng8": _leg([m + 0.03 for m in ref]),
-            "L128_ng8": _leg([m + 0.03 + ctrl_off for m in ref])}
+    legs = {"R2": _leg(ref, "sobolev_dmacro"), "R2build": _leg(ref, "sobolev_dmacro"),
+            "A2_ng8": _leg([m + dm_local[8] - ctrl_off for m in ref])}
     legs["R2build"]["seeds"] = [101, 102, 103]
-    kernels = {"K128": _kernel(128, "R2"), "K128build": _kernel(128, "R2build"), "A2_ng8": _kernel(8, "R2build"),
-               "L128_ng8": _kernel(128, "R2build", transform=dict(kind="local", n_coarse=8, archetypes=8, n_params=64, in_sample_tv=0.3))}
+    kernels = {"K128": _kernel(128, "R2"), "K128build": _kernel(128, "R2build"), "A2_ng8": _kernel(8, "R2build")}
+    _local_legs(legs, kernels, ref, dm_local, ev_local)
     for k, dm in dm_global.items():
         legs[f"G_k{k}"] = _leg([m + dm for m in ref])
         # a matrix whose TV distance from the identity K128 is ev_global[k]: identity mixed with uniform
@@ -154,8 +185,8 @@ def _g2(ion, dm_global, dm_trunc, rho_trunc, ev_global, ref_off=0.0, ctrl_off=0.
         kernels[f"T_f{f:g}"] = _kernel(128, "R2build", n_exit=int(1000 * rho_trunc[f]),
                                        transform=dict(kind="truncate", f=f, n_exit_kept=int(1000 * rho_trunc[f]), n_exit_total=1000, archetypes=128, n_params=128 ** 2))
     return dict(ion=ion, n=G2.PREREG["n"][ion], seeds=[1, 2, 3], build_seeds=[101, 102, 103], k_grid=[1, 2, 4, 8, 16, 32], f_grid=[0.1, 0.2, 0.5, 0.9, 0.99, 0.999],
-                ng_control=8, ng_fine=128, state="paper4/phase1_benchmarks/P1_t2.json", shell=28, lam_window=[1000.0, 30000.0], n_spec=200,
-                legs=legs, kernels=kernels)
+                ng_control=8, ng_fine=128, ng_local=[2, 4, 8, 16, 32], state="paper4/phase1_benchmarks/P1_t2.json", shell=28,
+                lam_window=[1000.0, 30000.0], n_spec=200, legs=legs, kernels=kernels)
 
 
 @pytest.fixture(autouse=True)
@@ -172,6 +203,7 @@ TRUNC_RHO = {0.1: 0.02, 0.2: 0.04, 0.5: 0.12, 0.9: 0.36, 0.99: 0.67, 0.999: 0.87
 
 
 def _case(ion, dm_g, ev_g, dm_t=None, rho_t=None, **kw):
+    kw.setdefault("dm_local", ND_DM if ion == "60NdII" else LOCAL_DM)
     return _g2(ion, dm_g, dm_t or TRUNC_DM, rho_t or TRUNC_RHO, ev_g, **kw)
 
 
@@ -223,7 +255,7 @@ def test_h1_red_when_a_low_rank_law_passes_with_four_times_fewer_archetypes():
 def test_h1_yellow_when_the_single_archetype_null_passes_on_the_nd_like_ion():
     g1 = {i: _g1(ND_DM, LOCAL_EV) for i in G2.IONS}                             # K*_local = 2: Red is out of reach
     dm_g = {1: 0.05, 2: 0.04, 4: 0.03, 8: 0.02, 16: 0.02, 32: 0.02}             # K*_global = 1 < 2
-    g2 = {i: _case(i, dm_g, {k: 0.1 for k in dm_g}) for i in G2.IONS}
+    g2 = {i: _case(i, dm_g, {k: 0.1 for k in dm_g}, dm_local=ND_DM) for i in G2.IONS}   # every ion Nd-like
     out = G2.readings(g2, g1)
     nd = out["per_ion"]["60NdII"]
     assert nd["k_global"] == 1 and nd["H1"] == "YELLOW" and out["H1"] == "YELLOW" and out["decision"] == "PI"
@@ -265,9 +297,14 @@ def test_gray_on_reference_mismatch_control_and_nmf_convergence():
     g2["58CeII"] = _case("58CeII", GLOBAL_16, EV_GLOBAL_BETTER, ref_off=1e-3)
     out = G2.readings(g2, g1)
     assert any(f.startswith("6:") for f in out["per_ion"]["58CeII"]["gray"]) and out["decision"] == "GRAY"
+    # the control comparison is a reported diagnostic, not a gray condition:
+    # it fired on both decisive ions in the real run and the preregistered
+    # remedy (the local family transported on the 128-group tables) applies
     g2["58CeII"] = _case("58CeII", GLOBAL_16, EV_GLOBAL_BETTER, ctrl_off=0.2)
     out = G2.readings(g2, g1)
-    assert any(f.startswith("7:") for f in out["per_ion"]["58CeII"]["gray"])
+    ce = out["per_ion"]["58CeII"]
+    assert ce["control"]["fired"] and abs(ce["control"]["max_abs_mag"] - 0.2) < 1e-9
+    assert not any(f.startswith("7:") for f in ce["gray"]) and ce["H1"] == "GREEN"
     g2["58CeII"] = _case("58CeII", GLOBAL_16, EV_GLOBAL_BETTER, conv=1e-2)
     out = G2.readings(g2, g1)
     assert any(f.startswith("8:") for f in out["per_ion"]["58CeII"]["gray"])
@@ -287,9 +324,11 @@ from sobolev import atomic_cache as ac                                  # noqa: 
 @pytest.mark.skipif(not (ac.CACHE_DIR / "57LaII.npz").exists(), reason="La II cache not built")
 def test_runner_smoke_la(tmp_path):
     R = _load("paperB_run_gate2", "paperB/gate2/run_gate2.py")
-    row = R.run("57LaII", n=2000, seeds=(1,), build_seeds=(101,), k_grid=(1,), f_grid=(0.9,), out=tmp_path / "r.json", verbose=False)
-    assert set(row["legs"]) == {"R2build", "R2", "A2_ng8", "L128_ng8", "G_k1", "T_f0.9"}
-    assert set(row["kernels"]) == {"A2_ng8", "L128_ng8", "G_k1", "T_f0.9", "K128", "K128build"}
+    row = R.run("57LaII", n=2000, seeds=(1,), build_seeds=(101,), k_grid=(1,), f_grid=(0.9,), ng_local=(2, 8),
+                out=tmp_path / "r.json", verbose=False)
+    assert set(row["legs"]) == {"R2build", "R2", "A2_ng8", "L128_ng2", "L128_ng8", "G_k1", "T_f0.9"}
+    assert set(row["kernels"]) == {"A2_ng8", "L128_ng2", "L128_ng8", "G_k1", "T_f0.9", "K128", "K128build"}
+    assert row["kernels"]["L128_ng2"]["transform"]["archetypes"] == 2 and row["ng_local"] == [2, 8]
     for tag, leg in row["legs"].items():
         assert abs(leg["energy"]["identity_residual"]) < 1e-10, tag
     for tag, k in row["kernels"].items():

@@ -22,26 +22,35 @@ import numpy as np
 from redistribution import RedistributionKernel
 
 
-def nmf(V, k, iters=600, seed=0, tail=100):
-    """V ~ W H, non-negative, Lee-Seung. Returns W, H and the convergence
-    record: the relative Frobenius error at the end and its relative change
-    over the last `tail` iterations."""
+def nmf(V, k, tol=1e-6, max_iters=20000, seed=0, tail=100):
+    """V ~ W H, non-negative, Lee-Seung multiplicative updates, iterated to
+    CONVERGENCE rather than to a fixed count: the relative Frobenius error is
+    checked every `tail` iterations and the loop stops when its relative
+    change over that block falls to `tol`, or at `max_iters`. A fixed 600
+    iterations left rank 16 and 32 short of the optimum (relative change
+    ~3e-3), which is a failure to compute the preregistered object, not a
+    property of it. Returns W, H and the convergence record."""
     rng = np.random.default_rng(seed)
     m, n = V.shape
     scale = np.sqrt(V.mean() / k) if V.mean() > 0 else 1.0
     W = rng.uniform(0.5, 1.5, (m, k)) * scale
     H = rng.uniform(0.5, 1.5, (k, n)) * scale
     eps = 1e-12
-    norm = np.linalg.norm(V)
-    err_tail = None
-    for it in range(iters):
-        H *= (W.T @ V) / (W.T @ W @ H + eps)
-        W *= (V @ H.T) / (W @ H @ H.T + eps)
-        if it == iters - tail - 1:
-            err_tail = np.linalg.norm(V - W @ H) / norm
-    err = float(np.linalg.norm(V - W @ H) / norm)
-    change = float(abs(err_tail - err) / max(err, 1e-300)) if err_tail is not None else float("nan")
-    return W, H, dict(rel_frobenius=err, rel_change_tail=change, iters=iters, seed=seed)
+    norm = max(float(np.linalg.norm(V)), 1e-300)
+    err_prev = float(np.linalg.norm(V - W @ H) / norm)
+    change, it = float("nan"), 0
+    while it < max_iters:
+        for _ in range(tail):
+            H *= (W.T @ V) / (W.T @ W @ H + eps)
+            W *= (V @ H.T) / (W @ H @ H.T + eps)
+        it += tail
+        err = float(np.linalg.norm(V - W @ H) / norm)
+        change = abs(err_prev - err) / max(err, 1e-300)
+        err_prev = err
+        if change <= tol:
+            break
+    return W, H, dict(rel_frobenius=err_prev, rel_change_tail=float(change), iters=int(it),
+                      converged=bool(change <= tol), tol=tol, max_iters=int(max_iters), seed=seed)
 
 
 def energy_in(kern, ev):
@@ -80,20 +89,33 @@ def local(n_coarse):
     return f
 
 
-def nmf_rank(k, iters=600, seed=0):
+def nmf_rank(k, tol=1e-6, max_iters=20000, seed=0):
     def f(kern, ev):
         live = ~kern.empty_rows
         V = kern.R[live]
         kk = min(int(k), min(V.shape))
-        W, H, conv = nmf(V, kk, iters=iters, seed=seed)
+        W, H, conv = nmf(V, kk, tol=tol, max_iters=max_iters, seed=seed)
         Rk = W @ H
+        # each row is rescaled to its ORIGINAL energy row sum, so the
+        # conservation identity sum_j R_ij + q_dep_i = 1 survives exactly
         rs_old = V.sum(axis=1, keepdims=True); rs_new = Rk.sum(axis=1, keepdims=True)
-        Rk = np.where(rs_new > 0, Rk * rs_old / np.where(rs_new > 0, rs_new, 1.0), 0.0)
+        ok = (rs_new > 0).ravel()
+        Rk = np.where(ok[:, None], Rk * rs_old / np.where(ok[:, None], rs_new, 1.0), 0.0)
         R_full = np.zeros_like(kern.R); R_full[live] = Rk
+        # a live row the factorisation sends to zero has no exit distribution
+        # at all under this operator; it is declared EMPTY so that transport
+        # applies the kernel's standing convention for a row with no
+        # information (coherent scattering, counted in the fallback fraction
+        # and limited by gray condition 4) instead of sampling a degenerate
+        # cumulative. Recorded with the energy share it carries.
+        counts = kern.counts.copy()
+        zeroed = np.flatnonzero(live)[~ok]
+        counts[zeroed] = 0.0
         E = energy_in(kern, ev)
         md = dict(transform=dict(kind="nmf", k=kk, archetypes=kk, n_params=int(2 * kern.n_groups * kk),
-                                 in_sample_tv=_tv_rows(R_full, kern.R, E), **conv))
-        return kern.with_matrix(R_full, md)
+                                 in_sample_tv=_tv_rows(R_full, kern.R, E), n_rows_zeroed=int(zeroed.size),
+                                 zeroed_energy_share=float(E[zeroed].sum() / E.sum()) if E.sum() > 0 else 0.0, **conv))
+        return kern.with_matrix(R_full, md, counts=counts)
     return f
 
 

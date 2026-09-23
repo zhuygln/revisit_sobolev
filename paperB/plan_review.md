@@ -231,3 +231,57 @@ values, the ladder read Red first, then Green, then Yellow.
 
 Sequence as instructed: amend, merge PR #10, tag the G2 preregistration
 state, run G2, leave G3 untouched until the G2 verdict is written.
+
+## G2 run, first attempt: two implementation defects, disclosed and repeated (2026-09-22)
+
+Not a PI statement: a record of a decision I took while executing the
+approved sequence, because it required touching a tagged preregistration
+after part of a run existed.
+
+The G2 run was launched from `paperB-g2-prereg`. La II finished; reading
+its record showed `G_k1` and `G_k2` failing the energy identity
+(`validate_energy` = 1.0, gray condition 3) because the factorisation sent
+one live row to exactly zero, and `G_k16`/`G_k32` failing the convergence
+condition (gray 8) because 600 Lee–Seung iterations left the relative
+Frobenius error falling by ~3×10⁻³ per 100 iterations. Both are failures
+to compute the preregistered object, not properties of it, so the
+preregistration's own remedy applies: fix and repeat the run.
+
+I stopped the run with Ce II in progress, deleted every G2 record unread
+except La II's (which had already been inspected and which decides
+neither reading), fixed both defects, recorded the amendment in
+`prl_gate.md` — including exactly what had been seen, and the direction
+in which the zeroed-row convention leans — and reran all three ions.
+
+The judgement call worth recording: the zeroed row could be repaired
+either by declaring it empty (coherent fallback, the kernel's standing
+convention for a row with no information) or by falling back to its own
+un-factorised distribution. The first leans toward H1 Green, the second
+toward Red and also leaks information the rank-k model does not contain.
+I chose the first and wrote the bias into the preregistration rather than
+leaving it implicit; on La II the row carried 1.5×10⁻⁶ of the absorbed
+energy.
+
+## G2 run, second attempt: the control fired on both decisive ions (2026-09-22)
+
+Again a record of my own execution decision, not a PI statement.
+
+The rerun completed on all three ions with no energy or convergence
+failures. Gray condition 7 then fired on both decisive ions: the
+`L128_ng8` control differed from G1's coarse `A2_ng8` by 2.6 σ (Ce II)
+and 2.1 σ (Nd II), so the gate read GRAY and H1/H2 could not be read.
+
+The preregistration names the remedy for this case and it does not
+involve a threshold: the local family is rerun on the 128-group tables.
+Applied. I did not loosen the 2 σ limit, and I recorded in `prl_gate.md`
+what the control was in fact resolving — per-band differences of
+0.002–0.035 mag, random in sign, all far inside the 0.10 mag threshold,
+with the σ coming from bands whose seed scatter is 0.003 mag. The
+empty-row explanation was checked and excluded (those rows carry exactly
+zero absorbed energy; the coherent fallback is 0.00000 in both legs).
+
+The honest summary of the control's design: a maximum over six or seven
+bands tested against a per-band 2 σ limit fires about a quarter of the
+time even when the two legs are identical in distribution. That is my
+error in writing the condition, it is now stated in the record, and it
+was left standing rather than adjusted after it fired.

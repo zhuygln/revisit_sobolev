@@ -56,9 +56,17 @@ itself moving by up to 2.1 mag; the downward-trained operator reproduces
 the downward reference it came from). The exit tables are already the
 exact aggregate over distinct exit lines; their size is the number of
 exit lines the sample discovers, and 90 % of the exit energy sits in
-5–26 % of them. **G2 is preregistered and approved** (the PI's review of PR
-#10, 2026-09-22, with the H1 amendment applied): H1 compares the archetype
-counts K*_local and K*_global on shared 128-group exit tables, the
-event-level fit demoted to the `events_vs_observables` diagnostic; H2 reads
-L*, the smallest retained fraction of distinct exit lines that still passes
-G1's transport thresholds. Ce II and Nd II decide both; La II is a control.
+5–26 % of them. G2 was preregistered, approved with the PI's H1 amendment, tagged
+`paperB-g2-prereg` and run on 2026-09-22 (§4.64, F69): **H1 Green, H2
+Yellow → write the mechanism claim.** K*_local = 2 / 16 / 2 against
+K*_global = 2 / 32 / undefined (La II / Ce II / Nd II), so local
+coarse-graining needs no more archetypal exit distributions than a global
+non-negative factorisation — on Nd II two contiguous frequency blocks
+against a rank-32 mixture that never reaches the threshold. At 32
+archetypes the global operator fits the microscopic redistribution 2–4×
+better and reproduces the light 2–20× worse. The exit spectrum compresses
+to L* = 0.358 (Ce II) and 0.113 (Nd II) of its distinct lines, short of
+the 10 % headline. Two preregistration amendments made during execution
+(two implementation defects; the control firing and its declared remedy)
+are recorded in `prl_gate.md`. **G3 is untouched until the G2 verdict is
+written up**, as the PI directed.
