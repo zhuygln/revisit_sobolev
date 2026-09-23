@@ -84,3 +84,9 @@ education/videos/*.mp4
 
 # Paper B per-run completion markers (the record itself is committed)
 paperB/*/*.done
+
+# Paper B manuscript build products
+docs/paperB/manuscript.pdf
+docs/paperB/manuscript.aux
+docs/paperB/manuscript.log
+docs/paperB/manuscript.out

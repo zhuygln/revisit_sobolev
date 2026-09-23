@@ -3302,6 +3302,51 @@ evaluated at one point is weaker than the curve it summarises.
 
 Cost: La 41 s, Ce 6 min, Nd 56 min (20 legs x 3 seeds x 1e6, 7 GB peak).
 
+## 9bl. Paper B: G2 frozen, G3 preregistered, the manuscript skeleton (2026-09-22)
+
+The PI read G2 as the conceptual centre of the paper: better reproduction
+of microscopic fluorescence events does NOT imply better reproduction of
+transported observables, with Nd II the clean case (K*_local = 2 while
+the global family never passes; at 32 archetypes it fits the events 1.8x
+better and the light 21x worse). PR #11 merged, tag paperB-g2-freeze.
+H2's Yellow stands as physics -- the PI explicitly refused to rescue it --
+and it gives the operator a two-level structure: P(nu_out|nu_in) =
+P(j|i) P(nu_out|i,j), the first factor extremely coarse, the second still
+needing a sparse set of real exit lines. The headline to avoid is
+"millions of transitions collapse to a few numbers"; we do not have that.
+
+G3 preregistered with the PI's two priorities. (1) Fixed and recomputed
+kernels are tested SEPARATELY: R(theta0)->theta is transfer, R(theta)->
+theta is existence, and a failure of the first with the second passing is
+a positive result (a state-dependent table), not a kill. (2) The state
+axes are separated rather than moved together: T_gas, tau-scale/density,
+and J_nu shape (t_core decoupled from T_gas). Paper III's assumption that
+the source spectrum is irrelevant is NOT inherited -- its own results had
+Nd II sensitive to it. A fourth axis follows the physical trajectory
+(P1 at 1/3/5 d). Feasibility checked before writing the grids: Nd II's
+opacity line count runs 42,695 (2500 K) to 202,630 (5000 K) and tau_max
+120 to 12,017 over the density axis, and the opacity range MOVES, so the
+fixed kernel's out-of-range clipped fraction is recorded as a diagnostic
+and never grayed -- for a transfer leg, clipping and coherent fallback
+ARE the failure mechanism, not a defect of the run. An interpolation leg
+per axis asks whether the dependence is smoothly tabulable, which is what
+"tabulated predictively" means; the NN stays out unless that fails.
+
+Manuscript skeleton in docs/paperB/ with the Paper IV machinery: freeze.py
+-> FROZEN.json (4 hashed sources) -> latex_tables.py (75 macros, 2 table
+fragments) -> manuscript.tex, check_structure.py (undefined macro, literal
+number in prose, missing figure, stale fragment), Makefile, 6 tests. The
+two figures the PI froze are generated from FROZEN.json alone.
+
+One bug worth recording: the first draft of Figure 2 plotted the archetype
+counts as categories 1,2,3,4,5 instead of 1,2,4,8,16,32, because json.dump
+turns int dict keys into strings and sorted() then ordered them as text
+("1","16","2","32","4","8"). The curves looked plausible -- monotone,
+right magnitudes -- and only the x tick labels gave it away. Frozen records
+now store ordered LISTS of {k, ...} rather than dicts keyed by number, and
+a test asserts the keys survive the round trip as sorted ints. A figure
+that looks reasonable is not evidence that its axis is right.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

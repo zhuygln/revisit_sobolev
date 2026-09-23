@@ -285,3 +285,264 @@ bands tested against a per-band 2 σ limit fires about a quarter of the
 time even when the two legs are identical in distribution. That is my
 error in writing the condition, it is now stated in the record, and it
 was left standing rather than adjusted after it fired.
+
+## The PI's reading of G2: merge, freeze, preregister G3, start the manuscript (2026-09-22)
+
+PI, verbatim (pasted from a rendered page: display formulae appear as
+rendered text and LaTeX source together; nothing edited):
+
+> G2 is a strong result. I would approve PR #11 for merge and move the research program to G3, while starting the Paper B manuscript skeleton now. The most important point is that H1 did much more than merely "pass."
+>
+> The central result is now:
+>
+> \boxed{
+> \text{better reproduction of microscopic fluorescence events}
+> \;\not\Rightarrow\;
+> \text{better reproduction of transported observables}.
+> }
+>
+> For Nd II, the contrast is unusually clean:
+>
+> K_{\rm local}^{\star}=2,
+> \qquad
+> K_{\rm global}^{\star}>32,
+>
+> while at 32 archetypes the global representation has the smaller event error,
+>
+> m_{\rm event}^{\rm global}=0.075
+> <
+> 0.132=m_{\rm event}^{\rm local},
+>
+> yet the observable errors go the opposite way,
+>
+> m_{\rm band}^{\rm global}=0.162\ {\rm mag},
+> \qquad
+> m_{\rm band}^{\rm local}=0.008\ {\rm mag}.
+>
+> That is much more interesting than "NMF didn't work." It says that the degrees of freedom relevant to radiation transport are not the degrees of freedom that minimize a generic distance between microscopic redistribution distributions.
+>
+> The emerging physical picture is therefore:
+>
+> \boxed{
+> \text{microscopic fluorescence}
+> \rightarrow
+> \underbrace{\text{frequency-local coarse structure}}_{\text{transport relevant}}
+> +
+> \underbrace{\text{fine event structure}}_{\text{mostly transport irrelevant}}.
+> }
+>
+> That is potentially the conceptual center of the paper.
+>
+> What H2 means
+>
+> I would not try to turn H2 Yellow into Green.
+>
+> The honest result is useful:
+>
+> L^\star_{\rm Ce}=0.358,\qquad
+> L^\star_{\rm Nd}=0.113.
+>
+> So the transition operator is dramatically compressible, while the conditional exit-frequency distribution retains appreciably more information.
+>
+> That gives the effective representation a natural two-level structure:
+>
+> \boxed{
+> P(\nu_{\rm out}\mid\nu_{\rm in})
+> =
+> P(j\mid i)
+> \,
+> P(\nu_{\rm out}\mid i,j)
+> }
+>
+> where the first factor,
+>
+> P(j\mid i)=R_{ij},
+>
+> is extremely coarse, but the second still needs a sparse set of actual exit lines.
+>
+> That is scientifically richer than forcing the entire object into "a tiny matrix."
+>
+> I would consequently avoid a future headline such as:
+>
+> millions of transitions collapse to a few numbers.
+>
+> We don't have that.
+>
+> A safer—and more interesting—claim is:
+>
+> The transport-relevant organization of fluorescence is low-dimensional and frequency-local, even though the microscopic exit spectrum is not equally compressible.
+>
+> That distinction should probably appear explicitly in the manuscript.
+>
+> The preregistration amendments
+>
+> I am comfortable with both, assuming the report records chronology exactly as you describe.
+>
+> The first is straightforward: zeroing a live row and inadequate iterative convergence meant the implementation was not computing the preregistered mathematical object. Fixing those and rerunning everything is precisely what a preregistered workflow should allow.
+>
+> The second is more delicate, but the remedy is scientifically defensible. You discovered that the Gray statistic itself had an uncontrolled multiple-comparisons problem rather than evidence that the physics run was noisy. Most importantly, you did not tune a tolerance until the result passed. Instead you used the already-specified remedy and put both operator families on the identical 128-group tables/occupancy. That actually makes the comparison cleaner.
+>
+> Keep the failed first/second attempts visible in the audit trail. A referee seeing
+>
+> "the preregistered diagnostic was found to have a 25%-ish null firing probability; rather than relaxing it, we changed the implementation to the preregistered common-table control and reran the full comparison"
+>
+> is much less concerning than silently replacing the rule.
+>
+> I would now freeze the first two paper figures
+>
+> We already have enough for two conceptual figures.
+>
+> Figure 1 — Compression survives the physics.
+>
+> For La/Ce/Nd:
+>
+> \epsilon^\star,\quad R_2,R_4,R_8,R_{16},R_{32}
+>
+> against the energy-conserving macroatom, including the R2M robustness result.
+>
+> The visual message:
+>
+> \epsilon^\star \text{ fails where a small }R\text{ succeeds}.
+>
+> Figure 2 — Why the compression works.
+>
+> Plot transport error and event error against archetype count for:
+>
+> \text{local frequency coarsening}
+> \quad\text{vs}\quad
+> \text{global factorization}.
+>
+> The most important panel may actually be a scatter plot of
+>
+> m_{\rm event}
+> \quad\text{versus}\quad
+> m_{\rm band}.
+>
+> If global points move left while remaining high in m_{\rm band}, and local points reach low m_{\rm band} despite worse m_{\rm event}, the central phenomenon becomes visually obvious.
+>
+> That is a very strong mechanistic figure.
+>
+> ⸻
+>
+> Now G3
+>
+> I would not change its basic three-part structure:
+>
+> \boxed{\text{state transfer}}
+> \qquad
+> \boxed{\text{species composability}}
+> \qquad
+> \boxed{\text{realistic mixture}}.
+>
+> But G1/G2 tell us what G3 should prioritize.
+>
+> The key question is no longer simply:
+>
+> Does R remain accurate elsewhere?
+>
+> It is:
+>
+> \boxed{
+> \text{Can the locally coarse transport-relevant structure itself be tabulated predictively?}
+> }
+>
+> I would therefore test fixed versus recomputed kernels separately.
+>
+> For a state \theta,
+>
+> R(\theta_0)\rightarrow\theta
+>
+> tests transferability, whereas
+>
+> R(\theta)\rightarrow\theta
+>
+> tests whether the low-dimensional representation still exists there.
+>
+> Those failures mean very different things.
+>
+> If, for example,
+>
+> R_8(\theta)\text{ succeeds}
+>
+> but
+>
+> R_8(\theta_0)\text{ fails},
+>
+> the compression principle survives; we simply need a state-dependent table.
+>
+> That outcome should not kill the paper.
+>
+> Indeed, after G2 I think a likely final architecture is
+>
+> \boxed{
+> R_{ij}=R_{ij}(T,\rho,J_\nu,\text{ion},\ldots)
+> }
+>
+> with only a few state coordinates needed.
+>
+> The NN still stays out unless this dependence is genuinely nonlinear enough that ordinary interpolation fails.
+>
+> One thing I would change before G3
+>
+> Do not inherit Paper III's old assumption that T_{\rm src} is irrelevant. The historical results already showed Nd II was sensitive to incident-spectrum changes while La II was not. So for G3, I would explicitly separate:
+>
+> T_{\rm gas},
+> \qquad
+> \tau\text{-scale / density},
+> \qquad
+> J_\nu\text{ shape}.
+>
+> The question is whether a compact sufficient state vector exists.
+>
+> That could become another strong result:
+>
+> \boxed{
+> R_{ij}
+> \approx
+> R_{ij}(\theta_{\rm small})
+> }
+>
+> rather than a giant function of the entire radiation field.
+>
+> ⸻
+>
+> The paper is beginning to have a coherent four-step argument
+>
+> If G3 works reasonably well, the story becomes:
+>
+> \boxed{\textbf{1. Scalar insufficiency}}
+>
+> A single \epsilon, even optimally tuned, cannot reproduce energy-conserving fluorescence.
+>
+> \boxed{\textbf{2. Local compression}}
+>
+> A handful of contiguous frequency groups can.
+>
+> \boxed{\textbf{3. Mechanism}}
+>
+> Global representations that reproduce the microscopic events better reproduce the radiation worse.
+>
+> Therefore the success isn't generic dimensional reduction; it is frequency-local transport structure.
+>
+> \boxed{\textbf{4. Generality}}
+>
+> The effective structure transfers/interpolates across physical states and combines across species.
+>
+> That is substantially stronger than where the PRL idea stood before G1.
+>
+> I would therefore merge PR #11, mark F69/G2 frozen, and preregister G3 next. Do not add another compression experiment to G2, and don't attempt to rescue H2. Its Yellow result is part of the physics: the coarse transition structure and the fine exit spectrum have different compressibilities.
+>
+> The education PRs remain independent, and I still would not hold the completed Paper IV MNRAS submission for any of this. Paper B has now earned its own trajectory.
+
+Applied: PR #11 merged; the G2 result set tagged `paperB-g2-freeze`
+(never moved); G2 closed — no further compression experiment is added to
+it and H2's Yellow stands as physics. G3 preregistered below in
+`prl_gate.md` with the PI's priorities: fixed **and** recomputed kernels
+tested separately, the state axes T_gas, τ-scale/density and J_ν shape
+separated (Paper III's assumption that the source spectrum is irrelevant
+is not inherited), and the question posed as whether a compact sufficient
+state vector exists. The manuscript skeleton and the two frozen figures
+are in `docs/paperB/`, and carry the PI's wording: the transport-relevant
+organisation of fluorescence is low-dimensional and frequency-local, even
+though the microscopic exit spectrum is not equally compressible — never
+"millions of transitions collapse to a few numbers".

@@ -1,0 +1,179 @@
+% Paper B -- SKELETON. The scientific scope is not frozen: G3 (generality)
+% is preregistered in paperB/prl_gate.md and has not run, so Section 5 is a
+% placeholder and no abstract claim is made about it.
+%
+% Every number below is a macro from numbers.tex, which docs/paperB/latex_tables.py
+% regenerates from paperB/FROZEN.json. Nothing is typed by hand (the standing
+% rule after Paper IV's fabricated-table incident). `make check` enforces it.
+%
+% The PRL submission will use revtex4-2; that class is not installed here, so
+% the skeleton builds under article and the structure is what is being fixed.
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{natbib}
+\input{numbers}
+
+\title{Effective line redistribution in kilonova ejecta:\\
+       transport-relevant structure is frequency-local}
+\author{(author list to be fixed)}
+\date{Draft skeleton, \today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+% Steps 1-3 only. Step 4 (generality) is written after G3.
+Lanthanide line fluorescence in kilonova ejecta couples of order $10^6$
+transitions, and radiative-transfer calculations therefore replace it with a
+closure. We show, on identical resolved Sobolev opacity and with an
+energy-conserving downward macroatom as the reference, that no single
+thermalisation parameter $\epsilon$ reproduces the emergent photometry, while
+a group-to-group redistribution operator with a handful of contiguous
+frequency groups does. We then ask why. Comparing local frequency coarsening
+with a global non-negative factorisation at a matched number of archetypal
+exit distributions, we find the local representation reaches the
+\PBdmMax~mag criterion with no more archetypes than the global one needs, and
+on Nd\,\textsc{ii} with far fewer: \PBNdKlocal\ contiguous frequency blocks
+against a global family that never reaches it. At \PBContrastK\ archetypes the
+global operator reproduces the microscopic redistribution better while
+reproducing the emergent light worse. The structure that matters for
+transport is therefore frequency-local, and fidelity to the microscopic event
+distribution is not fidelity to the radiation field.
+\end{abstract}
+
+\section{Introduction}
+% Beats: (i) the closure problem in kilonova line transport; (ii) what a
+% scalar epsilon and an expansion-opacity closure do and do not provide
+% (Paper IV); (iii) the question: can the fluorescence operator be replaced
+% by a compact R_ij at fixed resolved opacity; (iv) the four-step argument
+% of this paper. Cite Fontes et al. 2020, Lucy 2002/2003, Kasen et al. 2013,
+% Tanaka et al. 2020, Gillanders et al. 2026, and Paper IV for the
+% energy-conserving bookkeeping.
+TO BE WRITTEN.
+
+\section{Method}
+% The state, the atom, the reference, the operator, the metrics. Short: this
+% is a letter. The preregistration (gates G1-G3) is described in one
+% paragraph and pointed at the archived record.
+TO BE WRITTEN.
+
+\section{A scalar closure is insufficient; a small operator is not}
+\label{sec:compression}
+% Step 1 and step 2, from G1 (F67) and the robustness check (F68).
+The optimally tuned scalar misses the reference by \PBCeEpsErr~mag on
+Ce\,\textsc{ii} and \PBNdEpsErr~mag on Nd\,\textsc{ii}, while the group
+operator meets the \PBdmMax~mag criterion at $N_g=\PBCeNgStar$ and
+$N_g=\PBNdNgStar$ respectively (Fig.~\ref{fig:compression}a,
+Table~\ref{tab:gates}). La\,\textsc{ii} at its partial density in this state
+interacts \PBLaEvPerPkt\ times per packet and does not discriminate the
+closures; it is carried as a control throughout.
+
+The result is not a property of one cascade prescription. Replacing the
+reference by a radiation-field-driven macroatom with internal upward
+transitions moves the emergent photometry by \PBCeShift~mag on
+Ce\,\textsc{ii} and \PBNdShift~mag on Nd\,\textsc{ii}; an operator rebuilt
+from that reference's own events follows it to \PBCeRebuilt\ and
+\PBNdRebuilt~mag, while the operator trained on the original reference stays
+\PBCeDownward~mag away, reproducing the physics it was built from
+(Fig.~\ref{fig:compression}b).
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/fig1_compression.pdf}
+\caption{\textbf{A scalar closure fails where a small operator succeeds, and
+the operator follows the fluorescence physics.} (a) Maximum photometric error
+against the energy-conserving downward macroatom, over the live bands, for
+the group operator at $N_g=2\ldots32$ (solid) and for the optimally tuned
+scalar $\epsilon^\star$ (dashed). (b) When the reference is replaced by a
+radiation-field-driven macroatom the reference itself moves (grey); an
+operator rebuilt from its events follows it (green), while the operator
+trained on the previous reference does not (pink).}
+\label{fig:compression}
+\end{figure}
+
+\begin{table}[t]
+\centering
+\caption{The gates, per ion.}
+\label{tab:gates}
+\input{tab_gates}
+\end{table}
+
+\section{Why it works: locality, not low rank}
+\label{sec:mechanism}
+% Step 3, from G2 (F69). The conceptual centre of the paper.
+Two families of operator were built on identical exit tables and identical
+opacity, differing only in the group-to-group matrix: local coarsening into
+$N_g$ contiguous frequency blocks, and a global non-negative factorisation
+into $k$ freely mixed archetypes. At a matched count the global family is far
+the more expressive, carrying \PBParamsGlobal\ free numbers against
+\PBParamsLocal\ at \PBContrastK\ archetypes. It nonetheless needs no fewer
+archetypes to reach the criterion: $K^\star_{\rm local}=\PBCeKlocal$ against
+$K^\star_{\rm global}=\PBCeKglobal$ on Ce\,\textsc{ii}, and
+$K^\star_{\rm local}=\PBNdKlocal$ on Nd\,\textsc{ii} against a global family
+that is \PBNdKglobal\ at every rank tried.
+
+The contrast runs the other way on the microscopic distribution
+(Table~\ref{tab:contrast}, Fig.~\ref{fig:mechanism}). At \PBContrastK\
+archetypes the global operator's event-level total-variation loss is
+\PBNdEventGlobal\ against the local operator's \PBNdEventLocal\ on
+Nd\,\textsc{ii} --- it reproduces the microscopic redistribution
+\PBNdEventRatio\ times better --- while its photometric error is
+\PBNdBandGlobal~mag against \PBNdBandLocal~mag, \PBNdBandRatio\ times worse.
+The degrees of freedom that minimise a generic distance between microscopic
+redistribution distributions are therefore not the degrees of freedom that
+carry the radiation field.
+
+% The PI's wording, kept deliberately: the claim is NOT that millions of
+% transitions collapse to a few numbers.
+The compressibility is two-level. Writing
+$P(\nu_{\rm out}\mid\nu_{\rm in}) = P(j\mid i)\,P(\nu_{\rm out}\mid i,j)$,
+the first factor is extremely coarse, while the second still needs a sparse
+but appreciable set of real exit lines: truncating the exit tables by
+retained energy, the emergent light needs \PBCeLstar\ of the distinct exit
+lines on Ce\,\textsc{ii} and \PBNdLstar\ on Nd\,\textsc{ii} at the same
+thresholds. The transport-relevant organisation of fluorescence is
+low-dimensional and frequency-local, even though the microscopic exit
+spectrum is not equally compressible.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/fig2_mechanism.pdf}
+\caption{\textbf{Better on the events, worse on the light.} (a) Photometric
+error and (b) event-level total-variation loss against the number of
+archetypal exit distributions, for local frequency coarsening (solid) and the
+global factorisation (open). (c) The two against each other: the global
+points move left, fitting the microscopic redistribution better, while
+staying high, reproducing the emergent light worse.}
+\label{fig:mechanism}
+\end{figure}
+
+\begin{table}[t]
+\centering
+\caption{Microscopic against observable error at \PBContrastK\ archetypes.}
+\label{tab:contrast}
+\input{tab_contrast}
+\end{table}
+
+\section{Generality}
+\label{sec:generality}
+% Step 4. G3 is preregistered in paperB/prl_gate.md and has NOT run: state
+% transfer along the separated axes (T_gas, tau-scale, J_nu shape), species
+% composability, the realistic mixture, and the interpolation test that asks
+% whether the operator is tabulable in a small state vector. Nothing is
+% claimed here until that record exists.
+TO BE WRITTEN AFTER G3.
+
+\section{Discussion and conclusions}
+TO BE WRITTEN.
+
+\section*{Data availability}
+The transport code, the preregistrations of gates G1--G3, every run record
+and the script that regenerates every number in this paper are archived at
+\texttt{github.com/zhuygln/revisit\_sobolev} (tags \texttt{paperB-g2-prereg}
+and \texttt{paperB-g2-freeze}).
+
+\bibliographystyle{plainnat}
+% \bibliography{references}
+\end{document}

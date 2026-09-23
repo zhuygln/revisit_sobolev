@@ -483,3 +483,163 @@ the archetype count for both families, m_event alongside, the truncation
 curve against the fraction of exit lines kept, and every operator on the
 (m_event, max |Δm|) plane). `analyse.py` refuses a record whose state,
 seeds, packet count, grids or control differ from this section.
+
+---
+
+## G3 — is the transport-relevant structure predictively tabulable? (preregistered 2026-09-22; not run until the PI approves this section)
+
+G1 showed a small frequency-group operator reproduces energy-conserving
+fluorescence where no scalar ε can; G2 showed the structure it exploits is
+frequency locality, not global low rank, and that better reproduction of
+microscopic events does not imply better reproduction of transported
+observables. G3 asks the question those two leave (the PI, 2026-09-22):
+
+> Can the locally coarse transport-relevant structure itself be tabulated
+> predictively?
+
+Its three parts keep the announced structure — **state transfer**,
+**species composability**, **realistic mixture** — with the PI's two
+priorities built in: *fixed and recomputed kernels are tested separately*,
+and *the state axes are separated* rather than moved together.
+
+### The two tests, kept apart
+
+For a state θ and the reference state θ₀ (G1's: P1, 2 d, shell 28):
+
+    R(θ₀) → θ    "fixed":      the θ₀ kernel transported at θ   — does it TRANSFER?
+    R(θ)  → θ    "recomputed": a kernel built at θ, transported at θ — does the low-dimensional
+                                representation still EXIST there?
+
+The failures mean different things and are never merged into one number.
+If `R_8(θ)` succeeds while `R_8(θ₀)` fails at θ, the compression principle
+survives and what is needed is a state-dependent table; that outcome does
+not count against the paper.
+
+### The state axes, separated (Paper III's assumption is not inherited)
+
+Paper III treated the source spectrum as irrelevant; its own results had
+Nd II sensitive to the incident spectrum where La II was not, so that
+assumption is dropped and the axis is measured. Each axis moves **one**
+coordinate from θ₀, every other coordinate held:
+
+| axis | coordinate | grid (θ₀ in bold) | what it changes |
+|---|---|---|---|
+| T | `T_gas` of the atom | 2500, 3000, **3401**, 4000, 5000 K | the LTE populations, hence which lines carry opacity (42,695 → 202,630 for Nd II) and the branching β |
+| D | number density, `n_ion × s` | ×0.1, ×0.3, **×1**, ×3, ×10 | the Sobolev τ scale (τ_max 120 → 12,017 for Nd II), hence escape probabilities and the re-absorption chain |
+| J | source temperature `t_core` (the shape of the incident J_ν, decoupled from T_gas) | 2500, **3401**, 5000, 7000 K | which input groups are illuminated, hence which rows of R the light actually uses |
+| P | the physical trajectory: P1 at 1, 3, 5 d, shells 29, 27, 26 | 1 d (T 4411, ρ 1.03×10⁻¹⁴), **2 d**, 3 d (2987, 1.97×10⁻¹⁵), 5 d (2341, 7.35×10⁻¹⁶) | all coordinates together, as the ejecta actually moves |
+
+14 states besides θ₀. Ions: La II, Ce II, Nd II, each alone at that state's
+own `n_ion`; **Ce II and Nd II decide, La II is reported as a control**, as
+in G2. Packets: La II and Ce II 3×10⁵ per seed, Nd II 10⁶; evaluation
+seeds 1–3, build seeds 101–103; every other transport setting G1's.
+
+### Legs per state and ion
+
+| tag | what |
+|---|---|
+| `R2build` | the downward-macroatom build run **at θ** (build seeds), events pooled |
+| `R2` | the reference **at θ** (evaluation seeds): the target of every comparison at θ |
+| `Arec_ng{2,4,8,16,32}` | kernel built from `R2build(θ)`, transported at θ — the *existence* test |
+| `Afix_ng{2,4,8,16,32}` | kernel built from `R2build(θ₀)` (the frozen G2 kernels, reloaded), transported at θ — the *transfer* test |
+| `K128`, `K128build` | the fine matrices at θ, for m_event |
+
+Metrics are G1's throughout (max and mean |Δm| over the live bands,
+max |Δcolour|, m_sed, m_event, the energy identity), against **`R2` at the
+same state**, with G1's thresholds 0.10 mag and 0.10 mag. Per state and
+ion the readings are the two archetype counts
+
+    K*_rec(θ) = min { N : Arec_ngN passes },    K*_fix(θ) = min { N : Afix_ngN passes }
+
+both undefined if none passes.
+
+**The fixed kernel's coverage.** θ₀'s kernel has θ₀'s edges, and the
+opacity range moves with the state (Nd II's lowest opacity frequency
+rises from 4.2×10¹² to 7.8×10¹² Hz at 2500 K). The fraction of
+interactions whose absorbed frequency is clipped into an edge group, and
+the coherent-fallback fraction from rows θ₀ never populated, are recorded
+per fixed leg. **For fixed legs these are reported, never gray**: they are
+the mechanism of a transfer failure, not a defect of the run. A state
+whose clipped fraction exceeds 5 % is flagged `coverage-limited` and its
+transfer reading is reported with that flag.
+
+### The interpolation test — is the dependence smoothly tabulable?
+
+Where transfer fails on an axis, the question is whether a *table* over
+that axis would work, which is what "tabulated predictively" means. For
+the interior grid point of each axis (T = 3000 K, D = ×0.3, J = 5000 K,
+P = 3 d) one extra leg per ion:
+
+    Aint_ng8:  the N_g = 8 energy matrix formed by linear interpolation, in the
+               axis coordinate, of the two bracketing states' RECOMPUTED matrices
+               (on shared θ₀ edges, rows rescaled to their own sums so the energy
+               identity is exact), transported at the interior state.
+
+Passing means the operator's dependence on that coordinate is smooth
+enough to tabulate and interpolate; failing means it is not, and that
+coordinate needs dense sampling or is not a good coordinate.
+
+### Species composability and the realistic mixture
+
+- **Part (b), composability.** At θ₀, a La II + Ce II + Nd II atom at the
+  P1 partial densities. Legs: `R2` (the blend's own macroatom, the
+  target), `Amix_ng{2,…,32}` (`RedistributionKernel.mix` of the three
+  single-ion kernels on identical edges, weights from
+  `paper3/phase5_mixture/mixture.py::composition_weights`, **no blend
+  fit**), `Adirect_ng{2,…,32}` (a kernel trained on the blend's own
+  events: the upper bound the mixing rule is measured against). 10⁶
+  packets.
+- **Part (c), realistic mixture.** At θ₀, the full 13-ion P1 blend
+  (`legs.py::atom_for_zone`, II only). Legs: `R2`, `Arec_ng{2,…,32}`, and
+  the ε grid of G1 for the scalar comparison. 10⁶ packets. Paper IV's F61
+  put a 32-group kernel within 0.05 mag of R2 on this blend at 3×10⁵.
+
+### Readings (Gray first; Ce II and Nd II decide, La II reported)
+
+- **C1 — existence.** Green: `K*_rec(θ)` is defined at every one of the 14
+  states for both decisive ions, and ≤ 8 at two thirds of them. Yellow:
+  defined everywhere but not the ≤ 8 majority. Red: undefined at two or
+  more states for either decisive ion.
+- **C2 — transfer.** Per axis, transfer *holds* if `K*_fix(θ)` is defined
+  at every state on that axis for both decisive ions. Green: transfer
+  holds on all four axes. Yellow: it fails on at least one axis, and on
+  every failing axis the interpolation leg passes. Red: it fails on an
+  axis where interpolation also fails (the dependence is not smoothly
+  tabulable there).
+- **C3 — a compact sufficient state vector.** An axis is *needed* if
+  transfer fails on it. Green: at most two of T, D, J are needed by both
+  decisive ions — R_ij depends on a small set of coordinates, not on the
+  whole radiation field. Yellow: all three are needed but each is
+  interpolable. Red: interpolation fails on two or more axes. The axis
+  table (max |Δm| of the fixed kernel at each state) is reported whatever
+  the outcome, and **the J axis is reported explicitly per ion**, since
+  Paper III's assumption that it does not matter is what is being tested.
+- **C4 — composability.** Green: the mixed kernel passes both thresholds
+  at some N ≤ 32 and its K* is within a factor of two of the directly
+  trained kernel's. Yellow: the mixed kernel fails but the direct kernel
+  passes (a blend needs its own fit). Red: neither passes.
+- **C5 — realistic mixture.** Green: `K*_rec` ≤ 8 on the 13-ion blend;
+  Yellow ≤ 32; Red otherwise. Reported with ε*'s error on the same blend.
+
+**Decision.** The manuscript's fourth step (generality) is written as
+"transfers across states" iff C2 is Green; as "exists everywhere and is
+tabulable in a small state vector" iff C1 Green, C2 Yellow and C3 Green or
+Yellow — which, per the PI, is a positive result and not a failure; the
+PRL claim is reframed by the PI if C1 is Red. **A neural surrogate stays
+out** unless C3 goes Red, i.e. unless the dependence is genuinely too
+nonlinear for ordinary interpolation.
+
+**Gray conditions** (per state and ion): G1's 1–4, applied to `R2` and the
+recomputed legs only — the fixed legs' fallback and clipping are
+diagnostics, as above; plus (5) a state whose `R2` live-band set differs
+from θ₀'s by more than one band is read only against its own live set and
+flagged. A gray state is excluded from the counts of C1 and C2 and named
+in the record.
+
+**What may not change after the run:** the axes and their grids, the
+packet counts, the N grid, the thresholds (G1's), the two tests kept
+apart, the readings above. What may: the packet count upward on a gray
+(the whole state rerun), and bug fixes with the affected states repeated.
+
+**Records** `paperB/gate3/gate3_<axis>_<state>_<ion>.json`,
+`gate3_verdict.json`, figures `docs/figures/paperB/gate3_*.{pdf,png}`.
