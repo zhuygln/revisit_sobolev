@@ -34,8 +34,8 @@ def check_prereg(row, strict=True):
     for k in ("seeds", "build_seeds", "ng_grid", "ng_t", "ng_fine"):
         if row.get(k) != PREREG[k]:
             bad.append(f"{k}: {row.get(k)!r} != {PREREG[k]!r}")
-    if row.get("n") != PREREG["n"][row["ion"]]:
-        bad.append(f"n: {row.get('n')} != {PREREG['n'][row['ion']]}")
+    if row.get("n", 0) < PREREG["n"][row["ion"]]:            # the packet count may only be raised (a gray remedy), never lowered
+        bad.append(f"n: {row.get('n')} < {PREREG['n'][row['ion']]}")
     if row["axis"] != "ref" and row["value"] not in PREREG["axes"][row["axis"]]["grid"]:
         bad.append(f"state {row['axis']}={row['value']} not on the grid")
     if bad and strict:
@@ -186,11 +186,20 @@ def read_blend(row, kind):
 
 def main():
     states, records = [], {}
+    # one record per (axis, state, ion): the highest packet count present (a
+    # gray-remedy rerun supersedes the original, which is kept on disk)
+    best = {}
     for p in sorted(HERE.glob("gate3_*_*.json")):
         if p.name.startswith(("gate3_partb", "gate3_partc", "gate3_verdict", "gate3_support")):
             continue
-        row = json.loads(p.read_text()); check_prereg(row); records[p.name] = row
-        states.append(read_state(row))
+        row = json.loads(p.read_text()); check_prereg(row)
+        key = (row["axis"], row["label"], row["ion"])
+        if key not in best or row["n"] > best[key][1]["n"]:
+            best[key] = (p.name, row)
+    for key, (name, row) in sorted(best.items()):
+        records[name] = row; states.append(read_state(row))
+        if row["n"] > PREREG["n"][row["ion"]]:
+            print(f"{name}: n = {row['n']} (a gray-remedy rerun; the {PREREG['n'][row['ion']]} record is kept on disk)")
     pb = pc = None
     if (HERE / "gate3_partb_blend3.json").exists():
         pb = read_blend(json.loads((HERE / "gate3_partb_blend3.json").read_text()), "b")
