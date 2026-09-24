@@ -3347,6 +3347,46 @@ now store ordered LISTS of {k, ...} rather than dicts keyed by number, and
 a test asserts the keys survive the round trip as sorted ints. A figure
 that looks reasonable is not evidence that its axis is right.
 
+## 9bm. G3: the PI's hold, one frozen support, the whole operator interpolated (2026-09-24)
+
+The PI held PR #12 for one amendment and it was the right call. My G3
+draft interpolated "the eight-group matrix". Ce II's G1 result is
+N_g* = 16, so an R_8 that failed on transfer could not have been told
+apart from Ce being under-resolved before transfer began -- the transfer
+test would have been confounded at its origin. Transfer and interpolation
+now sit at N_g = 16 for all three ions: one controlled representation
+size, Nd and La deliberately over-resolved.
+
+The second point was sharper. "Interpolate the matrix" is not a
+tabulability test of the closure, because the closure is not the 16x16
+matrix: it is the transition rows PLUS the conditional exit-frequency
+distribution PLUS the deposition channel, and my own feasibility numbers
+showed the exit support moving with the state (Nd II 42,695 to 202,630
+opacity lines across T; the lower edge of the forest jumping from 4.2e12
+to 1.9e13 Hz at 5 d). Whole-operator interpolation on a frozen per-ion
+support, exit lines on the UNION of the endpoints with absent channels
+zero-filled, built from the endpoints' events only and never the interior
+state's: implemented in operators3.interpolate_whole, energy-exact by
+construction (tested), with the matrix-only version kept as a diagnostic
+so the table's contribution is measurable.
+
+Frozen before the run, as the PI required: one support per ion (the union
+of every state's range; gate3_support.json), the coordinates (log T_gas,
+log n_ion, log T_core, log t), and the separation of "row never trained"
+(an endpoint-empty row hit at theta -- coherent fallback, recorded) from
+"outside fixed support" (beyond the union edges -- clipped, recorded; zero
+by construction). Neither is gray for a transfer leg: they ARE the
+mechanism of transfer failure.
+
+Runner facts: the anchor is the theta0 N_g = 16 kernel saved on the frozen
+support and injected into every other state's run; run_legs grew a
+`kernel_range`, a `kernel_obj` (an injected operator) and a `save`. The
+interior of each axis is bracketed by theta0 and one grid state, so the
+anchor is always an endpoint. Order per ion: ref, endpoints, interior.
+Ce first (decisive, ~1 h), then Nd (~6.5 h at 1e6), then La, then the
+composability blend on the three-ion union support and the 13-ion P1
+blend. Everything smoke-tested through an interior interpolation; 6 tests.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

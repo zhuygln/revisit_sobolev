@@ -546,3 +546,45 @@ are in `docs/paperB/`, and carry the PI's wording: the transport-relevant
 organisation of fluorescence is low-dimensional and frequency-local, even
 though the microscopic exit spectrum is not equally compressible — never
 "millions of transitions collapse to a few numbers".
+
+## The PI's hold on PR #12: one amendment to G3 before it freezes (2026-09-24)
+
+PI, verbatim (pasted from a rendered page; nothing edited):
+
+> I would not merge PR #12 or start G3 yet. The overall G3 design is now scientifically strong, but there is one important methodological issue that should be fixed before the preregistration becomes immutable.
+> The problem is the sentence that the eight-group matrix is interpolated. Ce II already established at G1 that Ng⋆=16N_g^\star=16. Therefore, if an R8R_8 trained at one state fails when transferred to another state, we cannot distinguish "state dependence" from the simpler explanation that Ce was under-resolved before transfer even began. The handoff explicitly called for Ntransfer=16N_{\rm transfer}=16 for precisely this reason.
+> There is a second, closely related issue: interpolating only the matrix is not enough to establish tabulability. Your own feasibility study now makes this more important, not less. As temperature/density change, Nd II's participating opacity forest, frequency range, and exit support change substantially. The effective closure is not merely the 16×1616\times16 group-transition probabilities; it also contains the conditional exit-frequency distribution and any deposition/energy channel. The preregistered recommendation was therefore to interpolate the whole effective operator on fixed per-ion support, using the union of endpoint exit lines, zero-filling channels absent at one endpoint, while never using the interior state's macroatom events to construct the prediction.
+> Everything else you described I would keep. In particular, these are good decisions: separating existence from transfer; treating transfer-fail/existence-pass as a scientifically positive state-dependence result; varying TgasT_{\rm gas}, density/τ\tau, and source shape independently; decoupling TcoreT_{\rm core} from TgasT_{\rm gas}; and recording clipping/fallback as the mechanism of transfer failure rather than hiding it behind Gray. That is exactly the intended G3 logic.
+> So my merge condition is narrow:
+>
+> * Change transfer/interpolation from R8R_8 to R16R_{16} for all three ions. This deliberately over-resolves Nd and La but gives one controlled representation size across the comparison.
+> * Freeze one spectral/group support per ion over the entire G3 domain.
+> * Make the preregistered interpolation test whole-operator interpolation, including transition probabilities plus conditional exit-frequency weights. Matrix-only interpolation can remain as an additional diagnostic.
+> * Freeze the interpolation coordinates before the run—preferably log⁡Tgas\log T_{\rm gas}, log⁡ρ\log\rho or log⁡τ\log\tau, and log⁡Tcore\log T_{\rm core}—and separately report "row never trained" versus genuinely "outside fixed support." These were also explicitly identified as pre-merge requirements.
+>
+> Once those are in PR #12, I approve merging, tagging the exact preregistration commit, and immediately running G3. I would not add another scientific axis or expand the grid. The experiment is already large enough to answer the question cleanly.
+> And I would retain the four-way interpretation exactly as planned:
+> A: fixed anchor R16R_{16} transfers → very strong universality.
+> B: transfer fails but interpolation passes → arguably the most useful outcome: a small tabulated R(θ)R(\theta).
+> C: interpolation fails but fresh compact operators pass → compression survives, but the state manifold is more nonlinear.
+> D: fresh compact operators themselves fail → the actual challenge to the Paper B closure claim.
+> The Figure 2 axis bug is also worth preserving in the lab notebook exactly as you described it. It is a particularly good example of why the frozen-record/structure-test discipline matters: a scientifically plausible-looking figure can still encode the wrong independent variable.
+> Decision: HOLD PR #12 for this one amendment; then MERGE + FREEZE + RUN G3.
+
+Applied to the G3 section of `prl_gate.md` before it freezes: the
+transfer and interpolation legs at N_g = 16 for all three ions (the
+recomputed family keeps the full N grid, so existence is read as both
+"R_16 rebuilt at θ passes" and K*_rec); one frozen 128-group support per
+ion over the whole G3 domain (the union of every state's opacity range,
+computed and committed as `paperB/gate3/gate3_support.json` before the
+run; part (b) uses the three-ion union); the interpolation test is the
+whole operator — transition matrix, conditional exit-frequency weights on
+the union of the endpoint exit lines with absent channels zero-filled, and
+the deposition channel — built from the two endpoint states' build events
+only, never from the interior state's; matrix-only interpolation kept as a
+diagnostic; the coordinates frozen as log T_gas, log ρ (log n_ion at fixed
+composition), log T_core, and log t along the trajectory; "row never
+trained" (an endpoint-empty row hit at θ, coherent fallback) reported
+separately from "outside fixed support" (a frequency beyond the frozen
+edges, clipped). The four-way reading A/B/C/D is the per-state
+classification. No axis added, no grid expanded.

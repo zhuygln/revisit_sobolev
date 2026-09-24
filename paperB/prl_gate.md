@@ -534,50 +534,84 @@ own `n_ion`; **Ce II and Nd II decide, La II is reported as a control**, as
 in G2. Packets: La II and Ce II 3×10⁵ per seed, Nd II 10⁶; evaluation
 seeds 1–3, build seeds 101–103; every other transport setting G1's.
 
+### One frozen support per ion (the PI's amendment, 2026-09-24)
+
+Every kernel of G3 — the anchor, every recomputed operator, every
+interpolated one — is laid on **one frequency support per ion, frozen
+before the run**: the union over the whole G3 domain of each state's
+opacity range with G1's 0.5 % margin, computed by
+`paperB/gate3/support.py` and committed as `gate3_support.json`:
+La II 1.209×10¹⁴–2.624×10¹⁵ Hz, Ce II 7.129×10¹¹–2.661×10¹⁵ Hz,
+Nd II 3.858×10¹²–2.619×10¹⁵ Hz; part (b) uses the three-ion union. The
+128 fine groups and every coarse grid are log-spaced on that support, so
+every matrix in G3 shares its edges, and "outside fixed support" can only
+mean a frequency beyond the union (recorded per state as the clipped
+fraction; by construction it is zero). G1's N_g* values were measured on
+each ion's own range; G3's are on the frozen support and are recorded as
+such.
+
 ### Legs per state and ion
 
 | tag | what |
 |---|---|
-| `R2build` | the downward-macroatom build run **at θ** (build seeds), events pooled |
+| `R2build` | the downward-macroatom build run **at θ** (build seeds), events pooled; its N_g = 16 kernel on the frozen support is saved for the interpolation legs |
 | `R2` | the reference **at θ** (evaluation seeds): the target of every comparison at θ |
-| `Arec_ng{2,4,8,16,32}` | kernel built from `R2build(θ)`, transported at θ — the *existence* test |
-| `Afix_ng{2,4,8,16,32}` | kernel built from `R2build(θ₀)` (the frozen G2 kernels, reloaded), transported at θ — the *transfer* test |
-| `K128`, `K128build` | the fine matrices at θ, for m_event |
+| `Arec_ng{2,4,8,16,32}` | kernels built from `R2build(θ)`, transported at θ — the *existence* test; `Arec_ng16` is the fresh compact operator of the four-way reading, and the grid gives K*_rec(θ) |
+| `Afix_ng16` | **the anchor**: the N_g = 16 kernel built from `R2build(θ₀)` on the frozen support, transported at θ — the *transfer* test. **N_g = 16 for all three ions**, one controlled representation size across the comparison (Ce II's G1 N_g* is 16; an R_8 failing on transfer could not be told from Ce II being under-resolved before transfer began; Nd II and La II are deliberately over-resolved) |
+| `Aint_ng16`, `AintM_ng16` | at the interior point only: the whole-operator interpolation and its matrix-only diagnostic (below) |
+| `K128`, `K128build` | the fine matrices at θ, for m_event; `K128` also records the state's clipped fraction against the frozen support |
 
 Metrics are G1's throughout (max and mean |Δm| over the live bands,
-max |Δcolour|, m_sed, m_event, the energy identity), against **`R2` at the
-same state**, with G1's thresholds 0.10 mag and 0.10 mag. Per state and
-ion the readings are the two archetype counts
+max |Δcolour|, m_sed, m_event vs `K128`, the energy identity), against
+**`R2` at the same state**, with G1's thresholds 0.10 mag and 0.10 mag.
 
-    K*_rec(θ) = min { N : Arec_ngN passes },    K*_fix(θ) = min { N : Afix_ngN passes }
+**"Row never trained" against "outside fixed support", reported
+separately.** A frequency absorbed at θ in a fine row the anchor (or an
+endpoint) never populated is transported by the kernel's standing
+convention for a row with no information — coherent scattering — and its
+fraction of the leg's interactions is recorded as `rows_never_trained`. A
+frequency beyond the frozen edges is clipped into an edge group and its
+fraction is recorded as `clipped_frac` (the energy fraction alongside).
+**For the transfer and interpolation legs neither is a gray condition**:
+they are the mechanism of a transfer failure, not a defect of the run. A
+state whose clipped fraction exceeds 5 % is flagged `coverage-limited`.
 
-both undefined if none passes.
-
-**The fixed kernel's coverage.** θ₀'s kernel has θ₀'s edges, and the
-opacity range moves with the state (Nd II's lowest opacity frequency
-rises from 4.2×10¹² to 7.8×10¹² Hz at 2500 K). The fraction of
-interactions whose absorbed frequency is clipped into an edge group, and
-the coherent-fallback fraction from rows θ₀ never populated, are recorded
-per fixed leg. **For fixed legs these are reported, never gray**: they are
-the mechanism of a transfer failure, not a defect of the run. A state
-whose clipped fraction exceeds 5 % is flagged `coverage-limited` and its
-transfer reading is reported with that flag.
-
-### The interpolation test — is the dependence smoothly tabulable?
+### The interpolation test — is the whole operator smoothly tabulable?
 
 Where transfer fails on an axis, the question is whether a *table* over
-that axis would work, which is what "tabulated predictively" means. For
-the interior grid point of each axis (T = 3000 K, D = ×0.3, J = 5000 K,
-P = 3 d) one extra leg per ion:
+that axis would work, which is what "tabulated predictively" means. The
+effective closure is not the 16×16 transition matrix alone: it carries
+the conditional exit-frequency distribution and the deposition channel,
+and the feasibility study shows the participating forest and its exit
+support change substantially across the domain. So the preregistered test
+interpolates **the whole effective operator**, and never touches the
+interior state's own macroatom events.
 
-    Aint_ng8:  the N_g = 8 energy matrix formed by linear interpolation, in the
-               axis coordinate, of the two bracketing states' RECOMPUTED matrices
-               (on shared θ₀ edges, rows rescaled to their own sums so the energy
-               identity is exact), transported at the interior state.
+At the interior grid point of each axis (T = 3000 K, D = ×0.3,
+J = 5000 K, P = 3 d), bracketed by θ₀ and one other grid state, two legs
+per ion, both at N_g = 16 on the frozen support, built from the two
+endpoints' saved `R2build` kernels alone:
 
-Passing means the operator's dependence on that coordinate is smooth
-enough to tabulate and interpolate; failing means it is not, and that
-coordinate needs dense sampling or is not a good coordinate.
+- `Aint_ng16`, **whole-operator interpolation**, linear in the frozen
+  coordinate: the energy and photon transition rows (a row populated at
+  both endpoints is interpolated; at one endpoint only, that endpoint's
+  row is used and the count recorded; at neither, it stays empty), the
+  deposition channel q_dep, and per output group the conditional
+  exit-frequency weights on the **union of the two endpoints' exit lines,
+  a line absent at one endpoint zero-filled there**, renormalised. The
+  energy identity holds exactly by construction; the union size and the
+  two endpoint sizes are recorded.
+- `AintM_ng16`, the **matrix-only diagnostic**: the same interpolated
+  transition rows carrying θ₀'s exit tables unchanged. Its distance from
+  `Aint_ng16` isolates what the conditional exit spectrum contributes.
+
+**The coordinates are frozen here:** log T_gas on the T axis, log n_ion
+(log ρ at fixed composition) on D, log T_core on J, and log t along the
+trajectory P. The interpolation weight is λ = (c − c_a)/(c_b − c_a) in
+that coordinate. Passing means the operator's dependence on that
+coordinate is smooth enough to tabulate and interpolate; failing means it
+is not, and that coordinate needs dense sampling or is not a good
+coordinate.
 
 ### Species composability and the realistic mixture
 
@@ -596,29 +630,43 @@ coordinate needs dense sampling or is not a good coordinate.
 
 ### Readings (Gray first; Ce II and Nd II decide, La II reported)
 
-- **C1 — existence.** Green: `K*_rec(θ)` is defined at every one of the 14
-  states for both decisive ions, and ≤ 8 at two thirds of them. Yellow:
-  defined everywhere but not the ≤ 8 majority. Red: undefined at two or
-  more states for either decisive ion.
-- **C2 — transfer.** Per axis, transfer *holds* if `K*_fix(θ)` is defined
-  at every state on that axis for both decisive ions. Green: transfer
-  holds on all four axes. Yellow: it fails on at least one axis, and on
-  every failing axis the interpolation leg passes. Red: it fails on an
-  axis where interpolation also fails (the dependence is not smoothly
-  tabulable there).
+**The four-way reading per state** (the PI's, retained exactly), read in
+this order:
+
+- **A** — `Afix_ng16` passes: the fixed anchor transfers → very strong
+  universality.
+- **B** — transfer fails but `Aint_ng16` passes (interior points): a
+  small tabulated R(θ) → arguably the most useful outcome.
+- **C** — interpolation fails (or is not available at an endpoint) but
+  `Arec_ng16` passes: the compression survives, but the state manifold is
+  more nonlinear.
+- **D** — the fresh compact operator itself fails: the actual challenge to
+  the closure claim.
+
+Over the domain:
+
+- **C1 — existence.** Green: `Arec_ng16` passes at every one of the 14
+  states for both decisive ions, and K*_rec ≤ 8 at two thirds of them.
+  Yellow: passes everywhere but not the ≤ 8 majority, or fails at exactly
+  one state. Red: fails at two or more states for either decisive ion.
+- **C2 — transfer.** Per axis, transfer *holds* if `Afix_ng16` passes at
+  every state on that axis for both decisive ions. Green: holds on all
+  four axes. Yellow: fails on at least one axis, and on every failing axis
+  the whole-operator interpolation passes. Red: fails on an axis where the
+  whole-operator interpolation also fails.
 - **C3 — a compact sufficient state vector.** An axis is *needed* if
   transfer fails on it. Green: at most two of T, D, J are needed by both
   decisive ions — R_ij depends on a small set of coordinates, not on the
   whole radiation field. Yellow: all three are needed but each is
-  interpolable. Red: interpolation fails on two or more axes. The axis
-  table (max |Δm| of the fixed kernel at each state) is reported whatever
-  the outcome, and **the J axis is reported explicitly per ion**, since
-  Paper III's assumption that it does not matter is what is being tested.
+  interpolable. Red: the whole-operator interpolation fails on two or more
+  axes. The axis table is reported whatever the outcome, and **the J axis
+  is reported explicitly per ion**, since Paper III's assumption that it
+  does not matter is what is being tested.
 - **C4 — composability.** Green: the mixed kernel passes both thresholds
   at some N ≤ 32 and its K* is within a factor of two of the directly
   trained kernel's. Yellow: the mixed kernel fails but the direct kernel
-  passes (a blend needs its own fit). Red: neither passes.
-- **C5 — realistic mixture.** Green: `K*_rec` ≤ 8 on the 13-ion blend;
+  passes. Red: neither passes.
+- **C5 — realistic mixture.** Green: K*_rec ≤ 8 on the 13-ion blend;
   Yellow ≤ 32; Red otherwise. Reported with ε*'s error on the same blend.
 
 **Decision.** The manuscript's fourth step (generality) is written as
@@ -630,16 +678,30 @@ out** unless C3 goes Red, i.e. unless the dependence is genuinely too
 nonlinear for ordinary interpolation.
 
 **Gray conditions** (per state and ion): G1's 1–4, applied to `R2` and the
-recomputed legs only — the fixed legs' fallback and clipping are
-diagnostics, as above; plus (5) a state whose `R2` live-band set differs
-from θ₀'s by more than one band is read only against its own live set and
-flagged. A gray state is excluded from the counts of C1 and C2 and named
-in the record.
+recomputed legs only — the transfer and interpolation legs' fallback and
+clipping are diagnostics, as above. Every state is read against its own
+live-band set (R2 at that state), and the set is recorded. A gray state is
+excluded from the counts of C1 and C2 and named in the record.
+
+**Amended 2026-09-24 on the PI's hold of PR #12, before the section
+froze:** transfer and interpolation at N_g = 16 for all three ions (was
+R_8); one frozen support per ion over the domain; the interpolation test
+made whole-operator (transition rows, conditional exit-frequency weights
+on the union of endpoint exit lines, the deposition channel), with the
+matrix-only version kept as a diagnostic; the coordinates frozen as
+log T_gas, log n_ion, log T_core, log t; "row never trained" and "outside
+fixed support" reported separately. No axis added, no grid expanded.
 
 **What may not change after the run:** the axes and their grids, the
-packet counts, the N grid, the thresholds (G1's), the two tests kept
-apart, the readings above. What may: the packet count upward on a gray
-(the whole state rerun), and bug fixes with the affected states repeated.
+frozen supports, the coordinates, the packet counts, the N grid, N_g = 16
+for the transfer and interpolation legs, the thresholds (G1's), the two
+tests kept apart, the readings above. What may: the packet count upward on
+a gray (the whole state rerun), and bug fixes with the affected states
+repeated.
 
-**Records** `paperB/gate3/gate3_<axis>_<state>_<ion>.json`,
-`gate3_verdict.json`, figures `docs/figures/paperB/gate3_*.{pdf,png}`.
+**Records** `paperB/gate3/gate3_ref_<ion>.json`,
+`gate3_<axis>_<state>_<ion>.json`, `gate3_partb_blend3.json`,
+`gate3_partc_p1blend.json`, `gate3_verdict.json`, the frozen
+`gate3_support.json`; figures `docs/figures/paperB/gate3_*.{pdf,png}`.
+`analyse.py` refuses a record whose seeds, packet count, grids or N_g = 16
+differ from this section.
