@@ -3411,6 +3411,22 @@ energy identity and kernel validation, which a flipped bit in a weight
 would break, and are kept; anything that died is rerun from scratch.
 Lesson for this machine: one 1e6 transport job at a time.
 
+*Correction, an hour later.* The Nd II reference run's log shows it died
+the same way -- `index 1152921504606848737`, again 2^60 plus a valid
+index -- at 11:33, before any second job existed. Three incidents, three
+code paths, the SAME bit every time. That is not concurrency; it is a
+repeatable single-bit memory fault on this host (a stuck cell in one
+physical page, or a hypervisor bug), which larger processes are likelier
+to map. Nothing in G1, G2 or the R2M runs tripped it, so it is
+intermittent. Mitigation, since hardware is not mine to fix: the chain
+retries a crashed unit up to three times; every completed record is
+protected by the energy identity (< 1e-10) and the kernel validation
+(< 1e-12), which a flipped bit in a weight would break by many orders of
+magnitude; an index flip either crashes (caught) or lands in a valid
+index of the wrong packet -- undetectable in principle, but a single
+misrouted packet in 3e6 is far inside the seed noise. The PI should know
+the machine does this; a memtest of the host is the real fix.
+
 Meanwhile the Ce II reading, with the reruns in: transfer fails on T, D
 and P and holds on J (the source-spectrum axis the PI insisted on
 measuring -- for Ce II the anchor transfers across t_core, J2500 missing
