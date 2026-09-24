@@ -3387,6 +3387,42 @@ Ce first (decisive, ~1 h), then Nd (~6.5 h at 1e6), then La, then the
 composability blend on the three-ion union support and the 13-ion P1
 blend. Everything smoke-tested through an interior interpolation; 6 tests.
 
+## 9bn. G3 run: index corruption under concurrent 1e6 jobs (2026-09-24)
+
+Ce II's domain came in at 3e5 with four states gray on the precision rule
+(D10, T5000, P1d, P3d). The preregistered remedy is the whole state at a
+raised count, so I launched the four reruns at 1e6 while the Nd II chain
+was already running at 1e6. Within twenty minutes three jobs failed:
+Nd II's T axis with `IndexError: index 1152921504607443870`, its D axis
+with `index 1152921504606847448`, and the Ce II P3d rerun silently, with
+no traceback and its log cut at the third leg. The two indices are
+2^60 + 596894 and 2^60 + 472 -- valid indices with bit 60 set. That is
+not a physics or code path; it is a bit flip in an index array. The Nd II
+reference run had also died before writing its record (its anchor kernel
+survived, saved earlier in the run). All of it happened while two
+million-packet jobs sat side by side on the 24 GB WSL box; nothing like
+it in forty-odd single-job runs.
+
+Response: the chain is now STRICTLY SEQUENTIAL and resumable (a state with
+a completion marker is skipped, the marker written only after the record),
+gated to start after the lone Ce II rerun finishes. The records that
+completed during the overlap (Ce II D10, T5000, P1d at 1e6) pass every
+energy identity and kernel validation, which a flipped bit in a weight
+would break, and are kept; anything that died is rerun from scratch.
+Lesson for this machine: one 1e6 transport job at a time.
+
+Meanwhile the Ce II reading, with the reruns in: transfer fails on T, D
+and P and holds on J (the source-spectrum axis the PI insisted on
+measuring -- for Ce II the anchor transfers across t_core, J2500 missing
+only on colour by 0.007); the whole-operator interpolation passes at
+every interior point it could be read at (T3000 0.064, D0.3 0.047, J5000
+0.050 mag) while the matrix-only version fails on D (0.130) and sits on
+the threshold on T (0.099) -- the PI's amendment was decisive; the fresh
+R_16 misses at T4000, T5000 and P1d on a single colour by 0.007-0.02 mag
+while R_32 passes everywhere (K*_rec <= 32 at every state). By the
+preregistered rule those misses make Ce II C1 RED; the record will say
+exactly that and exactly how marginal it is.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

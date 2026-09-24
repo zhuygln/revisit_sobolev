@@ -217,5 +217,43 @@ def main():
     return out
 
 
-if __name__ == "__main__":
+if __name__ == "__main__" and "--markdown" not in sys.argv:
     main()
+
+
+def markdown(out=None):
+    """The report's tables, machine-generated from gate3_verdict.json."""
+    out = out or json.loads((HERE / "gate3_verdict.json").read_text())
+    NAME = {"57LaII": "La II", "58CeII": "Ce II", "60NdII": "Nd II"}
+    L = []
+    for ion, r in out["per_ion"].items():
+        L += [f"{NAME[ion]}" + ("" if ion in out["prereg"]["decisive"] else " (control)") +
+              f": C1 {r['C1']}, C2 {r['C2']}, C3 {r['C3']}; axes needed {r['needed_axes'] or 'none'}; "
+              f"whole-operator interpolation fails on {r['interpolation_fails'] or 'none'}:", "",
+              "| axis | state | reading | live bands | fresh $R_{16}$ max abs dm | $K^*_{\\rm rec}$ | anchor $R_{16}$ max abs dm | rows never trained | outside support | whole-operator interp. | matrix-only interp. |",
+              "|---|---|---|---|---|---|---|---|---|---|---|"]
+        for s in out["states"]:
+            if s["ion"] != ion:
+                continue
+            t = s["transfer"]; i = s["interpolation"]; r16 = s["recomputed"].get("16") or s["recomputed"].get(16) or {}
+            L.append(f"| {s['axis']} | {s['label']} | **{s['classification']}** | {''.join(s['live_bands'])} | "
+                     f"{r16.get('band', float('nan')):.3f} | {s['k_rec'] if s['k_rec'] is not None else '—'} | "
+                     + (f"{t['band']:.3f} | {t['rows_never_trained_frac']:.4f} | " if t else "— | — | ")
+                     + f"{s['outside_fixed_support']['clipped_frac']:.1e} | "
+                     + (f"{i['whole']['band']:.3f} (λ = {i['lam']:.2f}) | {i['matrix_only']['band']:.3f} |" if i else "— | — |")
+                     + (f" gray: {'; '.join(s['gray'])}" if s["gray"] else ""))
+        L.append("")
+    for part, key in (("b", "part_b"), ("c", "part_c")):
+        if key in out:
+            p = out[key]
+            L.append(f"Part ({part}): " + (f"K*_mix = {p['k_mix']}, K*_direct = {p['k_direct']}" if part == "b" else
+                                           f"K*_rec = {p['k_rec']}, ε* = {p['eps_star']}") + f"; live {''.join(p['live_bands'])}; gray {p['gray'] or 'none'}")
+            for fam, tab in p["table"].items():
+                L.append(f"  {fam}: " + "  ".join(f"N={n}: {m['band']:.3f}/{m['colour']:.3f}" for n, m in tab.items()) + "  (max abs dm / max abs dcolour)")
+            L.append("")
+    L.append(f"C1 {out['C1']}, C2 {out['C2']}, C3 {out['C3']}, C4 {out['C4']}, C5 {out['C5']} → step 4: {out['step4']}")
+    return "\n".join(L)
+
+
+if __name__ == "__main__" and "--markdown" in sys.argv:
+    print(markdown())

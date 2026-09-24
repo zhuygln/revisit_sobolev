@@ -141,12 +141,21 @@ def run_state(axis, value, ion, n=None, seeds=SEEDS, build_seeds=BUILD_SEEDS, ng
     return row
 
 
-def run_axis(axis, ion, **kw):
+def run_axis(axis, ion, skip_done=False, **kw):
+    """Every state on the axis, the interior last. `skip_done` resumes a
+    chain after an infrastructure failure: a state whose completion marker
+    exists is not rerun (the marker is written only after the record)."""
     if not kernel_path("ref", ion, kw.get("ng_t", NG_T)).exists():
         run_state("ref", None, ion, **kw)
     a = S.AXES[axis]
     order = [v for v in a["grid"] if v != a["interior"]] + [a["interior"]]
-    return [run_state(axis, v, ion, **kw) for v in order]
+    out = []
+    for v in order:
+        rp = record_path(axis, S.label(axis, v), ion, kw.get("n"))
+        if skip_done and (rp.parent / f"{rp.stem}.done").exists():
+            print(f"skip {rp.name}: done", flush=True); continue
+        out.append(run_state(axis, v, ion, **kw))
+    return out
 
 
 # ---- part (b): species composability; part (c): the realistic mixture ----
@@ -235,6 +244,7 @@ def main():
     ap.add_argument("--ng", default=",".join(str(g) for g in NG_GRID))
     ap.add_argument("--eps", default=None)
     ap.add_argument("--out", default=None)
+    ap.add_argument("--skip-done", action="store_true", help="resume: skip states whose completion marker exists")
     a = ap.parse_args()
     seeds = tuple(int(s) for s in a.seeds.split(",")); bseeds = tuple(int(s) for s in a.build_seeds.split(","))
     ng = tuple(int(g) for g in a.ng.split(","))
@@ -252,7 +262,7 @@ def main():
         v = float(a.state) if a.axis != "P" else int(a.state)
         run_state(a.axis, v, a.ion, out=a.out, **kw)
     else:
-        run_axis(a.axis, a.ion, **kw)
+        run_axis(a.axis, a.ion, skip_done=a.skip_done, **kw)
 
 
 if __name__ == "__main__":
