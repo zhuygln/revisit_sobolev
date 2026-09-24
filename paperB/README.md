@@ -29,6 +29,9 @@ is not the preregistered experiment. Tests: `tests/test_paperB_gate1.py`.
     .venv/bin/python paperB/audit/exit_tables.py --ion 57LaII     # representation audit (no transport scored); --figure; --markdown
     .venv/bin/python paperB/gate2/run_gate2.py --ion 58CeII       # G2: NOT before the PI approves prl_gate.md's G2 section
     .venv/bin/python paperB/gate2/analyse.py                      # H1/H2, gray first -> gate2_verdict.json; figure.py
+    .venv/bin/python paperB/gate3/support.py                      # G3: freeze one support per ion (committed before the run)
+    paperB/gate3/run_all.sh                                       # G3: Ce, Nd, La (anchor, then axes T D J P), then parts b and c (~10 h)
+    .venv/bin/python paperB/gate3/analyse.py                      # A/B/C/D per state, C1-C5 -> gate3_verdict.json
 
 `r2m/` is the post-pass robustness check of G1's own text (the
 radiation-field-driven macroatom as the reference, the 8-group operator
@@ -37,8 +40,14 @@ exit tables hold (distinct exit lines, exact rest frequencies, discovery
 curve, energy concentration, what a truncation keeps, size split).
 `gate2/` holds the operator families (`operators.py`: local on shared
 128-group tables, rank-k NMF, exit-table truncation), the runner, the
-readings H1/H2 and the figure. Tests: `tests/test_paperB_r2m.py`,
-`test_paperB_audit.py`, `test_paperB_gate2.py`.
+readings H1/H2 and the figure. `gate3/` holds the state domain
+(`states.py`: the T, D, J, P axes), the frozen supports
+(`gate3_support.json`), the whole-operator interpolation and the support
+diagnostic (`operators3.py`), the runner (transfer at R₁₆ from the θ₀
+anchor, existence from the operators rebuilt at θ, the interior
+interpolation from the endpoints' saved kernels), and the readings A/B/C/D
+and C1–C5. Tests: `tests/test_paperB_r2m.py`, `test_paperB_audit.py`,
+`test_paperB_gate2.py`, `test_paperB_gate3.py`, `test_paperB_freeze.py`.
 
 ## Where it stands
 

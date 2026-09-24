@@ -139,8 +139,15 @@ def ledger(res_list):
 
 def run_legs(zone, atom, n, legs=LADDER, seeds=SEEDS, ng=NG, relativity="worldline",
              chain_max=CHAIN_MAX, budget_s=None, a_cut=None, verbose=True, dnu_over_nu=4.17e-5,
-             thermal_k="reemit", eps_k=0.0):
-    """All `legs` on one zone dict (from `EjectaState.local_zone`) with one atom."""
+             thermal_k="reemit", eps_k=0.0, kernel_range=None):
+    """All `legs` on one zone dict (from `EjectaState.local_zone`) with one atom.
+
+    `kernel_range` = (nu_lo, nu_hi) fixes the frequency support every kernel
+    built in this run is laid on (Paper B G3: one frozen support per ion over
+    the whole state domain); None means the atom's own opacity range with
+    the 0.5 % margin. A spec may carry `kernel_obj` (a prebuilt
+    RedistributionKernel transported as is -- an anchor built elsewhere, or an
+    interpolated operator) and `save` (a path the built kernel is written to)."""
     t0 = time.time()
     lo, hi = (float(x) for x in phot.nu_edges(*LAM_WIN, 1))
     l_core = phot.planck_luminosity(lo, hi, zone["r_core"], zone["t_core"])
@@ -174,18 +181,23 @@ def run_legs(zone, atom, n, legs=LADDER, seeds=SEEDS, ng=NG, relativity="worldli
     row["kernels"] = {}
     order = [l for l in specs if "kernel" not in specs[l]] + [l for l in specs if "kernel" in specs[l]]
 
-    def kernel_record(tag, kern, src, ng_leg, nu_in, w_in):
-        gi = kern.group_index(nu_in)
-        E_in = np.bincount(gi, weights=w_in * nu_in, minlength=ng_leg)      # energy absorbed per row (h omitted)
+    def kernel_record(tag, kern, src, ng_leg, nu_in=None, w_in=None):
+        if nu_in is not None:
+            gi = kern.group_index(nu_in)
+            E_in = np.bincount(gi, weights=w_in * nu_in, minlength=ng_leg).tolist()   # energy absorbed per row (h omitted)
+        else:
+            E_in = None                                                    # an injected kernel: its build events are elsewhere
         n_exit = int(kern.disc_vals.size) if kern.disc_vals is not None else 0
         import io as _io
         buf = _io.BytesIO(); kern.save(buf)
         rec = dict(source=src, ng=ng_leg, n_events=int(kern.counts.sum()),
                    empty_rows=int(kern.empty_rows.sum()), validate_energy=kern.validate_energy(),
                    edges=kern.edges.tolist(), R=kern.R.tolist(), counts=kern.counts.tolist(),
-                   E_in=E_in.tolist(), n_exit_samples=n_exit, serialized_bytes=int(buf.getbuffer().nbytes))
+                   E_in=E_in, n_exit_samples=n_exit, serialized_bytes=int(buf.getbuffer().nbytes))
         if kern.metadata.get("transform"):
             rec["transform"] = kern.metadata["transform"]
+        if kern.metadata.get("injected"):
+            rec["injected"] = kern.metadata["injected"]
         row["kernels"][tag] = rec
 
     def build_kernels_from(src):
@@ -200,7 +212,10 @@ def run_legs(zone, atom, n, legs=LADDER, seeds=SEEDS, ng=NG, relativity="worldli
         nu_in = np.concatenate([e[0] for e in ev]); nu_out = np.concatenate([e[1] for e in ev])
         w_in = np.concatenate([e[2] for e in ev])
         w_out = np.concatenate([e[3] for e in ev]) if len(ev[0]) == 4 else None
-        k_lo, k_hi = atom.op_nu.min() * 0.995, atom.op_nu.max() * 1.005
+        if kernel_range is not None:
+            k_lo, k_hi = (float(x) for x in kernel_range)
+        else:
+            k_lo, k_hi = atom.op_nu.min() * 0.995, atom.op_nu.max() * 1.005
         for tag in order:
             spec = specs[tag]
             if spec.get("kernel") != src:
@@ -213,6 +228,8 @@ def run_legs(zone, atom, n, legs=LADDER, seeds=SEEDS, ng=NG, relativity="worldli
             if spec.get("transform") is not None:
                 kern = spec["transform"](kern, dict(nu_in=nu_in, nu_out=nu_out, w_in=w_in, w_out=w_out))
                 kernels[(src, ng_leg, tag)] = kern
+            if spec.get("save"):
+                Path(spec["save"]).parent.mkdir(parents=True, exist_ok=True); kern.save(spec["save"])
             kernel_record(tag, kern, src, ng_leg, nu_in, w_in)
         for r in results[src]:
             r.pop("events", None)
@@ -223,6 +240,10 @@ def run_legs(zone, atom, n, legs=LADDER, seeds=SEEDS, ng=NG, relativity="worldli
         kw = {}
         if "eps" in spec:
             kw["eps"] = float(spec["eps"])
+        if "kernel_obj" in spec:                                           # an injected, prebuilt operator
+            kern = spec["kernel_obj"]
+            kernel_record(tag, kern, spec.get("source", "injected"), int(kern.n_groups))
+            kw["kernel"] = kern
         if "kernel" in spec:
             src = spec["kernel"]; ng_leg = int(spec.get("ng", ng))
             if src not in results:
