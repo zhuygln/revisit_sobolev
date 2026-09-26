@@ -1,0 +1,4791 @@
+{
+ "prereg": {
+  "state": "paper4/phase1_benchmarks/P1_t2.json",
+  "shell": 28,
+  "seeds": [
+   1,
+   2,
+   3
+  ],
+  "build_seeds": [
+   101,
+   102,
+   103
+  ],
+  "n": {
+   "57LaII": 300000,
+   "58CeII": 300000,
+   "60NdII": 1000000
+  },
+  "n_blend": 1000000,
+  "ng_grid": [
+   2,
+   4,
+   8,
+   16,
+   32
+  ],
+  "ng_t": 16,
+  "ng_fine": 128,
+  "axes": {
+   "T": {
+    "grid": [
+     2500.0,
+     3000.0,
+     4000.0,
+     5000.0
+    ],
+    "interior": 3000.0,
+    "bracket": [
+     2500.0,
+     3401.0
+    ],
+    "coord": "logT"
+   },
+   "D": {
+    "grid": [
+     0.1,
+     0.3,
+     3.0,
+     10.0
+    ],
+    "interior": 0.3,
+    "bracket": [
+     0.1,
+     1.0
+    ],
+    "coord": "logn"
+   },
+   "J": {
+    "grid": [
+     2500.0,
+     5000.0,
+     7000.0
+    ],
+    "interior": 5000.0,
+    "bracket": [
+     3401.0,
+     7000.0
+    ],
+    "coord": "logTcore"
+   },
+   "P": {
+    "grid": [
+     1,
+     3,
+     5
+    ],
+    "interior": 3,
+    "bracket": [
+     2,
+     5
+    ],
+    "coord": "logt"
+   }
+  },
+  "dm_max": 0.1,
+  "dcolour_max": 0.1,
+  "c1_small_ng": 8,
+  "c1_small_frac": 0.6666666666666666,
+  "coverage_flag": 0.05,
+  "decisive": [
+   "58CeII",
+   "60NdII"
+  ],
+  "controlled_axes": [
+   "T",
+   "D",
+   "J"
+  ]
+ },
+ "per_ion": {
+  "57LaII": {
+   "axes": {
+    "T": {
+     "states": {
+      "T2500": "C",
+      "T3000": "B",
+      "T4000": "C",
+      "T5000": "C"
+     },
+     "n_expected": 4,
+     "n_present": 4,
+     "n_gray": 0,
+     "transfer_holds": false,
+     "interpolation_passes": true,
+     "needed": true,
+     "table": [
+      {
+       "label": "T2500",
+       "cls": "C",
+       "k_rec": 2,
+       "transfer_band": 0.3787989480008491,
+       "rows_never_trained": 0.0,
+       "clipped": 0.0,
+       "rec16": 0.007492012137404913
+      },
+      {
+       "label": "T3000",
+       "cls": "B",
+       "k_rec": 2,
+       "transfer_band": 0.15530392229036138,
+       "rows_never_trained": 0.0,
+       "clipped": 0.0,
+       "rec16": 0.0030469732660662885
+      },
+      {
+       "label": "T4000",
+       "cls": "C",
+       "k_rec": 2,
+       "transfer_band": 0.1924837631496601,
+       "rows_never_trained": 0.0,
+       "clipped": 0.0,
+       "rec16": 0.004617422739773502
+      },
+      {
+       "label": "T5000",
+       "cls": "C",
+       "k_rec": 2,
+       "transfer_band": 0.39884949373823986,
+       "rows_never_trained": 0.0,
+       "clipped": 0.0,
+       "rec16": 0.0072175038747168685
+      }
+     ]
+    },
+    "D": {
+     "states": {
+      "D0.1": "C",
+      "D0.3": "B",
+      "D3": "A",
+      "D10": "C"
+     },
+     "n_expected": 4,
+     "n_present": 4,
+     "n_gray": 0,
+     "transfer_holds": false,
+     "interpolation_passes": true,
+     "needed": true,
+     "table": [
+      {
+       "label": "D0.1",
+       "cls": "C",
+       "k_rec": 2,
+       "transfer_band": 0.13450285381617277,
+       "rows_never_trained": 0.0,
+       "clipped": 0.0,
+       "rec16": 0.013730521572259846
+      },
+      {
+       "label": "D0.3",
+       "cls": "B",
+       "k_rec": 2,
+       "transfer_band": 0.09711702505273578,
+       "rows_never_trained": 0.0,
+       "clipped": 0.0,
+       "rec16": 0.011680576103348272
+      },
+      {
+       "label": "D3",
+       "cls": "A",
+       "k_rec": 2,
+       "transfer_band": 0.05727148912700741,
+       "rows_never_trained": 0.0,
+       "clipped": 0.0,
+       "rec16": 0.015548939940600803
+      },
+      {
+       "label": "D10",
+       "cls": "C",
+       "k_rec": 2,
+       "transfer_band": 0.1041544101412164,
+       "rows_never_trained": 0.0,
+       "clipped": 0.0,
+       "rec16": 0.03919357398197576
+      }
+     ]
+    },
+    "J": {
+     "states": {
+      "J2500": "A",
+      "J5000": "A",
+      "J7000": "A"
+     },
+     "n_expected": 3,
+     "n_present": 3,
+     "n_gray": 0,
+     "transfer_holds": true,
+     "interpolation_passes": true,
+     "needed": false,
+     "table": [
+      {
+       "label": "J2500",
+       "cls": "A",
+       "k_rec": 2,
+       "transfer_band": 0.007578682369089762,
+       "rows_never_trained": 0.0,
+       "clipped": 0.0,
+       "rec16": 0.0036717669438566247
+      },
+      {
+       "label": "J5000",
+       "cls": "A",
+       "k_rec": 2,
+       "transfer_band": 0.009850314837915874,
+       "rows_never_trained": 7.91603872375362e-05,
+       "clipped": 0.0,
+       "rec16": 0.015175765691413545
+      },
+      {
+       "label": "J7000",
+       "cls": "A",
+       "k_rec": 2,
+       "transfer_band": 0.027791991331806543,
+       "rows_never_trained": 0.005463007975510322,
+       "clipped": 0.0,
+       "rec16": 0.004358042882532942
+      }
+     ]
+    },
+    "P": {
+     "states": {
+      "P1d": "C",
+      "P3d": "B",
+      "P5d": "A"
+     },
+     "n_expected": 3,
+     "n_present": 3,
+     "n_gray": 0,
+     "transfer_holds": false,
+     "interpolation_passes": true,
+     "needed": true,
+     "table": [
+      {
+       "label": "P1d",
+       "cls": "C",
+       "k_rec": 2,
+       "transfer_band": 0.2570160492224005,
+       "rows_never_trained": 8.917066820040216e-06,
+       "clipped": 0.0,
+       "rec16": 0.0020740547419713096
+      },
+      {
+       "label": "P3d",
+       "cls": "B",
+       "k_rec": 2,
+       "transfer_band": 0.19083090913247958,
+       "rows_never_trained": 0.0,
+       "clipped": 0.0,
+       "rec16": 0.03983510533070955
+      },
+      {
+       "label": "P5d",
+       "cls": "A",
+       "k_rec": 2,
+       "transfer_band": 0.04222659699119191,
+       "rows_never_trained": 0.0,
+       "clipped": 0.0,
+       "rec16": 0.014685354711492238
+      }
+     ]
+    }
+   },
+   "C1": "GREEN",
+   "C2": "YELLOW",
+   "C3": "GREEN",
+   "needed_axes": [
+    "T",
+    "D"
+   ],
+   "interpolation_fails": []
+  },
+  "58CeII": {
+   "axes": {
+    "T": {
+     "states": {
+      "T2500": "C",
+      "T3000": "B",
+      "T4000": "D",
+      "T5000": "D"
+     },
+     "n_expected": 4,
+     "n_present": 4,
+     "n_gray": 0,
+     "transfer_holds": false,
+     "interpolation_passes": true,
+     "needed": true,
+     "table": [
+      {
+       "label": "T2500",
+       "cls": "C",
+       "k_rec": 16,
+       "transfer_band": 0.3221122956472726,
+       "rows_never_trained": 2.2441812867596896e-07,
+       "clipped": 0.0,
+       "rec16": 0.07013970738537267
+      },
+      {
+       "label": "T3000",
+       "cls": "B",
+       "k_rec": 32,
+       "transfer_band": 0.18801186853490748,
+       "rows_never_trained": 2.1117277121394146e-07,
+       "clipped": 0.0,
+       "rec16": 0.06647071079965983
+      },
+      {
+       "label": "T4000",
+       "cls": "D",
+       "k_rec": 32,
+       "transfer_band": 0.12633120572700562,
+       "rows_never_trained": 0.0,
+       "clipped": 0.0,
+       "rec16": 0.09891210243241133
+      },
+      {
+       "label": "T5000",
+       "cls": "D",
+       "k_rec": 32,
+       "transfer_band": 0.717399871488773,
+       "rows_never_trained": 1.1836952373015987e-07,
+       "clipped": 0.0,
+       "rec16": 0.0803827084795401
+      }
+     ]
+    },
+    "D": {
+     "states": {
+      "D0.1": "C",
+      "D0.3": "B",
+      "D3": "C",
+      "D10": "C"
+     },
+     "n_expected": 4,
+     "n_present": 4,
+     "n_gray": 0,
+     "transfer_holds": false,
+     "interpolation_passes": true,
+     "needed": true,
+     "table": [
+      {
+       "label": "D0.1",
+       "cls": "C",
+       "k_rec": 4,
+       "transfer_band": 0.34172780947356785,
+       "rows_never_trained": 0.0,
+       "clipped": 0.0,
+       "rec16": 0.03712803360717842
+      },
+      {
+       "label": "D0.3",
+       "cls": "B",
+       "k_rec": 8,
+       "transfer_band": 0.2232329960885444,
+       "rows_never_trained": 0.0,
+       "clipped": 0.0,
+       "rec16": 0.05613299083999124
+      },
+      {
+       "label": "D3",
+       "cls": "C",
+       "k_rec": 16,
+       "transfer_band": 0.23573221141676726,
+       "rows_never_trained": 1.4122031866647348e-07,
+       "clipped": 0.0,
+       "rec16": 0.08900097757921088
+      },
+      {
+       "label": "D10",
+       "cls": "C",
+       "k_rec": 4,
+       "transfer_band": 0.37272690500658,
+       "rows_never_trained": 1.990324409213788e-06,
+       "clipped": 0.0,
+       "rec16": 0.04344926943126737
+      }
+     ]
+    },
+    "J": {
+     "states": {
+      "J2500": "C",
+      "J5000": "A",
+      "J7000": "A"
+     },
+     "n_expected": 3,
+     "n_present": 3,
+     "n_gray": 0,
+     "transfer_holds": false,
+     "interpolation_passes": true,
+     "needed": true,
+     "table": [
+      {
+       "label": "J2500",
+       "cls": "C",
+       "k_rec": 8,
+       "transfer_band": 0.06963003102946175,
+       "rows_never_trained": 4.0598264140020166e-07,
+       "clipped": 0.0,
+       "rec16": 0.051138875664968
+      },
+      {
+       "label": "J5000",
+       "cls": "A",
+       "k_rec": 32,
+       "transfer_band": 0.042376505383820984,
+       "rows_never_trained": 0.00011824968505463346,
+       "clipped": 0.0,
+       "rec16": 0.08261059417802485
+      },
+      {
+       "label": "J7000",
+       "cls": "A",
+       "k_rec": 32,
+       "transfer_band": 0.09637137182326327,
+       "rows_never_trained": 0.01252403480303787,
+       "clipped": 0.0,
+       "rec16": 0.0924891149428575
+      }
+     ]
+    },
+    "P": {
+     "states": {
+      "P1d": "D",
+      "P3d": "B",
+      "P5d": "D"
+     },
+     "n_expected": 3,
+     "n_present": 3,
+     "n_gray": 0,
+     "transfer_holds": false,
+     "interpolation_passes": true,
+     "needed": true,
+     "table": [
+      {
+       "label": "P1d",
+       "cls": "D",
+       "k_rec": 32,
+       "transfer_band": 0.48007780001415057,
+       "rows_never_trained": 3.9826561120383984e-05,
+       "clipped": 0.0,
+       "rec16": 0.11886222410818092
+      },
+      {
+       "label": "P3d",
+       "cls": "B",
+       "k_rec": 16,
+       "transfer_band": 0.2305954800669241,
+       "rows_never_trained": 1.7355722601171568e-07,
+       "clipped": 0.0,
+       "rec16": 0.06752488247446564
+      },
+      {
+       "label": "P5d",
+       "cls": "D",
+       "k_rec": 32,
+       "transfer_band": 0.33348902590290663,
+       "rows_never_trained": 0.0,
+       "clipped": 0.0,
+       "rec16": 0.06800675500161546
+      }
+     ]
+    }
+   },
+   "C1": "RED",
+   "C2": "YELLOW",
+   "C3": "YELLOW",
+   "needed_axes": [
+    "T",
+    "D",
+    "J"
+   ],
+   "interpolation_fails": []
+  },
+  "60NdII": {
+   "axes": {
+    "T": {
+     "states": {
+      "T2500": "C",
+      "T3000": "B",
+      "T4000": "C",
+      "T5000": "GRAY"
+     },
+     "n_expected": 4,
+     "n_present": 4,
+     "n_gray": 1,
+     "transfer_holds": false,
+     "interpolation_passes": true,
+     "needed": true,
+     "table": [
+      {
+       "label": "T2500",
+       "cls": "C",
+       "k_rec": 2,
+       "transfer_band": 0.39208584234123833,
+       "rows_never_trained": 0.0,
+       "clipped": 0.0,
+       "rec16": 0.010170422959770775
+      },
+      {
+       "label": "T3000",
+       "cls": "B",
+       "k_rec": 2,
+       "transfer_band": 0.15021670205870308,
+       "rows_never_trained": 0.0,
+       "clipped": 0.0,
+       "rec16": 0.009058989691656194
+      },
+      {
+       "label": "T4000",
+       "cls": "C",
+       "k_rec": 4,
+       "transfer_band": 0.23319666791914528,
+       "rows_never_trained": 0.0,
+       "clipped": 0.0,
+       "rec16": 0.016541797262391356
+      },
+      {
+       "label": "T5000",
+       "cls": "GRAY",
+       "k_rec": 4,
+       "transfer_band": 0.48261410760019885,
+       "rows_never_trained": 3.007380774043272e-08,
+       "clipped": 0.0,
+       "rec16": 0.018634888044957165
+      }
+     ]
+    },
+    "D": {
+     "states": {
+      "D0.1": "GRAY",
+      "D0.3": "B",
+      "D3": "C",
+      "D10": "C"
+     },
+     "n_expected": 4,
+     "n_present": 4,
+     "n_gray": 1,
+     "transfer_holds": false,
+     "interpolation_passes": true,
+     "needed": true,
+     "table": [
+      {
+       "label": "D0.1",
+       "cls": "GRAY",
+       "k_rec": 4,
+       "transfer_band": 0.7257593174839769,
+       "rows_never_trained": 0.0,
+       "clipped": 0.0,
+       "rec16": 0.009265531030241192
+      },
+      {
+       "label": "D0.3",
+       "cls": "B",
+       "k_rec": 2,
+       "transfer_band": 0.37482739641395924,
+       "rows_never_trained": 0.0,
+       "clipped": 0.0,
+       "rec16": 0.013143506810553873
+      },
+      {
+       "label": "D3",
+       "cls": "C",
+       "k_rec": 2,
+       "transfer_band": 0.3021206153340401,
+       "rows_never_trained": 2.6572970373131006e-08,
+       "clipped": 0.0,
+       "rec16": 0.0135669189140053
+      },
+      {
+       "label": "D10",
+       "cls": "C",
+       "k_rec": 4,
+       "transfer_band": 0.5182260441127191,
+       "rows_never_trained": 1.5878398846254369e-07,
+       "clipped": 0.0,
+       "rec16": 0.03332267264168465
+      }
+     ]
+    },
+    "J": {
+     "states": {
+      "J2500": "A",
+      "J5000": "A",
+      "J7000": "A"
+     },
+     "n_expected": 3,
+     "n_present": 3,
+     "n_gray": 0,
+     "transfer_holds": true,
+     "interpolation_passes": true,
+     "needed": false,
+     "table": [
+      {
+       "label": "J2500",
+       "cls": "A",
+       "k_rec": 2,
+       "transfer_band": 0.026995369798708424,
+       "rows_never_trained": 0.0,
+       "clipped": 0.0,
+       "rec16": 0.018130933241131686
+      },
+      {
+       "label": "J5000",
+       "cls": "A",
+       "k_rec": 4,
+       "transfer_band": 0.03482609431549477,
+       "rows_never_trained": 0.0,
+       "clipped": 0.0,
+       "rec16": 0.017862929833302843
+      },
+      {
+       "label": "J7000",
+       "cls": "A",
+       "k_rec": 4,
+       "transfer_band": 0.022623682204013562,
+       "rows_never_trained": 0.0,
+       "clipped": 0.0,
+       "rec16": 0.028102928818157125
+      }
+     ]
+    },
+    "P": {
+     "states": {
+      "P1d": "C",
+      "P3d": "C",
+      "P5d": "C"
+     },
+     "n_expected": 3,
+     "n_present": 3,
+     "n_gray": 0,
+     "transfer_holds": false,
+     "interpolation_passes": false,
+     "needed": true,
+     "table": [
+      {
+       "label": "P1d",
+       "cls": "C",
+       "k_rec": 4,
+       "transfer_band": 0.33247840218098546,
+       "rows_never_trained": 0.0,
+       "clipped": 0.0,
+       "rec16": 0.028794767540926358
+      },
+      {
+       "label": "P3d",
+       "cls": "C",
+       "k_rec": 2,
+       "transfer_band": 0.18068846102594094,
+       "rows_never_trained": 0.0,
+       "clipped": 0.0,
+       "rec16": 0.01282867267557819
+      },
+      {
+       "label": "P5d",
+       "cls": "C",
+       "k_rec": 2,
+       "transfer_band": 0.33136259465702267,
+       "rows_never_trained": 0.0,
+       "clipped": 0.0,
+       "rec16": 0.007447089701464904
+      }
+     ]
+    }
+   },
+   "C1": "GREEN",
+   "C2": "RED",
+   "C3": "GREEN",
+   "needed_axes": [
+    "T",
+    "D"
+   ],
+   "interpolation_fails": []
+  }
+ },
+ "C1": "RED",
+ "C2": "RED",
+ "C3": "YELLOW",
+ "C4": "YELLOW",
+ "C5": "NOT RUN",
+ "part_b": {
+  "gray": [
+   "3: Amix_ng32 identity residual 9.8e+31"
+  ],
+  "live_bands": [
+   "r",
+   "i",
+   "z",
+   "J",
+   "H",
+   "K"
+  ],
+  "table": {
+   "Amix": {
+    "2": {
+     "band": 0.9305698678944019,
+     "colour": 0.49109499478138474,
+     "event": 0.51288763131518
+    },
+    "4": {
+     "band": 0.9571689768522376,
+     "colour": 0.5464664956496676,
+     "event": 0.4924707545651808
+    },
+    "8": {
+     "band": 0.3871260576250428,
+     "colour": 0.39437781695638563,
+     "event": 0.31051989085531556
+    },
+    "16": {
+     "band": 0.1418099918338669,
+     "colour": 0.13056638279910615,
+     "event": 0.21015129097877727
+    },
+    "32": {
+     "band": 0.11075075738452966,
+     "colour": 0.10031652390923895,
+     "event": 0.15427350185065272
+    }
+   },
+   "Adirect": {
+    "2": {
+     "band": 0.14558592652244684,
+     "colour": 0.0746999329658955,
+     "event": 0.5128966633756995
+    },
+    "4": {
+     "band": 0.08261631089485277,
+     "colour": 0.05253061123818625,
+     "event": 0.4924581927311317
+    },
+    "8": {
+     "band": 0.049875852803122456,
+     "colour": 0.05429692584460355,
+     "event": 0.3105154294792998
+    },
+    "16": {
+     "band": 0.057013772437223054,
+     "colour": 0.047622691443617526,
+     "event": 0.21030314189671973
+    },
+    "32": {
+     "band": 0.039664537258733645,
+     "colour": 0.057432491224663096,
+     "event": 0.15393308923697946
+    }
+   }
+  },
+  "k_mix": null,
+  "k_direct": 4
+ },
+ "step4": "reframed by the PI",
+ "states": [
+  {
+   "axis": "D",
+   "value": 0.1,
+   "label": "D0.1",
+   "ion": "57LaII",
+   "coord": "logn",
+   "coord_value": 8.099444140144172,
+   "gray": [],
+   "live_bands": [
+    "g",
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "g": 0.011753573594962714,
+    "r": 0.005559729419064733,
+    "i": 0.003442870202632405,
+    "z": 0.004184518596475844,
+    "J": 0.004757365337357264,
+    "H": 0.007963298128252633,
+    "K": 0.00830832914207429
+   },
+   "classification": "C",
+   "k_rec": 2,
+   "exists_at_ng_t": true,
+   "transfers": false,
+   "interpolates": null,
+   "recomputed": {
+    "2": {
+     "band": 0.002017322213973216,
+     "colour": 0.002600146150250282,
+     "sed": 0.0035757244301080474,
+     "event": 0.7945779371569923
+    },
+    "4": {
+     "band": 0.0022111522665113625,
+     "colour": 0.002203009003327594,
+     "sed": 0.002927549540593994,
+     "event": 0.6822028637488327
+    },
+    "8": {
+     "band": 0.005036453357327275,
+     "colour": 0.007330303881534661,
+     "sed": 0.0031079916789883005,
+     "event": 0.5671810121359208
+    },
+    "16": {
+     "band": 0.013730521572259846,
+     "colour": 0.014674349634169914,
+     "sed": 0.0031292181655150366,
+     "event": 0.49764983454065953
+    },
+    "32": {
+     "band": 0.008726052939323381,
+     "colour": 0.008493238210981247,
+     "sed": 0.0034745844172899445,
+     "event": 0.4592727273112745
+    }
+   },
+   "transfer": {
+    "band": 0.13450285381617277,
+    "colour": 0.18186469662265736,
+    "sed": 0.02591855056440923,
+    "event": 0.5226709167744108,
+    "rows_never_trained_frac": 0.0,
+    "anchor_empty_rows": 2
+   },
+   "interpolation": null,
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.02977036768475041,
+   "events_per_packet": 0.30955777777777777,
+   "t_wall": 9.625225305557251
+  },
+  {
+   "axis": "D",
+   "value": 0.1,
+   "label": "D0.1",
+   "ion": "58CeII",
+   "coord": "logn",
+   "coord_value": 9.163027644597284,
+   "gray": [],
+   "live_bands": [
+    "g",
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "g": 0.01994143378287389,
+    "r": 0.004449148011137412,
+    "i": 0.0022074896179424216,
+    "z": 0.015827572545851903,
+    "J": 0.007221863462168256,
+    "H": 0.006344391996230523,
+    "K": 0.002356207784707851
+   },
+   "classification": "C",
+   "k_rec": 4,
+   "exists_at_ng_t": true,
+   "transfers": false,
+   "interpolates": null,
+   "recomputed": {
+    "2": {
+     "band": 0.13362646808609568,
+     "colour": 0.0628556031169829,
+     "sed": 0.02081305321153586,
+     "event": 0.5946786036604044
+    },
+    "4": {
+     "band": 0.07283294760653547,
+     "colour": 0.0486550853450467,
+     "sed": 0.016674824751509446,
+     "event": 0.5623568934993018
+    },
+    "8": {
+     "band": 0.06318225735255822,
+     "colour": 0.05024007798401442,
+     "sed": 0.0161928084197924,
+     "event": 0.43254758002008925
+    },
+    "16": {
+     "band": 0.03712803360717842,
+     "colour": 0.025530861249936976,
+     "sed": 0.015886112631610497,
+     "event": 0.3352280724462326
+    },
+    "32": {
+     "band": 0.015611650045869396,
+     "colour": 0.009166857777927362,
+     "sed": 0.014936449151293428,
+     "event": 0.2565890500382537
+    }
+   },
+   "transfer": {
+    "band": 0.34172780947356785,
+    "colour": 0.330684164592455,
+    "sed": 0.10475452785998918,
+    "event": 0.3447137211302876,
+    "rows_never_trained_frac": 0.0,
+    "anchor_empty_rows": 5
+   },
+   "interpolation": null,
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.013403739749521883,
+   "events_per_packet": 2.136128888888889,
+   "t_wall": 89.60532140731812
+  },
+  {
+   "axis": "D",
+   "value": 0.1,
+   "label": "D0.1",
+   "ion": "60NdII",
+   "coord": "logn",
+   "coord_value": 9.524078473872267,
+   "gray": [
+    "3: Arec_ng32 identity residual 3.9e+70"
+   ],
+   "live_bands": [
+    "g",
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "g": 0.011474263297127339,
+    "r": 0.006297719757646072,
+    "i": 0.002264772147100804,
+    "z": 0.0037476169220123103,
+    "J": 0.002125861002537529,
+    "H": 0.0011015736935562608,
+    "K": 0.004472643997059473
+   },
+   "classification": "GRAY",
+   "k_rec": 4,
+   "exists_at_ng_t": true,
+   "transfers": false,
+   "interpolates": null,
+   "recomputed": {
+    "2": {
+     "band": 0.10466138765117705,
+     "colour": 0.07985381084737497,
+     "sed": 0.009236402349153692,
+     "event": 0.5783819483617393
+    },
+    "4": {
+     "band": 0.039770371557523276,
+     "colour": 0.02002250043770104,
+     "sed": 0.008257519750073545,
+     "event": 0.5463545278779642
+    },
+    "8": {
+     "band": 0.025138534142797653,
+     "colour": 0.01857636834570897,
+     "sed": 0.00760907194780727,
+     "event": 0.3943748284152477
+    },
+    "16": {
+     "band": 0.009265531030241192,
+     "colour": 0.005152599985795092,
+     "sed": 0.007411787857556284,
+     "event": 0.30844743596740687
+    },
+    "32": {
+     "band": 0.00884272776778161,
+     "colour": 0.00846056516853011,
+     "sed": 0.007521925385282222,
+     "event": 0.25748687435329165
+    }
+   },
+   "transfer": {
+    "band": 0.7257593174839769,
+    "colour": 0.6926497763049504,
+    "sed": 0.1242152142770603,
+    "event": 0.33389629099423096,
+    "rows_never_trained_frac": 0.0,
+    "anchor_empty_rows": 3
+   },
+   "interpolation": null,
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.006079288482682756,
+   "events_per_packet": 3.4040683333333335,
+   "t_wall": 508.24166440963745
+  },
+  {
+   "axis": "D",
+   "value": 0.3,
+   "label": "D0.3",
+   "ion": "57LaII",
+   "coord": "logn",
+   "coord_value": 9.198056428812281,
+   "gray": [],
+   "live_bands": [
+    "g",
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "g": 0.004020360209030261,
+    "r": 0.0039544984075984045,
+    "i": 0.006174404875331396,
+    "z": 0.0029416088091173656,
+    "J": 0.0033666048349517115,
+    "H": 0.007567106339160142,
+    "K": 0.008373612834298766
+   },
+   "classification": "B",
+   "k_rec": 2,
+   "exists_at_ng_t": true,
+   "transfers": false,
+   "interpolates": true,
+   "recomputed": {
+    "2": {
+     "band": 0.0103044727954682,
+     "colour": 0.010601608220955683,
+     "sed": 0.0051156713986411605,
+     "event": 0.7680360258061267
+    },
+    "4": {
+     "band": 0.007151505531076907,
+     "colour": 0.005849643111123015,
+     "sed": 0.004402749028306559,
+     "event": 0.6509032281662716
+    },
+    "8": {
+     "band": 0.009359062280669406,
+     "colour": 0.012318530991134224,
+     "sed": 0.004614824860841345,
+     "event": 0.5419448771569828
+    },
+    "16": {
+     "band": 0.011680576103348272,
+     "colour": 0.012211247761289457,
+     "sed": 0.004483193845088597,
+     "event": 0.4730066509564277
+    },
+    "32": {
+     "band": 0.001908105705865637,
+     "colour": 0.003225452672673157,
+     "sed": 0.004509891132533616,
+     "event": 0.43479055666514893
+    }
+   },
+   "transfer": {
+    "band": 0.09711702505273578,
+    "colour": 0.12821548353439383,
+    "sed": 0.02051212800330428,
+    "event": 0.47947424882879225,
+    "rows_never_trained_frac": 0.0,
+    "anchor_empty_rows": 2
+   },
+   "interpolation": {
+    "whole": {
+     "band": 0.030369940607421597,
+     "colour": 0.037512444783352805,
+     "sed": 0.00765186280920048,
+     "event": 0.472377990129303,
+     "fallback": 0.0
+    },
+    "matrix_only": {
+     "band": 0.03195263588732544,
+     "colour": 0.05367003773495682,
+     "sed": 0.011347991193607946,
+     "event": 0.472377990129303
+    },
+    "lam": 0.4771212547196623,
+    "endpoints": [
+     "D0.1",
+     "ref"
+    ],
+    "transform": {
+     "kind": "interp_whole",
+     "lam": 0.4771212547196623,
+     "coord": "logn",
+     "endpoints": [
+      "D0.1",
+      "ref"
+     ],
+     "rows_both": 12,
+     "rows_one_endpoint": 2,
+     "n_exit_a": 372,
+     "n_exit_b": 524,
+     "n_exit_union": 525,
+     "archetypes": 16,
+     "n_params": 256
+    }
+   },
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.026245708488718694,
+   "events_per_packet": 0.49691555555555555,
+   "t_wall": 13.18338918685913
+  },
+  {
+   "axis": "D",
+   "value": 0.3,
+   "label": "D0.3",
+   "ion": "58CeII",
+   "coord": "logn",
+   "coord_value": 10.261639933265393,
+   "gray": [],
+   "live_bands": [
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "r": 0.005656221997957755,
+    "i": 0.020454713238467682,
+    "z": 0.025114122706530916,
+    "J": 0.015645947284390078,
+    "H": 0.010868968862105444,
+    "K": 0.011559173004942564
+   },
+   "classification": "B",
+   "k_rec": 8,
+   "exists_at_ng_t": true,
+   "transfers": false,
+   "interpolates": true,
+   "recomputed": {
+    "2": {
+     "band": 0.17912719248283082,
+     "colour": 0.15384429994041682,
+     "sed": 0.030871532300073314,
+     "event": 0.5665950182283872
+    },
+    "4": {
+     "band": 0.10082207657621822,
+     "colour": 0.09400065727843199,
+     "sed": 0.025211622189637763,
+     "event": 0.5242285764046273
+    },
+    "8": {
+     "band": 0.088153470885171,
+     "colour": 0.08420428189309348,
+     "sed": 0.02528802692569966,
+     "event": 0.38864444372591317
+    },
+    "16": {
+     "band": 0.05613299083999124,
+     "colour": 0.0909802492005305,
+     "sed": 0.023833683489259697,
+     "event": 0.294780819190481
+    },
+    "32": {
+     "band": 0.03487146338262903,
+     "colour": 0.05259529140464991,
+     "sed": 0.01827163966111703,
+     "event": 0.22436449020219557
+    }
+   },
+   "transfer": {
+    "band": 0.2232329960885444,
+    "colour": 0.1643104935520583,
+    "sed": 0.0999488261996327,
+    "event": 0.2985585808271504,
+    "rows_never_trained_frac": 0.0,
+    "anchor_empty_rows": 5
+   },
+   "interpolation": {
+    "whole": {
+     "band": 0.046508929625804996,
+     "colour": 0.05287505227769529,
+     "sed": 0.030288822396808964,
+     "event": 0.2947673201161317,
+     "fallback": 0.0
+    },
+    "matrix_only": {
+     "band": 0.13013168577329992,
+     "colour": 0.08264574414119252,
+     "sed": 0.08066033844816306,
+     "event": 0.2947673201161317
+    },
+    "lam": 0.47712125471966194,
+    "endpoints": [
+     "D0.1",
+     "ref"
+    ],
+    "transform": {
+     "kind": "interp_whole",
+     "lam": 0.47712125471966194,
+     "coord": "logn",
+     "endpoints": [
+      "D0.1",
+      "ref"
+     ],
+     "rows_both": 10,
+     "rows_one_endpoint": 1,
+     "n_exit_a": 10231,
+     "n_exit_b": 12510,
+     "n_exit_union": 12684,
+     "archetypes": 16,
+     "n_params": 256
+    }
+   },
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.010868489582125933,
+   "events_per_packet": 3.5955677777777777,
+   "t_wall": 123.54106783866882
+  },
+  {
+   "axis": "D",
+   "value": 0.3,
+   "label": "D0.3",
+   "ion": "60NdII",
+   "coord": "logn",
+   "coord_value": 10.622690762540376,
+   "gray": [],
+   "live_bands": [
+    "g",
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "g": 0.006445338864772924,
+    "r": 0.007484271518995971,
+    "i": 0.0020759077288512147,
+    "z": 0.0039595808010272696,
+    "J": 0.006311512845248247,
+    "H": 0.0007151125399212539,
+    "K": 0.0014176900178967478
+   },
+   "classification": "B",
+   "k_rec": 2,
+   "exists_at_ng_t": true,
+   "transfers": false,
+   "interpolates": true,
+   "recomputed": {
+    "2": {
+     "band": 0.08980092164043185,
+     "colour": 0.0644316680851631,
+     "sed": 0.010379863290933156,
+     "event": 0.5298408260172708
+    },
+    "4": {
+     "band": 0.061255545896298,
+     "colour": 0.02996627021031273,
+     "sed": 0.011102981571042931,
+     "event": 0.47787593248418264
+    },
+    "8": {
+     "band": 0.02167006637629143,
+     "colour": 0.012556235331111054,
+     "sed": 0.009973897876227307,
+     "event": 0.3263473528890649
+    },
+    "16": {
+     "band": 0.013143506810553873,
+     "colour": 0.007586926019993001,
+     "sed": 0.008806350833327686,
+     "event": 0.25217553513534047
+    },
+    "32": {
+     "band": 0.023706473665420447,
+     "colour": 0.02675208382882488,
+     "sed": 0.009820699751786566,
+     "event": 0.2100237621747687
+    }
+   },
+   "transfer": {
+    "band": 0.37482739641395924,
+    "colour": 0.39541303083752055,
+    "sed": 0.08344025838357551,
+    "event": 0.2583277808864718,
+    "rows_never_trained_frac": 0.0,
+    "anchor_empty_rows": 3
+   },
+   "interpolation": {
+    "whole": {
+     "band": 0.033850204927485805,
+     "colour": 0.037885491463384824,
+     "sed": 0.02069022626551817,
+     "event": 0.2530938642251938,
+     "fallback": 0.0
+    },
+    "matrix_only": {
+     "band": 0.11017909444589336,
+     "colour": 0.16516277561597548,
+     "sed": 0.0514017613154353,
+     "event": 0.2530938642251938
+    },
+    "lam": 0.4771212547196623,
+    "endpoints": [
+     "D0.1",
+     "ref"
+    ],
+    "transform": {
+     "kind": "interp_whole",
+     "lam": 0.4771212547196623,
+     "coord": "logn",
+     "endpoints": [
+      "D0.1",
+      "ref"
+     ],
+     "rows_both": 11,
+     "rows_one_endpoint": 2,
+     "n_exit_a": 41206,
+     "n_exit_b": 86187,
+     "n_exit_union": 88585,
+     "archetypes": 16,
+     "n_params": 256
+    }
+   },
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.005384953268537936,
+   "events_per_packet": 5.511377333333333,
+   "t_wall": 1146.844351530075
+  },
+  {
+   "axis": "D",
+   "value": 10.0,
+   "label": "D10",
+   "ion": "57LaII",
+   "coord": "logn",
+   "coord_value": 12.704614326132264,
+   "gray": [],
+   "live_bands": [
+    "g",
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "g": 0.007549123410781788,
+    "r": 0.003868024547085301,
+    "i": 0.0035347782720697492,
+    "z": 0.0053471011389946005,
+    "J": 0.0008156599721846153,
+    "H": 0.007538861118331113,
+    "K": 0.0076181564832915934
+   },
+   "classification": "C",
+   "k_rec": 2,
+   "exists_at_ng_t": true,
+   "transfers": false,
+   "interpolates": null,
+   "recomputed": {
+    "2": {
+     "band": 0.024995322158201105,
+     "colour": 0.029435604634308277,
+     "sed": 0.006523969244968792,
+     "event": 0.6879529676997516
+    },
+    "4": {
+     "band": 0.029501036569289596,
+     "colour": 0.03113294084144158,
+     "sed": 0.007037924065361956,
+     "event": 0.5432163107765401
+    },
+    "8": {
+     "band": 0.026024552459649186,
+     "colour": 0.03585250485970093,
+     "sed": 0.006827374701960991,
+     "event": 0.45716826753035517
+    },
+    "16": {
+     "band": 0.03919357398197576,
+     "colour": 0.034180266807052107,
+     "sed": 0.006481426755833877,
+     "event": 0.40879438147076935
+    },
+    "32": {
+     "band": 0.005010537816474425,
+     "colour": 0.006190965965068074,
+     "sed": 0.006174532548481388,
+     "event": 0.38348005548375713
+    }
+   },
+   "transfer": {
+    "band": 0.1041544101412164,
+    "colour": 0.0857176055379476,
+    "sed": 0.06147874839128526,
+    "event": 0.4248092317084438,
+    "rows_never_trained_frac": 0.0,
+    "anchor_empty_rows": 2
+   },
+   "interpolation": null,
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.02136910889486071,
+   "events_per_packet": 1.2616733333333334,
+   "t_wall": 17.174530267715454
+  },
+  {
+   "axis": "D",
+   "value": 10.0,
+   "label": "D10",
+   "ion": "58CeII",
+   "coord": "logn",
+   "coord_value": 13.768197830585375,
+   "gray": [],
+   "live_bands": [
+    "g",
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "g": 0.03894052275383596,
+    "r": 0.01164299980121049,
+    "i": 0.018935055627439357,
+    "z": 0.017197191250689914,
+    "J": 0.013036927417923646,
+    "H": 0.010130320492311008,
+    "K": 0.01439955371974006
+   },
+   "classification": "C",
+   "k_rec": 4,
+   "exists_at_ng_t": true,
+   "transfers": false,
+   "interpolates": null,
+   "recomputed": {
+    "2": {
+     "band": 0.18299057202967361,
+     "colour": 0.14067526299573174,
+     "sed": 0.04178885442272833,
+     "event": 0.47387169026709275
+    },
+    "4": {
+     "band": 0.07864992711960994,
+     "colour": 0.07025947050115633,
+     "sed": 0.03994005685166641,
+     "event": 0.4098098746019562
+    },
+    "8": {
+     "band": 0.06025287118667322,
+     "colour": 0.055314167181990115,
+     "sed": 0.041114217097235894,
+     "event": 0.2653722616015084
+    },
+    "16": {
+     "band": 0.04344926943126737,
+     "colour": 0.029156783629975536,
+     "sed": 0.03563942033572547,
+     "event": 0.18444501561459536
+    },
+    "32": {
+     "band": 0.04475142220266548,
+     "colour": 0.03862723251931044,
+     "sed": 0.03301800660120215,
+     "event": 0.14110669189253058
+    }
+   },
+   "transfer": {
+    "band": 0.37272690500658,
+    "colour": 0.21973293900868995,
+    "sed": 0.2952185456852917,
+    "event": 0.19327995223968536,
+    "rows_never_trained_frac": 1.990324409213788e-06,
+    "anchor_empty_rows": 5
+   },
+   "interpolation": null,
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.004445721441428246,
+   "events_per_packet": 9.880944333333332,
+   "t_wall": 537.5964505672455
+  },
+  {
+   "axis": "D",
+   "value": 10.0,
+   "label": "D10",
+   "ion": "60NdII",
+   "coord": "logn",
+   "coord_value": 14.129248659860359,
+   "gray": [],
+   "live_bands": [
+    "g",
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "g": 0.04032776173858222,
+    "r": 0.01649262509994658,
+    "i": 0.017463551657652062,
+    "z": 0.011584933687191577,
+    "J": 0.01588672786323007,
+    "H": 0.020404086020636147,
+    "K": 0.003885145814749145
+   },
+   "classification": "C",
+   "k_rec": 4,
+   "exists_at_ng_t": true,
+   "transfers": false,
+   "interpolates": null,
+   "recomputed": {
+    "2": {
+     "band": 0.12205975452258855,
+     "colour": 0.12253094674375475,
+     "sed": 0.026565442533115394,
+     "event": 0.4634077269303318
+    },
+    "4": {
+     "band": 0.06444720613961152,
+     "colour": 0.03302099436010408,
+     "sed": 0.0259635910469915,
+     "event": 0.3607562224259362
+    },
+    "8": {
+     "band": 0.04288411487685906,
+     "colour": 0.03744829545646411,
+     "sed": 0.027167421303194456,
+     "event": 0.21550428592991705
+    },
+    "16": {
+     "band": 0.03332267264168465,
+     "colour": 0.049684485860453265,
+     "sed": 0.0258432934610425,
+     "event": 0.15668038545133192
+    },
+    "32": {
+     "band": 0.04129707811323158,
+     "colour": 0.053064152694268785,
+     "sed": 0.025414367008616063,
+     "event": 0.12426357616032473
+    }
+   },
+   "transfer": {
+    "band": 0.5182260441127191,
+    "colour": 0.41807310879931947,
+    "sed": 0.2733528774898321,
+    "event": 0.1708001929920042,
+    "rows_never_trained_frac": 1.5878398846254369e-07,
+    "anchor_empty_rows": 3
+   },
+   "interpolation": null,
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.004162920845085577,
+   "events_per_packet": 14.163454,
+   "t_wall": 1838.372933626175
+  },
+  {
+   "axis": "D",
+   "value": 3.0,
+   "label": "D3",
+   "ion": "57LaII",
+   "coord": "logn",
+   "coord_value": 11.500641521806328,
+   "gray": [],
+   "live_bands": [
+    "g",
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "g": 0.012674613492313956,
+    "r": 0.014005927227224152,
+    "i": 0.0019915016202449,
+    "z": 0.0046384795789404685,
+    "J": 0.002568336644222429,
+    "H": 0.006534315497081007,
+    "K": 0.007897074103433384
+   },
+   "classification": "A",
+   "k_rec": 2,
+   "exists_at_ng_t": true,
+   "transfers": true,
+   "interpolates": null,
+   "recomputed": {
+    "2": {
+     "band": 0.03300065219728765,
+     "colour": 0.040632308549074736,
+     "sed": 0.00526140130699123,
+     "event": 0.7112778664297659
+    },
+    "4": {
+     "band": 0.03737252357823451,
+     "colour": 0.0433340808615128,
+     "sed": 0.00626694454307432,
+     "event": 0.5791837454055941
+    },
+    "8": {
+     "band": 0.021499018988961893,
+     "colour": 0.0289231946919557,
+     "sed": 0.005402732141741697,
+     "event": 0.49380899054743416
+    },
+    "16": {
+     "band": 0.015548939940600803,
+     "colour": 0.023531205819733003,
+     "sed": 0.005280028991775637,
+     "event": 0.4351772064002577
+    },
+    "32": {
+     "band": 0.005599190369842688,
+     "colour": 0.008361136324182894,
+     "sed": 0.005511879988941453,
+     "event": 0.40522430576919005
+    }
+   },
+   "transfer": {
+    "band": 0.05727148912700741,
+    "colour": 0.075333783039774,
+    "sed": 0.028018465851762774,
+    "event": 0.43931499348643627,
+    "rows_never_trained_frac": 0.0,
+    "anchor_empty_rows": 2
+   },
+   "interpolation": null,
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.022700797536936237,
+   "events_per_packet": 0.9808222222222223,
+   "t_wall": 14.999872207641602
+  },
+  {
+   "axis": "D",
+   "value": 3.0,
+   "label": "D3",
+   "ion": "58CeII",
+   "coord": "logn",
+   "coord_value": 12.56422502625944,
+   "gray": [],
+   "live_bands": [
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "r": 0.010657604638383954,
+    "i": 0.016967217500836018,
+    "z": 0.00661269330407926,
+    "J": 0.0061848823556226624,
+    "H": 0.031202449660243946,
+    "K": 0.011394125405302291
+   },
+   "classification": "C",
+   "k_rec": 16,
+   "exists_at_ng_t": true,
+   "transfers": false,
+   "interpolates": null,
+   "recomputed": {
+    "2": {
+     "band": 0.20850229606996606,
+     "colour": 0.22815339736246187,
+     "sed": 0.04781684731780594,
+     "event": 0.4989413612055819
+    },
+    "4": {
+     "band": 0.184267050102207,
+     "colour": 0.12332558020478857,
+     "sed": 0.04836396179280856,
+     "event": 0.4402780870722601
+    },
+    "8": {
+     "band": 0.10990939670868372,
+     "colour": 0.1284518914634809,
+     "sed": 0.0472217040904474,
+     "event": 0.29550519209878673
+    },
+    "16": {
+     "band": 0.08900097757921088,
+     "colour": 0.08059598598180884,
+     "sed": 0.04267056656543237,
+     "event": 0.2099844591231205
+    },
+    "32": {
+     "band": 0.077745541546129,
+     "colour": 0.13430650156234236,
+     "sed": 0.036907737572039655,
+     "event": 0.16151382865169817
+    }
+   },
+   "transfer": {
+    "band": 0.23573221141676726,
+    "colour": 0.2260192924883242,
+    "sed": 0.1722131184345553,
+    "event": 0.2115629954651724,
+    "rows_never_trained_frac": 1.4122031866647348e-07,
+    "anchor_empty_rows": 5
+   },
+   "interpolation": null,
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.009038589800242964,
+   "events_per_packet": 7.4202144444444444,
+   "t_wall": 116.02086758613586
+  },
+  {
+   "axis": "D",
+   "value": 3.0,
+   "label": "D3",
+   "ion": "60NdII",
+   "coord": "logn",
+   "coord_value": 12.925275855534421,
+   "gray": [],
+   "live_bands": [
+    "g",
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "g": 0.004529794015707028,
+    "r": 0.017967576466300882,
+    "i": 0.02211271509706785,
+    "z": 0.0033073542362538583,
+    "J": 0.0019540378641472447,
+    "H": 0.006643513206365376,
+    "K": 0.0014120298239542885
+   },
+   "classification": "C",
+   "k_rec": 2,
+   "exists_at_ng_t": true,
+   "transfers": false,
+   "interpolates": null,
+   "recomputed": {
+    "2": {
+     "band": 0.079040824579927,
+     "colour": 0.06129806214440592,
+     "sed": 0.016919230678598136,
+     "event": 0.47431568388262035
+    },
+    "4": {
+     "band": 0.04968234869629384,
+     "colour": 0.032342578488911755,
+     "sed": 0.015724570022218196,
+     "event": 0.3835572572250175
+    },
+    "8": {
+     "band": 0.02333169363225096,
+     "colour": 0.013823768374045642,
+     "sed": 0.016450943617149823,
+     "event": 0.2364906609999879
+    },
+    "16": {
+     "band": 0.0135669189140053,
+     "colour": 0.02018770303396522,
+     "sed": 0.017287113299220648,
+     "event": 0.17813607383182872
+    },
+    "32": {
+     "band": 0.02647902688654824,
+     "colour": 0.0313364010413153,
+     "sed": 0.01703521954687822,
+     "event": 0.1449523873245637
+    }
+   },
+   "transfer": {
+    "band": 0.3021206153340401,
+    "colour": 0.23739029425691882,
+    "sed": 0.11654585779647046,
+    "event": 0.18365235078082198,
+    "rows_never_trained_frac": 2.6572970373131006e-08,
+    "anchor_empty_rows": 3
+   },
+   "interpolation": null,
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.0045290878814736035,
+   "events_per_packet": 10.856690333333333,
+   "t_wall": 1375.0079956054688
+  },
+  {
+   "axis": "J",
+   "value": 2500.0,
+   "label": "J2500",
+   "ion": "57LaII",
+   "coord": "logTcore",
+   "coord_value": 7.824046010856292,
+   "gray": [],
+   "live_bands": [
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "r": 0.003680818895952837,
+    "i": 0.011576474789976691,
+    "z": 0.002572559762496974,
+    "J": 0.004994262867257683,
+    "H": 0.0036432945613712854,
+    "K": 0.007263122839331825
+   },
+   "classification": "A",
+   "k_rec": 2,
+   "exists_at_ng_t": true,
+   "transfers": true,
+   "interpolates": null,
+   "recomputed": {
+    "2": {
+     "band": 0.003637263395994239,
+     "colour": 0.0048495171648532676,
+     "sed": 0.003500198066699835,
+     "event": 0.7389860174112598
+    },
+    "4": {
+     "band": 0.0025944372541388816,
+     "colour": 0.00503367542235722,
+     "sed": 0.003448548692250823,
+     "event": 0.6258288722437417
+    },
+    "8": {
+     "band": 0.007985899079947956,
+     "colour": 0.009971941307121313,
+     "sed": 0.0031672278722446015,
+     "event": 0.5455161101434861
+    },
+    "16": {
+     "band": 0.0036717669438566247,
+     "colour": 0.0053318426088004856,
+     "sed": 0.0030359353048867504,
+     "event": 0.4815434184067096
+    },
+    "32": {
+     "band": 0.01057736842106749,
+     "colour": 0.014862400763679062,
+     "sed": 0.0032168804683574293,
+     "event": 0.44359370964193956
+    }
+   },
+   "transfer": {
+    "band": 0.007578682369089762,
+    "colour": 0.011068692831756266,
+    "sed": 0.004248663163435597,
+    "event": 0.48137829957992895,
+    "rows_never_trained_frac": 0.0,
+    "anchor_empty_rows": 2
+   },
+   "interpolation": null,
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.03316944283471121,
+   "events_per_packet": 0.36303111111111114,
+   "t_wall": 9.193562507629395
+  },
+  {
+   "axis": "J",
+   "value": 2500.0,
+   "label": "J2500",
+   "ion": "58CeII",
+   "coord": "logTcore",
+   "coord_value": 7.824046010856292,
+   "gray": [],
+   "live_bands": [
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "r": 0.022187517152995856,
+    "i": 0.01308563346381302,
+    "z": 0.013283579797333642,
+    "J": 0.009434151752471687,
+    "H": 0.009104113222627013,
+    "K": 0.00489275331317458
+   },
+   "classification": "C",
+   "k_rec": 8,
+   "exists_at_ng_t": true,
+   "transfers": false,
+   "interpolates": null,
+   "recomputed": {
+    "2": {
+     "band": 0.14988105892883752,
+     "colour": 0.14092596283878223,
+     "sed": 0.029541243687057895,
+     "event": 0.5292603582163815
+    },
+    "4": {
+     "band": 0.11401186683109898,
+     "colour": 0.09483455226602544,
+     "sed": 0.028878176660579718,
+     "event": 0.4719795172852321
+    },
+    "8": {
+     "band": 0.0820274255953457,
+     "colour": 0.08244318256569372,
+     "sed": 0.02690981061601555,
+     "event": 0.3292363932106317
+    },
+    "16": {
+     "band": 0.051138875664968,
+     "colour": 0.08717075569075661,
+     "sed": 0.023553948137983578,
+     "event": 0.24403382121634665
+    },
+    "32": {
+     "band": 0.034443383336345335,
+     "colour": 0.055711491177270034,
+     "sed": 0.025931186597116195,
+     "event": 0.18953147319192049
+    }
+   },
+   "transfer": {
+    "band": 0.06963003102946175,
+    "colour": 0.10677519333322749,
+    "sed": 0.02739412458923917,
+    "event": 0.2440333599941289,
+    "rows_never_trained_frac": 4.0598264140020166e-07,
+    "anchor_empty_rows": 5
+   },
+   "interpolation": null,
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.009647602937342604,
+   "events_per_packet": 5.469674444444444,
+   "t_wall": 114.42706966400146
+  },
+  {
+   "axis": "J",
+   "value": 2500.0,
+   "label": "J2500",
+   "ion": "60NdII",
+   "coord": "logTcore",
+   "coord_value": 7.824046010856292,
+   "gray": [],
+   "live_bands": [
+    "g",
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "g": 0.013262936883004556,
+    "r": 0.010621799388250398,
+    "i": 0.00835356651699658,
+    "z": 0.001761766222154137,
+    "J": 0.009549182825807733,
+    "H": 0.00536343384722181,
+    "K": 0.004848777802324523
+   },
+   "classification": "A",
+   "k_rec": 2,
+   "exists_at_ng_t": true,
+   "transfers": true,
+   "interpolates": null,
+   "recomputed": {
+    "2": {
+     "band": 0.06422803512448283,
+     "colour": 0.04173904418890473,
+     "sed": 0.010734770523045981,
+     "event": 0.4935976556320714
+    },
+    "4": {
+     "band": 0.041400113074644196,
+     "colour": 0.020279481535396826,
+     "sed": 0.010784054298796046,
+     "event": 0.41682274223407384
+    },
+    "8": {
+     "band": 0.026447199143955658,
+     "colour": 0.01997871735788337,
+     "sed": 0.01117270059617004,
+     "event": 0.26818787250939635
+    },
+    "16": {
+     "band": 0.018130933241131686,
+     "colour": 0.018521229712387566,
+     "sed": 0.01069038710520765,
+     "event": 0.206649668225637
+    },
+    "32": {
+     "band": 0.01182992714119635,
+     "colour": 0.012246809852495488,
+     "sed": 0.009662474822506949,
+     "event": 0.1709474046368842
+    }
+   },
+   "transfer": {
+    "band": 0.026995369798708424,
+    "colour": 0.021370753978555257,
+    "sed": 0.011529778708759786,
+    "event": 0.2066305450820498,
+    "rows_never_trained_frac": 0.0,
+    "anchor_empty_rows": 3
+   },
+   "interpolation": null,
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.004870913739508487,
+   "events_per_packet": 8.415184666666667,
+   "t_wall": 1173.362312555313
+  },
+  {
+   "axis": "J",
+   "value": 5000.0,
+   "label": "J5000",
+   "ion": "57LaII",
+   "coord": "logTcore",
+   "coord_value": 8.517193191416238,
+   "gray": [],
+   "live_bands": [
+    "g",
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "g": 0.0004365712066941307,
+    "r": 0.004596690165448692,
+    "i": 0.0028810948202728916,
+    "z": 0.0019823681918739464,
+    "J": 0.0021371115466949538,
+    "H": 0.008208750998297694,
+    "K": 0.005463164427729351
+   },
+   "classification": "A",
+   "k_rec": 2,
+   "exists_at_ng_t": true,
+   "transfers": true,
+   "interpolates": true,
+   "recomputed": {
+    "2": {
+     "band": 0.04032936453852898,
+     "colour": 0.03870628999400694,
+     "sed": 0.01214696039368393,
+     "event": 0.7332585387863424
+    },
+    "4": {
+     "band": 0.03840452630964464,
+     "colour": 0.0398519552850054,
+     "sed": 0.0121360951248627,
+     "event": 0.6002910888612646
+    },
+    "8": {
+     "band": 0.026508488414599185,
+     "colour": 0.028059457268454935,
+     "sed": 0.009807338387125268,
+     "event": 0.48965623849771583
+    },
+    "16": {
+     "band": 0.015175765691413545,
+     "colour": 0.01526443999238225,
+     "sed": 0.008498664041195701,
+     "event": 0.4231354121123565
+    },
+    "32": {
+     "band": 0.020809966359372822,
+     "colour": 0.017282783423777204,
+     "sed": 0.008242987172258139,
+     "event": 0.3892219152377374
+    }
+   },
+   "transfer": {
+    "band": 0.009850314837915874,
+    "colour": 0.019610000472692235,
+    "sed": 0.01321438095006183,
+    "event": 0.42320114622169785,
+    "rows_never_trained_frac": 7.91603872375362e-05,
+    "anchor_empty_rows": 2
+   },
+   "interpolation": {
+    "whole": {
+     "band": 0.003004326825418957,
+     "colour": 0.003512595890622805,
+     "sed": 0.007937913566075459,
+     "event": 0.4233069461849395,
+     "fallback": 0.0
+    },
+    "matrix_only": {
+     "band": 0.011094768977770286,
+     "colour": 0.006440207754398131,
+     "sed": 0.01248069644799463,
+     "event": 0.4233069461849395
+    },
+    "lam": 0.5338690888771288,
+    "endpoints": [
+     "ref",
+     "J7000"
+    ],
+    "transform": {
+     "kind": "interp_whole",
+     "lam": 0.5338690888771288,
+     "coord": "logTcore",
+     "endpoints": [
+      "ref",
+      "J7000"
+     ],
+     "rows_both": 14,
+     "rows_one_endpoint": 2,
+     "n_exit_a": 524,
+     "n_exit_b": 1554,
+     "n_exit_union": 1556,
+     "archetypes": 16,
+     "n_params": 256
+    }
+   },
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.01748470832319013,
+   "events_per_packet": 1.4669844444444446,
+   "t_wall": 24.16610097885132
+  },
+  {
+   "axis": "J",
+   "value": 5000.0,
+   "label": "J5000",
+   "ion": "58CeII",
+   "coord": "logTcore",
+   "coord_value": 8.517193191416238,
+   "gray": [],
+   "live_bands": [
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "r": 0.028355073477545987,
+    "i": 0.02867497302022793,
+    "z": 0.011813143034886257,
+    "J": 0.0059765605591216705,
+    "H": 0.025378198832973372,
+    "K": 0.0045042234244564855
+   },
+   "classification": "A",
+   "k_rec": 32,
+   "exists_at_ng_t": false,
+   "transfers": true,
+   "interpolates": true,
+   "recomputed": {
+    "2": {
+     "band": 0.38194422425259944,
+     "colour": 0.23688830074720713,
+     "sed": 0.05657202940046075,
+     "event": 0.5321912721553768
+    },
+    "4": {
+     "band": 0.12800964744365828,
+     "colour": 0.09443931103568914,
+     "sed": 0.04223609550682389,
+     "event": 0.486285464536186
+    },
+    "8": {
+     "band": 0.12315991435090012,
+     "colour": 0.11248455780722111,
+     "sed": 0.04292185395896251,
+     "event": 0.3400303525721247
+    },
+    "16": {
+     "band": 0.08261059417802485,
+     "colour": 0.16240176929659,
+     "sed": 0.032841013777458176,
+     "event": 0.24863208435357875
+    },
+    "32": {
+     "band": 0.04961321677309627,
+     "colour": 0.09693470189849052,
+     "sed": 0.025882771332598753,
+     "event": 0.1887664854583395
+    }
+   },
+   "transfer": {
+    "band": 0.042376505383820984,
+    "colour": 0.03641499268360704,
+    "sed": 0.028939057749981865,
+    "event": 0.24860191815781738,
+    "rows_never_trained_frac": 0.00011824968505463346,
+    "anchor_empty_rows": 5
+   },
+   "interpolation": {
+    "whole": {
+     "band": 0.0501311081914686,
+     "colour": 0.09724072168168263,
+     "sed": 0.029096426310452585,
+     "event": 0.24859560565204966,
+     "fallback": 2.0970990409546666e-07
+    },
+    "matrix_only": {
+     "band": 0.05214254044587818,
+     "colour": 0.057445436060508115,
+     "sed": 0.031662019359582204,
+     "event": 0.24859560565204966
+    },
+    "lam": 0.5338690888771288,
+    "endpoints": [
+     "ref",
+     "J7000"
+    ],
+    "transform": {
+     "kind": "interp_whole",
+     "lam": 0.5338690888771288,
+     "coord": "logTcore",
+     "endpoints": [
+      "ref",
+      "J7000"
+     ],
+     "rows_both": 11,
+     "rows_one_endpoint": 1,
+     "n_exit_a": 12510,
+     "n_exit_b": 18203,
+     "n_exit_union": 18498,
+     "archetypes": 16,
+     "n_params": 256
+    }
+   },
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.010406132857233977,
+   "events_per_packet": 5.28101111111111,
+   "t_wall": 131.79139709472656
+  },
+  {
+   "axis": "J",
+   "value": 5000.0,
+   "label": "J5000",
+   "ion": "60NdII",
+   "coord": "logTcore",
+   "coord_value": 8.517193191416238,
+   "gray": [],
+   "live_bands": [
+    "g",
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "g": 0.002044798032077546,
+    "r": 0.008494773752067532,
+    "i": 0.006250428644607543,
+    "z": 0.010322232057502125,
+    "J": 0.014364859280827199,
+    "H": 0.004684076965070438,
+    "K": 0.008778948688436735
+   },
+   "classification": "A",
+   "k_rec": 4,
+   "exists_at_ng_t": true,
+   "transfers": true,
+   "interpolates": true,
+   "recomputed": {
+    "2": {
+     "band": 0.141523511140921,
+     "colour": 0.1047474279310947,
+     "sed": 0.0169462613379808,
+     "event": 0.4927814000070146
+    },
+    "4": {
+     "band": 0.08998296312424614,
+     "colour": 0.05455309494745819,
+     "sed": 0.01674843488257582,
+     "event": 0.42187122845429675
+    },
+    "8": {
+     "band": 0.033305272293350896,
+     "colour": 0.03755427296685809,
+     "sed": 0.015718690007489884,
+     "event": 0.26852907341616
+    },
+    "16": {
+     "band": 0.017862929833302843,
+     "colour": 0.03440838160946669,
+     "sed": 0.01306648870810647,
+     "event": 0.20458682495341124
+    },
+    "32": {
+     "band": 0.017446077090792045,
+     "colour": 0.012094410825689295,
+     "sed": 0.015207215425899385,
+     "event": 0.16817597685995586
+    }
+   },
+   "transfer": {
+    "band": 0.03482609431549477,
+    "colour": 0.029659592807899315,
+    "sed": 0.017610679438556633,
+    "event": 0.2045487987025956,
+    "rows_never_trained_frac": 0.0,
+    "anchor_empty_rows": 3
+   },
+   "interpolation": {
+    "whole": {
+     "band": 0.025775281322239607,
+     "colour": 0.02592559352335755,
+     "sed": 0.01563150947718677,
+     "event": 0.20460947691575038,
+     "fallback": 0.0
+    },
+    "matrix_only": {
+     "band": 0.021559523048704676,
+     "colour": 0.013090610849125994,
+     "sed": 0.017540294076640765,
+     "event": 0.20460947691575038
+    },
+    "lam": 0.5338690888771288,
+    "endpoints": [
+     "ref",
+     "J7000"
+    ],
+    "transform": {
+     "kind": "interp_whole",
+     "lam": 0.5338690888771288,
+     "coord": "logTcore",
+     "endpoints": [
+      "ref",
+      "J7000"
+     ],
+     "rows_both": 13,
+     "rows_one_endpoint": 0,
+     "n_exit_a": 86187,
+     "n_exit_b": 105596,
+     "n_exit_union": 120315,
+     "archetypes": 16,
+     "n_params": 256
+    }
+   },
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.0052484601242863615,
+   "events_per_packet": 7.604613333333333,
+   "t_wall": 1255.4635462760925
+  },
+  {
+   "axis": "J",
+   "value": 7000.0,
+   "label": "J7000",
+   "ion": "57LaII",
+   "coord": "logTcore",
+   "coord_value": 8.85366542803745,
+   "gray": [],
+   "live_bands": [
+    "g",
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "g": 0.010102225880360794,
+    "r": 0.008598384402383398,
+    "i": 0.003174203070213688,
+    "z": 0.006329682751398956,
+    "J": 0.00502575641410505,
+    "H": 0.015475228748296821,
+    "K": 0.02228049277259588
+   },
+   "classification": "A",
+   "k_rec": 2,
+   "exists_at_ng_t": true,
+   "transfers": true,
+   "interpolates": null,
+   "recomputed": {
+    "2": {
+     "band": 0.013215296308530355,
+     "colour": 0.013422448339579063,
+     "sed": 0.015506661213831707,
+     "event": 0.7289593915829952
+    },
+    "4": {
+     "band": 0.018764031305693152,
+     "colour": 0.018471658105131183,
+     "sed": 0.01529181490478286,
+     "event": 0.5892772442722257
+    },
+    "8": {
+     "band": 0.011594562535766073,
+     "colour": 0.014181202020623118,
+     "sed": 0.01437531338997101,
+     "event": 0.4706489470600032
+    },
+    "16": {
+     "band": 0.004358042882532942,
+     "colour": 0.008297666472525833,
+     "sed": 0.011269781172221766,
+     "event": 0.40414052462219435
+    },
+    "32": {
+     "band": 0.006135830771679451,
+     "colour": 0.006706918120006122,
+     "sed": 0.010026198681306019,
+     "event": 0.37097371668978457
+    }
+   },
+   "transfer": {
+    "band": 0.027791991331806543,
+    "colour": 0.04122820763455337,
+    "sed": 0.03141736522294595,
+    "event": 0.40502004397027935,
+    "rows_never_trained_frac": 0.005463007975510322,
+    "anchor_empty_rows": 2
+   },
+   "interpolation": null,
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.015740244091213367,
+   "events_per_packet": 2.076891111111111,
+   "t_wall": 28.89388370513916
+  },
+  {
+   "axis": "J",
+   "value": 7000.0,
+   "label": "J7000",
+   "ion": "58CeII",
+   "coord": "logTcore",
+   "coord_value": 8.85366542803745,
+   "gray": [],
+   "live_bands": [
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "r": 0.02254942975373065,
+    "i": 0.010089742822530811,
+    "z": 0.04018830803518778,
+    "J": 0.024319921772261537,
+    "H": 0.021634264561516885,
+    "K": 0.0111212807795227
+   },
+   "classification": "A",
+   "k_rec": 32,
+   "exists_at_ng_t": false,
+   "transfers": true,
+   "interpolates": null,
+   "recomputed": {
+    "2": {
+     "band": 0.37286607924196247,
+     "colour": 0.25451528587472794,
+     "sed": 0.06468945954288045,
+     "event": 0.5361959586548475
+    },
+    "4": {
+     "band": 0.0815614299521421,
+     "colour": 0.11356662320858746,
+     "sed": 0.04650876050975335,
+     "event": 0.49310511233726906
+    },
+    "8": {
+     "band": 0.07716750026026631,
+     "colour": 0.11388371859455049,
+     "sed": 0.04432645373101378,
+     "event": 0.34608768887139507
+    },
+    "16": {
+     "band": 0.0924891149428575,
+     "colour": 0.13385246166321352,
+     "sed": 0.038110137277512536,
+     "event": 0.2513379085950964
+    },
+    "32": {
+     "band": 0.03428561614835601,
+     "colour": 0.029060288849699134,
+     "sed": 0.03364097689033855,
+     "event": 0.18987334430742747
+    }
+   },
+   "transfer": {
+    "band": 0.09637137182326327,
+    "colour": 0.07357882995544429,
+    "sed": 0.034357030430871065,
+    "event": 0.25210646174744417,
+    "rows_never_trained_frac": 0.01252403480303787,
+    "anchor_empty_rows": 5
+   },
+   "interpolation": null,
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.010635956978263191,
+   "events_per_packet": 5.197728888888888,
+   "t_wall": 118.10848474502563
+  },
+  {
+   "axis": "J",
+   "value": 7000.0,
+   "label": "J7000",
+   "ion": "60NdII",
+   "coord": "logTcore",
+   "coord_value": 8.85366542803745,
+   "gray": [],
+   "live_bands": [
+    "g",
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "g": 0.042016381327340604,
+    "r": 0.009643824864332679,
+    "i": 0.021448595755113514,
+    "z": 0.014247840891499492,
+    "J": 0.00812474179168469,
+    "H": 0.011444071622761535,
+    "K": 0.005415377912904428
+   },
+   "classification": "A",
+   "k_rec": 4,
+   "exists_at_ng_t": true,
+   "transfers": true,
+   "interpolates": null,
+   "recomputed": {
+    "2": {
+     "band": 0.17872579304229674,
+     "colour": 0.15042945697183185,
+     "sed": 0.023798459073485427,
+     "event": 0.4917337150481433
+    },
+    "4": {
+     "band": 0.05746887273332035,
+     "colour": 0.06638523483320213,
+     "sed": 0.01862052609059726,
+     "event": 0.42649473388141523
+    },
+    "8": {
+     "band": 0.0343716497363431,
+     "colour": 0.05279069592484831,
+     "sed": 0.0185688355358972,
+     "event": 0.26884448131190586
+    },
+    "16": {
+     "band": 0.028102928818157125,
+     "colour": 0.02626748811554691,
+     "sed": 0.0153652265758287,
+     "event": 0.2041076889350632
+    },
+    "32": {
+     "band": 0.039158455398748515,
+     "colour": 0.027515348523451166,
+     "sed": 0.01746817114807667,
+     "event": 0.1664789225534264
+    }
+   },
+   "transfer": {
+    "band": 0.022623682204013562,
+    "colour": 0.03733008774812774,
+    "sed": 0.018464524949786506,
+    "event": 0.2041357001905506,
+    "rows_never_trained_frac": 0.0,
+    "anchor_empty_rows": 3
+   },
+   "interpolation": null,
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.005516727112219424,
+   "events_per_packet": 6.968318666666666,
+   "t_wall": 1005.2673850059509
+  },
+  {
+   "axis": "P",
+   "value": 1,
+   "label": "P1d",
+   "ion": "57LaII",
+   "coord": "logt",
+   "coord_value": 11.366742954792146,
+   "gray": [],
+   "live_bands": [
+    "g",
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "g": 0.008642290147288529,
+    "r": 0.004067481728024188,
+    "i": 0.004739101953374449,
+    "z": 0.00371511195685219,
+    "J": 0.006246162883749409,
+    "H": 0.003249386499239865,
+    "K": 0.015247975726630406
+   },
+   "classification": "C",
+   "k_rec": 2,
+   "exists_at_ng_t": true,
+   "transfers": false,
+   "interpolates": null,
+   "recomputed": {
+    "2": {
+     "band": 0.010735910298546258,
+     "colour": 0.015317665863136654,
+     "sed": 0.007547238537438779,
+     "event": 0.7190287944066567
+    },
+    "4": {
+     "band": 0.008926704674831143,
+     "colour": 0.012602138679337571,
+     "sed": 0.007595378801050763,
+     "event": 0.5631842014648746
+    },
+    "8": {
+     "band": 0.00817367594938645,
+     "colour": 0.008708591837446988,
+     "sed": 0.00787202886783153,
+     "event": 0.4444423266290898
+    },
+    "16": {
+     "band": 0.0020740547419713096,
+     "colour": 0.002221354738576764,
+     "sed": 0.007023325485655229,
+     "event": 0.3831819523679141
+    },
+    "32": {
+     "band": 0.007614873124904165,
+     "colour": 0.012657050602154385,
+     "sed": 0.007239718291952696,
+     "event": 0.3537341104471654
+    }
+   },
+   "transfer": {
+    "band": 0.2570160492224005,
+    "colour": 0.2799082848004062,
+    "sed": 0.060382111148358765,
+    "event": 0.3956720756545887,
+    "rows_never_trained_frac": 8.917066820040216e-06,
+    "anchor_empty_rows": 2
+   },
+   "interpolation": null,
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.01943596093860998,
+   "events_per_packet": 1.4327144444444446,
+   "t_wall": 21.134910583496094
+  },
+  {
+   "axis": "P",
+   "value": 1,
+   "label": "P1d",
+   "ion": "58CeII",
+   "coord": "logt",
+   "coord_value": 11.366742954792146,
+   "gray": [],
+   "live_bands": [
+    "g",
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "g": 0.017557570365519953,
+    "r": 0.008967161996191268,
+    "i": 0.0007222671065717096,
+    "z": 0.01520579085026727,
+    "J": 0.0038733573974916572,
+    "H": 0.006162649949327474,
+    "K": 0.008976865226535092
+   },
+   "classification": "D",
+   "k_rec": 32,
+   "exists_at_ng_t": false,
+   "transfers": false,
+   "interpolates": null,
+   "recomputed": {
+    "2": {
+     "band": 0.33473269935053196,
+     "colour": 0.26382407061456803,
+     "sed": 0.04460661938278681,
+     "event": 0.5091802485836449
+    },
+    "4": {
+     "band": 0.14370916344329032,
+     "colour": 0.17200433869852816,
+     "sed": 0.03720451149052522,
+     "event": 0.4781636239150156
+    },
+    "8": {
+     "band": 0.12028454724679705,
+     "colour": 0.16615696711733818,
+     "sed": 0.035241716439030644,
+     "event": 0.3120564303076394
+    },
+    "16": {
+     "band": 0.11886222410818092,
+     "colour": 0.15104674127298878,
+     "sed": 0.02503786367155911,
+     "event": 0.23316424730789306
+    },
+    "32": {
+     "band": 0.05505678530498059,
+     "colour": 0.07779641724230757,
+     "sed": 0.022479461297985833,
+     "event": 0.17714841238554177
+    }
+   },
+   "transfer": {
+    "band": 0.48007780001415057,
+    "colour": 0.3855830100539208,
+    "sed": 0.05439763435347873,
+    "event": 0.24499708650616916,
+    "rows_never_trained_frac": 3.9826561120383984e-05,
+    "anchor_empty_rows": 5
+   },
+   "interpolation": null,
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.005341998828445249,
+   "events_per_packet": 6.2362676666666665,
+   "t_wall": 440.31748032569885
+  },
+  {
+   "axis": "P",
+   "value": 1,
+   "label": "P1d",
+   "ion": "60NdII",
+   "coord": "logt",
+   "coord_value": 11.366742954792146,
+   "gray": [],
+   "live_bands": [
+    "g",
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "g": 0.031144487947717302,
+    "r": 0.023531175778211434,
+    "i": 0.011859184894281515,
+    "z": 0.009773066798802648,
+    "J": 0.005457160167132117,
+    "H": 0.0023960331289664327,
+    "K": 0.005731563699812931
+   },
+   "classification": "C",
+   "k_rec": 4,
+   "exists_at_ng_t": true,
+   "transfers": false,
+   "interpolates": null,
+   "recomputed": {
+    "2": {
+     "band": 0.12547171557953973,
+     "colour": 0.14068041203270454,
+     "sed": 0.0201322626557316,
+     "event": 0.4758670526569604
+    },
+    "4": {
+     "band": 0.07095570338458401,
+     "colour": 0.04822957460411459,
+     "sed": 0.019232932722855214,
+     "event": 0.4484531546867892
+    },
+    "8": {
+     "band": 0.01879134961482265,
+     "colour": 0.02503098661248515,
+     "sed": 0.0175327028076029,
+     "event": 0.2431236877923531
+    },
+    "16": {
+     "band": 0.028794767540926358,
+     "colour": 0.04129422040640307,
+     "sed": 0.017863704944315557,
+     "event": 0.17958344972673013
+    },
+    "32": {
+     "band": 0.010481651437874717,
+     "colour": 0.0195144731449588,
+     "sed": 0.014842739930581727,
+     "event": 0.1400419194049716
+    }
+   },
+   "transfer": {
+    "band": 0.33247840218098546,
+    "colour": 0.25456359874221945,
+    "sed": 0.14778256998671524,
+    "event": 0.20685348197018147,
+    "rows_never_trained_frac": 0.0,
+    "anchor_empty_rows": 3
+   },
+   "interpolation": null,
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.004581473843220828,
+   "events_per_packet": 11.073603333333333,
+   "t_wall": 1949.737012386322
+  },
+  {
+   "axis": "P",
+   "value": 3,
+   "label": "P3d",
+   "ion": "57LaII",
+   "coord": "logt",
+   "coord_value": 12.465355243460257,
+   "gray": [],
+   "live_bands": [
+    "g",
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "g": 0.010176592912042199,
+    "r": 0.005211351232097539,
+    "i": 0.0011044493457145145,
+    "z": 0.0007901002099506658,
+    "J": 0.0040074048071507265,
+    "H": 0.0055306559297047045,
+    "K": 0.003671790977918677
+   },
+   "classification": "B",
+   "k_rec": 2,
+   "exists_at_ng_t": true,
+   "transfers": false,
+   "interpolates": true,
+   "recomputed": {
+    "2": {
+     "band": 0.011323553248526963,
+     "colour": 0.01768755732542715,
+     "sed": 0.004834811496879953,
+     "event": 0.7408663959491548
+    },
+    "4": {
+     "band": 0.009869063492796926,
+     "colour": 0.014388451705933392,
+     "sed": 0.005023062287428231,
+     "event": 0.6346440812136673
+    },
+    "8": {
+     "band": 0.004874302093028859,
+     "colour": 0.007833336759873077,
+     "sed": 0.004751666381540372,
+     "event": 0.5604569587149971
+    },
+    "16": {
+     "band": 0.03983510533070955,
+     "colour": 0.043044356753942026,
+     "sed": 0.004595533239387338,
+     "event": 0.49333328906239615
+    },
+    "32": {
+     "band": 0.013412776110836688,
+     "colour": 0.015048986113299634,
+     "sed": 0.004599900858654563,
+     "event": 0.4531715869212483
+    }
+   },
+   "transfer": {
+    "band": 0.19083090913247958,
+    "colour": 0.17023471496105458,
+    "sed": 0.01478978458349497,
+    "event": 0.49299359352475863,
+    "rows_never_trained_frac": 0.0,
+    "anchor_empty_rows": 2
+   },
+   "interpolation": {
+    "whole": {
+     "band": 0.05362500023597505,
+     "colour": 0.06975514237631941,
+     "sed": 0.006716413463973277,
+     "event": 0.4942759305051874,
+     "fallback": 0.0
+    },
+    "matrix_only": {
+     "band": 0.01353460336649448,
+     "colour": 0.016821845052614748,
+     "sed": 0.007335470118454771,
+     "event": 0.4942759305051874
+    },
+    "lam": 0.4425070493497607,
+    "endpoints": [
+     "ref",
+     "P5d"
+    ],
+    "transform": {
+     "kind": "interp_whole",
+     "lam": 0.4425070493497607,
+     "coord": "logt",
+     "endpoints": [
+      "ref",
+      "P5d"
+     ],
+     "rows_both": 11,
+     "rows_one_endpoint": 3,
+     "n_exit_a": 524,
+     "n_exit_b": 284,
+     "n_exit_union": 524,
+     "archetypes": 16,
+     "n_params": 256
+    }
+   },
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.026198023214357772,
+   "events_per_packet": 0.5477288888888889,
+   "t_wall": 12.291373014450073
+  },
+  {
+   "axis": "P",
+   "value": 3,
+   "label": "P3d",
+   "ion": "58CeII",
+   "coord": "logt",
+   "coord_value": 12.465355243460257,
+   "gray": [],
+   "live_bands": [
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "r": 0.0015238527691780969,
+    "i": 0.003943113473168612,
+    "z": 0.01466913436422195,
+    "J": 0.009114656015126194,
+    "H": 0.007239412623626395,
+    "K": 0.006276305256243839
+   },
+   "classification": "B",
+   "k_rec": 16,
+   "exists_at_ng_t": true,
+   "transfers": false,
+   "interpolates": true,
+   "recomputed": {
+    "2": {
+     "band": 0.23916096153682886,
+     "colour": 0.20254085370267205,
+     "sed": 0.03604160564155844,
+     "event": 0.5459079678864935
+    },
+    "4": {
+     "band": 0.1583426895323008,
+     "colour": 0.10070349347009255,
+     "sed": 0.03148627181232633,
+     "event": 0.4729251270762829
+    },
+    "8": {
+     "band": 0.14999944144515354,
+     "colour": 0.10274069093845029,
+     "sed": 0.03251378331132235,
+     "event": 0.3395035282533269
+    },
+    "16": {
+     "band": 0.06752488247446564,
+     "colour": 0.0958618648338323,
+     "sed": 0.021511367241607005,
+     "event": 0.2487760476237112
+    },
+    "32": {
+     "band": 0.03139510927650235,
+     "colour": 0.04765859536695771,
+     "sed": 0.017013884614523262,
+     "event": 0.19348364617265
+    }
+   },
+   "transfer": {
+    "band": 0.2305954800669241,
+    "colour": 0.2089117416341537,
+    "sed": 0.052157266065255246,
+    "event": 0.25203587486620604,
+    "rows_never_trained_frac": 1.7355722601171568e-07,
+    "anchor_empty_rows": 5
+   },
+   "interpolation": {
+    "whole": {
+     "band": 0.08415813734678323,
+     "colour": 0.07500835761570102,
+     "sed": 0.027486428595911185,
+     "event": 0.24935946422219488,
+     "fallback": 6.243127876989404e-08
+    },
+    "matrix_only": {
+     "band": 0.09253659242359902,
+     "colour": 0.15998628528368286,
+     "sed": 0.04889416926189574,
+     "event": 0.24935946422219488
+    },
+    "lam": 0.4425070493497607,
+    "endpoints": [
+     "ref",
+     "P5d"
+    ],
+    "transform": {
+     "kind": "interp_whole",
+     "lam": 0.4425070493497607,
+     "coord": "logt",
+     "endpoints": [
+      "ref",
+      "P5d"
+     ],
+     "rows_both": 11,
+     "rows_one_endpoint": 0,
+     "n_exit_a": 12510,
+     "n_exit_b": 7516,
+     "n_exit_union": 12551,
+     "archetypes": 16,
+     "n_params": 256
+    }
+   },
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.005113896257362547,
+   "events_per_packet": 5.369691333333333,
+   "t_wall": 464.88729667663574
+  },
+  {
+   "axis": "P",
+   "value": 3,
+   "label": "P3d",
+   "ion": "60NdII",
+   "coord": "logt",
+   "coord_value": 12.465355243460257,
+   "gray": [],
+   "live_bands": [
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "r": 0.005577733828911899,
+    "i": 0.0075279895882329525,
+    "z": 0.0042349509307094005,
+    "J": 0.007431181397508352,
+    "H": 0.0032239187310384113,
+    "K": 0.007428366501831829
+   },
+   "classification": "C",
+   "k_rec": 2,
+   "exists_at_ng_t": true,
+   "transfers": false,
+   "interpolates": false,
+   "recomputed": {
+    "2": {
+     "band": 0.023060797377876696,
+     "colour": 0.014007736577450913,
+     "sed": 0.012390351843729004,
+     "event": 0.5036758502435796
+    },
+    "4": {
+     "band": 0.033062424386059774,
+     "colour": 0.012426253990160063,
+     "sed": 0.012365128535755103,
+     "event": 0.3913340311986775
+    },
+    "8": {
+     "band": 0.03175479009562565,
+     "colour": 0.0208422702110731,
+     "sed": 0.012078079988256222,
+     "event": 0.27478576336211535
+    },
+    "16": {
+     "band": 0.01282867267557819,
+     "colour": 0.00955380512247217,
+     "sed": 0.010325107220881355,
+     "event": 0.2203338628391676
+    },
+    "32": {
+     "band": 0.014848716673018458,
+     "colour": 0.022229257167911243,
+     "sed": 0.010843647164567705,
+     "event": 0.18545375330862512
+    }
+   },
+   "transfer": {
+    "band": 0.18068846102594094,
+    "colour": 0.13454340429725065,
+    "sed": 0.06858097333150419,
+    "event": 0.2289344956521691,
+    "rows_never_trained_frac": 0.0,
+    "anchor_empty_rows": 3
+   },
+   "interpolation": {
+    "whole": {
+     "band": 0.11719254647487176,
+     "colour": 0.07543060176518779,
+     "sed": 0.035801886010486526,
+     "event": 0.22105241069188117,
+     "fallback": 0.0
+    },
+    "matrix_only": {
+     "band": 0.05698500541363316,
+     "colour": 0.10964148527771655,
+     "sed": 0.036861210747828194,
+     "event": 0.22105241069188117
+    },
+    "lam": 0.4425070493497607,
+    "endpoints": [
+     "ref",
+     "P5d"
+    ],
+    "transform": {
+     "kind": "interp_whole",
+     "lam": 0.4425070493497607,
+     "coord": "logt",
+     "endpoints": [
+      "ref",
+      "P5d"
+     ],
+     "rows_both": 12,
+     "rows_one_endpoint": 1,
+     "n_exit_a": 86187,
+     "n_exit_b": 19129,
+     "n_exit_union": 86358,
+     "archetypes": 16,
+     "n_params": 256
+    }
+   },
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.004965115710798208,
+   "events_per_packet": 7.251212,
+   "t_wall": 1109.4731686115265
+  },
+  {
+   "axis": "P",
+   "value": 5,
+   "label": "P5d",
+   "ion": "57LaII",
+   "coord": "logt",
+   "coord_value": 12.976180867226248,
+   "gray": [],
+   "live_bands": [
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "r": 0.00776714912215059,
+    "i": 0.01318102406731074,
+    "z": 0.002411023883655647,
+    "J": 0.005564296048888027,
+    "H": 0.0022938622813873594,
+    "K": 0.008818338274162535
+   },
+   "classification": "A",
+   "k_rec": 2,
+   "exists_at_ng_t": true,
+   "transfers": true,
+   "interpolates": null,
+   "recomputed": {
+    "2": {
+     "band": 0.015676291466597547,
+     "colour": 0.010630627504820467,
+     "sed": 0.002611526113774068,
+     "event": 0.7552984739440041
+    },
+    "4": {
+     "band": 0.015496187407187278,
+     "colour": 0.015327011557342729,
+     "sed": 0.0023289751131180658,
+     "event": 0.6764785628552777
+    },
+    "8": {
+     "band": 0.01903987406812746,
+     "colour": 0.0174711684897062,
+     "sed": 0.00236819893597038,
+     "event": 0.631066390214638
+    },
+    "16": {
+     "band": 0.014685354711492238,
+     "colour": 0.013693490593624347,
+     "sed": 0.002780256772492298,
+     "event": 0.5663406557348344
+    },
+    "32": {
+     "band": 0.008459614612597477,
+     "colour": 0.006685498136381085,
+     "sed": 0.0029955950605104723,
+     "event": 0.5151525968688608
+    }
+   },
+   "transfer": {
+    "band": 0.04222659699119191,
+    "colour": 0.0716889355264918,
+    "sed": 0.014297310707592917,
+    "event": 0.5746257832713931,
+    "rows_never_trained_frac": 0.0,
+    "anchor_empty_rows": 2
+   },
+   "interpolation": null,
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.03765037905019282,
+   "events_per_packet": 0.1742911111111111,
+   "t_wall": 6.090427875518799
+  },
+  {
+   "axis": "P",
+   "value": 5,
+   "label": "P5d",
+   "ion": "58CeII",
+   "coord": "logt",
+   "coord_value": 12.976180867226248,
+   "gray": [],
+   "live_bands": [
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "i": 0.03256695816698121,
+    "z": 0.03815112917125241,
+    "J": 0.013249951569741254,
+    "H": 0.010661436150626338,
+    "K": 0.0074285055091639724
+   },
+   "classification": "D",
+   "k_rec": 32,
+   "exists_at_ng_t": false,
+   "transfers": false,
+   "interpolates": null,
+   "recomputed": {
+    "2": {
+     "band": 0.24316263065109567,
+     "colour": 0.22010389225491167,
+     "sed": 0.029837724740044064,
+     "event": 0.5815456848008639
+    },
+    "4": {
+     "band": 0.1915134066730424,
+     "colour": 0.14860208432178013,
+     "sed": 0.02644993640263616,
+     "event": 0.4632823525602552
+    },
+    "8": {
+     "band": 0.1278903628446244,
+     "colour": 0.12291609710256779,
+     "sed": 0.023748698820293825,
+     "event": 0.3447960153023122
+    },
+    "16": {
+     "band": 0.06800675500161546,
+     "colour": 0.10732363844026693,
+     "sed": 0.021647268316595396,
+     "event": 0.26739516484258496
+    },
+    "32": {
+     "band": 0.04025232407378354,
+     "colour": 0.05763876392586553,
+     "sed": 0.017715120043328328,
+     "event": 0.2144090982507579
+    }
+   },
+   "transfer": {
+    "band": 0.33348902590290663,
+    "colour": 0.5392120321909211,
+    "sed": 0.1020080946291371,
+    "event": 0.2875863812887461,
+    "rows_never_trained_frac": 0.0,
+    "anchor_empty_rows": 5
+   },
+   "interpolation": null,
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.009635779038983492,
+   "events_per_packet": 4.106421111111111,
+   "t_wall": 99.72683095932007
+  },
+  {
+   "axis": "P",
+   "value": 5,
+   "label": "P5d",
+   "ion": "60NdII",
+   "coord": "logt",
+   "coord_value": 12.976180867226248,
+   "gray": [],
+   "live_bands": [
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "i": 0.017156619814104903,
+    "z": 0.004200927154032086,
+    "J": 0.0022954139885197453,
+    "H": 0.0037783545919131945,
+    "K": 0.001481581514712683
+   },
+   "classification": "C",
+   "k_rec": 2,
+   "exists_at_ng_t": true,
+   "transfers": false,
+   "interpolates": null,
+   "recomputed": {
+    "2": {
+     "band": 0.01893085988884735,
+     "colour": 0.020043933477598586,
+     "sed": 0.007219149608151646,
+     "event": 0.5527980402341636
+    },
+    "4": {
+     "band": 0.019712273068776653,
+     "colour": 0.018759841640321184,
+     "sed": 0.007346544533035899,
+     "event": 0.383771544588863
+    },
+    "8": {
+     "band": 0.006169193598921652,
+     "colour": 0.010120581821162489,
+     "sed": 0.007450913162557167,
+     "event": 0.31568267200988726
+    },
+    "16": {
+     "band": 0.007447089701464904,
+     "colour": 0.006854403354473959,
+     "sed": 0.00651718593053287,
+     "event": 0.27056165529944165
+    },
+    "32": {
+     "band": 0.004816976093930947,
+     "colour": 0.006055614343029703,
+     "sed": 0.006571873852048514,
+     "event": 0.2343391600955268
+    }
+   },
+   "transfer": {
+    "band": 0.33136259465702267,
+    "colour": 0.11495028619020076,
+    "sed": 0.10704074661441104,
+    "event": 0.3141866986717951,
+    "rows_never_trained_frac": 0.0,
+    "anchor_empty_rows": 3
+   },
+   "interpolation": null,
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.005977958042716498,
+   "events_per_packet": 3.6696259999999996,
+   "t_wall": 429.0100464820862
+  },
+  {
+   "axis": "T",
+   "value": 2500.0,
+   "label": "T2500",
+   "ion": "57LaII",
+   "coord": "logT",
+   "coord_value": 7.824046010856292,
+   "gray": [],
+   "live_bands": [
+    "g",
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "g": 0.01390965558642103,
+    "r": 0.009160447289095866,
+    "i": 0.002175905924434928,
+    "z": 0.003871707235359165,
+    "J": 0.004177915837725734,
+    "H": 0.008080134998067813,
+    "K": 0.009289533691556329
+   },
+   "classification": "C",
+   "k_rec": 2,
+   "exists_at_ng_t": true,
+   "transfers": false,
+   "interpolates": null,
+   "recomputed": {
+    "2": {
+     "band": 0.022312411394118215,
+     "colour": 0.020718099848558325,
+     "sed": 0.005124717201053902,
+     "event": 0.7373780917773547
+    },
+    "4": {
+     "band": 0.010398198155623817,
+     "colour": 0.007496474029249356,
+     "sed": 0.00513475201460904,
+     "event": 0.6424631048635964
+    },
+    "8": {
+     "band": 0.02142914849212474,
+     "colour": 0.025802305414835303,
+     "sed": 0.005081744319757427,
+     "event": 0.5795588541714837
+    },
+    "16": {
+     "band": 0.007492012137404913,
+     "colour": 0.0046510594454893806,
+     "sed": 0.0046767482916537486,
+     "event": 0.5130482370049256
+    },
+    "32": {
+     "band": 0.005035620195286583,
+     "colour": 0.009775199973436344,
+     "sed": 0.0038643473387814297,
+     "event": 0.46866717210991266
+    }
+   },
+   "transfer": {
+    "band": 0.3787989480008491,
+    "colour": 0.31432972758154776,
+    "sed": 0.033459738740398065,
+    "event": 0.5172041538461077,
+    "rows_never_trained_frac": 0.0,
+    "anchor_empty_rows": 2
+   },
+   "interpolation": null,
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.026668593062174006,
+   "events_per_packet": 0.4906,
+   "t_wall": 9.372646570205688
+  },
+  {
+   "axis": "T",
+   "value": 2500.0,
+   "label": "T2500",
+   "ion": "58CeII",
+   "coord": "logT",
+   "coord_value": 7.824046010856292,
+   "gray": [],
+   "live_bands": [
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "i": 0.00730970039587748,
+    "z": 0.009750716797790443,
+    "J": 0.016181908480919716,
+    "H": 0.010685625303932677,
+    "K": 0.008612881699563906
+   },
+   "classification": "C",
+   "k_rec": 16,
+   "exists_at_ng_t": true,
+   "transfers": false,
+   "interpolates": null,
+   "recomputed": {
+    "2": {
+     "band": 0.32000857516101533,
+     "colour": 0.31436717812449544,
+     "sed": 0.04314611178110698,
+     "event": 0.5583202546541947
+    },
+    "4": {
+     "band": 0.21836916518516247,
+     "colour": 0.20450005712259767,
+     "sed": 0.039388500937406375,
+     "event": 0.45769917762626044
+    },
+    "8": {
+     "band": 0.18877105319342746,
+     "colour": 0.1762423659590553,
+     "sed": 0.03927145764140816,
+     "event": 0.3339473522706616
+    },
+    "16": {
+     "band": 0.07013970738537267,
+     "colour": 0.08413976276301227,
+     "sed": 0.02571065229278908,
+     "event": 0.24318631623904147
+    },
+    "32": {
+     "band": 0.037040581022697694,
+     "colour": 0.05199986604954887,
+     "sed": 0.026713057541965766,
+     "event": 0.19133246995259293
+    }
+   },
+   "transfer": {
+    "band": 0.3221122956472726,
+    "colour": 0.41892444837931464,
+    "sed": 0.11690226973929134,
+    "event": 0.2603050336973504,
+    "rows_never_trained_frac": 2.2441812867596896e-07,
+    "anchor_empty_rows": 5
+   },
+   "interpolation": null,
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.010279536290278394,
+   "events_per_packet": 4.194945555555555,
+   "t_wall": 84.7157986164093
+  },
+  {
+   "axis": "T",
+   "value": 2500.0,
+   "label": "T2500",
+   "ion": "60NdII",
+   "coord": "logT",
+   "coord_value": 7.824046010856292,
+   "gray": [],
+   "live_bands": [
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "r": 0.008154798498763357,
+    "i": 0.006539200830581888,
+    "z": 0.007779359444309409,
+    "J": 0.0025743220386991385,
+    "H": 0.001425666997785585,
+    "K": 0.0077412462777355084
+   },
+   "classification": "C",
+   "k_rec": 2,
+   "exists_at_ng_t": true,
+   "transfers": false,
+   "interpolates": null,
+   "recomputed": {
+    "2": {
+     "band": 0.062344507203285104,
+     "colour": 0.0347696541138518,
+     "sed": 0.011397351013190494,
+     "event": 0.5207860011789945
+    },
+    "4": {
+     "band": 0.059992026031252976,
+     "colour": 0.03333218316290498,
+     "sed": 0.010771008913166133,
+     "event": 0.35439460999618033
+    },
+    "8": {
+     "band": 0.04007423168103941,
+     "colour": 0.028480755518476286,
+     "sed": 0.010619856504574065,
+     "event": 0.2802666269295301
+    },
+    "16": {
+     "band": 0.010170422959770775,
+     "colour": 0.011219152078254524,
+     "sed": 0.009472633343019406,
+     "event": 0.2336517171509541
+    },
+    "32": {
+     "band": 0.013386322559153285,
+     "colour": 0.017316524644162,
+     "sed": 0.00926821963375807,
+     "event": 0.19994931012796252
+    }
+   },
+   "transfer": {
+    "band": 0.39208584234123833,
+    "colour": 0.33282382795404075,
+    "sed": 0.12663974900934521,
+    "event": 0.27682894917214057,
+    "rows_never_trained_frac": 0.0,
+    "anchor_empty_rows": 3
+   },
+   "interpolation": null,
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.005984798481205065,
+   "events_per_packet": 4.278341666666667,
+   "t_wall": 536.6969459056854
+  },
+  {
+   "axis": "T",
+   "value": 3000.0,
+   "label": "T3000",
+   "ion": "57LaII",
+   "coord": "logT",
+   "coord_value": 8.006367567650246,
+   "gray": [],
+   "live_bands": [
+    "g",
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "g": 0.0064932794901475565,
+    "r": 0.007378554851618318,
+    "i": 0.00238186243839044,
+    "z": 0.0015055220957562098,
+    "J": 0.001459604344161133,
+    "H": 0.007020268339803118,
+    "K": 0.008395598377341256
+   },
+   "classification": "B",
+   "k_rec": 2,
+   "exists_at_ng_t": true,
+   "transfers": false,
+   "interpolates": true,
+   "recomputed": {
+    "2": {
+     "band": 0.0490447461320187,
+     "colour": 0.04729736984244326,
+     "sed": 0.005730269723899559,
+     "event": 0.7362408429099097
+    },
+    "4": {
+     "band": 0.01734687552788472,
+     "colour": 0.010241852769897974,
+     "sed": 0.004964817395628969,
+     "event": 0.626529296671608
+    },
+    "8": {
+     "band": 0.021018979729483078,
+     "colour": 0.02543234358510915,
+     "sed": 0.0051853017346878425,
+     "event": 0.5467328728821275
+    },
+    "16": {
+     "band": 0.0030469732660662885,
+     "colour": 0.005809706493472788,
+     "sed": 0.004649073943607989,
+     "event": 0.4796445535765401
+    },
+    "32": {
+     "band": 0.003375385829212263,
+     "colour": 0.004540889926182956,
+     "sed": 0.0046875008897369055,
+     "event": 0.44167851259828844
+    }
+   },
+   "transfer": {
+    "band": 0.15530392229036138,
+    "colour": 0.136442082779201,
+    "sed": 0.016603736222568236,
+    "event": 0.4792989303715837,
+    "rows_never_trained_frac": 0.0,
+    "anchor_empty_rows": 2
+   },
+   "interpolation": {
+    "whole": {
+     "band": 0.01021341806661269,
+     "colour": 0.016647639832324757,
+     "sed": 0.005052452364567618,
+     "event": 0.48022242567281315,
+     "fallback": 0.0
+    },
+    "matrix_only": {
+     "band": 0.02041873985051268,
+     "colour": 0.037593323118183974,
+     "sed": 0.006699278234855903,
+     "event": 0.48022242567281315
+    },
+    "lam": 0.5923785917236845,
+    "endpoints": [
+     "T2500",
+     "ref"
+    ],
+    "transform": {
+     "kind": "interp_whole",
+     "lam": 0.5923785917236845,
+     "coord": "logT",
+     "endpoints": [
+      "T2500",
+      "ref"
+     ],
+     "rows_both": 13,
+     "rows_one_endpoint": 1,
+     "n_exit_a": 359,
+     "n_exit_b": 524,
+     "n_exit_union": 525,
+     "archetypes": 16,
+     "n_params": 256
+    }
+   },
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.025287356264381913,
+   "events_per_packet": 0.6242722222222222,
+   "t_wall": 13.848333597183228
+  },
+  {
+   "axis": "T",
+   "value": 3000.0,
+   "label": "T3000",
+   "ion": "58CeII",
+   "coord": "logT",
+   "coord_value": 8.006367567650246,
+   "gray": [],
+   "live_bands": [
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "r": 0.04363400552118927,
+    "i": 0.019534395804173196,
+    "z": 0.018504657355693056,
+    "J": 0.010622245638286993,
+    "H": 0.019279300300671376,
+    "K": 0.010189020597793464
+   },
+   "classification": "B",
+   "k_rec": 32,
+   "exists_at_ng_t": false,
+   "transfers": false,
+   "interpolates": true,
+   "recomputed": {
+    "2": {
+     "band": 0.23516850984585247,
+     "colour": 0.23898553111948928,
+     "sed": 0.042080423766407936,
+     "event": 0.5421647506429154
+    },
+    "4": {
+     "band": 0.15169159082346084,
+     "colour": 0.12836996218872088,
+     "sed": 0.03925798903090842,
+     "event": 0.47286509347318834
+    },
+    "8": {
+     "band": 0.14204807109497253,
+     "colour": 0.09818624758136352,
+     "sed": 0.03434976836261046,
+     "event": 0.3380283097140199
+    },
+    "16": {
+     "band": 0.06647071079965983,
+     "colour": 0.11612149590036225,
+     "sed": 0.03053511143562778,
+     "event": 0.24544620524731403
+    },
+    "32": {
+     "band": 0.01639560448272448,
+     "colour": 0.027742419103205407,
+     "sed": 0.023519007160576956,
+     "event": 0.18996581528955403
+    }
+   },
+   "transfer": {
+    "band": 0.18801186853490748,
+    "colour": 0.1951695886536413,
+    "sed": 0.05804682453518464,
+    "event": 0.24830684057409982,
+    "rows_never_trained_frac": 2.1117277121394146e-07,
+    "anchor_empty_rows": 5
+   },
+   "interpolation": {
+    "whole": {
+     "band": 0.06416340633274586,
+     "colour": 0.08929240792764404,
+     "sed": 0.028577529738083654,
+     "event": 0.24555450392221487,
+     "fallback": 4.5290316590635546e-07
+    },
+    "matrix_only": {
+     "band": 0.0988545089049424,
+     "colour": 0.1492909829878002,
+     "sed": 0.046657782716737504,
+     "event": 0.24555450392221487
+    },
+    "lam": 0.5923785917236845,
+    "endpoints": [
+     "T2500",
+     "ref"
+    ],
+    "transform": {
+     "kind": "interp_whole",
+     "lam": 0.5923785917236845,
+     "coord": "logT",
+     "endpoints": [
+      "T2500",
+      "ref"
+     ],
+     "rows_both": 11,
+     "rows_one_endpoint": 0,
+     "n_exit_a": 9482,
+     "n_exit_b": 12510,
+     "n_exit_union": 12611,
+     "archetypes": 16,
+     "n_params": 256
+    }
+   },
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.010494272735623351,
+   "events_per_packet": 4.891836666666666,
+   "t_wall": 119.40104866027832
+  },
+  {
+   "axis": "T",
+   "value": 3000.0,
+   "label": "T3000",
+   "ion": "60NdII",
+   "coord": "logT",
+   "coord_value": 8.006367567650246,
+   "gray": [],
+   "live_bands": [
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "r": 0.010730075316052051,
+    "i": 0.0144492070694795,
+    "z": 0.0077500930283409125,
+    "J": 0.007077495550876828,
+    "H": 0.003593084608812752,
+    "K": 0.001764112083474582
+   },
+   "classification": "B",
+   "k_rec": 2,
+   "exists_at_ng_t": true,
+   "transfers": false,
+   "interpolates": true,
+   "recomputed": {
+    "2": {
+     "band": 0.037967581141366225,
+     "colour": 0.031233954389708884,
+     "sed": 0.0123336899680976,
+     "event": 0.4998268952389228
+    },
+    "4": {
+     "band": 0.03418742950367104,
+     "colour": 0.02061925989144342,
+     "sed": 0.013961115571440448,
+     "event": 0.3878241544275687
+    },
+    "8": {
+     "band": 0.017255805865271867,
+     "colour": 0.018124447344394667,
+     "sed": 0.010810926706270657,
+     "event": 0.2698327797334921
+    },
+    "16": {
+     "band": 0.009058989691656194,
+     "colour": 0.01639143829537204,
+     "sed": 0.010320542283422203,
+     "event": 0.21529027914590051
+    },
+    "32": {
+     "band": 0.013411242965709391,
+     "colour": 0.022051238009037633,
+     "sed": 0.011643551793749816,
+     "event": 0.180883446661647
+    }
+   },
+   "transfer": {
+    "band": 0.15021670205870308,
+    "colour": 0.14990940179871615,
+    "sed": 0.06305587417329289,
+    "event": 0.22445630446731044,
+    "rows_never_trained_frac": 0.0,
+    "anchor_empty_rows": 3
+   },
+   "interpolation": {
+    "whole": {
+     "band": 0.032373016208172345,
+     "colour": 0.02137912116576146,
+     "sed": 0.01434538913487213,
+     "event": 0.2156498701141154,
+     "fallback": 0.0
+    },
+    "matrix_only": {
+     "band": 0.08736439262909457,
+     "colour": 0.08463757432329189,
+     "sed": 0.03078961065399109,
+     "event": 0.2156498701141154
+    },
+    "lam": 0.5923785917236845,
+    "endpoints": [
+     "T2500",
+     "ref"
+    ],
+    "transform": {
+     "kind": "interp_whole",
+     "lam": 0.5923785917236845,
+     "coord": "logT",
+     "endpoints": [
+      "T2500",
+      "ref"
+     ],
+     "rows_both": 11,
+     "rows_one_endpoint": 2,
+     "n_exit_a": 28911,
+     "n_exit_b": 86187,
+     "n_exit_union": 86884,
+     "archetypes": 16,
+     "n_params": 256
+    }
+   },
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.005232600289685434,
+   "events_per_packet": 6.412751333333333,
+   "t_wall": 952.9344906806946
+  },
+  {
+   "axis": "T",
+   "value": 4000.0,
+   "label": "T4000",
+   "ion": "57LaII",
+   "coord": "logT",
+   "coord_value": 8.294049640102028,
+   "gray": [],
+   "live_bands": [
+    "g",
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "g": 0.0011708223510174466,
+    "r": 0.008454208835627664,
+    "i": 0.004701072305102989,
+    "z": 0.005008170366597506,
+    "J": 0.003599611958224386,
+    "H": 0.007964272056126032,
+    "K": 0.008036429097609321
+   },
+   "classification": "C",
+   "k_rec": 2,
+   "exists_at_ng_t": true,
+   "transfers": false,
+   "interpolates": null,
+   "recomputed": {
+    "2": {
+     "band": 0.022061147082851562,
+     "colour": 0.02180527582425995,
+     "sed": 0.005298814506401745,
+     "event": 0.735993027597314
+    },
+    "4": {
+     "band": 0.013600257988091613,
+     "colour": 0.013385600054363067,
+     "sed": 0.00514777563136485,
+     "event": 0.599155629364731
+    },
+    "8": {
+     "band": 0.01339522910244284,
+     "colour": 0.011253451017459781,
+     "sed": 0.004998924562455642,
+     "event": 0.4925925024848567
+    },
+    "16": {
+     "band": 0.004617422739773502,
+     "colour": 0.006670600759601797,
+     "sed": 0.00551377438102615,
+     "event": 0.42953613958494474
+    },
+    "32": {
+     "band": 0.003357462581234927,
+     "colour": 0.0022345908915468726,
+     "sed": 0.005740974955445983,
+     "event": 0.3966374768811875
+    }
+   },
+   "transfer": {
+    "band": 0.1924837631496601,
+    "colour": 0.17551031593385247,
+    "sed": 0.021919684157794068,
+    "event": 0.43541084746863556,
+    "rows_never_trained_frac": 0.0,
+    "anchor_empty_rows": 2
+   },
+   "interpolation": null,
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.022468141798933285,
+   "events_per_packet": 0.9367633333333334,
+   "t_wall": 15.314271926879883
+  },
+  {
+   "axis": "T",
+   "value": 4000.0,
+   "label": "T4000",
+   "ion": "58CeII",
+   "coord": "logT",
+   "coord_value": 8.294049640102028,
+   "gray": [],
+   "live_bands": [
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "r": 0.04666808621411794,
+    "i": 0.042222586006474244,
+    "z": 0.03561952782914649,
+    "J": 0.005886090469323132,
+    "H": 0.01139137432958082,
+    "K": 0.009559647184671814
+   },
+   "classification": "D",
+   "k_rec": 32,
+   "exists_at_ng_t": false,
+   "transfers": false,
+   "interpolates": null,
+   "recomputed": {
+    "2": {
+     "band": 0.216221358684205,
+     "colour": 0.18486229582113367,
+     "sed": 0.039970702197549876,
+     "event": 0.5207529141605128
+    },
+    "4": {
+     "band": 0.14127833701481407,
+     "colour": 0.07201488761420194,
+     "sed": 0.03310797305470702,
+     "event": 0.4838123971227563
+    },
+    "8": {
+     "band": 0.09660583149887714,
+     "colour": 0.10840315232133335,
+     "sed": 0.036738813304038845,
+     "event": 0.3281272539344806
+    },
+    "16": {
+     "band": 0.09891210243241133,
+     "colour": 0.11188490033777754,
+     "sed": 0.03631603345973146,
+     "event": 0.24680346306305123
+    },
+    "32": {
+     "band": 0.04251425846509349,
+     "colour": 0.04087021662442325,
+     "sed": 0.029167660930729027,
+     "event": 0.18940791230318854
+    }
+   },
+   "transfer": {
+    "band": 0.12633120572700562,
+    "colour": 0.1287058655048341,
+    "sed": 0.04819953918599561,
+    "event": 0.2535028452552042,
+    "rows_never_trained_frac": 0.0,
+    "anchor_empty_rows": 5
+   },
+   "interpolation": null,
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.009442267667534131,
+   "events_per_packet": 6.144243333333333,
+   "t_wall": 121.4924578666687
+  },
+  {
+   "axis": "T",
+   "value": 4000.0,
+   "label": "T4000",
+   "ion": "60NdII",
+   "coord": "logT",
+   "coord_value": 8.294049640102028,
+   "gray": [],
+   "live_bands": [
+    "g",
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "g": 0.013003734080549523,
+    "r": 0.004272883525276324,
+    "i": 0.02272837018004045,
+    "z": 0.0010095897293645752,
+    "J": 0.007366312215125042,
+    "H": 0.0051958531011017895,
+    "K": 0.0026838832525621615
+   },
+   "classification": "C",
+   "k_rec": 4,
+   "exists_at_ng_t": true,
+   "transfers": false,
+   "interpolates": null,
+   "recomputed": {
+    "2": {
+     "band": 0.10267018181374254,
+     "colour": 0.0876669290533485,
+     "sed": 0.013958996678765455,
+     "event": 0.488109510992843
+    },
+    "4": {
+     "band": 0.0546616571954317,
+     "colour": 0.03697228635633465,
+     "sed": 0.01420276701967637,
+     "event": 0.4489086243347279
+    },
+    "8": {
+     "band": 0.045531266547541804,
+     "colour": 0.03714555887222204,
+     "sed": 0.013691378337400422,
+     "event": 0.2629145533379765
+    },
+    "16": {
+     "band": 0.016541797262391356,
+     "colour": 0.016943236700466713,
+     "sed": 0.014922419484532563,
+     "event": 0.1959917185798327
+    },
+    "32": {
+     "band": 0.007445453935812196,
+     "colour": 0.010599627647167154,
+     "sed": 0.013521584930187375,
+     "event": 0.15724014347082096
+    }
+   },
+   "transfer": {
+    "band": 0.23319666791914528,
+    "colour": 0.20031496170060592,
+    "sed": 0.07906783994608355,
+    "event": 0.20740378574938548,
+    "rows_never_trained_frac": 0.0,
+    "anchor_empty_rows": 3
+   },
+   "interpolation": null,
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.00468825220105757,
+   "events_per_packet": 10.746593666666667,
+   "t_wall": 1717.3528032302856
+  },
+  {
+   "axis": "T",
+   "value": 5000.0,
+   "label": "T5000",
+   "ion": "57LaII",
+   "coord": "logT",
+   "coord_value": 8.517193191416238,
+   "gray": [],
+   "live_bands": [
+    "g",
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "g": 0.009612525068403542,
+    "r": 0.005094275985372877,
+    "i": 0.005167605676163108,
+    "z": 0.006240959947628726,
+    "J": 0.00239596467039835,
+    "H": 0.006602535652089827,
+    "K": 0.00764625424441
+   },
+   "classification": "C",
+   "k_rec": 2,
+   "exists_at_ng_t": true,
+   "transfers": false,
+   "interpolates": null,
+   "recomputed": {
+    "2": {
+     "band": 0.0073737373906368475,
+     "colour": 0.007361333959185146,
+     "sed": 0.006703286578929389,
+     "event": 0.7241900002369415
+    },
+    "4": {
+     "band": 0.0033091151920565665,
+     "colour": 0.0052961088221756825,
+     "sed": 0.005884927027210311,
+     "event": 0.5700902565638764
+    },
+    "8": {
+     "band": 0.005148629001723748,
+     "colour": 0.009075049842458327,
+     "sed": 0.006175690359410738,
+     "event": 0.4537593970634591
+    },
+    "16": {
+     "band": 0.0072175038747168685,
+     "colour": 0.005413433313361082,
+     "sed": 0.00607303922712581,
+     "event": 0.3943278868643023
+    },
+    "32": {
+     "band": 0.008552960188612957,
+     "colour": 0.005780779952576864,
+     "sed": 0.005997837361827235,
+     "event": 0.3636859126137957
+    }
+   },
+   "transfer": {
+    "band": 0.39884949373823986,
+    "colour": 0.3917745631983358,
+    "sed": 0.052976893658379876,
+    "event": 0.41270435101932085,
+    "rows_never_trained_frac": 0.0,
+    "anchor_empty_rows": 2
+   },
+   "interpolation": null,
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.021377636401535016,
+   "events_per_packet": 1.2903422222222223,
+   "t_wall": 22.284780025482178
+  },
+  {
+   "axis": "T",
+   "value": 5000.0,
+   "label": "T5000",
+   "ion": "58CeII",
+   "coord": "logT",
+   "coord_value": 8.517193191416238,
+   "gray": [],
+   "live_bands": [
+    "g",
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "g": 0.009333948738738291,
+    "r": 0.016811484201063362,
+    "i": 0.00990838368625608,
+    "z": 0.012547543265397901,
+    "J": 0.007152660796894693,
+    "H": 0.021212002492148652,
+    "K": 0.0033164949723146933
+   },
+   "classification": "D",
+   "k_rec": 32,
+   "exists_at_ng_t": false,
+   "transfers": false,
+   "interpolates": null,
+   "recomputed": {
+    "2": {
+     "band": 0.22820118856224525,
+     "colour": 0.21401668755930814,
+     "sed": 0.033821643762455264,
+     "event": 0.5205480149105184
+    },
+    "4": {
+     "band": 0.1372086939165058,
+     "colour": 0.1521500851730373,
+     "sed": 0.02882390602523591,
+     "event": 0.49057331800087545
+    },
+    "8": {
+     "band": 0.10667042193678355,
+     "colour": 0.12087918139689435,
+     "sed": 0.02717922865763907,
+     "event": 0.3258679029749537
+    },
+    "16": {
+     "band": 0.0803827084795401,
+     "colour": 0.11164034553481983,
+     "sed": 0.02006291807787088,
+     "event": 0.24766259984178965
+    },
+    "32": {
+     "band": 0.03358416701059497,
+     "colour": 0.033730491385064454,
+     "sed": 0.018397252515231614,
+     "event": 0.19069513627804222
+    }
+   },
+   "transfer": {
+    "band": 0.717399871488773,
+    "colour": 0.571032686928671,
+    "sed": 0.08959988725946026,
+    "event": 0.2701832776357128,
+    "rows_never_trained_frac": 1.1836952373015987e-07,
+    "anchor_empty_rows": 5
+   },
+   "interpolation": null,
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.00508227628922734,
+   "events_per_packet": 7.054598333333334,
+   "t_wall": 569.6162846088409
+  },
+  {
+   "axis": "T",
+   "value": 5000.0,
+   "label": "T5000",
+   "ion": "60NdII",
+   "coord": "logT",
+   "coord_value": 8.517193191416238,
+   "gray": [
+    "3: R2 identity residual 3.9e+70"
+   ],
+   "live_bands": [
+    "g",
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "g": 0.027056487693196796,
+    "r": 0.02055974962486804,
+    "i": 0.015350628876878434,
+    "z": 0.010781905455459961,
+    "J": 0.014018231376872225,
+    "H": 0.004913539157490977,
+    "K": 0.0061520168699982555
+   },
+   "classification": "GRAY",
+   "k_rec": 4,
+   "exists_at_ng_t": true,
+   "transfers": false,
+   "interpolates": null,
+   "recomputed": {
+    "2": {
+     "band": 0.09156372530837942,
+     "colour": 0.10442130588167942,
+     "sed": 0.017424180424175158,
+     "event": 0.4787950367587739
+    },
+    "4": {
+     "band": 0.032448567106207804,
+     "colour": 0.037191725863973346,
+     "sed": 0.01634643038578207,
+     "event": 0.46519781676583993
+    },
+    "8": {
+     "band": 0.02434806490410324,
+     "colour": 0.03722697650810858,
+     "sed": 0.016003760483671702,
+     "event": 0.24714151097846845
+    },
+    "16": {
+     "band": 0.018634888044957165,
+     "colour": 0.02745576771564373,
+     "sed": 0.015439746911700447,
+     "event": 0.18934916392928303
+    },
+    "32": {
+     "band": 0.027817501758455876,
+     "colour": 0.04158546292077148,
+     "sed": 0.015593378508957038,
+     "event": 0.14523154450220802
+    }
+   },
+   "transfer": {
+    "band": 0.48261410760019885,
+    "colour": 0.4001587666354922,
+    "sed": 0.16594480620405105,
+    "event": 0.23936228147810304,
+    "rows_never_trained_frac": 3.007380774043272e-08,
+    "anchor_empty_rows": 3
+   },
+   "interpolation": null,
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.003959059915402169,
+   "events_per_packet": 14.785530333333334,
+   "t_wall": 3034.687855243683
+  },
+  {
+   "axis": "ref",
+   "value": null,
+   "label": "ref",
+   "ion": "57LaII",
+   "coord": null,
+   "coord_value": null,
+   "gray": [],
+   "live_bands": [
+    "g",
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "g": 0.028960296618332843,
+    "r": 0.01270556225835393,
+    "i": 0.006591358268843602,
+    "z": 0.0008578115365858641,
+    "J": 0.0036897647470052874,
+    "H": 0.007837506264456095,
+    "K": 0.008709610551220682
+   },
+   "classification": "REF",
+   "k_rec": 2,
+   "exists_at_ng_t": true,
+   "transfers": null,
+   "interpolates": null,
+   "recomputed": {
+    "2": {
+     "band": 0.035656065166051576,
+     "colour": 0.03480081497956178,
+     "sed": 0.006136762037929254,
+     "event": 0.7366439487655121
+    },
+    "4": {
+     "band": 0.0214368571443444,
+     "colour": 0.020689066838958325,
+     "sed": 0.00553302031861732,
+     "event": 0.6144885683894799
+    },
+    "8": {
+     "band": 0.013487382641613976,
+     "colour": 0.020411481781366092,
+     "sed": 0.005841478013849637,
+     "event": 0.5213585664196265
+    },
+    "16": {
+     "band": 0.008632425336742244,
+     "colour": 0.008786588471838996,
+     "sed": 0.005457002494852172,
+     "event": 0.45561551523165494
+    },
+    "32": {
+     "band": 0.009558212418674827,
+     "colour": 0.006883589913577737,
+     "sed": 0.0050572285057881045,
+     "event": 0.420590296702328
+    }
+   },
+   "transfer": null,
+   "interpolation": null,
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.024040793162593697,
+   "events_per_packet": 0.7435877777777778,
+   "t_wall": 12.329663276672363
+  },
+  {
+   "axis": "ref",
+   "value": null,
+   "label": "ref",
+   "ion": "58CeII",
+   "coord": null,
+   "coord_value": null,
+   "gray": [],
+   "live_bands": [
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "r": 0.0326417056654397,
+    "i": 0.021191079736366095,
+    "z": 0.017437739415327135,
+    "J": 0.02443912386787976,
+    "H": 0.002749642871917031,
+    "K": 0.0053808917474316344
+   },
+   "classification": "REF",
+   "k_rec": 16,
+   "exists_at_ng_t": true,
+   "transfers": null,
+   "interpolates": null,
+   "recomputed": {
+    "2": {
+     "band": 0.236019162188839,
+     "colour": 0.2238939265810984,
+     "sed": 0.0417153304604484,
+     "event": 0.5303086085025713
+    },
+    "4": {
+     "band": 0.13977734892248606,
+     "colour": 0.09743014963743946,
+     "sed": 0.03628594090654646,
+     "event": 0.47788000522454155
+    },
+    "8": {
+     "band": 0.12155644238261232,
+     "colour": 0.10270937923726109,
+     "sed": 0.036848512605897596,
+     "event": 0.3344615494451663
+    },
+    "16": {
+     "band": 0.05975888302574006,
+     "colour": 0.08358393312466106,
+     "sed": 0.028024720481122718,
+     "event": 0.24540249471656425
+    },
+    "32": {
+     "band": 0.025242232086807093,
+     "colour": 0.03830358168594117,
+     "sed": 0.028614998538224558,
+     "event": 0.1883492864064073
+    }
+   },
+   "transfer": null,
+   "interpolation": null,
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.009500093359442463,
+   "events_per_packet": 5.427690000000001,
+   "t_wall": 97.43967175483704
+  },
+  {
+   "axis": "ref",
+   "value": null,
+   "label": "ref",
+   "ion": "60NdII",
+   "coord": null,
+   "coord_value": null,
+   "gray": [],
+   "live_bands": [
+    "g",
+    "r",
+    "i",
+    "z",
+    "J",
+    "H",
+    "K"
+   ],
+   "seed_std_R2": {
+    "g": 0.00484018743241923,
+    "r": 0.013609753591882386,
+    "i": 0.0076519361946876105,
+    "z": 0.004277593493474636,
+    "J": 0.0033800772930744666,
+    "H": 0.008646100460059893,
+    "K": 0.003183118436951684
+   },
+   "classification": "REF",
+   "k_rec": 2,
+   "exists_at_ng_t": true,
+   "transfers": null,
+   "interpolates": null,
+   "recomputed": {
+    "2": {
+     "band": 0.08240254842646877,
+     "colour": 0.059540591272504884,
+     "sed": 0.013804082472269726,
+     "event": 0.49323427925742386
+    },
+    "4": {
+     "band": 0.04694337073440735,
+     "colour": 0.029062786486178993,
+     "sed": 0.012978667002420192,
+     "event": 0.4181738647920314
+    },
+    "8": {
+     "band": 0.028651177175479603,
+     "colour": 0.027430100814953562,
+     "sed": 0.012738186549382054,
+     "event": 0.2681946242692672
+    },
+    "16": {
+     "band": 0.017071539323278984,
+     "colour": 0.020796204823358977,
+     "sed": 0.012376934592807537,
+     "event": 0.20575903708287996
+    },
+    "32": {
+     "band": 0.011760921023327597,
+     "colour": 0.01303073041893299,
+     "sed": 0.011860083336896945,
+     "event": 0.16994469647867616
+    }
+   },
+   "transfer": null,
+   "interpolation": null,
+   "outside_fixed_support": {
+    "clipped_frac": 0.0,
+    "clipped_energy_frac": 0.0,
+    "coverage_limited": false
+   },
+   "fine_in_vs_out_of_sample": 0.004926968337526813,
+   "events_per_packet": 8.219072333333335,
+   "t_wall": 987.8511724472046
+  }
+ ]
+}

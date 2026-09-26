@@ -1,0 +1,24 @@
+gate3_D_D10_58CeII_n1e6.json: n = 1000000 (a gray-remedy rerun; the 300000 record is kept on disk)
+gate3_P_P1d_58CeII_n1e6.json: n = 1000000 (a gray-remedy rerun; the 300000 record is kept on disk)
+gate3_P_P3d_58CeII_n1e6.json: n = 1000000 (a gray-remedy rerun; the 300000 record is kept on disk)
+gate3_T_T5000_58CeII_n1e6.json: n = 1000000 (a gray-remedy rerun; the 300000 record is kept on disk)
+
+57LaII: C1 GREEN  C2 YELLOW  C3 GREEN  needed ['T', 'D']  interp fails []
+  T: T2500:C(rec16 0.007, fix 0.379, untrained 0.0000)  T3000:B(rec16 0.003, fix 0.155, untrained 0.0000)  T4000:C(rec16 0.005, fix 0.192, untrained 0.0000)  T5000:C(rec16 0.007, fix 0.399, untrained 0.0000)  | transfer FAILS, interp True
+  D: D0.1:C(rec16 0.014, fix 0.135, untrained 0.0000)  D0.3:B(rec16 0.012, fix 0.097, untrained 0.0000)  D3:A(rec16 0.016, fix 0.057, untrained 0.0000)  D10:C(rec16 0.039, fix 0.104, untrained 0.0000)  | transfer FAILS, interp True
+  J: J2500:A(rec16 0.004, fix 0.008, untrained 0.0000)  J5000:A(rec16 0.015, fix 0.010, untrained 0.0001)  J7000:A(rec16 0.004, fix 0.028, untrained 0.0055)  | transfer holds, interp True
+  P: P1d:C(rec16 0.002, fix 0.257, untrained 0.0000)  P3d:B(rec16 0.040, fix 0.191, untrained 0.0000)  P5d:A(rec16 0.015, fix 0.042, untrained 0.0000)  | transfer FAILS, interp True
+
+58CeII: C1 RED  C2 YELLOW  C3 YELLOW  needed ['T', 'D', 'J']  interp fails []
+  T: T2500:C(rec16 0.070, fix 0.322, untrained 0.0000)  T3000:B(rec16 0.066, fix 0.188, untrained 0.0000)  T4000:D(rec16 0.099, fix 0.126, untrained 0.0000)  T5000:D(rec16 0.080, fix 0.717, untrained 0.0000)  | transfer FAILS, interp True
+  D: D0.1:C(rec16 0.037, fix 0.342, untrained 0.0000)  D0.3:B(rec16 0.056, fix 0.223, untrained 0.0000)  D3:C(rec16 0.089, fix 0.236, untrained 0.0000)  D10:C(rec16 0.043, fix 0.373, untrained 0.0000)  | transfer FAILS, interp True
+  J: J2500:C(rec16 0.051, fix 0.070, untrained 0.0000)  J5000:A(rec16 0.083, fix 0.042, untrained 0.0001)  J7000:A(rec16 0.092, fix 0.096, untrained 0.0125)  | transfer FAILS, interp True
+  P: P1d:D(rec16 0.119, fix 0.480, untrained 0.0000)  P3d:B(rec16 0.068, fix 0.231, untrained 0.0000)  P5d:D(rec16 0.068, fix 0.333, untrained 0.0000)  | transfer FAILS, interp True
+
+60NdII: C1 GREEN  C2 RED  C3 GREEN  needed ['T', 'D']  interp fails []
+  T: T2500:C(rec16 0.010, fix 0.392, untrained 0.0000)  T3000:B(rec16 0.009, fix 0.150, untrained 0.0000)  T4000:C(rec16 0.017, fix 0.233, untrained 0.0000)  T5000:GRAY(rec16 0.019, fix 0.483, untrained 0.0000)  | transfer FAILS, interp True
+  D: D0.1:GRAY(rec16 0.009, fix 0.726, untrained 0.0000)  D0.3:B(rec16 0.013, fix 0.375, untrained 0.0000)  D3:C(rec16 0.014, fix 0.302, untrained 0.0000)  D10:C(rec16 0.033, fix 0.518, untrained 0.0000)  | transfer FAILS, interp True
+  J: J2500:A(rec16 0.018, fix 0.027, untrained 0.0000)  J5000:A(rec16 0.018, fix 0.035, untrained 0.0000)  J7000:A(rec16 0.028, fix 0.023, untrained 0.0000)  | transfer holds, interp True
+  P: P1d:C(rec16 0.029, fix 0.332, untrained 0.0000)  P3d:C(rec16 0.013, fix 0.181, untrained 0.0000)  P5d:C(rec16 0.007, fix 0.331, untrained 0.0000)  | transfer FAILS, interp False
+
+C1 RED  C2 RED  C3 YELLOW  C4 YELLOW  C5 NOT RUN  -> step 4: reframed by the PI
