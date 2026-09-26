@@ -594,3 +594,35 @@ def test_bin_legs_reproduce_the_analytic_attenuation_on_an_uneven_forest(mode, w
                  dnu_over_nu=dnu)
     p_mc = res["n_absorbed"] / n
     assert abs(p_mc - p_th) < 4 * np.sqrt(p_th * (1 - p_th) / n) + 1e-3, (p_mc, p_th)
+
+
+def test_thermal_sampler_clips_the_searchsorted_overflow_at_the_float_roundoff_tail():
+    """The exact defect behind Paper B G3's part-c crash (2026-09-24,
+    paperB/gate3/bug_snapshot/thermal_sampler_overflow.md, forest_mc.py's
+    thermal_sampler): cum = np.cumsum(w / w.sum()) falls short of 1.0 by
+    float roundoff on a large sum, and the un-clipped `sample` used to return
+    len(cum) -- one past the array -- for any u drawn at or above that tail,
+    crashing the first time the sampled line index was used (nu0_all/tau_all
+    are indexed over the identical "every line" space, for every outcome
+    mode, not only sobolev_tla -- see the reachability note in the bug
+    snapshot). This reproduces the actual failing input: `cum[-1]` as this
+    environment computes it, not an assumed value, and the smallest float64
+    strictly above it -- what rng.uniform() drawing arbitrarily close to the
+    tail would produce."""
+    n = 50_000
+    rng = np.random.default_rng(0)
+    nu0 = np.geomspace(1e14, 8e14, n)
+    A = rng.uniform(0.1, 10.0, n); n_upper = rng.uniform(0.1, 10.0, n)   # a spread of magnitudes, like a real line list
+    fa = ForestAtom(nu0=nu0, f_osc=np.full(n, F_OSC), n_lower=np.zeros(n), n_upper=n_upper,
+                    A=A, lower=np.zeros(n, int), upper=np.arange(n), t_exp=T_EXP, stim=False)
+    sample = fa.thermal_sampler(weight="photon")
+    w = A * n_upper
+    cum = np.cumsum(w / w.sum())                     # what thermal_sampler computes internally
+    u_over = np.nextafter(cum[-1], 2.0)              # the smallest float64 strictly above it: the failing draw
+    out = sample(np.array([u_over]))
+    assert out[0] == n - 1                            # clipped to the last valid line index, never n (out of bounds)
+    # every draw in [0, u_over] stays a valid line index, and ordinary draws are unaffected by the clip
+    u = np.concatenate([rng.uniform(0.0, float(cum[-1]), 20000), [0.0, u_over]])
+    out = sample(u)
+    assert out.min() >= 0 and out.max() < n
+    assert sample(np.array([0.0]))[0] == 0
