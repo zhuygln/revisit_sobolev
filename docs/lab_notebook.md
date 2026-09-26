@@ -3439,6 +3439,85 @@ while R_32 passes everywhere (K*_rec <= 32 at every state). By the
 preregistered rule those misses make Ce II C1 RED; the record will say
 exactly that and exactly how marginal it is.
 
+## 9bo. G3 finished: two real bugs found and disclosed, a Ce II resolution deficiency, and outcome B (2026-09-26)
+
+The PI's approved order (verbatim in plan_review.md): read C1-C4 first and
+preserve it, snapshot the failing state, audit thermal_sampler's
+reachability before touching it, apply the minimal clip + regression
+test, reproduce a small failing unit, rerun part (c) if the audit clears,
+then C5 and the final write-up. Followed exactly, in that order.
+
+**The thermal_sampler bug, confirmed and fixed.** Part (c)'s crash was
+100% reproducible: the SAME index (20752336, exactly the array size) on
+all four attempts across 24 hours, at forest_mc.py:1586. Traced to
+ForestAtom.thermal_sampler's unclamped `np.searchsorted(cum, u)` -- cum
+falls short of 1.0 by float roundoff over 20.75M summed lines, so a u in
+that tail returns len(cum). Two SIBLING samplers in the same file already
+guard this (min(..., stop-1); np.clip(..., 0, nb-1)); this one didn't.
+Fix: the same one-line clip. Regression test reproduces the actual
+failing input (this environment's own cum[-1], nextafter it) and fails
+pre-fix, confirmed by git-stashing the fix and rerunning.
+
+The reachability audit (mandatory before touching the file) went further
+than "does it crash": I traced every USE of the sampled index, not just
+where it's called. The k-packet path calls this sampler in every
+dmacro/macro leg with a dead-end walk -- G1, G2, R2M, all of G3 exercise
+it routinely -- but line 1624 (`atom.nu0_all[new_line[...]]`) runs
+UNCONDITIONALLY for every outcome and shares the exact index space the
+sampler sums over. Any overflow crashes there if not earlier, for every
+mode, not only tla. A run that finished clean could not have hit it. No
+prior result needed touching. Part (c) reran clean past every point of
+the four previous crashes; energy identity 1.8e-16.
+
+**The other four crashes are NOT the same defect** -- checked by reading
+the actual code at each crash site (forest_mc.py:1086/1225/1366), not by
+inference. All three sit in the core resonance-search loop
+(np.flatnonzero, searchsorted-derived index arrays), nowhere near
+thermal_sampler. Their garbage values (~2^60 + a small number) are a
+completely different shape than the confirmed bug's clean off-by-one, and
+critically: they are INTERMITTENT even with identical seeds -- Ce II's
+P3d state failed, then succeeded on a later retry, before any code
+changed. A deterministic logic bug does not do that. Reran the fastest
+previously-failing unit (La II's D axis) after the fix: clean, as
+expected either way (the fix could not have touched this code path).
+Left open, not reclassified -- no SIGKILL/segfault/OOM/ECC signature, so
+no broader hardware investigation, per the PI's explicit bound.
+
+**A third anomaly, found only while pulling final numbers for the
+write-up**: three legs' identity_residual exploded to 3.9e70 / 3.9e70 /
+9.8e31 (Nd II D0.1 and T5000; part (b)'s Amix_ng32) while every other
+accounting fraction and the emergent photometry stayed completely
+ordinary. Two of three are ALREADY caught by G1's gray-first protocol
+(those states read GRAY, correctly excluded). The third sits inside part
+(b)'s C4 computation, which doesn't yet exclude a gray leg from the K*
+search before reading it -- a real gap in analyse.py, though it happens
+not to change today's C4=Yellow (Amix fails every N regardless). Not
+root-caused, not fixed, disclosed in the record and left for the PI.
+
+**A precision lesson caught before publishing, not after.** My first
+draft of the C1-C4 write-up said Ce II's existence "fails narrowly at
+four of fourteen states." Pulling the actual per-state JSON instead of
+trusting the printed summary line showed SEVEN failures, not four, all
+requiring N_g=32 (not visible from the terminal's truncated table), and
+the colour miss at J5000 is 0.062 mag over threshold, not the ~0.05 I'd
+estimated from the wrong subset. Rewrote from the verified numbers before
+it went in the frozen record. The table-machine-generation discipline
+exists for exactly this: a summary that LOOKS complete from the terminal
+output is not the same as the underlying data.
+
+**The reading**: C1 Ce Red (7/14 states need 32 groups, mostly on
+colour), C2 Nd Red (driven specifically by the trajectory axis P, the
+one axis moving every coordinate together -- transfer AND whole-operator
+interpolation both fail there), C3 Yellow, C4 Yellow (a blend needs its
+own fit), C5 Green (the 13-ion blend passes at N_g=4; eps* misses by
+1.69 mag, the worst scalar failure in the program). Whole-operator
+interpolation passes at every OTHER interior point tested, on every axis,
+for every ion -- the PI's amendment (interpolate the whole operator, not
+just the matrix) is doing real work again, exactly as in G2. Net reading:
+outcome B (a compact, tabulable R_ij(theta_small)), with two named
+exceptions, not averaged away: Ce II's resolution and Nd II's trajectory
+axis.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

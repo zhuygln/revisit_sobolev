@@ -5569,6 +5569,159 @@ The exit spectrum is compressible but not by an order of magnitude: the
 light needs 36 % (Ce II) and 11 % (Nd II) of the distinct exit lines at
 the same thresholds.** H1 Green, H2 Yellow.
 
+### 4.65 Paper B gate G3: does the compact operator transfer, exist, or tabulate across states? (F70)
+
+Preregistered in `paperB/prl_gate.md` "G3", amended once by the PI before
+freezing (transfer and interpolation at N_g = 16 for every ion, one
+frequency support per ion frozen over the whole domain, the interpolation
+test made whole-operator) and left mid-run to the discipline established
+for exactly this situation when three implementation defects surfaced
+(below); frozen at the tag `paperB-g3-prereg`, run 2026-09-24–26. Four
+axes moved one coordinate at a time from the P1 2 d reference state
+(T_gas, number density, the source temperature T_core decoupled from
+T_gas, and the physical trajectory at 1/3/5 d); every kernel built on the
+frozen per-ion support; two tests kept apart throughout — **transfer**
+(the reference state's own R₁₆ operator, transported unchanged at the new
+state) and **existence** (a fresh R₁₆ built and transported at the new
+state) — plus, at the interior grid point of each axis, the
+**whole-operator interpolation** built only from the two bracketing
+states' events. Records `paperB/gate3/gate3_*.json`,
+`gate3_verdict.json`; figure
+`docs/figures/paperB/gate3_transfer_vs_existence.png`; tables generated
+by `paperB/gate3/analyse.py --markdown`.
+
+**Three implementation defects surfaced during the run and are disclosed
+in full, per the PI's decision that a genuine post-run bug may be fixed
+provided the affected calculation is repeated and the defect recorded.**
+
+*(1) `ForestAtom.thermal_sampler`'s `searchsorted` was unclamped*
+(`paper2/phase1/forest_mc.py`; full account in
+`paperB/gate3/bug_snapshot/thermal_sampler_overflow.md`). Summing the
+emissivity of every line in the 13-ion P1 blend (20,752,336 lines, part
+c's realistic-mixture test) leaves the cumulative sum short of 1.0 by
+float roundoff; a drawn `u` at or above that tail returned one index past
+the array, crashing identically on four attempts across 24 hours. Fixed
+with the one-line clip its two sibling samplers in the same file already
+carry; a regression test reproduces the actual failing input and is
+verified to fail pre-fix. **Reachability was traced, not assumed**: the
+sampler is called from every dmacro leg with a dead-end macroatom walk —
+G1, G2, R2M, and every G3 per-state leg exercise it routinely — but a
+line that runs unconditionally for every outcome mode indexes the
+identical "every line" array the sampler sums over, so any overflow
+crashes there if not earlier. **No completed record, in this gate or any
+earlier one, could have hit the condition without crashing**; none needed
+rerunning for this defect. Only part (c), the largest resolved line list
+in the project's history, ever reached the tail. Part (c) was rerun after
+the fix and completed cleanly past the point of every previous crash,
+energy identity and kernel validation both at machine precision.
+
+*(2) Four other crashes, checked against the same question and found not
+to be the same defect* (Nd II's temperature, density and trajectory axes,
+one Ce II and one La II state; `docs/lab_notebook.md` 9bn). Their crash
+sites sit in the core resonance-search loop, nowhere near
+`thermal_sampler`; their garbage index values (≈2⁶⁰ plus a small number)
+are categorically different from the exact off-by-one that identifies
+the confirmed bug; and unlike that bug's four-of-four identical
+reproduction, these recurred intermittently, including succeeding on a
+later retry with unchanged seeds before any code changed. Left open,
+not reclassified, per the PI's instruction to escalate only on a
+materially different signature.
+
+*(3) A third, separate anomaly, found while reading the final numbers and
+not yet root-caused*: three legs' internal energy identity blew up to
+3.9×10⁷⁰ / 3.9×10⁷⁰ / 9.8×10³¹ (Nd II at D0.1 and T5000, on `Arec_ng32`
+and `R2` respectively; part (b)'s `Amix_ng32`) while every other
+accounting fraction and the emergent photometry stayed ordinary — the
+corruption is isolated to the identity's own accumulator, not the
+transport or the spectrum. Two of the three are per-state legs and are
+already caught and quarantined by G1's gray-first protocol (those two
+states read GRAY and are excluded from every count below). The third is
+internal to part (b)'s `Amix_ng32`; `paperB/gate3/analyse.py`'s part-(b)
+reading does not yet exclude a gray leg from the K* search before using
+it, though it happens not to change today's answer (Amix fails its
+threshold at every tested N regardless). Not investigated further this
+pass; recorded here rather than absorbed silently, and left for the PI
+to decide whether to root-cause it.
+
+**The reading.** No axis, grid, or threshold changed after these three
+findings.
+
+| ion | C1 (existence) | C2 (transfer) | C3 (state vector) | axes needing a state-dependent table (T/D/J) |
+|---|---|---|---|---|
+| La II (control) | Green | Yellow | Green | T, D |
+| Ce II | **Red** | Yellow | Yellow | T, D, J |
+| Nd II | Green | **Red** | Green | T, D |
+
+C3's "needed" and "interpolation fails" accounting is restricted to the
+three single-coordinate axes (T, D, J) by design, since it asks whether a
+*small state vector* of controllable coordinates suffices; that
+restriction is why Nd II's C3 reads Green even though its overall C2 is
+Red. **The axis actually driving that Red is P, the physical trajectory**
+(all four coordinates moving together, not a controllable single
+coordinate) — reported below, outside the C3 table.
+
+Per axis, for every ion: transfer of the θ₀ anchor **fails** on T, D and
+P; it **holds** on J, the source-spectrum axis Paper III assumed
+irrelevant and this gate measured instead. The whole-operator
+interpolation **passes at every interior point tested, on every axis, for
+every ion**, with one exception: Nd II's trajectory axis (P), the one
+axis that moves every physical coordinate together rather than one at a
+time, where the interior state (3 d) fails both transfer (0.181 mag) and
+the whole-operator interpolation (0.117 mag).
+
+La II and Nd II's fresh R₁₆ passes at every one of their fourteen states,
+comfortably (La II's worst is 0.040 mag; Nd II's is 0.033 mag), and the
+existence grid never needs more than N_g = 4. **Ce II is different, and
+substantially so**: its fresh R₁₆ fails at seven of its fourteen states —
+J5000, J7000, P1d, P5d, T3000, T4000, T5000 — every one of them recovered
+at N_g = 32 instead (K*_rec = 32 in all seven). Six of the seven fail on
+colour alone, with band under the 0.10 mag criterion in each (max
+0.099 mag); only P1d fails on both (band 0.119 mag, colour 0.151 mag).
+The colour miss ranges from 0.007 mag over threshold (P5d) to 0.062 mag
+(J5000, the single worst existence failure in the gate). This is G1's
+N_g* = 16 sitting exactly at the edge of the criterion, now showing as a
+genuine resolution deficiency across half the state domain rather than as
+one number — and it is the reason C1 reads Red. One counter-intuitive
+detail worth stating plainly: at J5000 and J7000 the **fixed θ₀ anchor
+transfers successfully** (0.042 and 0.096 mag) even though a **freshly
+built** 16-group operator trained at that same state does not
+(0.162 and 0.134 mag on colour); a same-resolution model fit to the state
+it is scored on is not automatically the more accurate one.
+
+C4 (composability): **Yellow**. The mixed kernel (`RedistributionKernel.mix`
+with `composition_weights`, no blend fit) never reaches the 0.10 mag
+criterion at any N_g up to 32 (0.111 mag band, 0.100 mag colour, at 32 —
+that specific run carries the flagged identity anomaly above), while the
+directly-trained blend kernel passes at N_g = 4 (0.083 mag band,
+0.053 mag colour). A blend needs its own fit; the mixing rule alone is
+not enough at these lanthanide mass fractions.
+
+C5 (the realistic mixture): **Green**. On the full 13-ion P1 blend, the
+recomputed operator passes at N_g = 4 (0.088 mag band, 0.073 mag colour),
+while the best scalar ε (ε* = 0, the coherent limit) misses by 1.69 mag —
+the widest scalar failure recorded in this program, on the composition
+transport actually uses.
+
+**F70 — Transfer of a fixed, energy-conserving compact operator holds
+only along the source-spectrum axis; it fails whenever the gas
+temperature, density, or the physical trajectory changes. A
+whole-operator interpolation built from two bracketing states — carrying
+the conditional exit spectrum, not only the transition matrix — recovers
+every one of those failures except one: Nd II's trajectory axis, where
+even interpolation cannot bridge the interior state. A freshly built
+16-group operator exists at every tested state for La II and Nd II, but
+fails at half of Ce II's fourteen states — G1's marginal N_g* = 16 showing
+up as a real resolution deficiency, recovered at 32 groups in every case
+and driven by colour rather than bolometric error. Species mixing needs
+its own fit rather than a training-free composition rule; on the full
+13-ion blend the compact operator passes at four groups while the best
+scalar closure misses by 1.7 mag, the widest scalar failure in the
+program. The result is closest to the PI's outcome B: not a fixed
+universal operator, but a compact, tabulable one — R_ij(θ_small) over a
+handful of state coordinates — with two identified exceptions (Ce II's
+resolution at several states, Nd II's trajectory axis) that the
+manuscript's fourth step must state plainly rather than average away.**
+
 ## 5. Findings register
 
 | # | Finding | Where |

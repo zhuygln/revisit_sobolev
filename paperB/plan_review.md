@@ -588,3 +588,44 @@ trained" (an endpoint-empty row hit at θ, coherent fallback) reported
 separately from "outside fixed support" (a frequency beyond the frozen
 edges, clipped). The four-way reading A/B/C/D is the per-state
 classification. No axis added, no grid expanded.
+
+## G3 executed per the PI's approved order (2026-09-26)
+
+The seven-step order approved above was followed exactly: (1) the C1-C4
+reading run and preserved (`gate3_verdict_pre_partc_fix.json`,
+`gate3_c1c4_reading_2026-09-26.txt`) before any code changed; (2) the
+failing state snapshotted (`paperB/gate3/bug_snapshot/`, the pre-fix
+commit hash and the identical 4/4 traceback); (3) `thermal_sampler`'s
+reachability traced by reading the code, not assumed -- it is called from
+every dmacro leg with a dead-end walk, but a mode-independent line shares
+its index space and crashes on any overflow regardless of outcome, so no
+completed record could have hit the condition silently; (4) the one-line
+clip applied with a regression test that reproduces the actual failing
+input and is verified to fail pre-fix; (5) the fastest previously-failing
+unit (La II's D axis) reran clean; (6) the other four crashes were
+checked against the fix's code path and found structurally unrelated (a
+different crash site, a different garbage-value signature, and
+intermittent recurrence with unchanged seeds where the confirmed bug was
+100% deterministic) -- left open, not escalated, since none carries the
+signature (SIGKILL, segfault, OOM, ECC) the PI set as the escalation bar;
+part (c) reran clean past every point of its four previous crashes; (7)
+C5 computed Green, the final figure and tables generated, the full G3
+finding written into `docs/results_report.md` §4.65 (F70) with the bug
+fix and a third, newly found, unresolved anomaly (an energy-identity
+blowup in three legs, two already caught by the gray-first protocol, the
+third in part (b)'s C4 path) disclosed in the same section, not only in
+the commit log.
+
+One precision catch worth recording: the first draft of the C1-C4 write-up
+undercounted Ce II's existence failures (four states from the terminal's
+printed summary, seven from the actual per-state JSON) and underestimated
+the worst colour miss by a factor of five. Caught by re-pulling every
+number from the verdict file before it went into the frozen record,
+following the standing rule after the earlier fabricated-table incident.
+
+Reading: C1 RED (Ce), C2 RED (Nd, driven by the trajectory axis P), C3
+YELLOW, C4 YELLOW, C5 GREEN -- outcome B (a compact, tabulable
+R_ij(theta_small)) with two named exceptions, per the PI's own
+four-way framework. Not reframed to Red: C1's failure is narrow and
+specific (colour, not band, at half of Ce II's states, always recovered
+at 32 groups) and C2's is confined to one axis for one ion.

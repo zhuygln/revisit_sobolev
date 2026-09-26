@@ -77,5 +77,19 @@ better and reproduces the light 2–20× worse. The exit spectrum compresses
 to L* = 0.358 (Ce II) and 0.113 (Nd II) of its distinct lines, short of
 the 10 % headline. Two preregistration amendments made during execution
 (two implementation defects; the control firing and its declared remedy)
-are recorded in `prl_gate.md`. **G3 is untouched until the G2 verdict is
-written up**, as the PI directed.
+are recorded in `prl_gate.md`.
+
+G3 was preregistered with the PI's amendment (transfer/interpolation at
+N_g = 16, one frozen support per ion, whole-operator interpolation),
+tagged `paperB-g3-prereg`, and run 2026-09-24-26 (§4.65, F70): **transfer
+holds only on the source-spectrum axis; whole-operator interpolation
+recovers every other failure except Nd II's trajectory axis. C1 Ce Red
+(7/14 states need 32 groups), C2 Nd Red, C3 Yellow, C4 Yellow (a blend
+needs its own fit), C5 Green** (the 13-ion blend passes at N_g = 4; eps*
+misses by 1.69 mag, the worst scalar failure in the program). Reading:
+outcome B -- a compact, tabulable R_ij(theta_small) -- with two named
+exceptions. Three implementation issues surfaced and are disclosed in
+full in §4.65 and `paperB/gate3/bug_snapshot/`: a confirmed, fixed,
+disclosed bug in `thermal_sampler` (unreachable in any prior completed
+record); four crashes checked and found to be a different, unresolved
+phenomenon; one energy-identity anomaly flagged and left for the PI.
