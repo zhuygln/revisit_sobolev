@@ -588,3 +588,105 @@ trained" (an endpoint-empty row hit at θ, coherent fallback) reported
 separately from "outside fixed support" (a frequency beyond the frozen
 edges, clipped). The four-way reading A/B/C/D is the per-state
 classification. No axis added, no grid expanded.
+
+## G3 executed per the PI's approved order (2026-09-26)
+
+The seven-step order approved above was followed exactly: (1) the C1-C4
+reading run and preserved (`gate3_verdict_pre_partc_fix.json`,
+`gate3_c1c4_reading_2026-09-26.txt`) before any code changed; (2) the
+failing state snapshotted (`paperB/gate3/bug_snapshot/`, the pre-fix
+commit hash and the identical 4/4 traceback); (3) `thermal_sampler`'s
+reachability traced by reading the code, not assumed -- it is called from
+every dmacro leg with a dead-end walk, but a mode-independent line shares
+its index space and crashes on any overflow regardless of outcome, so no
+completed record could have hit the condition silently; (4) the one-line
+clip applied with a regression test that reproduces the actual failing
+input and is verified to fail pre-fix; (5) the fastest previously-failing
+unit (La II's D axis) reran clean; (6) the other four crashes were
+checked against the fix's code path and found structurally unrelated (a
+different crash site, a different garbage-value signature, and
+intermittent recurrence with unchanged seeds where the confirmed bug was
+100% deterministic) -- left open, not escalated, since none carries the
+signature (SIGKILL, segfault, OOM, ECC) the PI set as the escalation bar;
+part (c) reran clean past every point of its four previous crashes; (7)
+C5 computed Green, the final figure and tables generated, the full G3
+finding written into `docs/results_report.md` §4.65 (F70) with the bug
+fix and a third, newly found, unresolved anomaly (an energy-identity
+blowup in three legs, two already caught by the gray-first protocol, the
+third in part (b)'s C4 path) disclosed in the same section, not only in
+the commit log.
+
+One precision catch worth recording: the first draft of the C1-C4 write-up
+undercounted Ce II's existence failures (four states from the terminal's
+printed summary, seven from the actual per-state JSON) and underestimated
+the worst colour miss by a factor of five. Caught by re-pulling every
+number from the verdict file before it went into the frozen record,
+following the standing rule after the earlier fabricated-table incident.
+
+Reading: C1 RED (Ce), C2 RED (Nd, driven by the trajectory axis P), C3
+YELLOW, C4 YELLOW, C5 GREEN -- outcome B (a compact, tabulable
+R_ij(theta_small)) with two named exceptions, per the PI's own
+four-way framework. Not reframed to Red: C1's failure is narrow and
+specific (colour, not band, at half of Ce II's states, always recovered
+at 32 groups) and C2's is confined to one axis for one ion.
+
+## The PI's hold on PR #13: the bounded energy-identity audit, closed (2026-09-27)
+
+PI, verbatim (pasted from a rendered page; nothing edited):
+
+> I would hold PR #13 open for one bounded audit, then merge. The G3 result is scientifically strong enough to write, but the energy-identity anomaly is too large to freeze into the final gate record without understanding it.
+> An energy residual of 10^{31}–10^{70} is categorically different from Monte Carlo noise. Your preregistered discipline already treats energy-identity residual >10^{-10} as Gray and permits a disclosed bug fix followed by rerunning the affected calculation. The fact that two anomalous legs are caught correctly but the third slips through the C4 analysis means there is at least an analysis-validity bug, even if the underlying transport result ultimately proves fine.
+> I would make the audit deliberately narrow: [the five steps, applied exactly, see below]
+> If that audit shows the anomaly is isolated to bookkeeping/analysis and C4 remains Yellow after the corrected gray logic, merge PR #13 immediately. If the affected C4 family needs rerunning, rerun only that preregistered family and then merge. I would not reopen C1–C3 or C5 unless the audit demonstrates the same defect is reachable there.
+>
+> [The scientific-reading refinement: outcome B is dominant but Nd's trajectory axis is genuinely C -- the operator manifold is compact but not adequately represented by independent one-dimensional interpolation when several coordinates move together; Ce's seven-of-fourteen failures mean compactness survives but fixed representation size does not, needing adaptive resolution or a conservative N_g=32 Ce representation; C5 Green substantially strengthens the central story and makes C4's "a blend needs its own fit" physically understandable rather than contradictory. Headline: "Lanthanide fluorescence remains strongly compressible across physical state and realistic composition, but the effective operator is state dependent: one-dimensional interpolation predicts most state changes, while coupled trajectories and species mixing expose nonlinearities that require refitting or richer tabulation." No neural surrogate yet -- one failure of separable interpolation is not enough evidence against a better-chosen low-dimensional table.]
+
+Audit executed exactly as specified:
+
+1. **The three exact records identified** with full per-term ledgers, not
+   only the normalized residual: `gate3_D_D0.1_60NdII.json` (`Arec_ng32`),
+   `gate3_T_T5000_60NdII.json` (`R2`), `gate3_partb_blend3.json`
+   (`Amix_ng32`); all seeds 1,2,3, build seeds 101,102,103. Recorded in
+   `paperB/gate3/bug_snapshot/energy_identity_anomaly.md`.
+2. **Each leg reproduced once**, per seed, from scratch. **All three
+   reproduced clean at machine precision on every seed** — the
+   discriminator the PI asked for: a logic bug reproduces identically
+   given the same seeds (as `thermal_sampler` did, 4/4); these did not
+   (0/3). Traced the identity formula directly in `forest_mc.py`:
+   `identity_residual` matches `esc_frac` to full float precision in all
+   three anomalous records, meaning the raw `E_esc` sum alone is the
+   corrupted term — not a formula/aliasing bug, which would corrupt every
+   run, not one.
+3. **Amix_ng32's full photometry reproduced and compared**: 0.1114 mag
+   against the frozen record's 0.1108 mag maximum error, indistinguishable
+   within seed scatter. The corrupted identity did not measurably affect
+   the numbers C4 was built from — checked directly, not assumed.
+4. **Transport is sound; only the C4 analysis was wrong.** The real
+   defect: `read_blend()` computed `gray_checks()` (which correctly names
+   the bad leg) but never used it to exclude that leg from the K* search.
+   Fixed with `leg_invalid()`, gating every K* candidate; no rerun of any
+   family was needed since Amix already fails at every other N regardless
+   (`k_mix` None, `k_direct` 4, unchanged by the fix).
+5. **C4 now enforces gray-first**, matching G1's per-leg rule and G3's
+   per-state rule; every exclusion is disclosed (`invalid_legs`,
+   `table[...]['invalid']`), never dropped silently. Four regression
+   tests added, one pinned against the actual frozen record with the
+   test file's synthetic-photometry fixture explicitly undone so it
+   reads real numbers.
+
+C1–C3 and C5 were not reopened: G3's per-state reading already applies a
+stricter rule (a whole state grays, not one leg) and no identity anomaly
+touched any part-(c) leg — the audit's own bar for reopening them, per
+the PI's instruction, was not met.
+
+**Decision applied**: C4 remains Yellow after the corrected gray logic on
+the existing raw records; no family needed rerunning. PR #13 approved to
+merge on this basis.
+
+The scientific-reading refinement is adopted verbatim for the manuscript
+and the memory record: the dominant result is outcome B; Nd's trajectory
+axis is genuinely C (the manifold is compact but not representable by
+independent one-dimensional interpolation when coordinates move together);
+Ce's failures mean compactness survives but a fixed representation size
+does not; C5 Green makes C4's "a blend needs its own fit" physically
+understandable rather than contradictory. No neural surrogate started.

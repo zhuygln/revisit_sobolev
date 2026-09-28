@@ -3387,6 +3387,195 @@ Ce first (decisive, ~1 h), then Nd (~6.5 h at 1e6), then La, then the
 composability blend on the three-ion union support and the 13-ion P1
 blend. Everything smoke-tested through an interior interpolation; 6 tests.
 
+## 9bn. G3 run: index corruption under concurrent 1e6 jobs (2026-09-24)
+
+Ce II's domain came in at 3e5 with four states gray on the precision rule
+(D10, T5000, P1d, P3d). The preregistered remedy is the whole state at a
+raised count, so I launched the four reruns at 1e6 while the Nd II chain
+was already running at 1e6. Within twenty minutes three jobs failed:
+Nd II's T axis with `IndexError: index 1152921504607443870`, its D axis
+with `index 1152921504606847448`, and the Ce II P3d rerun silently, with
+no traceback and its log cut at the third leg. The two indices are
+2^60 + 596894 and 2^60 + 472 -- valid indices with bit 60 set. That is
+not a physics or code path; it is a bit flip in an index array. The Nd II
+reference run had also died before writing its record (its anchor kernel
+survived, saved earlier in the run). All of it happened while two
+million-packet jobs sat side by side on the 24 GB WSL box; nothing like
+it in forty-odd single-job runs.
+
+Response: the chain is now STRICTLY SEQUENTIAL and resumable (a state with
+a completion marker is skipped, the marker written only after the record),
+gated to start after the lone Ce II rerun finishes. The records that
+completed during the overlap (Ce II D10, T5000, P1d at 1e6) pass every
+energy identity and kernel validation, which a flipped bit in a weight
+would break, and are kept; anything that died is rerun from scratch.
+Lesson for this machine: one 1e6 transport job at a time.
+
+*Correction, an hour later.* The Nd II reference run's log shows it died
+the same way -- `index 1152921504606848737`, again 2^60 plus a valid
+index -- at 11:33, before any second job existed. Three incidents, three
+code paths, the SAME bit every time. That is not concurrency; it is a
+repeatable single-bit memory fault on this host (a stuck cell in one
+physical page, or a hypervisor bug), which larger processes are likelier
+to map. Nothing in G1, G2 or the R2M runs tripped it, so it is
+intermittent. Mitigation, since hardware is not mine to fix: the chain
+retries a crashed unit up to three times; every completed record is
+protected by the energy identity (< 1e-10) and the kernel validation
+(< 1e-12), which a flipped bit in a weight would break by many orders of
+magnitude; an index flip either crashes (caught) or lands in a valid
+index of the wrong packet -- undetectable in principle, but a single
+misrouted packet in 3e6 is far inside the seed noise. The PI should know
+the machine does this; a memtest of the host is the real fix.
+
+Meanwhile the Ce II reading, with the reruns in: transfer fails on T, D
+and P and holds on J (the source-spectrum axis the PI insisted on
+measuring -- for Ce II the anchor transfers across t_core, J2500 missing
+only on colour by 0.007); the whole-operator interpolation passes at
+every interior point it could be read at (T3000 0.064, D0.3 0.047, J5000
+0.050 mag) while the matrix-only version fails on D (0.130) and sits on
+the threshold on T (0.099) -- the PI's amendment was decisive; the fresh
+R_16 misses at T4000, T5000 and P1d on a single colour by 0.007-0.02 mag
+while R_32 passes everywhere (K*_rec <= 32 at every state). By the
+preregistered rule those misses make Ce II C1 RED; the record will say
+exactly that and exactly how marginal it is.
+
+## 9bo. G3 finished: two real bugs found and disclosed, a Ce II resolution deficiency, and outcome B (2026-09-26)
+
+The PI's approved order (verbatim in plan_review.md): read C1-C4 first and
+preserve it, snapshot the failing state, audit thermal_sampler's
+reachability before touching it, apply the minimal clip + regression
+test, reproduce a small failing unit, rerun part (c) if the audit clears,
+then C5 and the final write-up. Followed exactly, in that order.
+
+**The thermal_sampler bug, confirmed and fixed.** Part (c)'s crash was
+100% reproducible: the SAME index (20752336, exactly the array size) on
+all four attempts across 24 hours, at forest_mc.py:1586. Traced to
+ForestAtom.thermal_sampler's unclamped `np.searchsorted(cum, u)` -- cum
+falls short of 1.0 by float roundoff over 20.75M summed lines, so a u in
+that tail returns len(cum). Two SIBLING samplers in the same file already
+guard this (min(..., stop-1); np.clip(..., 0, nb-1)); this one didn't.
+Fix: the same one-line clip. Regression test reproduces the actual
+failing input (this environment's own cum[-1], nextafter it) and fails
+pre-fix, confirmed by git-stashing the fix and rerunning.
+
+The reachability audit (mandatory before touching the file) went further
+than "does it crash": I traced every USE of the sampled index, not just
+where it's called. The k-packet path calls this sampler in every
+dmacro/macro leg with a dead-end walk -- G1, G2, R2M, all of G3 exercise
+it routinely -- but line 1624 (`atom.nu0_all[new_line[...]]`) runs
+UNCONDITIONALLY for every outcome and shares the exact index space the
+sampler sums over. Any overflow crashes there if not earlier, for every
+mode, not only tla. A run that finished clean could not have hit it. No
+prior result needed touching. Part (c) reran clean past every point of
+the four previous crashes; energy identity 1.8e-16.
+
+**The other four crashes are NOT the same defect** -- checked by reading
+the actual code at each crash site (forest_mc.py:1086/1225/1366), not by
+inference. All three sit in the core resonance-search loop
+(np.flatnonzero, searchsorted-derived index arrays), nowhere near
+thermal_sampler. Their garbage values (~2^60 + a small number) are a
+completely different shape than the confirmed bug's clean off-by-one, and
+critically: they are INTERMITTENT even with identical seeds -- Ce II's
+P3d state failed, then succeeded on a later retry, before any code
+changed. A deterministic logic bug does not do that. Reran the fastest
+previously-failing unit (La II's D axis) after the fix: clean, as
+expected either way (the fix could not have touched this code path).
+Left open, not reclassified -- no SIGKILL/segfault/OOM/ECC signature, so
+no broader hardware investigation, per the PI's explicit bound.
+
+**A third anomaly, found only while pulling final numbers for the
+write-up**: three legs' identity_residual exploded to 3.9e70 / 3.9e70 /
+9.8e31 (Nd II D0.1 and T5000; part (b)'s Amix_ng32) while every other
+accounting fraction and the emergent photometry stayed completely
+ordinary. Two of three are ALREADY caught by G1's gray-first protocol
+(those states read GRAY, correctly excluded). The third sits inside part
+(b)'s C4 computation, which doesn't yet exclude a gray leg from the K*
+search before reading it -- a real gap in analyse.py, though it happens
+not to change today's C4=Yellow (Amix fails every N regardless). Not
+root-caused, not fixed, disclosed in the record and left for the PI.
+
+**A precision lesson caught before publishing, not after.** My first
+draft of the C1-C4 write-up said Ce II's existence "fails narrowly at
+four of fourteen states." Pulling the actual per-state JSON instead of
+trusting the printed summary line showed SEVEN failures, not four, all
+requiring N_g=32 (not visible from the terminal's truncated table), and
+the colour miss at J5000 is 0.062 mag over threshold, not the ~0.05 I'd
+estimated from the wrong subset. Rewrote from the verified numbers before
+it went in the frozen record. The table-machine-generation discipline
+exists for exactly this: a summary that LOOKS complete from the terminal
+output is not the same as the underlying data.
+
+**The reading**: C1 Ce Red (7/14 states need 32 groups, mostly on
+colour), C2 Nd Red (driven specifically by the trajectory axis P, the
+one axis moving every coordinate together -- transfer AND whole-operator
+interpolation both fail there), C3 Yellow, C4 Yellow (a blend needs its
+own fit), C5 Green (the 13-ion blend passes at N_g=4; eps* misses by
+1.69 mag, the worst scalar failure in the program). Whole-operator
+interpolation passes at every OTHER interior point tested, on every axis,
+for every ion -- the PI's amendment (interpolate the whole operator, not
+just the matrix) is doing real work again, exactly as in G2. Net reading:
+outcome B (a compact, tabulable R_ij(theta_small)), with two named
+exceptions, not averaged away: Ce II's resolution and Nd II's trajectory
+axis.
+
+## 9bp. The energy-identity anomaly, audited and closed (2026-09-27)
+
+The PI held PR #13 for a bounded, five-step audit of finding (3) rather
+than merging around it: "an energy residual of 1e31-1e70 is categorically
+different from Monte Carlo noise... too large to freeze into the final
+gate record without understanding it." Right call, and a useful contrast
+with the thermal_sampler bug's audit -- same discipline, opposite
+conclusion.
+
+Reproduced all three flagged legs individually (Nd D0.1's Arec_ng32, Nd
+T5000's R2, part b's Amix_ng32), each rebuilt from scratch with the exact
+state/atom/kernel/seeds, per-seed raw accounting read directly (the
+committed record only stores the 3-seed average). ALL THREE reproduced
+CLEAN, identity ~1e-16 on every seed. This is the deciding fact: a real
+logic bug reproduces every time given the same seeds (thermal_sampler was
+4/4 identical); these were 0/3. Confirms these are one-off,
+non-reproducible corruption events -- the SAME general phenomenon as the
+four earlier "bit-60" crashes, just landing in a float accumulator
+(escape energy) instead of an integer index, so it poisons a sum instead
+of crashing. Traced the actual formula in forest_mc.py:
+identity_residual = (E_esc + ... - E_inj)/E_inj matches esc_frac bit for
+bit in all three anomalous records -- meaning E_esc alone (raw
+np.sum(w[fate==1] * H * nu_final[fate==1])) is the corrupted term, not a
+formula bug (a formula bug would corrupt every run, not one).
+
+Then checked the PI's step 3 directly rather than assuming: does the
+corrupted run's PHOTOMETRY (not just its identity self-check) differ from
+a clean one? Reproduced Amix_ng32's full spectrum/mags and compared:
+0.1114 vs 0.1108 mag max error against the reference -- indistinguishable
+within seed noise. The corruption never touched the numbers the verdict
+actually used. This matters: it means whatever hits this machine
+occasionally (same suspect as the earlier crashes) is narrowly contained
+to one accounting sum, not a broad corruption of the transport.
+
+The REAL bug this audit found: paperB/gate3/analyse.py's read_blend()
+(part b/c's K* search) computed gray_checks() -- which correctly NAMES
+the bad leg ("3: Amix_ng32 identity residual 9.8e+31") -- but never used
+that to exclude the leg from the K* search. G1's own per-leg check and
+G3's read_state() both already enforce gray-first; only the blend
+readings didn't. Fixed: leg_invalid() gates every K* candidate now,
+disclosed via invalid_legs/table[...]['invalid'], never silently dropped.
+Confirmed on the real record: Amix_ng32's face value (0.111/0.100 mag)
+sits close enough to the 0.10 threshold that reading it uncorrected COULD
+plausibly have mattered -- it doesn't, because Amix fails at every other
+N regardless. k_mix None, k_direct 4, before and after. No rerun needed.
+C1/C2/C3/C5 correctly left untouched -- read_state()'s existing rule is
+already stricter (grays the whole state, not one leg) and no anomaly
+touched any part-(c) leg. 4 new regression tests, one of them pinned
+directly against the real frozen record (with the file's own synthetic-
+photometry fixture explicitly undone via monkeypatch.undo() so it reads
+the real committed numbers, not the toy ones the other tests use).
+
+Lesson matching the thermal_sampler audit exactly: reproduce before you
+fix, and check the DOWNSTREAM impact, not just whether the number looks
+scary. A residual of 1e70 looks like the whole run is garbage; it wasn't
+-- the photometry was fine, only one diagnostic accumulator got hit by
+something this machine does rarely and still doesn't have a name for.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

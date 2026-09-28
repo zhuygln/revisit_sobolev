@@ -46,9 +46,12 @@ def support(ion):
     return json.loads(SUPPORT.read_text())["per_ion"][ion]
 
 
-def record_path(axis, label, ion):
+def record_path(axis, label, ion, n=None):
+    """A gray-remedy rerun at a raised packet count gets its own file; the
+    original stays (G1's convention: gate1_60NdII_n1e6.json)."""
     ODIR.mkdir(parents=True, exist_ok=True)
-    return ODIR / (f"gate3_ref_{ion}.json" if axis == "ref" else f"gate3_{axis}_{label}_{ion}.json")
+    suffix = "" if n is None or n == N_PACKETS[ion] else f"_n{n:.0e}".replace("e+0", "e")
+    return ODIR / (f"gate3_ref_{ion}{suffix}.json" if axis == "ref" else f"gate3_{axis}_{label}_{ion}{suffix}.json")
 
 
 def kernel_path(label, ion, ng=NG_T, tag="rec"):
@@ -111,7 +114,10 @@ def run_state(axis, value, ion, n=None, seeds=SEEDS, build_seeds=BUILD_SEEDS, ng
     if interp:
         for k in ("whole", "matrix"):
             interp[k].metadata["injected"] = dict(kind=interp[k].metadata["transform"]["kind"], lam=interp["lam"], endpoints=interp["endpoints"])
-    specs = leg_specs(anchor, interp, ng_grid, ng_t, ng_fine, build_seeds, save_to=kernel_path(st["label"], ion, ng_t))
+    save_to = kernel_path(st["label"], ion, ng_t)
+    if n != N_PACKETS[ion] and save_to.exists():
+        save_to = None                                          # a gray-remedy rerun keeps the preregistered-count kernel on disk
+    specs = leg_specs(anchor, interp, ng_grid, ng_t, ng_fine, build_seeds, save_to=save_to)
     if verbose:
         a = st["atom"]
         print(f"{ion} {axis}:{st['label']}  T_gas {st['T_gas']:.0f} t_core {st['t_core']:.0f} n {st['n_ion']:.3e}; "
@@ -127,7 +133,7 @@ def run_state(axis, value, ion, n=None, seeds=SEEDS, build_seeds=BUILD_SEEDS, ng
                t_wall_total=time.time() - t0)
     for tag, k in row["kernels"].items():
         k["table_kb"] = k["serialized_bytes"] / 1024.0
-    out = Path(out) if out else record_path(axis, st["label"], ion)
+    out = Path(out) if out else record_path(axis, st["label"], ion, n)
     out.write_text(json.dumps(row, indent=1, default=float) + "\n")
     (out.parent / f"{out.stem}.done").write_text(f"{row['git']} {row['t_wall_total']:.0f}s {n}\n")
     if verbose:
@@ -135,12 +141,21 @@ def run_state(axis, value, ion, n=None, seeds=SEEDS, build_seeds=BUILD_SEEDS, ng
     return row
 
 
-def run_axis(axis, ion, **kw):
+def run_axis(axis, ion, skip_done=False, **kw):
+    """Every state on the axis, the interior last. `skip_done` resumes a
+    chain after an infrastructure failure: a state whose completion marker
+    exists is not rerun (the marker is written only after the record)."""
     if not kernel_path("ref", ion, kw.get("ng_t", NG_T)).exists():
         run_state("ref", None, ion, **kw)
     a = S.AXES[axis]
     order = [v for v in a["grid"] if v != a["interior"]] + [a["interior"]]
-    return [run_state(axis, v, ion, **kw) for v in order]
+    out = []
+    for v in order:
+        rp = record_path(axis, S.label(axis, v), ion, kw.get("n"))
+        if skip_done and (rp.parent / f"{rp.stem}.done").exists():
+            print(f"skip {rp.name}: done", flush=True); continue
+        out.append(run_state(axis, v, ion, **kw))
+    return out
 
 
 # ---- part (b): species composability; part (c): the realistic mixture ----
@@ -229,6 +244,7 @@ def main():
     ap.add_argument("--ng", default=",".join(str(g) for g in NG_GRID))
     ap.add_argument("--eps", default=None)
     ap.add_argument("--out", default=None)
+    ap.add_argument("--skip-done", action="store_true", help="resume: skip states whose completion marker exists")
     a = ap.parse_args()
     seeds = tuple(int(s) for s in a.seeds.split(",")); bseeds = tuple(int(s) for s in a.build_seeds.split(","))
     ng = tuple(int(g) for g in a.ng.split(","))
@@ -246,7 +262,7 @@ def main():
         v = float(a.state) if a.axis != "P" else int(a.state)
         run_state(a.axis, v, a.ion, out=a.out, **kw)
     else:
-        run_axis(a.axis, a.ion, **kw)
+        run_axis(a.axis, a.ion, skip_done=a.skip_done, **kw)
 
 
 if __name__ == "__main__":

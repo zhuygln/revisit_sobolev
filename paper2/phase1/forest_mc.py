@@ -426,7 +426,7 @@ class ForestAtom:
             raise ValueError("thermal emissivity is empty in the requested window")
         cum = np.cumsum(w / w.sum())
         def sample(u):
-            return np.searchsorted(cum, u)
+            return np.clip(np.searchsorted(cum, u), 0, cum.size - 1)  # cum[-1] < 1.0 by float roundoff on large sums; u can exceed it
         return sample
 
     def expansion_bins(self, dnu_over_nu=4.17e-5, nu_lo=None, nu_hi=None,
