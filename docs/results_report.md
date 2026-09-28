@@ -5627,21 +5627,38 @@ later retry with unchanged seeds before any code changed. Left open,
 not reclassified, per the PI's instruction to escalate only on a
 materially different signature.
 
-*(3) A third, separate anomaly, found while reading the final numbers and
-not yet root-caused*: three legs' internal energy identity blew up to
-3.9×10⁷⁰ / 3.9×10⁷⁰ / 9.8×10³¹ (Nd II at D0.1 and T5000, on `Arec_ng32`
-and `R2` respectively; part (b)'s `Amix_ng32`) while every other
-accounting fraction and the emergent photometry stayed ordinary — the
-corruption is isolated to the identity's own accumulator, not the
-transport or the spectrum. Two of the three are per-state legs and are
-already caught and quarantined by G1's gray-first protocol (those two
-states read GRAY and are excluded from every count below). The third is
-internal to part (b)'s `Amix_ng32`; `paperB/gate3/analyse.py`'s part-(b)
-reading does not yet exclude a gray leg from the K* search before using
-it, though it happens not to change today's answer (Amix fails its
-threshold at every tested N regardless). Not investigated further this
-pass; recorded here rather than absorbed silently, and left for the PI
-to decide whether to root-cause it.
+*(3) A third, separate anomaly, audited and closed*
+(`paperB/gate3/bug_snapshot/energy_identity_anomaly.md`): three legs'
+internal energy identity blew up to 3.9×10⁷⁰ / 3.9×10⁷⁰ / 9.8×10³¹ (Nd II
+at D0.1 and T5000, on `Arec_ng32` and `R2` respectively; part (b)'s
+`Amix_ng32`) while every other accounting fraction and the emergent
+photometry stayed ordinary. The PI held PR #13 for a bounded, five-step
+audit before merging. **Every one of the three reproduced clean, at
+machine precision, on every seed** — a genuine logic bug would reproduce
+identically given the same seeds (as the `thermal_sampler` bug did, 4/4);
+none of these three did, so this is a one-off, non-reproducible
+corruption of a floating-point accumulator, the same general character as
+the four crashes already characterised and left open, but landing in a
+physical quantity (a packet's escape energy) rather than an array index.
+`Amix_ng32`'s full photometry was separately reproduced and compared to
+the frozen record: 0.1114 mag against 0.1108 mag maximum error, well
+inside ordinary seed scatter — **the corruption did not measurably affect
+the numbers C4 was built from.** Two of the three legs are per-state and
+were already caught and quarantined by G1's gray-first protocol (those
+states read GRAY, excluded from every count below); the third exposed a
+genuine gap in `paperB/gate3/analyse.py`'s part-(b)/(c) reading, which
+named the bad leg via `gray_checks` but never excluded it from the K*
+search. **Fixed**: `leg_invalid` now gates every entry before it can be
+returned as a K*, disclosing every exclusion rather than dropping it
+silently. Confirmed on the actual record: `Amix_ng32`'s face value
+(0.111/0.100 mag) sits close enough to the 0.10 mag threshold that reading
+it uncorrected could plausibly have mattered; it does not, because Amix
+already fails at every other tested N regardless — `k_mix` is `None` and
+`k_direct` is 4 both before and after the fix. No rerun of part (b), or
+of any other family, was warranted; C1, C2, C3 and C5 were not reopened,
+since G3's per-state reading already applies the stricter rule (excluding
+a whole state, not just one leg) and no identity anomaly was found in any
+part-(c) leg.
 
 **The reading.** No axis, grid, or threshold changed after these three
 findings.
@@ -5702,25 +5719,38 @@ while the best scalar ε (ε* = 0, the coherent limit) misses by 1.69 mag —
 the widest scalar failure recorded in this program, on the composition
 transport actually uses.
 
-**F70 — Transfer of a fixed, energy-conserving compact operator holds
-only along the source-spectrum axis; it fails whenever the gas
-temperature, density, or the physical trajectory changes. A
-whole-operator interpolation built from two bracketing states — carrying
-the conditional exit spectrum, not only the transition matrix — recovers
-every one of those failures except one: Nd II's trajectory axis, where
-even interpolation cannot bridge the interior state. A freshly built
-16-group operator exists at every tested state for La II and Nd II, but
-fails at half of Ce II's fourteen states — G1's marginal N_g* = 16 showing
-up as a real resolution deficiency, recovered at 32 groups in every case
-and driven by colour rather than bolometric error. Species mixing needs
-its own fit rather than a training-free composition rule; on the full
-13-ion blend the compact operator passes at four groups while the best
-scalar closure misses by 1.7 mag, the widest scalar failure in the
-program. The result is closest to the PI's outcome B: not a fixed
-universal operator, but a compact, tabulable one — R_ij(θ_small) over a
-handful of state coordinates — with two identified exceptions (Ce II's
-resolution at several states, Nd II's trajectory axis) that the
-manuscript's fourth step must state plainly rather than average away.**
+**F70 — Lanthanide fluorescence remains strongly compressible across
+physical state and realistic composition, but the effective operator is
+state dependent: one-dimensional interpolation predicts most state
+changes, while coupled trajectories and species mixing expose
+nonlinearities that require refitting or richer tabulation.** Transfer of
+a fixed, energy-conserving compact operator holds only along the
+source-spectrum axis and fails whenever gas temperature, density, or the
+physical trajectory changes; a whole-operator interpolation built from
+two bracketing states — carrying the conditional exit spectrum, not only
+the transition matrix — recovers every one of those failures except one.
+That one exception is genuinely a different outcome, not a variant of the
+same one: **Nd II's trajectory axis is outcome C**, not B — direct
+transfer fails, the whole-operator interpolation also fails at the
+interior state, and only a freshly fitted compact operator survives,
+meaning the operator manifold is still compact but is not adequately
+represented by independent one-dimensional interpolation when several
+physical coordinates move together. Ce II adds a distinct qualification,
+also not outcome D: its fresh 16-group operator fails at half of its
+fourteen states, always recovered at 32 groups and driven by colour
+rather than bolometric error — compactness survives, but a *fixed*
+representation size does not, so a practical tabulation needs either
+adaptive resolution or a conservative N_g = 32 Ce II representation.
+Species mixing needs its own fit rather than a training-free composition
+rule — physically understandable, not contradictory, once C5 is read
+alongside it: on the full 13-ion blend the compact operator passes at
+four groups while the best scalar closure misses by 1.7 mag, the widest
+scalar failure in the program, so the effective-operator idea survives a
+realistic blend even though the individual-ion state dependence is
+nontrivial. Not a fixed universal operator, but a compact, tabulable one —
+R_ij(θ_small) over a handful of state coordinates, refit rather than
+interpolated where coordinates move together — is the manuscript's fourth
+step, stated plainly rather than averaged into a single "outcome B".**
 
 ## 5. Findings register
 

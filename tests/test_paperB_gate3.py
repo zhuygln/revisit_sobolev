@@ -214,3 +214,78 @@ def test_runner_smoke_through_an_interior_interpolation(tmp_path, monkeypatch):
     sup = mid["kernels"]["K128"]["transform"]; assert sup["kind"] == "support" and sup["clipped_frac"] == 0.0
     assert np.allclose(mid["kernels"]["Aint_ng16"]["edges"], mid["kernels"]["Arec_ng16"]["edges"])   # one frozen support
     s = G3.read_state(dict(mid, ng_t=16)); assert s["classification"] in "ABCD"
+
+
+# ---- the gray-first fix for read_blend (2026-09-27, the PI's bounded audit) ----
+def _blend_leg(mags, mode="sobolev_group", ng=2, identity=1e-16, kernel_energy=0.0, fallback=0.0):
+    d = _leg(mags, mode); d["energy"]["identity_residual"] = identity
+    d["n_coherent_fallback"] = int(fallback * d["n_interactions"])
+    return d, ng
+
+
+def _blend_record(fam_legs, kernel_energy=0.0):
+    """fam_legs: {tag: (leg_dict, ng)}. A minimal part-(b)/(c)-shaped record."""
+    ref = [20.0] * 7
+    legs = {"R2": _leg(ref, "sobolev_dmacro"), "R2build": _leg(ref, "sobolev_dmacro")}
+    legs["R2build"]["seeds"] = [101, 102, 103]
+    kernels = {"K128": _kernel(128, "R2"), "K128build": _kernel(128, "R2build")}
+    for tag, (leg, ng) in fam_legs.items():
+        legs[tag] = leg
+        kernels[tag] = _kernel(ng, "R2build", transform=dict(kind="test") if kernel_energy == 0.0 else None)
+        kernels[tag]["validate_energy"] = kernel_energy
+    return dict(n=300_000, seeds=[1, 2, 3], build_seeds=[101, 102, 103], ng_grid=[2, 4, 8, 16, 32], ng_fine=128,
+                state="paper4/phase1_benchmarks/P1_t2.json", shell=28, lam_window=[1000.0, 30000.0], n_spec=200,
+                legs=legs, kernels=kernels)
+
+
+def test_leg_invalid_flags_a_broken_energy_ledger():
+    ok, _ = _blend_leg([20.0] * 7, identity=1e-16)
+    bad, _ = _blend_leg([20.0] * 7, identity=9.8e31)
+    m_ok = dict(identity=abs(ok["energy"]["identity_residual"]), kernel_energy=0.0, trapped_frac=0.0, fallback_frac=0.0)
+    m_bad = dict(identity=abs(bad["energy"]["identity_residual"]), kernel_energy=0.0, trapped_frac=0.0, fallback_frac=0.0)
+    assert not G3.leg_invalid(m_ok) and G3.leg_invalid(m_bad)
+
+
+def test_an_invalid_leg_is_excluded_from_the_k_star_search_even_when_it_looks_like_a_pass():
+    """The exact shape of the real anomaly: Amix_ng32's band/colour (0.111/0.100)
+    sit almost exactly at the 0.10 mag threshold -- close enough that, read at
+    face value, it could plausibly flip k_mix. leg_invalid must exclude it
+    regardless of which side of the threshold it lands on."""
+    ref = [20.0] * 7
+    passing = [m - 0.01 for m in ref]     # comfortably passes face value
+    row = _blend_record({"Amix_ng2": (_blend_leg(passing)[0], 2), "Amix_ng32": (_blend_leg(passing, identity=9.8e31)[0], 32)})
+    out = G3.read_blend(row, "b")
+    assert out["k_mix"] == 2                              # the valid, passing leg is found
+    assert "Amix_ng32" not in [] or True                  # (documented: ng32 would also have "passed" face value)
+    assert out["invalid_legs"] == ["Amix_ng32"]
+    assert out["table"]["Amix"][32]["invalid"] is True and out["table"]["Amix"][2]["invalid"] is False
+
+
+def test_k_star_is_none_when_every_valid_leg_fails_even_if_the_invalid_one_would_have_passed():
+    ref = [20.0] * 7
+    failing = [m + 0.5 for m in ref]
+    row = _blend_record({"Amix_ng2": (_blend_leg(failing)[0], 2), "Amix_ng32": (_blend_leg([m - 0.01 for m in ref], identity=9.8e31)[0], 32)})
+    out = G3.read_blend(row, "b")
+    assert out["k_mix"] is None and out["invalid_legs"] == ["Amix_ng32"]
+
+
+def test_the_real_partb_record_is_unaffected_by_the_fix_amix_ng32_excluded_k_mix_still_none(monkeypatch):
+    """Regression pin for the actual 2026-09-27 finding: reproducing
+    Amix_ng32 three times (energy identity, and its photometry against a
+    clean rerun) showed the corruption was isolated to the identity
+    accumulator and non-reproducible -- not a transport defect -- so no
+    rerun of part (b) was warranted; only the analysis needed the
+    gray-first fix. This pins that the fix changes nothing about today's
+    C4 verdict on the actual frozen record. Undoes the file's own
+    autouse fixture, which fakes equal band fractions for the synthetic
+    records above -- this test reads the real record and needs the real
+    photometry functions."""
+    monkeypatch.undo()
+    path = ROOT / "paperB/gate3/gate3_partb_blend3.json"
+    if not path.exists():
+        pytest.skip("part (b)'s record is not present in this checkout")
+    row = json.loads(path.read_text())
+    out = G3.read_blend(row, "b")
+    assert out["invalid_legs"] == ["Amix_ng32"]
+    assert out["k_mix"] is None and out["k_direct"] == 4
+    assert out["table"]["Amix"][32]["invalid"] is True

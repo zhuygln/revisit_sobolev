@@ -165,20 +165,47 @@ def readings(states, part_b=None, part_c=None):
     return out
 
 
+def leg_invalid(m, P=None):
+    """A leg's own energy ledger fails G1's gray thresholds -- the identity
+    residual, the kernel validation, the chain-capped fraction, or the
+    empty-row fallback. Such a leg is excluded from every K* search in
+    read_blend below, exactly as a gray STATE is excluded from G3's
+    per-state C1/C2 counts (2026-09-27, the PI's bounded audit of the
+    Amix_ng32 anomaly: a leg whose identity blew up to ~1e31 while its
+    photometry stayed statistically indistinguishable from a clean rerun
+    was still being read at face value here -- an analysis-validity gap,
+    not a transport one; see paperB/gate3/bug_snapshot/energy_identity_anomaly.md)."""
+    P = P or A.PREREG
+    return bool(m["identity"] > P["gray_identity"] or m.get("kernel_energy", 0.0) > P["gray_kernel_energy"]
+                or m["trapped_frac"] > P["gray_trapped_frac"] or m["fallback_frac"] > P["gray_fallback_frac"])
+
+
 def read_blend(row, kind):
-    """Part (b): k_mix / k_direct; part (c): k_rec and eps*."""
+    """Part (b): k_mix / k_direct; part (c): k_rec and eps*. A leg with an
+    invalid energy ledger (leg_invalid) is excluded from every K* search --
+    never read at face value regardless of whether its band/colour happen
+    to look like a pass -- and is disclosed via `invalid_legs` and the
+    per-entry `invalid` flag in `table`, not silently dropped."""
     M = A.metrics(row); gray = A.gray_checks(row, M)
     fam = {}
+    invalid_legs = []
     for t, m in M["legs"].items():
         if "band" in m and "ng" in m:
             fam.setdefault(t.split("_ng")[0], {})[int(m["ng"])] = m
-    out = dict(gray=gray, live_bands=M["live_bands"],
-               table={f: {n: dict(band=m["band"]["max"], colour=m["colour"]["max"], event=m["event"]) for n, m in sorted(v.items())} for f, v in fam.items()})
+            if leg_invalid(m):
+                invalid_legs.append(t)
+    out = dict(gray=gray, live_bands=M["live_bands"], invalid_legs=invalid_legs,
+               table={f: {n: dict(band=m["band"]["max"], colour=m["colour"]["max"], event=m["event"], invalid=leg_invalid(m))
+                          for n, m in sorted(v.items())} for f, v in fam.items()})
+
+    def k_star(family):
+        return next((n for n in sorted(fam.get(family, {})) if not leg_invalid(fam[family][n]) and passes(fam[family][n])), None)
+
     if kind == "b":
-        out["k_mix"] = next((n for n in sorted(fam.get("Amix", {})) if passes(fam["Amix"][n])), None)
-        out["k_direct"] = next((n for n in sorted(fam.get("Adirect", {})) if passes(fam["Adirect"][n])), None)
+        out["k_mix"] = k_star("Amix")
+        out["k_direct"] = k_star("Adirect")
     else:
-        out["k_rec"] = next((n for n in sorted(fam.get("Arec", {})) if passes(fam["Arec"][n])), None)
+        out["k_rec"] = k_star("Arec")
         es = A.eps_star(M, row) if any("eps" in m for m in M["legs"].values()) else None
         out["eps_star"] = None if es is None else dict(eps=es["eps"], max_dm=es["max_dm"])
     return out
@@ -247,9 +274,11 @@ def markdown(out=None):
         if key in out:
             p = out[key]
             L.append(f"Part ({part}): " + (f"K*_mix = {p['k_mix']}, K*_direct = {p['k_direct']}" if part == "b" else
-                                           f"K*_rec = {p['k_rec']}, ε* = {p['eps_star']}") + f"; live {''.join(p['live_bands'])}; gray {p['gray'] or 'none'}")
+                                           f"K*_rec = {p['k_rec']}, ε* = {p['eps_star']}") + f"; live {''.join(p['live_bands'])}; gray {p['gray'] or 'none'}"
+                    + (f"; INVALID (excluded from every K* search): {', '.join(p['invalid_legs'])}" if p.get("invalid_legs") else ""))
             for fam, tab in p["table"].items():
-                L.append(f"  {fam}: " + "  ".join(f"N={n}: {m['band']:.3f}/{m['colour']:.3f}" for n, m in tab.items()) + "  (max abs dm / max abs dcolour)")
+                L.append(f"  {fam}: " + "  ".join(f"N={n}: {m['band']:.3f}/{m['colour']:.3f}" + (" [invalid]" if m.get("invalid") else "")
+                                                  for n, m in tab.items()) + "  (max abs dm / max abs dcolour)")
             L.append("")
     L.append(f"C1 {out['C1']}, C2 {out['C2']}, C3 {out['C3']}, C4 {out['C4']}, C5 {out['C5']} → step 4: {out['step4']}")
     return "\n".join(L)

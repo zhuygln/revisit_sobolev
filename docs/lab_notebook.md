@@ -3518,6 +3518,64 @@ outcome B (a compact, tabulable R_ij(theta_small)), with two named
 exceptions, not averaged away: Ce II's resolution and Nd II's trajectory
 axis.
 
+## 9bp. The energy-identity anomaly, audited and closed (2026-09-27)
+
+The PI held PR #13 for a bounded, five-step audit of finding (3) rather
+than merging around it: "an energy residual of 1e31-1e70 is categorically
+different from Monte Carlo noise... too large to freeze into the final
+gate record without understanding it." Right call, and a useful contrast
+with the thermal_sampler bug's audit -- same discipline, opposite
+conclusion.
+
+Reproduced all three flagged legs individually (Nd D0.1's Arec_ng32, Nd
+T5000's R2, part b's Amix_ng32), each rebuilt from scratch with the exact
+state/atom/kernel/seeds, per-seed raw accounting read directly (the
+committed record only stores the 3-seed average). ALL THREE reproduced
+CLEAN, identity ~1e-16 on every seed. This is the deciding fact: a real
+logic bug reproduces every time given the same seeds (thermal_sampler was
+4/4 identical); these were 0/3. Confirms these are one-off,
+non-reproducible corruption events -- the SAME general phenomenon as the
+four earlier "bit-60" crashes, just landing in a float accumulator
+(escape energy) instead of an integer index, so it poisons a sum instead
+of crashing. Traced the actual formula in forest_mc.py:
+identity_residual = (E_esc + ... - E_inj)/E_inj matches esc_frac bit for
+bit in all three anomalous records -- meaning E_esc alone (raw
+np.sum(w[fate==1] * H * nu_final[fate==1])) is the corrupted term, not a
+formula bug (a formula bug would corrupt every run, not one).
+
+Then checked the PI's step 3 directly rather than assuming: does the
+corrupted run's PHOTOMETRY (not just its identity self-check) differ from
+a clean one? Reproduced Amix_ng32's full spectrum/mags and compared:
+0.1114 vs 0.1108 mag max error against the reference -- indistinguishable
+within seed noise. The corruption never touched the numbers the verdict
+actually used. This matters: it means whatever hits this machine
+occasionally (same suspect as the earlier crashes) is narrowly contained
+to one accounting sum, not a broad corruption of the transport.
+
+The REAL bug this audit found: paperB/gate3/analyse.py's read_blend()
+(part b/c's K* search) computed gray_checks() -- which correctly NAMES
+the bad leg ("3: Amix_ng32 identity residual 9.8e+31") -- but never used
+that to exclude the leg from the K* search. G1's own per-leg check and
+G3's read_state() both already enforce gray-first; only the blend
+readings didn't. Fixed: leg_invalid() gates every K* candidate now,
+disclosed via invalid_legs/table[...]['invalid'], never silently dropped.
+Confirmed on the real record: Amix_ng32's face value (0.111/0.100 mag)
+sits close enough to the 0.10 threshold that reading it uncorrected COULD
+plausibly have mattered -- it doesn't, because Amix fails at every other
+N regardless. k_mix None, k_direct 4, before and after. No rerun needed.
+C1/C2/C3/C5 correctly left untouched -- read_state()'s existing rule is
+already stricter (grays the whole state, not one leg) and no anomaly
+touched any part-(c) leg. 4 new regression tests, one of them pinned
+directly against the real frozen record (with the file's own synthetic-
+photometry fixture explicitly undone via monkeypatch.undo() so it reads
+the real committed numbers, not the toy ones the other tests use).
+
+Lesson matching the thermal_sampler audit exactly: reproduce before you
+fix, and check the DOWNSTREAM impact, not just whether the number looks
+scary. A residual of 1e70 looks like the whole run is garbage; it wasn't
+-- the photometry was fine, only one diagnostic accumulator got hit by
+something this machine does rarely and still doesn't have a name for.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

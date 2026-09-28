@@ -81,15 +81,39 @@ are recorded in `prl_gate.md`.
 
 G3 was preregistered with the PI's amendment (transfer/interpolation at
 N_g = 16, one frozen support per ion, whole-operator interpolation),
-tagged `paperB-g3-prereg`, and run 2026-09-24-26 (§4.65, F70): **transfer
-holds only on the source-spectrum axis; whole-operator interpolation
-recovers every other failure except Nd II's trajectory axis. C1 Ce Red
-(7/14 states need 32 groups), C2 Nd Red, C3 Yellow, C4 Yellow (a blend
-needs its own fit), C5 Green** (the 13-ion blend passes at N_g = 4; eps*
-misses by 1.69 mag, the worst scalar failure in the program). Reading:
-outcome B -- a compact, tabulable R_ij(theta_small) -- with two named
-exceptions. Three implementation issues surfaced and are disclosed in
-full in §4.65 and `paperB/gate3/bug_snapshot/`: a confirmed, fixed,
-disclosed bug in `thermal_sampler` (unreachable in any prior completed
-record); four crashes checked and found to be a different, unresolved
-phenomenon; one energy-identity anomaly flagged and left for the PI.
+tagged `paperB-g3-prereg`, and run 2026-09-24-26 (§4.65, F70). **Lanthanide
+fluorescence remains strongly compressible across physical state and
+realistic composition, but the effective operator is state dependent:
+one-dimensional interpolation predicts most state changes, while coupled
+trajectories and species mixing expose nonlinearities that require
+refitting or richer tabulation.** Transfer holds only on the
+source-spectrum axis; whole-operator interpolation recovers every other
+failure except one genuinely *different* outcome, not a variant of the
+same one -- **Nd II's trajectory axis is outcome C**: direct transfer
+fails, interpolation also fails at the interior state, and only a fresh
+fit survives, so the operator manifold is compact but not separably
+interpolable when several coordinates move together. Ce II is a distinct
+qualification, not outcome D: its fresh 16-group operator fails at 7/14
+states, always recovered at 32 -- compactness survives, a *fixed*
+representation size does not. C4 (species mixing needs its own fit) reads
+Yellow and is physically understandable once read against **C5 Green**:
+the 13-ion blend passes at N_g = 4 while eps* misses by 1.69 mag, the
+worst scalar failure in the program -- the effective-operator idea
+survives a realistic blend even though the individual-ion state
+dependence is nontrivial. No neural surrogate is warranted yet (one
+failure of separable interpolation is not evidence against a better-chosen
+low-dimensional table).
+
+Three implementation issues surfaced during the run, all disclosed in full
+in §4.65 and `paperB/gate3/bug_snapshot/`: a confirmed, fixed, disclosed
+bug in `thermal_sampler` (unreachable in any prior completed record); four
+crashes checked and found to be a different, unresolved phenomenon; and a
+third, energy-identity anomaly that the PI held PR #13 to audit before
+merging -- closed 2026-09-27 (`energy_identity_anomaly.md`): all three
+flagged legs reproduced clean on every seed (non-reproducible, not a logic
+bug), the corrupted run's photometry was shown indistinguishable from a
+clean rerun, and the real defect -- `read_blend()`'s C4 search not
+excluding a leg its own `gray_checks()` had already named -- is fixed
+(`leg_invalid`, gray-first, every exclusion disclosed). C4 reads Yellow
+unchanged on the existing records; no family needed rerunning; C1-C3 and
+C5 were not reopened.
