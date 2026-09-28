@@ -24,6 +24,16 @@ book:
         - chapters/06_atomic_cascades.qmd
         - chapters/07_energy_packets.qmd
         - chapters/08_macroatom.qmd
+    - part: "Part III — Derive the effective model yourself"
+      chapters:
+        - chapters/09_redistribution_matrix.qmd
+        - chapters/10_resolution.qmd
+        - chapters/11_state_dependence.qmd
+        - chapters/12_neural_surrogate.qmd
+    - part: "Part IV — Back into radiative transfer"
+      chapters:
+        - chapters/13_mini_lightcurve.qmd
+        - chapters/14_bridge.qmd
 
 execute:
   freeze: false
