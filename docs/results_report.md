@@ -1,10 +1,32 @@
 # Sobolev Validity in Kilonova Ejecta — Results Report
 
-**Status:** Paper I and Paper III are frozen records; Paper III is tagged
-`paper3-freeze` and carries the boxed correction of `paper3/CORRECTION.md`.
-Paper IV is complete on the corrected transport — findings F1–F66, 603 tests,
-the computational result set tagged `paper4-freeze`.
-**Date:** 2026-09-12. **Repo:** `zhuygln/revisit_sobolev`.
+> **Current status (2026-09-29).** This report is the archival, chronological
+> ledger of a repository that now holds four distinct programs; the title is
+> the first of them and is kept for the record. A new reader should start
+> here, not at §1.
+>
+> | program | question | state |
+> |---|---|---|
+> | **Paper I** (§1–§4.20) | the error of the Sobolev approximation proper against resolved profiles, and of the expansion-opacity closure against Sobolev | frozen record |
+> | **Paper III** (§4.21–§4.44) | whether the fluorescence redistribution operator compresses to a small group-to-group matrix, with the historical photon-packet treatment | frozen, tagged `paper3-freeze`, under the boxed correction of `paper3/CORRECTION.md` (the bin-leg inversion bug, F58) |
+> | **Paper IV** (§4.45–§4.61) | coarse line-opacity treatments under energy-conserving fluorescence on published benchmark states; a methods paper | complete, tagged `paper4-freeze`, referee revision applied, **ready for MNRAS submission** |
+> | **Paper B** (§4.62–§4.65) | can detailed energy-conserving lanthanide fluorescence be replaced by a compact effective operator, why, and how far does it generalise | gates G1–G3 preregistered, run and frozen (`paperB-g3-freeze`); **manuscript in preparation** (`docs/paperB/`) |
+>
+> Paper B's result in one sentence: detailed lanthanide fluorescence has a
+> much lower observable complexity than its microscopic transition network;
+> the reduced description is frequency-local and remains compact across
+> physical states and realistic mixtures, but its parameters — and sometimes
+> its required resolution — depend on the thermodynamic and radiation-field
+> state (F67–F70). G4 of the original Paper B roadmap (operator error against
+> a composition-pattern proxy) is demoted to a post-manuscript robustness
+> candidate and is not a gate.
+
+**Status of the ledger:** Paper I and Paper III are frozen records; Paper III
+is tagged `paper3-freeze` and carries the boxed correction of
+`paper3/CORRECTION.md`. Paper IV is complete on the corrected transport —
+findings F1–F66, the computational result set tagged `paper4-freeze`. Paper B
+adds F67–F70; the root suite is at 651 tests.
+**Date:** 2026-09-29. **Repo:** `zhuygln/revisit_sobolev`.
 
 **Manuscripts:** [paper4/manuscript.pdf](paper4/manuscript.pdf) — the Paper IV
 methods paper (every number a macro generated from `paper4/FROZEN.json`;

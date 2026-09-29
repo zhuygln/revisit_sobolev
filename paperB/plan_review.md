@@ -690,3 +690,121 @@ independent one-dimensional interpolation when coordinates move together);
 Ce's failures mean compactness survives but a fixed representation size
 does not; C5 Green makes C4's "a blend needs its own fit" physically
 understandable rather than contradictory. No neural surrogate started.
+
+## The PI's decision after G3: manuscript mode, G4 demoted (2026-09-29)
+
+PI, verbatim (pasted from a rendered page; nothing edited):
+
+> I checked the GitHub report. One important caveat: the public web index is inconsistent right now. The GitHub file page says results_report.md is 5,506 lines, while the raw-text snapshot available to me is only 4,921 lines and still has the September 12 header saying Paper IV/F66 is the endpoint. So the raw crawler is clearly behind the merged G3 version; I would not use that stale copy to audit your new G3 numbers.
+>
+> Scientifically, though, the trajectory of the project is now quite clear. I think Paper B should move into manuscript-writing mode now, and G4 should not block it.
+>
+> The strongest story is no longer simply "we found a compressed redistribution matrix." It is a sequence:
+>
+> 1. G1 — existence: detailed energy-conserving fluorescence can be replaced by a compact frequency-local operator, while a scalar \epsilon closure can fail by order magnitudes.
+> 2. G2 — mechanism: the relevant compression is frequency locality, not global low rank. The particularly interesting observation is that better microscopic/event-level reconstruction can produce worse emergent-light fidelity.
+> 3. G3 — generalization: compactness survives everywhere you tested, but the operator is not universal. State dependence is real. Ordinary one-dimensional interpolation usually captures it; coupled motion through state space can require a fresh fit; and the required representation size can itself change, as Ce demonstrates.
+> 4. Realistic mixture: the 13-ion blend remaining extremely compact is what prevents G3's state dependence from turning the paper into merely a negative "transfer doesn't work" result. The physically relevant mixture still admits a small effective description.
+>
+> That is a coherent paper already.
+>
+> I would not make G4 a prerequisite
+>
+> The original G4 idea made more sense before G3, when the important question was something like:
+>
+> \text{Is operator error negligible relative to nuclear/composition uncertainty?}
+>
+> Now G3 has revealed something more fundamental: the effective operator is a state-dependent reduced model. Comparing its error to a somewhat artificial composition-pattern proxy doesn't establish that model; G1–G3 already do.
+>
+> There is also a framing risk. Unless you actually propagate a defensible nuclear-physics ensemble—mass models, heating histories, abundance realizations, etc.—calling the spread "nuclear uncertainty" would be too strong. The older project notes already recognized this limitation. A few composition patterns are useful robustness tests, but they are not the same quantity.
+>
+> I would therefore demote G4 from Gate 4 to perhaps a post-manuscript robustness experiment / Appendix candidate. If the manuscript discussion exposes a specific need for it, then design it around that need. Don't invent a fourth gate just because the original roadmap contained four.
+>
+> The manuscript should now change emphasis
+>
+> I would make the fourth Results section—the one currently waiting for G3—the conceptual payoff, not just a dump of C1–C5.
+>
+> Its progression should probably be:
+>
+> State dependence → interpolation → coupled-state failure → composition.
+>
+> Start with the simple result: a kernel trained at the anchor does not remain predictive when temperature/density change. That immediately kills the overly strong interpretation of a universal operator.
+>
+> Then show the better result: rebuilding locally demonstrates that compactness itself survives. That distinction is crucial:
+>
+> \boxed{\text{failure of transfer} \neq \text{failure of compression}}
+>
+> Next, show interpolation. Most failures of direct transfer can be recovered from neighboring states, meaning the physically useful object is
+>
+> R = R(\theta),
+>
+> rather than one universal R.
+>
+> Then use Nd's trajectory as the boundary of that simple statement. It says the manifold cannot necessarily be reconstructed by treating state coordinates independently. I would avoid saying "interpolation generally works" without immediately qualifying that it was tested primarily one axis at a time and fails for the coupled trajectory.
+>
+> Ce gives a separate lesson: even when compactness survives, the required resolution is state-dependent, N_g^\star(\theta). Seven of fourteen states requiring 32 rather than 16 is large enough to make that part of the scientific result, not an implementation footnote.
+>
+> Finally come to mixtures. C4 and C5 together say something interesting:
+>
+> \text{per-species operators are not trivially composable}
+>
+> but
+>
+> \text{the combined physical system can itself be highly compressible.}
+>
+> That is a much deeper statement than "mixture test passed."
+>
+> What I think the main claim has become
+>
+> Something close to this—not necessarily manuscript wording yet:
+>
+> Detailed lanthanide fluorescence has a much lower observable complexity than its microscopic transition network. That reduced description is frequency-local and remains compact across physical states and realistic mixtures, but its parameters and sometimes its required resolution depend on thermodynamic and radiation-field state.
+>
+> I like this better than claiming a universally transferable R_{ij}. It is more nuanced, but actually more interesting.
+>
+> There is also a nice hierarchy emerging:
+>
+> \text{millions of transitions}
+> \rightarrow
+> \text{fine redistribution events}
+> \rightarrow
+> \boxed{\text{small, state-dependent local operator}}
+> \rightarrow
+> \text{observables}.
+>
+> G2 gives evidence that a lot of information is discarded between the middle two arrows without harming the observables. G3 shows that what survives is not a single universal object but a comparatively low-dimensional family of objects.
+>
+> One report-level cleanup I would do before prose writing
+>
+> Once your local/current version is the authority, I would update the very top of results_report.md, not only append G3 at the bottom. The stale public snapshot still presents the whole project as "Sobolev Validity in Kilonova Ejecta" and introduces the main research question purely as the error of the Sobolev approximation. That framing made sense for Paper I, but the repository now contains three substantially different programs.
+>
+> I would keep the historical title if you want the report to remain an archival chronological ledger, but add a current-status block saying roughly:
+>
+> Paper I: Sobolev proper vs expansion-opacity error.
+> Paper III: redistribution compression with the historical photon treatment.
+> Paper IV: energy-conserving coarse-opacity study, frozen.
+> Paper B: effective fluorescence operator, G1–G3 frozen; manuscript in preparation.
+>
+> Otherwise a new reader has to traverse thousands of lines before understanding what the repository is currently trying to establish.
+>
+> Priority now
+>
+> My order would be:
+>
+> Paper IV submission first as an administrative action—because it is finished and should not sit indefinitely—then Paper B manuscript writing as the actual research task. Those can effectively happen in parallel because Paper IV needs no more scientific work.
+>
+> For Paper B, I would now write Results §4 from G3 first, while every interpretation and caveat is fresh. Then Discussion. Then Introduction. Method can come after that because the frozen records already constrain it heavily.
+>
+> I would not start G4 yet and would not start an NN/surrogate project. G3 gave enough material for the paper, and the Nd coupled-trajectory failure is one data point telling us where the next-generation model might be needed—not yet evidence that a neural representation is warranted.
+>
+> If you want to continue immediately, I think the next useful step is for us to build the actual Paper B narrative section-by-section from G1 → G2 → G3, rather than launch another experiment.
+
+Applied: G4 demoted from a gate to a post-manuscript robustness/appendix
+candidate (`prl_gate.md`, `plan.md`), not preregistered; a current-status
+block added at the top of `docs/results_report.md`; G3's numbers frozen
+into `paperB/FROZEN.json` with macros and a third display item; the
+manuscript's Results §4 written first in the PI's progression (state
+dependence → interpolation → coupled-state failure → composition), then
+Discussion, then Introduction, then Method, every number a macro. No G4
+run, no surrogate. The Paper IV submission is the PI's administrative
+action; nothing in the repository blocks it.

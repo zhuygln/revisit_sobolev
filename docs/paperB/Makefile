@@ -8,7 +8,9 @@ export SOURCE_DATE_EPOCH_TEX_PRIMITIVES = 1
 all: manuscript.pdf
 	@$(MAKE) --no-print-directory check
 
-manuscript.pdf: manuscript.tex numbers.tex tab_gates.tex tab_contrast.tex
+manuscript.pdf: manuscript.tex numbers.tex tab_gates.tex tab_contrast.tex tab_generality.tex references.bib
+	pdflatex -interaction=nonstopmode manuscript.tex
+	bibtex manuscript
 	pdflatex -interaction=nonstopmode manuscript.tex
 	pdflatex -interaction=nonstopmode manuscript.tex
 
@@ -24,8 +26,14 @@ figures:
 check:
 	@$(PY) ../../paperB/freeze.py --check
 	@$(PY) check_structure.py
+	@$(PY) check_claims.py -q
+
+# The pre-submission read-through: every sentence that quotes a number, with
+# the macro replaced by the value the freeze gives it (PI's standing rule).
+claims:
+	@$(PY) check_claims.py $(ARGS)
 
 clean:
 	rm -f manuscript.{aux,bbl,blg,log,out,toc}
 
-.PHONY: all check clean tables figures freeze
+.PHONY: all check claims clean tables figures freeze

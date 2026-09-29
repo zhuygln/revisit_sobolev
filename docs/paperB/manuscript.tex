@@ -1,13 +1,14 @@
-% Paper B -- SKELETON. The scientific scope is not frozen: G3 (generality)
-% is preregistered in paperB/prl_gate.md and has not run, so Section 5 is a
-% placeholder and no abstract claim is made about it.
+% Paper B -- DRAFT. Gates G1-G3 are preregistered, run and frozen (tags
+% paperB-g2-freeze, paperB-g3-freeze); the scientific scope is what those
+% three gates establish. G4 of the original roadmap is demoted to a
+% post-manuscript robustness candidate (paperB/plan_review.md, 2026-09-29).
 %
 % Every number below is a macro from numbers.tex, which docs/paperB/latex_tables.py
 % regenerates from paperB/FROZEN.json. Nothing is typed by hand (the standing
 % rule after Paper IV's fabricated-table incident). `make check` enforces it.
 %
 % The PRL submission will use revtex4-2; that class is not installed here, so
-% the skeleton builds under article and the structure is what is being fixed.
+% the draft builds under article and the structure is what is being fixed.
 \documentclass[11pt]{article}
 \usepackage[margin=1in]{geometry}
 \usepackage{graphicx}
@@ -18,46 +19,166 @@
 \title{Effective line redistribution in kilonova ejecta:\\
        transport-relevant structure is frequency-local}
 \author{(author list to be fixed)}
-\date{Draft skeleton, \today}
+\date{Draft, \today}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-% Steps 1-3 only. Step 4 (generality) is written after G3.
 Lanthanide line fluorescence in kilonova ejecta couples of order $10^6$
 transitions, and radiative-transfer calculations therefore replace it with a
-closure. We show, on identical resolved Sobolev opacity and with an
-energy-conserving downward macroatom as the reference, that no single
-thermalisation parameter $\epsilon$ reproduces the emergent photometry, while
-a group-to-group redistribution operator with a handful of contiguous
-frequency groups does. We then ask why. Comparing local frequency coarsening
-with a global non-negative factorisation at a matched number of archetypal
-exit distributions, we find the local representation reaches the
-\PBdmMax~mag criterion with no more archetypes than the global one needs, and
-on Nd\,\textsc{ii} with far fewer: \PBNdKlocal\ contiguous frequency blocks
-against a global family that never reaches it. At \PBContrastK\ archetypes the
-global operator reproduces the microscopic redistribution better while
-reproducing the emergent light worse. The structure that matters for
-transport is therefore frequency-local, and fidelity to the microscopic event
-distribution is not fidelity to the radiation field.
+closure. On identical resolved Sobolev opacity, with an energy-conserving
+downward macroatom as the reference, we show that no single thermalisation
+parameter $\epsilon$ reproduces the emergent photometry, while a
+group-to-group redistribution operator with a handful of contiguous frequency
+groups does. Comparing local frequency coarsening with a global non-negative
+factorisation at a matched number of archetypal exit distributions, the local
+representation reaches the \PBdmMax~mag criterion with no more archetypes
+than the global one, and on Nd\,\textsc{ii} with far fewer; at
+\PBContrastK\ archetypes the global operator reproduces the microscopic
+redistribution better while reproducing the light worse. The structure that
+matters for transport is frequency-local. It is not, however, universal: an
+operator built at one thermodynamic state does not remain predictive when the
+gas temperature, density or the physical trajectory changes, whereas an
+operator rebuilt at the new state does, and interpolating the whole operator
+between two neighbouring states recovers most of the difference --- but not
+along a coupled trajectory through state space, and not at a fixed resolution
+for Ce\,\textsc{ii}. Per-species operators do not compose into a mixture
+without refitting, yet the full \PBBlendNIons-ion mixture itself is described
+by \PBBlendKrec\ groups where the best scalar closure misses by
+\PBBlendEpsErr~mag. Detailed lanthanide fluorescence thus has a much lower
+observable complexity than its microscopic transition network: the reduced
+description is frequency-local and remains compact across physical states and
+realistic mixtures, but its parameters, and sometimes its required
+resolution, depend on the thermodynamic and radiation-field state.
 \end{abstract}
 
 \section{Introduction}
-% Beats: (i) the closure problem in kilonova line transport; (ii) what a
-% scalar epsilon and an expansion-opacity closure do and do not provide
-% (Paper IV); (iii) the question: can the fluorescence operator be replaced
-% by a compact R_ij at fixed resolved opacity; (iv) the four-step argument
-% of this paper. Cite Fontes et al. 2020, Lucy 2002/2003, Kasen et al. 2013,
-% Tanaka et al. 2020, Gillanders et al. 2026, and Paper IV for the
-% energy-conserving bookkeeping.
-TO BE WRITTEN.
+\label{sec:intro}
+The optical and infrared light of a kilonova is shaped by the line opacity
+of the lanthanides synthesised in the ejecta, whose open $f$-shells carry
+of order $10^6$ transitions per ion at the relevant temperatures
+\citep{barneskasen2013,tanaka2020}. A photon absorbed in one of those lines
+is re-emitted, after a cascade through the ion's levels, in another; this
+fluorescence redistributes energy across the spectrum and is the dominant
+non-local process in the transport. No calculation follows every
+transition. Every kilonova radiative-transfer code replaces the fluorescence
+by a closure: a single thermalisation parameter $\epsilon$ that sends a
+fraction of the absorbed energy to a thermal pool and scatters the rest
+coherently \citep{fontes2020}, an expansion-opacity treatment that groups
+the lines and prescribes the re-emission within a group, or a macroatom that
+walks the cascade explicitly \citep{lucy2002,lucy2003}. In a companion
+methods paper we showed, on published benchmark ejecta states and with an
+energy-conserving treatment of the fluorescence, that the coarse
+line-opacity closures leave errors of order a magnitude in the broad-band
+photometry and that the errors change shape when the fluorescence
+prescription changes (Paper IV). % TODO: cite once submitted
+The question that leaves open is whether the fluorescence itself --- not
+the opacity --- admits a compact description at all, and if so what it
+depends on.
+
+We ask that question in the narrowest form we can control. The opacity is
+held fixed at the resolved Sobolev value of every line; the reference is an
+energy-conserving downward macroatom; and the candidate closure is a
+redistribution operator $R_{ij}$ that maps the frequency group of an
+absorbed packet to the frequency group and exit line of the re-emitted one.
+The operator is built from the reference's own Monte Carlo events on one
+set of random seeds and scored on another, so that no operator is ever
+compared with the events it was trained on. Three questions follow one
+another. Does such an operator exist, and is it better than the best scalar
+closure? Why does it work --- is the structure it exploits locality in
+frequency, or a globally low rank of the microscopic redistribution law?
+And how far does it generalise: across thermodynamic state, across the
+radiation field, and across composition?
+
+Each question was posed as a preregistered gate with its thresholds, its
+gray conditions and its readings fixed before the run, and the record of
+every run, every reading and every amendment made during execution is
+public (Section~\ref{sec:method}). The answers are, in order: a
+frequency-local operator with a handful of groups reproduces the reference
+where no scalar closure comes within a magnitude
+(Section~\ref{sec:compression}); the compression is frequency locality, and
+a global representation that reproduces the microscopic events better
+reproduces the emergent light worse (Section~\ref{sec:mechanism}); and the
+operator is compact everywhere but universal nowhere --- its parameters, and
+for one ion its required resolution, depend on the state, in a way that a
+table over a few coordinates captures along single coordinates but not
+along a coupled trajectory, while the realistic mixture remains as compact
+as any single ion (Section~\ref{sec:generality}). The result is a hierarchy:
+millions of transitions, to a fine distribution of redistribution events, to
+a small state-dependent local operator, to the observables --- with most of
+the information discarded between the middle two steps and no harm done to
+the last.
 
 \section{Method}
-% The state, the atom, the reference, the operator, the metrics. Short: this
-% is a letter. The preregistration (gates G1-G3) is described in one
-% paragraph and pointed at the archived record.
-TO BE WRITTEN.
+\label{sec:method}
+\paragraph{State and atom.} Every calculation is a single-zone,
+time-independent transport through one shell of a published kilonova ejecta
+model at two days --- the photospheric shell of the lanthanide-rich secular
+component used as benchmark P1 in Paper IV --- with the shell's own density,
+gas temperature and expansion time, and a black-body core at the gas
+temperature illuminating it. The atom is one ion at its number density in
+that shell, its levels and lines from the GSI calibrated line list
+\citep{gsi_atomic}, level populations in local thermodynamic equilibrium,
+and every line with Sobolev optical depth above $10^{-3}$ carrying opacity.
+La\,\textsc{ii}, Ce\,\textsc{ii} and Nd\,\textsc{ii} are the three ions; the
+first is thin enough at its partial density that every closure agrees, and
+is carried as a control. The generality test of
+Section~\ref{sec:generality} moves one coordinate of this state at a time
+and, for the mixtures, replaces the single ion by the three ions together
+and by the state's full \PBBlendNIons-ion composition.
+
+\paragraph{Transport and reference.} Packets carry indivisible energy and
+are transported with worldline relativity and Sobolev line interaction
+(Paper IV). The reference fluorescence is a downward macroatom: on
+absorption the packet activates the line's upper level and walks the
+radiative cascade with branching probabilities $A\beta$, the escape
+probability $\beta$ of each line included, until it exits in a line whose
+photon escapes; energy is conserved at every step by construction, and the
+identity between injected and accounted energy is verified to
+$10^{-10}$ on every run. A radiation-field-driven macroatom with internal
+upward transitions under an imposed diluted Planck field was run once as a
+robustness check (Section~\ref{sec:compression}), and a scalar closure
+$\epsilon$ --- thermal re-emission from the energy-weighted line emissivity
+with probability $\epsilon$, coherent scattering otherwise --- was scanned
+over a grid of values to find the best one for each ion.
+
+\paragraph{The operator.} The redistribution operator is built from the
+reference's events, each event the absorbed comoving frequency, the
+re-emitted rest frequency and the packet's energy before and after. On
+$N_g$ log-spaced frequency groups the energy transition matrix $R_{ij}$ is
+the fraction of energy absorbed in group $i$ that exits in group $j$; within
+each output group the exit line is drawn from a discrete table of the
+distinct exit lines the events populated, weighted by their energy. Transport
+with the operator replaces the macroatom walk by one draw from $R_{ij}$ and
+one from the table. Operators are built from events on three build seeds and
+scored on three disjoint evaluation seeds. The global family of
+Section~\ref{sec:mechanism} replaces the transition matrix by a rank-$k$
+non-negative factorisation of the fine-grouped matrix, iterated to
+convergence, on the same exit tables; the interpolated operators of
+Section~\ref{sec:generality} combine two endpoint operators linearly in the
+logarithm of the moved coordinate, transition rows, deposition channel and
+exit tables alike, on the union of the two endpoints' exit lines.
+
+\paragraph{Metrics and gates.} Every closure is scored against the reference
+on the same state and seeds by the maximum and mean absolute error in the
+broad-band magnitudes over the bands that carry at least one per cent of the
+luminosity with acceptable Monte Carlo precision, by the maximum absolute
+error in the colours between those bands, by an integrated spectral
+distance, and by an energy-weighted total-variation distance between the
+operator and an independent fine-grouped matrix from the evaluation events.
+The criterion used throughout is a maximum band error of \PBdmMax~mag and a
+maximum colour error of \PBdcolMax~mag. Each of the three questions was
+preregistered as a gate --- the state, the grids, the metrics, the
+thresholds, the gray conditions that invalidate a reading, and the readings
+themselves fixed and committed before the run --- and read gray-first. Three
+amendments were made during the runs: two implementation defects in the
+factorisation were found on the control ion and fixed before any decisive
+number was read; a validity control fired and its preregistered remedy was
+applied; and a sampler overflow found on the mixture run was fixed, its
+reachability in every earlier record established by inspection, and the
+affected calculation repeated. Each is recorded, with what had been seen
+when it was made, in the archived preregistration.
 
 \section{A scalar closure is insufficient; a small operator is not}
 \label{sec:compression}
@@ -156,24 +277,220 @@ staying high, reproducing the emergent light worse.}
 \input{tab_contrast}
 \end{table}
 
-\section{Generality}
+\section{Generality: a compact operator that depends on the state}
 \label{sec:generality}
-% Step 4. G3 is preregistered in paperB/prl_gate.md and has NOT run: state
-% transfer along the separated axes (T_gas, tau-scale, J_nu shape), species
-% composability, the realistic mixture, and the interpolation test that asks
-% whether the operator is tabulable in a small state vector. Nothing is
-% claimed here until that record exists.
-TO BE WRITTEN AFTER G3.
+% Step 4, from G3 (F70). The PI's progression: state dependence ->
+% interpolation -> the coupled trajectory -> composition.
+The first three sections concern one thermodynamic state. The last question
+is whether the operator built there is a property of the ion or of the state
+it was built in. We moved one coordinate at a time away from that state along
+\PBNAxes\ axes --- the gas temperature that sets the level populations, the
+number density that sets the optical-depth scale, the temperature of the
+illuminating source that sets which input groups the light actually uses,
+and the physical trajectory of the ejecta at one, three and five days, along
+which every coordinate moves together --- \PBNStatesPerIon\ states per ion in
+all, on one frequency support per ion frozen over the whole domain. At every
+state two operators were scored against that state's own reference
+(Fig.~\ref{fig:generality}, Table~\ref{tab:generality}): the operator built
+at the original state and transported unchanged, which tests
+\emph{transfer}, and an operator rebuilt from the new state's own events,
+which tests whether the compact description still \emph{exists} there. The
+two tests were kept apart by design, because their failures mean different
+things. Both use \PBNgT\ groups for every ion, one controlled representation
+size across the comparison.
+
+\paragraph{Transfer fails; compression does not.} The transported operator
+is not predictive. For Ce\,\textsc{ii} it fails the criterion on every axis;
+for Nd\,\textsc{ii} and the La\,\textsc{ii} control it survives only along the
+source-spectrum axis, the one coordinate that changes which rows of the
+operator are illuminated without changing the atom's response. Anywhere the
+populations or the optical depths move, an operator trained elsewhere is
+simply the wrong operator: \PBNdFixT~mag on Nd\,\textsc{ii} at the interior
+temperature point, midway in $\log T_{\rm gas}$ between two states at which
+the operator was rebuilt, and larger at the ends of every axis. That kills the strongest reading of
+Sections~\ref{sec:compression}--\ref{sec:mechanism}: there is no universal
+$R_{ij}$. But the operator rebuilt at the new state passes at every one of
+the \PBNdNStates\ readable Nd\,\textsc{ii} states and every one of the
+\PBLaNStates\ La\,\textsc{ii} states, with at most \PBNdKrecMax\ groups
+needed anywhere on Nd\,\textsc{ii}. The failure of transfer is not a failure
+of compression. What varies with the state is the content of a small
+operator, not its size.
+
+\paragraph{Interpolation: $R = R(\theta)$.} If the operator's parameters vary
+smoothly with the state, a table over a few coordinates should replace it.
+At the interior grid point of each axis we built an operator from the two
+bracketing states alone --- never from the interior state's own events ---
+by interpolating the whole effective operator linearly in the logarithm of
+the moved coordinate: the transition rows, the deposition channel, and the
+conditional exit-frequency weights on the union of the two endpoints' exit
+lines. That interpolant passes the criterion at every interior point on the
+temperature, density and source-spectrum axes for every ion, reducing
+Nd\,\textsc{ii}'s transfer error at the interior temperature from
+\PBNdFixT\ to \PBNdIntWT~mag and Ce\,\textsc{ii}'s at the interior density
+from \PBCeFixD\ to \PBCeIntWD~mag. The physically useful object is therefore
+a state-dependent family $R(\theta)$ over a small set of coordinates, and
+along a single coordinate that family is smooth enough to tabulate. The
+conditional exit spectrum is part of what must be tabulated: interpolating
+the transition matrix alone while keeping one endpoint's exit tables leaves
+Ce\,\textsc{ii} at \PBCeIntMD~mag on the density axis, above the criterion,
+where the whole-operator interpolant passes at \PBCeIntWD.
+
+\paragraph{The coupled trajectory is the boundary of that statement.} The
+interpolation test above moves one coordinate at a time. Along the physical
+trajectory, where temperature, density and the source all change together,
+Nd\,\textsc{ii} at three days is the one point in the domain where
+interpolation fails: the transported operator misses by \PBNdTrajAnchor~mag,
+the whole-operator interpolant by \PBNdTrajWhole~mag, and the matrix-only
+interpolant \PBNdTrajMatrixPasses\ as well, on colour rather than on band ---
+while the operator rebuilt at that state passes at \PBNdTrajKrec\ groups with
+\PBNdTrajFresh~mag. This is not a failure of compactness; it is a failure of
+separable interpolation. The operator manifold cannot necessarily be
+reconstructed by treating the state coordinates independently, and we do not
+claim that interpolation works in general: it was tested primarily one axis
+at a time, and the one coupled path tested breaks it.
+
+\paragraph{The required resolution is itself state-dependent.}
+Ce\,\textsc{ii} adds a separate qualification. Its rebuilt \PBNgT-group
+operator fails the criterion at \PBCeNFreshFail\ of its \PBCeNStates\ states
+--- at every one of them on colour, by between \PBCeLeastColourOver\ and
+\PBCeWorstColourOver~mag over the threshold, and at \PBCeNFreshFailBand\ of
+them on band as well --- and at every one of them a \PBCeKrecMax-group
+operator passes. Section~\ref{sec:compression} found Ce\,\textsc{ii}'s
+$N_g^\star=\PBCeNgStar$ exactly at the edge of the criterion at the original
+state; across the domain that marginality becomes a resolution requirement
+that moves with the state, $N_g^\star(\theta)$. Compactness survives, but a
+fixed representation size does not, and a practical table for
+Ce\,\textsc{ii} needs either adaptive resolution or the conservative
+\PBCeKrecMax-group representation throughout. La\,\textsc{ii}, whose
+interactions per packet are too few to discriminate any closure, passes
+everywhere and decides nothing.
+
+\paragraph{Composition.} Two mixture tests close the gate. First, at the
+original state the three single-ion operators were combined by the
+opacity-share composition rule of the earlier photon-packet work, with no fit
+to the blend, and scored against the three-ion blend's own macroatom: the
+composed operator does not reach the criterion at any valid tested
+resolution (\PBAmixBestBand~mag at its best, \PBAmixBestN\ groups; the
+finest-resolution run was excluded by the preregistered validity check),
+while an operator
+trained on the blend's own events passes at \PBKdirect\ groups
+(\PBAdirectBand~mag). Per-species operators are not trivially composable.
+Second, and decisively, on the full \PBBlendNIons-ion composition of the
+published benchmark state the operator built from the blend's events passes
+at \PBBlendKrec\ groups (\PBBlendBand~mag on band, \PBBlendColour~mag on
+colour), while the best scalar closure --- again the coherent limit,
+$\epsilon^\star=\PBBlendEps$ --- misses by \PBBlendEpsErr~mag, the widest
+scalar failure in this work. Read together, the two results are not in
+tension: the combined physical system is itself highly compressible even
+though it cannot be assembled from its parts without refitting. It is this
+result that keeps the state dependence above from reducing the paper to a
+negative finding about transfer. The physically relevant mixture still
+admits a small effective description.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/fig3_generality.pdf}
+\caption{\textbf{Transfer is not compression.} Maximum photometric error
+against the state's own reference for the operator built at the original
+state and transported unchanged (filled squares), the operator rebuilt at
+the state (open circles), and at each axis' interior point the
+whole-operator interpolant built from the two bracketing states (filled
+diamonds; the matrix-only interpolant as open diamonds). Rows: Ce\,\textsc{ii},
+Nd\,\textsc{ii}, the La\,\textsc{ii} control; columns: the gas temperature,
+the density, the source spectrum, and the physical trajectory along which
+every coordinate moves together. The dotted line is the band criterion; the
+letter is the preregistered reading of each state (A: the transported
+operator passes; B: only the interpolant passes; C: only a fresh fit passes;
+D: none passes at \PBNgT\ groups). The criterion also bounds the colour
+error, so a circle below the line can still read D. Grey: states excluded by
+the preregistered validity checks.}
+\label{fig:generality}
+\end{figure}
+
+\begin{table}[t]
+\centering
+\caption{Generality, per ion: the preregistered readings, the axes along
+which the transported operator stays predictive, how often the rebuilt
+\PBNgT-group operator fails and the largest resolution it needed, and the
+interior-point interpolation error (whole operator / transition matrix only)
+on the three single-coordinate axes, in mag.}
+\label{tab:generality}
+\input{tab_generality}
+\end{table}
 
 \section{Discussion and conclusions}
-TO BE WRITTEN.
+\label{sec:discussion}
+The three gates together establish a hierarchy. Of the order $10^6$
+transitions of a lanthanide ion, the transport sees a fine distribution of
+redistribution events; of that distribution, the emergent light sees a
+small operator; and that operator is local in frequency. Most of the
+information in the event distribution is discarded on the way to the light
+without harm --- the global factorisation of Section~\ref{sec:mechanism}
+reproduces the events \PBNdEventRatio\ times better than the local operator
+and the photometry \PBNdBandRatio\ times worse --- so fidelity to the
+microscopic redistribution is the wrong target for a closure. The right
+target is the frequency-local structure, and a handful of contiguous groups
+carries it.
+
+What Section~\ref{sec:generality} adds is that the small operator is not one
+object but a family. Its parameters depend on the gas temperature, the
+density and the illumination, and the dependence is smooth enough along any
+one of those coordinates that an operator interpolated between two
+neighbouring states passes the same criterion as one built in place. That
+is the practically useful form of the result: not a universal $R_{ij}$, but
+a tabulated $R(\theta)$ over a few state coordinates, of the same size at
+every entry. Two boundaries of that statement are set by the data and should
+be read as results rather than caveats. Along the physical trajectory, where
+the coordinates move together, one-dimensional interpolation fails at the
+one interior point tested while a fresh fit succeeds --- the family is
+compact but not separable, and a table indexed by independent coordinates is
+not guaranteed to reconstruct it. And for Ce\,\textsc{ii} the resolution the
+criterion requires is itself state-dependent: \PBNgT\ groups suffice at the
+original state and fail at half of the others, \PBCeKrecMax\ groups pass
+everywhere. A closure of this kind must carry its resolution as a parameter
+or adopt the conservative one.
+
+The mixture results settle how the family composes. It does not: operators
+built for single ions, combined by the opacity-share rule that served the
+earlier photon-packet work, do not reproduce the blend they are combined
+into, while an operator built on the blend does, at \PBKdirect\ groups. Yet
+the full \PBBlendNIons-ion composition of the benchmark state --- the
+mixture a transport calculation actually needs --- is described by
+\PBBlendKrec\ groups where the best scalar closure misses by
+\PBBlendEpsErr~mag. Per-species operators are not composable, but the
+combined system is compressible, and the effective description a code would
+use is the one built on the mixture it transports.
+
+Three limitations bound the claims. The calculations are single-zone and
+time-independent, with the level populations in local thermodynamic
+equilibrium and the radiation field imposed rather than solved; the
+operator's dependence on a self-consistent radiation field is measured only
+through the source-spectrum axis. The state domain is a grid of single
+coordinates around one benchmark state and one coupled path; the failure of
+interpolation along that path is one data point, and it does not yet
+indicate what representation would succeed there --- a better choice of
+coordinates or a denser table are the first candidates, ahead of any
+learned surrogate. And the criterion is photometric: an operator that passes
+it reproduces the broad-band light, not the line-by-line spectrum.
+
+The conclusion we draw is nevertheless a positive one for transport.
+Detailed lanthanide fluorescence has a much lower observable complexity
+than its microscopic transition network. The reduced description is
+frequency-local, survives a change of the fluorescence physics it is built
+from, and remains compact across physical states and realistic mixtures.
+What it does not do is transfer: its parameters, and sometimes its required
+resolution, depend on the thermodynamic and radiation-field state, and a
+transport code that adopts it must carry that dependence --- as a table
+along the coordinates where the dependence is smooth, and as a refit where
+it is not.
 
 \section*{Data availability}
 The transport code, the preregistrations of gates G1--G3, every run record
 and the script that regenerates every number in this paper are archived at
-\texttt{github.com/zhuygln/revisit\_sobolev} (tags \texttt{paperB-g2-prereg}
-and \texttt{paperB-g2-freeze}).
+\texttt{github.com/zhuygln/revisit\_sobolev} (tags \texttt{paperB-g2-prereg},
+\texttt{paperB-g2-freeze}, \texttt{paperB-g3-prereg} and
+\texttt{paperB-g3-freeze}).
 
 \bibliographystyle{plainnat}
-% \bibliography{references}
+\bibliography{references}
 \end{document}

@@ -3576,6 +3576,58 @@ scary. A residual of 1e70 looks like the whole run is garbage; it wasn't
 -- the photometry was fine, only one diagnostic accumulator got hit by
 something this machine does rarely and still doesn't have a name for.
 
+## 9bq. Paper B: manuscript mode -- G4 demoted, the full draft written on the frozen record (2026-09-29)
+
+The PI's call after G3: write, don't run. G4 (operator error vs a
+composition-pattern proxy) is demoted to a post-manuscript robustness
+candidate -- after G3 the operator is a state-dependent reduced model and
+a proxy comparison establishes nothing G1-G3 don't, while calling a few
+composition patterns "nuclear uncertainty" without a propagated nuclear
+ensemble would be too strong. No G4 run, no surrogate.
+
+Order as instructed: the report's top got a current-status block (a new
+reader was otherwise facing "Sobolev validity" as the research question
+5,000 lines before Paper B), then Results 4 from G3 first while the caveats
+were fresh, then Discussion, Introduction, Method. The Results-4
+progression is the PI's: state dependence -> failure of transfer is not
+failure of compression -> interpolation R = R(theta) -> the coupled
+trajectory as the boundary of that statement -> N_g*(theta) on Ce ->
+composition (C4 and C5 read together, not as a contradiction).
+
+Machinery: FROZEN.json now carries G3 (five hashed sources); 221 macros;
+tab_generality; Figure 3 generated from the frozen record (anchor squares
+above the criterion, fresh circles below, interpolation diamonds bridging
+the gap everywhere but the Nd trajectory panel); check_claims.py ported
+from Paper IV (its macros are (name, value, fmt) triples -- the port
+needed a one-line change) and wired into `make check`; references.bib
+shared with Paper IV.
+
+The read-through earned its keep again, on the first pass: "by up to
+0.150 mag ... at the interior temperature point" -- the macro was the
+anchor's error AT the interior point, not the axis maximum (0.48 at the
+ends), so "up to" was wrong; and "at any tested resolution" for the
+composed mixture had to become "at any VALID tested resolution", since the
+32-group leg is the one the gray-first audit excluded. Neither was a wrong
+number; both were a wrong word around a right number, which is exactly
+what substituting the values into the sentences exposes and the LaTeX
+source hides.
+
+One honest detail the freeze surfaced that the verdict summary had not:
+on the Nd trajectory the whole-operator interpolant fails on BAND (0.117)
+with colour fine (0.075), while the matrix-only diagnostic fails on
+COLOUR (0.110) with band fine (0.057). Both fail, on different criteria.
+The manuscript says so rather than "interpolation fails".
+
+*A slip in the same session, recorded because the rule exists for it:* the
+commit message's "Suite: N" was filled by a shell variable that came back
+empty (the background test run had been launched from docs/paperB, where
+`.venv/bin/python` does not resolve, so it ran nothing), and the PR body
+carried a suite count typed from expectation rather than read from the
+run. Caught on the next look at the output, the suite rerun from the
+repository root, and both corrected. The standing rule is not only for
+tables: any number that reaches a record, a commit or a PR comes from an
+output that was actually read.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

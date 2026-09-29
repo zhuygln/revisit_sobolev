@@ -104,6 +104,14 @@ dependence is nontrivial. No neural surrogate is warranted yet (one
 failure of separable interpolation is not evidence against a better-chosen
 low-dimensional table).
 
+**The manuscript is a complete first draft** (`docs/paperB/manuscript.tex`,
+2026-09-29): every section written on the frozen G1–G3 record in the PI's
+progression, three figures and three tables generated from
+`paperB/FROZEN.json`, every number a macro, the claim read-through
+(`make claims`) clean. **G4 is demoted** to a post-manuscript robustness
+candidate and is not a gate. Open on the PI's side: the referee-style read
+of the draft; the Paper IV MNRAS submission is independent.
+
 Three implementation issues surfaced during the run, all disclosed in full
 in §4.65 and `paperB/gate3/bug_snapshot/`: a confirmed, fixed, disclosed
 bug in `thermal_sampler` (unreachable in any prior completed record); four
