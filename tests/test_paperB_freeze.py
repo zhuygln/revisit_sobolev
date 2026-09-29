@@ -32,6 +32,13 @@ def test_the_frozen_record_carries_the_headline_results():
     h = json.loads((ROOT / "paperB/FROZEN.json").read_text())
     assert h["g1"]["B1"] == "GREEN" and h["g1"]["decision"] == "CONTINUE"
     assert h["g2"]["H1"] == "GREEN" and h["g2"]["H2"] == "YELLOW" and h["g2"]["decision"] == "WRITE"
+    g3 = h["g3"]
+    assert (g3["C1"], g3["C2"], g3["C3"], g3["C4"], g3["C5"]) == ("RED", "RED", "YELLOW", "YELLOW", "GREEN")
+    assert g3["per_ion"]["58CeII"]["n_fresh_fail"] == 7 and g3["per_ion"]["58CeII"]["k_rec_max"] == 32
+    assert g3["per_ion"]["60NdII"]["n_fresh_fail"] == 0 and g3["per_ion"]["57LaII"]["n_fresh_fail"] == 0
+    assert g3["per_ion"]["60NdII"]["transfer_holds_axes"] == ["J"] and "P" in g3["per_ion"]["60NdII"]["interpolation_fails"] or g3["per_ion"]["60NdII"]["interp_passes_axes"] == ["T", "D", "J"]
+    assert not g3["nd_trajectory"]["matrix_only_passes"] and g3["nd_trajectory"]["interp_whole_band"] > h["g1"]["dm_max"]
+    assert g3["part_b"]["k_mix"] is None and g3["part_b"]["k_direct"] == 4 and g3["part_c"]["k_rec"] == 4
     for ion in h["ions"]:
         assert h["r2m"]["per_ion"][ion]["survives"] == "YES"
         assert h["audit"]["per_ion"][ion]["exact"] == 1.0            # every stored exit is a real line
@@ -62,7 +69,7 @@ def test_macros_are_generated_and_ordered_lists_survive_the_json_round_trip():
         assert len(rho) == 6
 
 
-@pytest.mark.parametrize("which", [1, 2])
+@pytest.mark.parametrize("which", [1, 2, 3])
 def test_figures_build_from_the_frozen_record(tmp_path, which):
     fig = _load("paperB_figures", "docs/paperB/figures.py")
     written = fig.main(tmp_path, which=which)

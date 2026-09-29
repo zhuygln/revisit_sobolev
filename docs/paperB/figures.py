@@ -11,6 +11,11 @@ here). The PI froze these two on 2026-09-22.
       The message: eps* fails where a small R succeeds, and R follows the
       reference physics when that physics changes.
 
+  Figure 3 -- Transfer is not compression.  Per ion and state axis, the
+      anchor operator transported unchanged, the operator rebuilt at the
+      state, and the whole-operator interpolation at the interior point,
+      with the preregistered A/B/C/D reading; G3 (F70).
+
   Figure 2 -- Why the compression works.  Transport error and event-level
       error against the number of archetypal exit distributions, for local
       frequency coarsening and for the global non-negative factorisation;
@@ -125,6 +130,55 @@ def figure2(h, out_dir):
     return save(fig, out_dir, "fig2_mechanism")
 
 
+AXLAB = {"T": r"$\log T_{\rm gas}$", "D": r"$\log n_{\rm ion}$", "J": r"$\log T_{\rm core}$", "P": r"$\log t$"}
+CLS = {"A": "#009E73", "B": "#0072B2", "C": "#E69F00", "D": "#D55E00", "GRAY": "0.6"}
+
+
+def figure3(h, out_dir):
+    """Transfer is not compression. Per ion (rows) and state axis (columns):
+    the anchor operator transported unchanged (filled squares), the operator
+    rebuilt at the state (open circles), and at the interior point the
+    whole-operator interpolation (diamonds), each against the state's own
+    reference; the letter is the preregistered reading (A transfers, B
+    interpolates, C only a fresh fit passes, D none). The PI's progression:
+    state dependence -> interpolation -> the coupled trajectory -> composition."""
+    g3 = h["g3"]; names = h["ion_names"]; dm_max = h["g1"]["dm_max"]
+    ions = [i for i in ("58CeII", "60NdII", "57LaII") if i in g3["per_ion"]]
+    axes_names = g3["axes"]
+    fig, axes = plt.subplots(len(ions), len(axes_names), figsize=(3.6 * len(axes_names), 2.9 * len(ions)), squeeze=False, sharey="row")
+    for ri, ion in enumerate(ions):
+        sts = g3["per_ion"][ion]["states"]
+        for ci, ax_name in enumerate(axes_names):
+            ax = axes[ri][ci]
+            for st in sorted((x for x in sts if x["axis"] == ax_name), key=lambda x: x["coord_value"]):
+                c = st["coord_value"]; col = CLS[st["cls"]]
+                ax.plot([c], [st["fresh_band"]], "o", color=col, ms=6, mfc="none", mew=1.4)
+                if st["anchor_band"] is not None:
+                    ax.plot([c], [st["anchor_band"]], "s", color=col, ms=6)
+                if st["interp_whole_band"] is not None:
+                    ax.plot([c], [st["interp_whole_band"]], "D", color=col, ms=6)
+                    ax.plot([c], [st["interp_matrix_band"]], "d", color=col, ms=5, mfc="none")
+                top = max(st["fresh_band"], st["anchor_band"] or 0.0, st["interp_whole_band"] or 0.0)
+                ax.annotate(st["cls"], (c, top), textcoords="offset points", xytext=(0, 5), ha="center", fontsize=8, color=col)
+            ax.axhline(dm_max, color="k", ls=":", lw=1)
+            ax.set_yscale("log"); ax.set_ylim(2e-3, 1.5)
+            if ri == len(ions) - 1:
+                ax.set_xlabel(AXLAB[ax_name])
+            if ci == 0:
+                ax.set_ylabel(f"{names[ion]}\nmax $|\\Delta m|$ vs $R_2(\\theta)$ [mag]")
+            if ri == 0:
+                ax.set_title({"T": "gas temperature", "D": "density", "J": "source spectrum", "P": "trajectory (all coordinates)"}[ax_name], fontsize=9)
+    # one legend for the whole figure
+    from matplotlib.lines import Line2D
+    hs = [Line2D([], [], marker="s", color="0.3", ls="", ms=6, label="anchor $R_{16}$ transported"),
+          Line2D([], [], marker="o", color="0.3", ls="", ms=6, mfc="none", mew=1.4, label="fresh $R_{16}$ built at the state"),
+          Line2D([], [], marker="D", color="0.3", ls="", ms=6, label="whole-operator interpolation"),
+          Line2D([], [], marker="d", color="0.3", ls="", ms=5, mfc="none", label="matrix-only interpolation (diagnostic)")]
+    fig.legend(handles=hs, loc="lower center", ncol=4, fontsize=8, frameon=False, bbox_to_anchor=(0.5, -0.02))
+    fig.tight_layout(rect=(0, 0.03, 1, 1))
+    return save(fig, out_dir, "fig3_generality")
+
+
 def main(out_dir=None, which=None):
     h = json.loads(FROZEN.read_text())
     out_dir = Path(out_dir) if out_dir else HERE / "figures"
@@ -133,6 +187,8 @@ def main(out_dir=None, which=None):
         written += figure1(h, out_dir)
     if which in (None, 2):
         written += figure2(h, out_dir)
+    if which in (None, 3):
+        written += figure3(h, out_dir)
     return written
 
 

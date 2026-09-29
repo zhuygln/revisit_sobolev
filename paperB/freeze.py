@@ -39,8 +39,9 @@ def build():
     r2m, r2m_rel, r2m_sha = load("paperB/r2m/r2m_verdict.json")
     aud, aud_rel, aud_sha = load("paperB/audit/exit_tables.json")
     g2, g2_rel, g2_sha = load("paperB/gate2/gate2_verdict.json")
+    g3, g3_rel, g3_sha = load("paperB/gate3/gate3_verdict.json")
 
-    h = dict(sources={g1_rel: g1_sha, r2m_rel: r2m_sha, aud_rel: aud_sha, g2_rel: g2_sha},
+    h = dict(sources={g1_rel: g1_sha, r2m_rel: r2m_sha, aud_rel: aud_sha, g2_rel: g2_sha, g3_rel: g3_sha},
              ions=list(IONS), ion_names=NAME, decisive=list(DECISIVE))
 
     # ---- G1 (F67) ----
@@ -108,6 +109,58 @@ def build():
         params_global=at(ion, "glob", K)["n_params"], params_local=at(ion, "local", K)["n_params"],
         event_ratio=at(ion, "local", K)["event"] / at(ion, "glob", K)["event"],
         band_ratio=at(ion, "glob", K)["band"] / at(ion, "local", K)["band"]) for ion in IONS}
+    # ---- G3 (F70): state transfer, existence, interpolation, mixtures ----
+    P3 = g3["prereg"]
+    h["g3"] = dict(C1=g3["C1"], C2=g3["C2"], C3=g3["C3"], C4=g3["C4"], C5=g3["C5"], step4=g3["step4"],
+                   ng_t=P3["ng_t"], n_axes=len(P3["axes"]), axes=list(P3["axes"]),
+                   n_states_per_ion=sum(len(a["grid"]) for a in P3["axes"].values()), per_ion={})
+    for ion in IONS:
+        r = g3["per_ion"][ion]
+        sts = [x for x in g3["states"] if x["ion"] == ion and x["axis"] != "ref"]
+        fresh = []
+        for x in sts:
+            r16 = x["recomputed"].get(str(P3["ng_t"])) or x["recomputed"].get(P3["ng_t"])
+            t = x["transfer"]; i = x["interpolation"]
+            fresh.append(dict(axis=x["axis"], label=x["label"], cls=x["classification"], coord_value=x["coord_value"],
+                              k_rec=x["k_rec"], exists=bool(x["exists_at_ng_t"]), gray=bool(x["gray"]),
+                              fresh_band=r16["band"], fresh_colour=r16["colour"],
+                              anchor_band=t["band"] if t else None, anchor_colour=t["colour"] if t else None,
+                              rows_never_trained=t["rows_never_trained_frac"] if t else None,
+                              interp_whole_band=i["whole"]["band"] if i else None,
+                              interp_whole_colour=i["whole"]["colour"] if i else None,
+                              interp_matrix_band=i["matrix_only"]["band"] if i else None,
+                              interp_matrix_colour=i["matrix_only"]["colour"] if i else None, lam=i["lam"] if i else None))
+        readable = [f for f in fresh if not f["gray"]]
+        failing = [f for f in readable if not f["exists"]]
+        h["g3"]["per_ion"][ion] = dict(
+            C1=r["C1"], C2=r["C2"], C3=r["C3"], needed_axes=r["needed_axes"], interpolation_fails=r["interpolation_fails"],
+            transfer_holds_axes=[ax for ax, a in r["axes"].items() if a["transfer_holds"]],
+            transfer_fails_axes=[ax for ax, a in r["axes"].items() if not a["transfer_holds"]],
+            interp_passes_axes=[ax for ax, a in r["axes"].items() if a["interpolation_passes"] is True],
+            n_states=len(fresh), n_readable=len(readable), n_gray=len(fresh) - len(readable),
+            n_fresh_fail=len(failing), n_fresh_fail_band=sum(1 for f in failing if f["fresh_band"] > P3["dm_max"]),
+            worst_fresh_band=max(f["fresh_band"] for f in readable), worst_fresh_colour=max(f["fresh_colour"] for f in readable),
+            worst_fail_colour_over=max((f["fresh_colour"] - P3["dcolour_max"] for f in failing), default=0.0),
+            least_fail_colour_over=min((f["fresh_colour"] - P3["dcolour_max"] for f in failing), default=0.0),
+            k_rec_max=max(f["k_rec"] for f in readable if f["k_rec"] is not None),
+            states=fresh)
+    # the coupled-trajectory boundary: Nd II at 3 d
+    nd = next(f for f in h["g3"]["per_ion"]["60NdII"]["states"] if f["label"] == "P3d")
+    h["g3"]["nd_trajectory"] = dict(label=nd["label"], anchor_band=nd["anchor_band"], anchor_colour=nd["anchor_colour"],
+                                    interp_whole_band=nd["interp_whole_band"], interp_whole_colour=nd["interp_whole_colour"],
+                                    interp_matrix_band=nd["interp_matrix_band"], interp_matrix_colour=nd["interp_matrix_colour"],
+                                    fresh_band=nd["fresh_band"], fresh_colour=nd["fresh_colour"], k_rec=nd["k_rec"],
+                                    matrix_only_passes=bool(nd["interp_matrix_band"] <= P3["dm_max"] and nd["interp_matrix_colour"] <= P3["dcolour_max"]))
+    pb, pc = g3["part_b"], g3["part_c"]
+    amix_valid = {int(n): m for n, m in pb["table"]["Amix"].items() if not m.get("invalid")}
+    best_n = min(amix_valid, key=lambda n: amix_valid[n]["band"])
+    kd = pb["k_direct"]
+    h["g3"]["part_b"] = dict(k_mix=pb["k_mix"], k_direct=kd, invalid_legs=pb["invalid_legs"],
+                             amix_best_n=best_n, amix_best_band=amix_valid[best_n]["band"], amix_best_colour=amix_valid[best_n]["colour"],
+                             adirect_band=pb["table"]["Adirect"][str(kd)]["band"], adirect_colour=pb["table"]["Adirect"][str(kd)]["colour"])
+    kr = pc["k_rec"]
+    h["g3"]["part_c"] = dict(k_rec=kr, band=pc["table"]["Arec"][str(kr)]["band"], colour=pc["table"]["Arec"][str(kr)]["colour"],
+                             eps_star=pc["eps_star"]["eps"], eps_err=pc["eps_star"]["max_dm"], n_ions=13)
     return h
 
 

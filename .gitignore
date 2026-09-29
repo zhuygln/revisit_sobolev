@@ -102,3 +102,5 @@ paperB/gate3/kernels/
 paperB/gate3/run_all.finished
 paperB/gate3/*.finished
 paperB/gate3/run_all.pid
+docs/paperB/manuscript.bbl
+docs/paperB/manuscript.blg

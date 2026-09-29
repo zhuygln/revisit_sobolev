@@ -195,7 +195,16 @@ from this file.
   La+Ce+Nd macroatom run at the P1 densities with no blend fit;
   (c) realistic mixture — the 13-ion P1 blend at N_g = 2 … 32 (A2 at 32
   is within 0.05 mag, F61).
-- **G4, σ_R vs σ_comp**: on the composition patterns that exist in this
+- **G4 — DEMOTED (PI, 2026-09-29; `plan_review.md`): not a gate.** After
+  G3 showed the effective operator to be a state-dependent reduced model,
+  comparing its error to a composition-pattern proxy no longer establishes
+  anything G1–G3 do not, and calling that proxy's spread "nuclear
+  uncertainty" would be too strong without a propagated nuclear-physics
+  ensemble. It is kept below as it was named, as a post-manuscript
+  robustness / appendix candidate to be designed around a specific need
+  if the manuscript's discussion exposes one; it is not preregistered and
+  does not block the manuscript.
+- **G4 (as originally named), σ_R vs σ_comp**: on the composition patterns that exist in this
   repository (Ye-0.21a at X_lan 0.11 and 0.30, solar_r at 0.11, Ye-0.29a),
   σ_R = the spread of R_{N_g*} − macroatom and **σ_comp** = the spread of
   the macroatom across those patterns. This is a composition proxy, not
