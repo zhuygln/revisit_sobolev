@@ -27,6 +27,7 @@ check:
 	@$(PY) ../../paperB/freeze.py --check
 	@$(PY) check_structure.py
 	@$(PY) check_claims.py -q
+	@$(PY) wordcount.py
 
 # The pre-submission read-through: every sentence that quotes a number, with
 # the macro replaced by the value the freeze gives it (PI's standing rule).

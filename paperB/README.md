@@ -86,8 +86,9 @@ fluorescence remains strongly compressible across physical state and
 realistic composition, but the effective operator is state dependent:
 one-dimensional interpolation predicts most state changes, while coupled
 trajectories and species mixing expose nonlinearities that require
-refitting or richer tabulation.** Transfer holds only on the
-source-spectrum axis; whole-operator interpolation recovers every other
+refitting or richer tabulation.** Transfer fails on every axis for Ce II
+and on all but the source-spectrum axis for Nd II and La II;
+whole-operator interpolation recovers every other
 failure except one genuinely *different* outcome, not a variant of the
 same one -- **Nd II's trajectory axis is outcome C**: direct transfer
 fails, interpolation also fails at the interior state, and only a fresh

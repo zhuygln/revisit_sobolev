@@ -5699,9 +5699,13 @@ Red. **The axis actually driving that Red is P, the physical trajectory**
 (all four coordinates moving together, not a controllable single
 coordinate) — reported below, outside the C3 table.
 
-Per axis, for every ion: transfer of the θ₀ anchor **fails** on T, D and
-P; it **holds** on J, the source-spectrum axis Paper III assumed
-irrelevant and this gate measured instead. The whole-operator
+Per axis: transfer of the θ₀ anchor **fails** on T, D and P for every
+ion; on J, the source-spectrum axis Paper III assumed irrelevant and this
+gate measured instead, it **holds** for Nd II and La II and **fails for
+Ce II** (at the coolest source, on colour alone, by 0.007 mag over the
+threshold — the frozen record reads Ce II's transfer as failing on all
+four axes, and that reading is authoritative; an earlier version of this
+sentence said J held for every ion, corrected 2026-10-05). The whole-operator
 interpolation **passes at every interior point tested, on every axis, for
 every ion**, with one exception: Nd II's trajectory axis (P), the one
 axis that moves every physical coordinate together rather than one at a
@@ -5746,9 +5750,9 @@ physical state and realistic composition, but the effective operator is
 state dependent: one-dimensional interpolation predicts most state
 changes, while coupled trajectories and species mixing expose
 nonlinearities that require refitting or richer tabulation.** Transfer of
-a fixed, energy-conserving compact operator holds only along the
-source-spectrum axis and fails whenever gas temperature, density, or the
-physical trajectory changes; a whole-operator interpolation built from
+a fixed, energy-conserving compact operator fails whenever gas
+temperature, density, or the physical trajectory changes, and survives
+only along the source-spectrum axis, and there only for Nd II and La II; a whole-operator interpolation built from
 two bracketing states — carrying the conditional exit spectrum, not only
 the transition matrix — recovers every one of those failures except one.
 That one exception is genuinely a different outcome, not a variant of the

@@ -3628,6 +3628,50 @@ repository root, and both corrected. The standing rule is not only for
 tables: any number that reaches a record, a commit or a PR comes from an
 output that was actually read.
 
+## 9br. Paper B: the PRL reframing -- G2 is the discovery (2026-10-05)
+
+The PI replaced plan.md with the submission map (their GitHub integration
+is read-only, so it went in from here, verbatim) and reordered the paper:
+G2's inversion -- the representation that reproduces the microscopic
+events better reproduces the light worse -- is the discovery, G1 is the
+set-up, G3 the generality proof. The literature position is explicit and
+defensive: observable-aware reduction (goal-oriented model reduction),
+redistribution matrices (Hummer), low-rank transport, fluorescence in
+kilonovae (Shingles et al.'s line-by-line ARTIS) and the heuristic
+character of a scalar epsilon (Fontes et al.) are all prior; the novelty
+is the CONTROLLED inversion on identical events, opacity and observables,
+and frequency locality as the organising structure. The safe sentence is
+the PI's: in lanthanide fluorescence transport, generic fidelity to the
+microscopic redistribution does not identify the degrees of freedom that
+control the emergent radiation; a frequency-local representation does.
+
+Done in the manuscript: abstract and Introduction open on the general
+coarse-graining question for a non-kilonova physicist before R_ij appears;
+the macroatom is described as a stochastic detailed-network treatment,
+not as a closure of the same kind as epsilon (my earlier sentence had
+lumped them); the G2 heading is "Observable fidelity is not microscopic
+fidelity" with the inversion as the Letter's one display equation; Method
+trimmed to state, reference, operator, local/global constructions, seed
+split, observables, criterion; gate tables, amendment history and the
+transport validation moved to End Matter, which also makes the Letter
+self-contained without Paper IV (cited only as "in preparation"); the
+13-ion N_g = 4 / 1.69 mag result stays in the abstract, Results 4 and the
+Conclusions; the Letter ends on the PI's physical statement. Core: 2,250
+words + 3 full-width figures (was 3,738 + 3 figures + 3 tables -- over the
+3,750 APS budget once figure equivalents are added).
+
+The report inconsistency the PI caught: 4.65 said transfer "holds on J
+for every ion". The frozen record has Ce II failing J too (J2500, colour,
+0.007 mag over). Corrected in the report, README row and paperB/README;
+the frozen record is authoritative and the manuscript already said "every
+axis" for Ce. The notebook's 9bn said the same wrong thing in passing --
+left as written (it is a dated log) with this correction standing.
+
+Three bib entries (Hummer 1962; Benner, Gugercin & Willcox 2015; Peng,
+McClarren & Frank 2020) were written from memory and are flagged VERIFY in
+references.bib; they are not to be trusted until checked against ADS, which
+the plan's pre-submission novelty audit requires anyway.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

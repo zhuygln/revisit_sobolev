@@ -808,3 +808,26 @@ dependence → interpolation → coupled-state failure → composition), then
 Discussion, then Introduction, then Method, every number a macro. No G4
 run, no surrogate. The Paper IV submission is the PI's administrative
 action; nothing in the repository blocks it.
+
+## The PI's PRL reframing: G2 is the discovery (2026-10-05)
+
+The PI replaced `paperB/plan.md` with the submission map (verbatim there;
+the PI's GitHub integration was read-only, so it was dropped in here) and
+set the immediate manuscript revisions: G2 as the novelty claim (G1 setup,
+G3 generality); the G2 heading toward "Observable fidelity is not
+microscopic fidelity"; the Introduction opened for a broad physics audience
+and positioned against Fontes et al. 2020, Shingles et al. 2023, the
+macroatom/redistribution literature and reduced-order / goal-oriented model
+reduction without claiming any of those ideas as new; macroatom language
+clarified (a detailed stochastic network treatment is not a closure of the
+same kind as a parameterised one); the internal "Paper IV" dependency made
+self-contained in End Matter; the F70 source-spectrum sentence in the
+report corrected to the frozen record (Ce II fails transfer on every axis,
+including J); the Method trimmed; gate tables, audit history and per-state
+numbers moved to End Matter; the Letter ending on the physical statement;
+the 3750-word core budget and two End Matter pages of APS. G4 and the
+surrogate stay demoted until after submission. The most important sentence
+of the revised plan, the PI's: *in lanthanide fluorescence transport,
+generic fidelity to the microscopic redistribution does not identify the
+degrees of freedom that control the emergent radiation; a frequency-local
+representation does.*
