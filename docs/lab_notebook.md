@@ -3672,6 +3672,74 @@ McClarren & Frank 2020) were written from memory and are flagged VERIFY in
 references.bib; they are not to be trusted until checked against ADS, which
 the plan's pre-submission novelty audit requires anyway.
 
+## 9bs. Paper B: submission polish -- the five changes, REVTeX, the flagship figure, the literature check (2026-10-05)
+
+The PI approved the PRL framing at ee16d79 ("stop adding experiments and
+move into submission polishing") and asked for five substantive changes
+before the REVTeX pass; all applied. (1) "many-body process" -> "high-
+dimensional microscopic process" (fluorescence through a transition
+network is not what a PRL reader hears as many-body). (2) The macroatom is
+NOT "exact": it is the unreduced reference within the adopted atomic and
+transport model -- "simulated without the reduction under study". A real
+referee-proofing point; "exactly" would have invited the obvious
+objection. (3) "the dominant non-local process" -> "a major mechanism of
+non-local redistribution in wavelength"; "dominant" invites an argument
+nobody needs. (4) The model-reduction citation: Benner, Gugercin & Willcox
+2015 is a parametric projection-based survey, not the cleanest support for
+"the appropriate reduced model depends on the quantity of interest"; Zahm,
+Billaud-Friess & Nouy 2017 (SIAM J. Sci. Comput. 39, A1647, DOI
+10.1137/16M106385X, supplied by the PI) is the direct one and now leads.
+(5) End Matter validation no longer asks the referee to trust an
+unpublished companion paper: the particular tests the Letter depends on
+are stated and pointed at the public record; the companion work holds the
+extended validation.
+
+Bibliography: the PI verified the three from-memory entries against the
+publishers (Hummer: MNRAS 125, 21-37, DOI 10.1093/mnras/125.1.21; Benner:
+SIAM Review 57(4) 483-531, DOI 10.1137/130932715; Peng: JCP 421, 109735,
+DOI 10.1016/j.jcp.2020.109735) -- genuine, now with pages and DOIs, VERIFY
+notes removed. Zahm 2017's title and page range are mine from memory and
+still carry a note.
+
+The visual hierarchy now matches the intellectual one (the PI's "not
+mandatory, but"): Figure 1 is the flagship -- (a) the scalar fails where a
+small operator succeeds, (b-d) the inversion -- so an editor who reads the
+abstract and the first figure sees "better on the microscopic events,
+worse on the light". The R2M robustness bars went to an End Matter figure;
+generality is Figure 2. figures.py keeps the former standalone figures
+reproducible (which=4) for the record. In restructuring figures.py I
+sliced out the generality function and its constants along with the old
+Figure 1 -- caught at once by the NameError on regeneration, restored.
+
+REVTeX: `tlmgr install revtex` worked (TinyTeX had network); the class is
+revtex4-2 [aps,prl,twocolumn]; abstract before \maketitle; figures and
+tables as figure*/table*; apsrev4-2 bibliography style. No PDF renderer on
+the box, so pymupdf went into the venv as a dev-only tool to rasterise the
+two-column pages for inspection.
+
+The targeted literature check the plan requires, done with four web
+searches on 2026-10-05 (not ADS; the PI's final ADS/arXiv pass still
+stands): "reduced model microscopic vs observable fidelity frequency-local
+vs low-rank fluorescence" returned reduced-order radiative-transfer work
+(POD/Galerkin ROMs, Planck-averaged spectral models, low-rank transport)
+and partial-redistribution H2 fluorescence -- none performing a
+local-versus-global comparison scored on observables; "kilonova
+fluorescence redistribution matrix effective operator macroatom" returned
+line-by-line ARTIS (Shingles et al. 2023), Fontes et al.'s line-binned
+opacities, and -- as the only hit on the specific framing -- our own
+public repository (the education PR #7); "redistribution NMF fluorescence
+coarse graining observable-aware" returned NMF spectral-unmixing papers
+unrelated to transport; "goal-oriented / quantity-of-interest model
+reduction radiative transfer" returned goal-oriented inference and
+goal-oriented adaptive meshing for inverse transfer, radiosity model
+reduction and reduced-basis RTE -- the field the Introduction now cites,
+none of it the inversion on identical fluorescence events. No paper found
+that performs the controlled inversion. The plan's ADS search terms are
+unchanged and remain the PI's pre-submission step.
+
+A cover-letter draft (docs/paperB/cover_letter.md) carries the PI's
+editorial pitch and a pre-send checklist.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

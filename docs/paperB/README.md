@@ -11,18 +11,18 @@ for APS: a core of about 2,250 words plus three full-width figures (the
 budget is 3,750 with figure equivalents; `make check` prints the count),
 and an End Matter carrying the gate tables, the amendments made during the
 runs, the transport's validation (so the Letter is self-contained without
-the companion methods paper), and data availability. The class is
-`article` until revtex4-2 is installed; the structure and every number are
-what is fixed.
+the companion methods paper), and data availability. Built with `revtex4-2`
+(aps, prl, twocolumn) since 2026-10-05; `docs/paperB/cover_letter.md` is the
+cover-letter draft.
 
-Three references added for the literature positioning (Hummer 1962,
-Benner et al. 2015, Peng et al. 2020) were written from memory and are
-marked **VERIFY before submission** in `references.bib`; the plan's final
-ADS/arXiv novelty audit covers them.
+The references added for the literature positioning (Hummer 1962; Benner
+et al. 2015; Zahm, Billaud-Friess & Nouy 2017; Peng et al. 2020) carry the
+DOIs the PI verified on 2026-10-05; Zahm et al.'s title and page range are
+still to be confirmed against the DOI.
 
     make -C docs/paperB freeze    # paperB/FROZEN.json from the committed gate records
     make -C docs/paperB tables    # numbers.tex, tab_gates.tex, tab_contrast.tex
-    make -C docs/paperB figures   # figures/fig1_compression, fig2_mechanism, fig3_generality
+    make -C docs/paperB figures   # figures/fig1_flagship, fig2_generality, figEM_robustness
     make -C docs/paperB           # manuscript.pdf (pdflatex + bibtex), then `check`
     make -C docs/paperB check     # freeze --check + check_structure.py + check_claims.py -q + wordcount.py
     make -C docs/paperB claims    # the read-through: every sentence quoting a number, macros substituted
@@ -35,21 +35,18 @@ into the prose; `check_structure.py` fails on a literal result number, an
 undefined macro, a missing figure, or a table fragment that is not the
 regeneration of the frozen record. Tests: `tests/test_paperB_freeze.py`.
 
-## The figures (the first two frozen by the PI on 2026-09-22)
+## The figures (hierarchy set by the PI, 2026-10-05: the discovery is Figure 1)
 
-- **Figure 1 — compression survives the physics.** ε* against R₂…R₃₂ for
-  La II, Ce II and Nd II, with the R2M robustness check alongside: the
-  scalar fails where a small operator succeeds, and the operator follows
-  the reference physics when that physics changes.
-- **Figure 2 — why it works.** Transport error and event-level error
-  against the number of archetypal exit distributions, local against
-  global, and the two plotted against each other: the global points move
-  left (better on the microscopic events) while staying high (worse on the
-  light).
-- **Figure 3 — transfer is not compression.** Per ion and state axis, the
+- **Figure 1 — the flagship.** (a) A scalar closure fails where a small
+  operator succeeds; (b–d) better on the microscopic events, worse on the
+  light: transport error and event-level error against archetype count,
+  local against global, and the two plotted against each other.
+- **Figure 2 — transfer is not compression.** Per ion and state axis, the
   anchor operator transported unchanged, the operator rebuilt at the state,
   and the whole-operator interpolant at the interior point, with the
   preregistered A/B/C/D reading of each state.
+- **End Matter figure — the operator follows the fluorescence physics it is
+  built from** (the radiation-field-driven macroatom robustness check).
 
 ## The argument
 

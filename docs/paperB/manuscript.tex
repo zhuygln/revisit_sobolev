@@ -8,26 +8,24 @@
 % enforces it and prints the core word count (APS: 3750 incl. figure
 % equivalents; End Matter up to two pages, not counted).
 %
-% The submission will use revtex4-2; that class is not installed here, so the
-% draft builds under article and the structure is what is being fixed.
-\documentclass[11pt]{article}
-\usepackage[margin=1in]{geometry}
+% Built with revtex4-2 (aps, prl, twocolumn) since 2026-10-05.
+\documentclass[aps,prl,twocolumn,superscriptaddress,nofootinbib,longbibliography]{revtex4-2}
 \usepackage{graphicx}
 \usepackage{amsmath}
-\usepackage{natbib}
+\usepackage[colorlinks=false]{hyperref}
 \input{numbers}
+
+\begin{document}
 
 \title{Effective line redistribution in kilonova ejecta:\\
        transport-relevant structure is frequency-local}
 \author{(author list to be fixed)}
-\date{Draft, \today}
-
-\begin{document}
-\maketitle
+\affiliation{(affiliation to be fixed)}
+\date{\today}
 
 \begin{abstract}
-A reduced model of a many-body process is usually judged by how well it
-reproduces the microscopic dynamics it replaces. We show, for lanthanide
+A reduced model of a high-dimensional microscopic process is usually
+judged by how well it reproduces the microscopic dynamics it replaces. We show, for lanthanide
 line fluorescence in kilonova ejecta, that this criterion selects the wrong
 model. Holding the atomic physics, the resolved line opacity and the
 physical state fixed, we compare two reduced representations of the
@@ -48,27 +46,30 @@ state coordinates and not along a coupled trajectory, and for one ion its
 required resolution changes with the state.
 \end{abstract}
 
+\maketitle
+
 \section{Introduction}
 \label{sec:intro}
 When a process with millions of microscopic degrees of freedom is replaced
 by a reduced model, the reduction is normally built and judged against the
 microscopic dynamics: the reduced model that reconstructs the fine-grained
-process most accurately is taken to be the best. Goal-oriented model
-reduction has long recognised that the appropriate reduced model can
-depend on the quantity one wants from it \citep{benner2015}, and reduced
-and low-rank formulations of radiative transfer exist \citep{peng2020}. The
+process most accurately is taken to be the best. Model reduction aimed at a quantity of interest recognises that the
+appropriate reduced model can depend on what one wants from it
+\citep{zahm2017,benner2015}, and reduced and low-rank formulations of
+radiative transfer exist \citep{peng2020}. The
 question we address is narrower and physical: in a concrete transport
-problem where the microscopic process can be simulated exactly, which of
-its degrees of freedom actually reach the observable radiation, and does
-fidelity to the microscopic process identify them?
+problem where the microscopic process can be simulated without the
+reduction under study, which of its degrees of freedom actually reach the
+observable radiation, and does fidelity to the microscopic process
+identify them?
 
 The process is lanthanide line fluorescence in the ejecta of a neutron-star
 merger. The open $f$-shells of the lanthanides carry of order $10^6$
 transitions per ion at the relevant temperatures \citep{barneskasen2013,
 tanaka2020}; a photon absorbed in one line is re-emitted, after a cascade
 through the ion's levels, in another, and this redistribution of energy
-across frequency is the dominant non-local process shaping a kilonova's
-light. High-fidelity transport keeps the identity of every transition for
+across frequency is a major mechanism of non-local redistribution in
+wavelength in a kilonova's light. High-fidelity transport keeps the identity of every transition for
 exactly this reason: line-by-line calculations with tens of millions of
 lines follow the absorption and the cascade explicitly, through a
 stochastic macroatom \citep{lucy2002,lucy2003,shingles2023}. Cheaper
@@ -82,14 +83,13 @@ of the fluorescence response a transport calculation needs, and what
 organises the part it needs.
 
 We hold the opacity at the resolved Sobolev value of every line, take an
-energy-conserving downward macroatom as the exact reference, and build
+energy-conserving downward macroatom as the unreduced reference, and build
 reduced operators from the reference's own events on one set of random
 seeds, scoring them on another. Three preregistered gates then ask, in
-order, whether a compact operator exists where the scalar closure fails
-(Section~\ref{sec:compression}); whether the structure it exploits is
-locality in frequency or a globally low rank of the redistribution law
-(Section~\ref{sec:mechanism}); and whether that structure survives changes
-of state and composition (Section~\ref{sec:generality}). The second gate is
+order, whether a compact operator exists where the scalar closure fails;
+whether the structure it exploits is locality in frequency or a globally
+low rank of the redistribution law; and whether that structure survives
+changes of state and composition --- the three results sections below. The second gate is
 the result of this Letter. At matched complexity, the representation that
 reproduces the microscopic redistribution better reproduces the light
 worse, and the data identify frequency locality as the missing organising
@@ -121,10 +121,10 @@ that exits in group $j$; within each output group the exit line is drawn
 from a discrete table of the distinct exit lines the events populated,
 weighted by energy. Transport with the operator replaces the cascade by one
 draw from $R_{ij}$ and one from the table. Operators are built on three
-seeds and scored on three disjoint seeds. The global family of
-Section~\ref{sec:mechanism} replaces the transition matrix by a rank-$k$
+seeds and scored on three disjoint seeds. The global family of the
+locality test replaces the transition matrix by a rank-$k$
 non-negative factorisation of the fine-grouped matrix on the same exit
-tables; the state-dependent operators of Section~\ref{sec:generality} are
+tables; the state-dependent operators of the generality test are
 rebuilt at, transported to, or interpolated between states as described
 there. Every closure is scored by its maximum absolute error in the
 broad-band magnitudes and colours over the bands that carry at least one
@@ -139,29 +139,31 @@ readings and the amendments made during the runs are in the End Matter.
 The optimally tuned scalar misses the reference by \PBCeEpsErr~mag on
 Ce\,\textsc{ii} and \PBNdEpsErr~mag on Nd\,\textsc{ii}; the group operator
 meets the criterion at $N_g=\PBCeNgStar$ and $N_g=\PBNdNgStar$
-(Fig.~\ref{fig:compression}a). The compression is not an artefact of one
+(Fig.~\ref{fig:flagship}a). The compression is not an artefact of one
 cascade prescription: replacing the reference by a radiation-field-driven
 macroatom with internal upward transitions moves the photometry by
 \PBCeShift~mag on Ce\,\textsc{ii}, and an operator rebuilt from that
 reference follows it to \PBCeRebuilt~mag while the operator trained on the
 original reference stays \PBCeDownward~mag away
-(Fig.~\ref{fig:compression}b). The operator carries the fluorescence
+(End Matter, Fig.~\ref{fig:robustness}). The operator carries the fluorescence
 physics it is built from. This establishes that there is a non-trivial
 reduced model to explain; the explanation is the next section.
 
-\begin{figure}[t]
+\begin{figure*}[t]
 \centering
-\includegraphics[width=\textwidth]{figures/fig1_compression.pdf}
-\caption{\textbf{A scalar closure fails where a small operator succeeds,
-and the operator follows the fluorescence physics.} (a) Maximum
+\includegraphics[width=\textwidth]{figures/fig1_flagship.pdf}
+\caption{\textbf{Better on the microscopic events, worse on the light.}
+(a) A scalar closure fails where a small operator succeeds: maximum
 photometric error against the energy-conserving downward macroatom for the
 group operator at $N_g=2\ldots32$ (solid) and the optimally tuned scalar
-$\epsilon^\star$ (dashed). (b) Under a radiation-field-driven macroatom the
-reference itself moves (grey); an operator rebuilt from its events follows
-it (green); the operator trained on the previous reference does not
-(pink).}
-\label{fig:compression}
-\end{figure}
+$\epsilon^\star$ (dashed); dotted, the criterion. (b)~Photometric error and
+(c)~event-level total-variation loss against the number of archetypal exit
+distributions, for local frequency coarsening (solid) and the global
+factorisation (open). (d)~The two against each other: the global points
+move left, fitting the microscopic redistribution better, while staying
+high, reproducing the emergent light worse.}
+\label{fig:flagship}
+\end{figure*}
 
 \section{Observable fidelity is not microscopic fidelity}
 \label{sec:mechanism}
@@ -173,7 +175,7 @@ group. The matched axis is the number of archetypes. At equal count the
 global family is far the more expressive, with \PBParamsGlobal\ free
 numbers against \PBParamsLocal\ at \PBContrastK\ archetypes, and it fits
 the microscopic redistribution better by construction. If the compression
-of Section~\ref{sec:compression} reflected a globally low-rank
+of the first results section reflected a globally low-rank
 redistribution law, the global family would reach the photometric
 criterion with fewer archetypes.
 
@@ -191,7 +193,7 @@ E_{\rm obs}^{\rm global} > E_{\rm obs}^{\rm local},
 \label{eq:inversion}
 \end{equation}
 by factors of \PBNdEventRatio\ and \PBNdBandRatio\ respectively, and the
-same inversion holds on every ion (Fig.~\ref{fig:mechanism}). The degrees
+same inversion holds on every ion (Fig.~\ref{fig:flagship}b--d). The degrees
 of freedom that minimise a generic distance between microscopic
 redistribution distributions are not the degrees of freedom that carry the
 radiation field. What the radiation samples is that neighbouring absorbed
@@ -210,17 +212,7 @@ that the atomic network has only a handful of degrees of freedom. We claim
 that the part of it the transport needs is organised by frequency locality,
 and that microscopic reconstruction error does not find it.
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=\textwidth]{figures/fig2_mechanism.pdf}
-\caption{\textbf{Better on the microscopic events, worse on the light.}
-(a) Photometric error and (b) event-level total-variation loss against the
-number of archetypal exit distributions, for local frequency coarsening
-(solid) and the global factorisation (open). (c) The two against each
-other: the global points move left, fitting the microscopic redistribution
-better, while staying high, reproducing the emergent light worse.}
-\label{fig:mechanism}
-\end{figure}
+
 
 \section{A state-dependent family, compact throughout}
 \label{sec:generality}
@@ -271,9 +263,9 @@ closure misses by \PBBlendEpsErr~mag, the widest scalar failure in this
 work. The combined physical system is itself highly compressible even
 though it cannot be assembled from its parts.
 
-\begin{figure}[t]
+\begin{figure*}[t]
 \centering
-\includegraphics[width=\textwidth]{figures/fig3_generality.pdf}
+\includegraphics[width=\textwidth]{figures/fig2_generality.pdf}
 \caption{\textbf{Transfer is not compression.} Maximum photometric error
 against the state's own reference for the original operator transported
 unchanged (filled squares), the operator rebuilt at the state (open
@@ -288,7 +280,7 @@ groups). The criterion also bounds the colour error, so a circle below the
 line can read D. Grey: states excluded by the preregistered validity
 checks.}
 \label{fig:generality}
-\end{figure}
+\end{figure*}
 
 \section{Conclusions}
 \label{sec:discussion}
@@ -356,16 +348,21 @@ photometry, and answered by excluding any run with an invalid energy
 ledger from every reading.
 
 \paragraph{Transport and validation.} The transport is a Monte Carlo
-Sobolev code with worldline relativity and energy packets, developed and
-validated in a companion methods paper on coarse line-opacity treatments
-(in preparation). The properties this Letter relies on are verified
-within it: the energy identity closes to $10^{-10}$ on every run reported;
-the resolved Sobolev transport is pinned against a deterministic
-formal-solution reference; the downward macroatom reproduces an explicit
-cascade's energy per line; and every operator is built on seeds disjoint
-from those it is scored on. The generality test lays every kernel of an ion
-on one frequency support frozen over the whole state domain, so that an
-operator transported between states is never clipped to a different range.
+Sobolev code with worldline relativity and energy packets. Its extended
+validation on coarse line-opacity treatments is the subject of a companion
+methods paper (in preparation); the particular tests this Letter depends on
+are documented in the public record cited below and are independent of
+that paper. Every run reported here closes the identity between injected
+and accounted energy to $10^{-10}$, and the record carries each run's
+ledger. The resolved Sobolev transport is pinned against a deterministic
+formal-solution reference on identical rays, the downward macroatom
+reproduces an explicit level-by-level cascade's energy per line digit for
+digit, and every operator is built on seeds disjoint from those it is
+scored on, the build and evaluation records both archived. The generality
+test lays every kernel of an ion on one frequency support frozen over the
+whole state domain, so that an operator transported between states is
+never clipped to a different range, and the clipped fraction is recorded
+per state.
 
 \paragraph{Data availability.} The transport code, the preregistrations of
 the three gates, every run record, the frozen record from which every
@@ -375,21 +372,33 @@ numbers, tables and figures are archived at
 \texttt{paperB-g2-freeze}, \texttt{paperB-g3-prereg},
 \texttt{paperB-g3-freeze}).
 
-\begin{table}[p]
+\begin{figure}[p]
+\centering
+\includegraphics[width=\columnwidth]{figures/figEM_robustness.pdf}
+\caption{\textbf{The operator follows the fluorescence physics it is built
+from.} When the reference is replaced by a radiation-field-driven
+macroatom with internal upward transitions, the reference itself moves
+(grey); an operator rebuilt from the new reference's events follows it
+(green), while the operator trained on the previous reference does not
+(pink). Dotted: the criterion.}
+\label{fig:robustness}
+\end{figure}
+
+\begin{table*}[p]
 \centering
 \caption{The first two gates, per ion.}
 \label{tab:gates}
 \input{tab_gates}
-\end{table}
+\end{table*}
 
-\begin{table}[p]
+\begin{table*}[p]
 \centering
 \caption{Microscopic against observable error at \PBContrastK\ archetypes.}
 \label{tab:contrast}
 \input{tab_contrast}
-\end{table}
+\end{table*}
 
-\begin{table}[p]
+\begin{table*}[p]
 \centering
 \caption{The third gate, per ion: the readings, the axes along which the
 transported operator stays predictive, how often the rebuilt \PBNgT-group
@@ -398,8 +407,8 @@ interior-point interpolation error (whole operator / transition matrix
 only) on the three single-coordinate axes, in mag.}
 \label{tab:generality}
 \input{tab_generality}
-\end{table}
+\end{table*}
 
-\bibliographystyle{plainnat}
+\bibliographystyle{apsrev4-2}
 \bibliography{references}
 \end{document}
