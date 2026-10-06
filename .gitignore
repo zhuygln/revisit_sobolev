@@ -103,3 +103,7 @@ paperB/gate3/*.finished
 paperB/gate3/run_all.pid
 docs/paperB/manuscript.bbl
 docs/paperB/manuscript.blg
+paperB/gate2r/run_all.pid
+paperB/gate2r/*.finished
+paperB/gate3u/run_all.pid
+paperB/gate3u/*.finished

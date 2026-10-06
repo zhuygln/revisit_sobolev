@@ -163,5 +163,8 @@ def test_runner_smoke_on_la_ii(tmp_path):
         assert k["validate_energy"] < 1e-12 and k["serialized_bytes"] > 0 and len(k["E_in"]) == k["ng"]
     assert row["legs"]["E1.00"]["eps"] == 1.0 and row["ng_grid"] == [4] and row["eps_grid"] == [0.0, 1.0] and row["build_seeds"] == [101]
     assert "n_coherent_fallback" in row["legs"]["A2_ng4"]
+    # the per-seed magnitudes are kept (G3U's paired-seed statistic needs them)
+    ps = row["legs"]["A2_ng4"]["mags_per_seed"]
+    assert len(ps) == 1 and set(ps[0]) == set(row["legs"]["A2_ng4"]["mags"]) and all(isinstance(v, float) for v in ps[0].values())
     M = A.metrics(row)
     assert M["fine_in_vs_out_of_sample"] >= 0.0 and 0.0 <= M["legs"]["A2_ng4"]["event"] <= 1.0

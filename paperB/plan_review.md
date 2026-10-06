@@ -831,3 +831,258 @@ of the revised plan, the PI's: *in lanthanide fluorescence transport,
 generic fidelity to the microscopic redistribution does not identify the
 degrees of freedom that control the emergent radiation; a frequency-local
 representation does.*
+
+## The PI's decision on the referee report: one bounded reviewer-response revision (2026-10-06)
+
+Verbatim (the referee report itself is not in the repository; the PI's
+table of its points is its record here):
+
+> This is a **good referee report**, and after checking `f46e3c8` against the frozen records and implementation, I agree with its central criticism. I would treat this as a real **major revision**, not argue around it.
+>
+> The good news is that the paper's most interesting measured result survives intact:
+>
+> \[
+> E_{\rm micro}^{\rm global}<E_{\rm micro}^{\rm local},
+> \qquad
+> E_{\rm obs}^{\rm global}>E_{\rm obs}^{\rm local}
+> \]
+>
+> at the featured high-rank comparison. What does **not** survive is the stronger inference that this alone proves "locality rather than low rank."
+>
+> ### What I verified
+>
+> | Referee point | My assessment | What to do |
+> |---|---|---|
+> | Locality vs low rank | **Correct and important** | Add one direct locality ablation; stop claiming low rank is excluded |
+> | "Global fits events better by construction" | **Correct criticism** | Remove it. NMF optimizes Frobenius error, not your energy-weighted TV metric |
+> | G3 "nonseparable" | **Overclaimed** | Narrow wording; no large new G3 program needed |
+> | Threshold uncertainty | **Correct** | Add paired-seed uncertainty for predetermined near-threshold states |
+> | Practical utility | **Correct** | Report offline build/storage/online transport costs and limit claim |
+> | \(P(\nu_{\rm out}|i,j)\) | **Referee is correct** | Implemented exit table is marginalized over input: \(P(\nu_{\rm out}|j)\) |
+> | Scalar fairness | **Correct** | Nd minimax scalar is indeed \(\approx0.822\) mag at \(\epsilon=0.10\), not 1.058 mag |
+> | "every run" energy closure | **Correct** | Say "every accepted leg" |
+>
+> The particularly important check is G2. At \(k=2\), Nd II actually has
+>
+> \[
+> E_{\rm event}^{\rm global}=0.2294
+> >
+> 0.1892=E_{\rm event}^{\rm local}.
+> \]
+>
+> So the global family absolutely does **not** dominate the event metric throughout the rank ladder. The inversion becomes striking at \(k=32\):
+>
+> \[
+> 0.075<0.132
+> \]
+>
+> microscopically, but
+>
+> \[
+> 0.162\ {\rm mag}>0.008\ {\rm mag}
+> \]
+>
+> observationally. The manuscript needs to state exactly that scope.
+>
+> ## I would run exactly one new mechanism experiment
+>
+> This is one of the rare cases where I would reverse my earlier "stop experiments" recommendation. The referee has identified a clean causal ambiguity, and there is a relatively inexpensive experiment that resolves it.
+>
+> I would call it something like **G2R — frequency-adjacency ablation**.
+>
+> Do **not** try first to optimize a full low-rank model directly against photometry. That's a much bigger and noisier problem and can drag us into another experiment cycle.
+>
+> Instead, take the already frozen 128-group G2 operator and compare the actual frequency ordering against **scrambled frequency orderings**.
+>
+> The clean construction is:
+>
+> \[
+> R_{\rm fine}
+> \rightarrow
+> \text{permute the 128 frequency indices}
+> \rightarrow
+> \text{apply exactly the same block coarse-graining}
+> \rightarrow
+> \text{undo the permutation}.
+> \]
+>
+> Everything stays the same: number of blocks, rank upper bound, parameter count, exit tables, fine operator, build events, evaluation seeds, and transport machinery. The only thing destroyed is **physical frequency adjacency**.
+>
+> I would preregister **31 random permutations plus the true ordering**, using fixed random seeds, for Ce II and Nd II and the existing \(k=\{2,4,8,16,32\}\) ladder. Thirty-one is useful because if the physical ordering beats every scrambled ordering, the simple permutation probability is \(1/32\simeq0.031\).
+>
+> Then the question is beautifully direct:
+>
+> \[
+> \boxed{
+> \text{Does keeping neighboring physical frequencies together matter?}
+> }
+> \]
+>
+> If the contiguous ordering consistently beats the scrambled partitions in transported photometry, you have much stronger evidence that **frequency adjacency itself carries transport-relevant information**. Because the controls have the same rank bound and the same complexity, the referee's "locality and low rank are not mutually exclusive" objection is largely neutralized.
+>
+> But I would still change the language from:
+>
+> > "locality rather than low rank"
+>
+> to:
+>
+> > **"frequency adjacency provides transport-relevant structure beyond rank or parameter count alone."**
+>
+> That is more defensible. A cleverly transport-optimized low-rank representation might still work; we don't need to prove that no such representation exists.
+>
+> If the scrambling experiment **does not** distinguish the physical ordering, that is also decisive: abandon the locality mechanism claim and make the PRL result purely about the failure of microscopic reconstruction error as the model-selection objective.
+>
+> That makes this an excellent bounded experiment.
+>
+> ## G3 should mostly be narrowed, not expanded
+>
+> I agree with the referee about "nonseparable." One failed interpolation along the physical trajectory does not establish mathematical nonseparability.
+>
+> Replace:
+>
+> > "the family is compact but not separable"
+>
+> with something like:
+>
+> > **"the one-dimensional interpolation that succeeds along independently varied coordinates does not predict the tested coupled trajectory; the present calculation does not distinguish multivariate coupling from insufficient sampling or an inadequate interpolation coordinate."**
+>
+> That's scientifically cleaner.
+>
+> Likewise, say explicitly:
+>
+> > **"The 13-ion result demonstrates compression of that mixture at the tested state; predictive transfer of a mixture-specific operator to other states has not been demonstrated."**
+>
+> That costs you very little because G3 is no longer the PRL discovery.
+>
+> ## I would take the uncertainty comment seriously
+>
+> The existing `mags_seed_std` is the scatter of individual legs. It is **not** the uncertainty in the closure-minus-reference quantity that decides the threshold.
+>
+> The clean fix is a bounded paired-seed rerun.
+>
+> Before running anything, define the affected set mechanically: all decisive Ce/Nd G3 cases for which either band or colour error lies within, say,
+>
+> \[
+> |E-0.10|<0.03\ {\rm mag}.
+> \]
+>
+> Then rerun those reference/closure pairs on a larger common evaluation-seed set, preserving the trained operators. For each seed \(s\) and band \(b\),
+>
+> \[
+> d_{s,b}=m^{\rm closure}_{s,b}-m^{\rm ref}_{s,b}.
+> \]
+>
+> Bootstrap **paired seeds**, and in every bootstrap replicate recompute the maximum over bands and colours. That gives an interval on the actual decision statistic, including the "winner's curse" from choosing the largest band/color.
+>
+> I would also change Figure 2's y-axis from band error alone to the actual joint decision metric:
+>
+> \[
+> E_{\rm joint}=
+> \max(E_{\rm band,max},E_{\rm colour,max}).
+> \]
+>
+> Then the A/B/C/D letters and the plotted threshold refer to the **same thing**. That is a substantial clarity improvement.
+>
+> ## The scalar correction should be stronger than the referee asks
+>
+> Don't merely add the Nd \(0.822\)-mag number in a footnote.
+>
+> The operator is judged using maximum band/colour error, while \(\epsilon^\star\) was selected by mean band error. That's an avoidable fairness mismatch.
+>
+> For the manuscript, I would recompute from the already existing scalar grids
+>
+> \[
+> \epsilon^\star_{\rm minimax}
+> =
+> \arg\min_\epsilon
+> \max\left(
+> E_{\rm band,max},
+> E_{\rm colour,max}
+> \right).
+> \]
+>
+> No new Monte Carlo is needed.
+>
+> Report **that** scalar in the main comparison. Keep the preregistered mean-optimal \(\epsilon^\star\) in End Matter as the original gate definition.
+>
+> For Nd II, even the band-only minimax improves 1.058 to only about **0.822 mag**, so the scientific conclusion is untouched. We should similarly recalculate the fair minimax value for the 13-ion blend before continuing to call 1.69 mag the "best scalar."
+>
+> ## The model equation definitely needs correction
+>
+> The implementation explicitly constructs exit tables **per output group, marginalized over input groups**.
+>
+> So instead of
+>
+> \[
+> P(\nu_{\rm out}\mid\nu_{\rm in})
+> =
+> P(j\mid i)P(\nu_{\rm out}\mid i,j),
+> \]
+>
+> the implemented reduced model is better written
+>
+> \[
+> \boxed{
+> P_{\rm red}(\nu_{\rm out}\mid\nu_{\rm in})
+> \approx
+> P(j\mid i)\,
+> P(\nu_{\rm out}\mid j)
+> }
+> \]
+>
+> with \(i=i(\nu_{\rm in})\).
+>
+> That actually clarifies how aggressive the compression is: once the output group is selected, the detailed exit-line distribution no longer remembers which input group produced it.
+>
+> ## The practical-cost comment does not require new physics runs
+>
+> Your existing records already contain wall times, serialized kernel sizes, exit-table sizes, event counts, and macroatom/operator timings.
+>
+> So add a compact comparison separating:
+>
+> **offline cost:** generate reference macroatom events + build \(R\);
+>
+> **stored model:** matrix + exit-line tables;
+>
+> **online cost:** transport with macroatom versus transport with \(R\).
+>
+> And say explicitly that the current method **does not yet remove the reference calculation for a new state or mixture**. Its demonstrated practical path is a precomputed \(R(\theta)\) table; G3 shows that such prediction is plausible along some axes but not yet established generally.
+>
+> That limitation will make the practical claim much more credible.
+>
+> ## What I would do next
+>
+> This is no longer an open-ended experimental program. I would define a **single bounded reviewer-response revision**:
+>
+> 1. Preregister and run the frequency-order scrambling control.
+> 2. Do paired-seed uncertainty only for the mechanically defined near-threshold G3 cases.
+> 3. Recompute fair minimax scalar comparators from existing data.
+> 4. Extract existing timing/storage numbers.
+> 5. Correct the conditional-exit equation and all overstatements: "by construction," "nonseparable," "every run," "locality rather than low rank."
+> 6. Rebuild Figure 1 so the inversion is explicitly described as the **\(k=32\) result**, not as a property of the full NMF ladder; rebuild Figure 2 using the actual joint band/colour decision statistic.
+>
+> If the adjacency ablation succeeds, I think the paper becomes **stronger than the current PRL draft**, because then the mechanism no longer rests on comparing two differently optimized families.
+>
+> If it fails, we still have a publishable and interesting result, but I would probably retitle/reframe around:
+>
+> > **Microscopic fidelity does not predict observable fidelity in lanthanide fluorescence transport**
+>
+> rather than frequency locality.
+>
+> So I would **accept this referee report rather than fight it**. The referee has found the exact experiment that can turn our current plausible PRL inference into a much cleaner physical result.
+
+**Applied (2026-10-06, PR A, `claude/paperB-referee-prereg`).** G2R and
+G3U are preregistered as their own sections of `prl_gate.md` (the G2R
+readings: Green iff the physical ordering ranks first at K*_local and in at
+least 4 of 5 block counts on both decisive ions; Red iff it is outside the
+top quartile at K*_local on either; the G3U window [0.07, 0.13] mag on
+the decision legs, 12 common seeds, a paired bootstrap of 10,000 on the
+joint statistic, "decided" iff the 95 % interval excludes 0.10; G3U
+annotates, it does not re-gate). The joint minimax scalar and the cost
+layers are computed from the frozen records (`paperB/scalar/`,
+`paperB/cost/`), frozen into `FROZEN.json` and quoted by macro. The
+manuscript carries every wording change now, with the mechanism sentence
+in the hedged form until G2R is read; Figure 2 plots the joint statistic;
+Figure 1 names the \(k = 32\) scope. The two runs start after this PR is
+merged and tagged `paperB-g2r-prereg`; PR B carries their results and the
+final mechanism sentence or the fallback reframing.

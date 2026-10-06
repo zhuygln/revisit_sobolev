@@ -1,4 +1,4 @@
-# Cover letter — draft (2026-10-05)
+# Cover letter — draft (2026-10-05; revised 2026-10-06 with the referee revision, to be finalised after G2R)
 
 To the Editors, Physical Review Letters
 
@@ -21,29 +21,32 @@ opacity, the physical state, the random seeds and the observables fixed, we
 compare two reduced representations of the redistribution of absorbed
 energy across frequency at a matched number of archetypal exit
 distributions: a coarse graining into contiguous frequency groups, and a
-global non-negative factorisation with many more free parameters. The
-global representation reproduces the microscopic redistribution events
-roughly twice as well and the emergent broad-band light roughly twenty
-times worse. The reduced model that best reproduces microscopic lanthanide
-fluorescence is not the model that best reproduces the light; frequency
-locality, not microscopic reconstruction error, is the structure the
-radiation samples.
+global non-negative factorisation with many more free parameters. At
+thirty-two archetypes the global representation reproduces the
+microscopic redistribution events roughly twice as well and the emergent
+broad-band light roughly twenty times worse. The reduced model that best
+reproduces microscopic lanthanide fluorescence is not the model that best
+reproduces the light; microscopic reconstruction error is not the
+criterion that selects the representation the radiation samples. [After
+G2R: whether frequency adjacency itself carries the transport-relevant
+structure, beyond rank or parameter count, is settled by a preregistered
+ablation of the frequency ordering at fixed block count.]
 
 The inversion is not an anchor-state curiosity. The frequency-local
 operator remains compact across gas temperature, density, illumination and
 a realistic thirteen-ion mixture, where four frequency groups suffice while
-the best scalar thermalisation closure misses by 1.7 magnitudes. It is,
-however, state dependent: its parameters interpolate along single state
-coordinates but not along a coupled physical trajectory, and for one ion
-its required resolution changes with the state. We state these boundaries
-as results.
+the scalar thermalisation closure, tuned to the same criterion, misses by
+more than one and a half magnitudes. It is, however, state dependent: its
+parameters interpolate along single state coordinates, the one coupled
+physical trajectory tested required a refit, and for one ion its required
+resolution changes with the state. We state these boundaries as results.
 
 We believe the Letter is of interest beyond kilonova physics. Goal-oriented
 model reduction has long held that the appropriate reduced model depends
 on the quantity of interest; this Letter provides a controlled physical
 realisation in which the microscopically better model is measurably the
-worse transport model, and identifies the organising principle the
-microscopic criterion misses. Every number in the manuscript is generated
+worse transport model, and shows that the representation the light
+accepts is the one that keeps contiguous frequencies together. Every number in the manuscript is generated
 from a frozen, publicly archived record; the three experiments were
 preregistered with their thresholds and readings fixed before the runs,
 and every amendment made during execution is recorded.

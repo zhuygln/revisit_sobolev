@@ -9,7 +9,9 @@ by hand (the standing rule after Paper IV's fabricated-table incident).
 
 Sources: paperB/gate1/gate1_verdict.json (G1, F67), paperB/r2m/r2m_verdict.json
 (the robustness check, F68), paperB/audit/exit_tables.json (the exit-table
-audit, F68) and paperB/gate2/gate2_verdict.json (G2, F69). A pure function of
+audit, F68), paperB/gate2/gate2_verdict.json (G2, F69), paperB/gate3/gate3_verdict.json
+(G3, F70), paperB/scalar/minimax.json (the joint minimax scalar, 2026-10-06) and
+paperB/cost/costs.json (the cost layers, 2026-10-06). A pure function of
 the committed JSONs: no transport is run.
 """
 import argparse
@@ -40,8 +42,10 @@ def build():
     aud, aud_rel, aud_sha = load("paperB/audit/exit_tables.json")
     g2, g2_rel, g2_sha = load("paperB/gate2/gate2_verdict.json")
     g3, g3_rel, g3_sha = load("paperB/gate3/gate3_verdict.json")
+    mm, mm_rel, mm_sha = load("paperB/scalar/minimax.json")
+    co, co_rel, co_sha = load("paperB/cost/costs.json")
 
-    h = dict(sources={g1_rel: g1_sha, r2m_rel: r2m_sha, aud_rel: aud_sha, g2_rel: g2_sha, g3_rel: g3_sha},
+    h = dict(sources={g1_rel: g1_sha, r2m_rel: r2m_sha, aud_rel: aud_sha, g2_rel: g2_sha, g3_rel: g3_sha, mm_rel: mm_sha, co_rel: co_sha},
              ions=list(IONS), ion_names=NAME, decisive=list(DECISIVE))
 
     # ---- G1 (F67) ----
@@ -90,9 +94,11 @@ def build():
         h["g2"]["per_ion"][ion] = dict(
             k_local=r["k_local"], k_global=r["k_global"], L_star=r["L_star"], f_star=r["f_star"],
             H1=r["H1"], H2=r["H2"], live=r["live_bands"],
-            local=[dict(k=int(k), band=v["band_max"], event=v["event"], n_params=v["n_params"])
+            local=[dict(k=int(k), band=v["band_max"], colour=v["colour_max"], joint=max(v["band_max"], v["colour_max"]),
+                        event=v["event"], n_params=v["n_params"], passes=v["passes"])
                    for k, v in sorted(r["local"].items(), key=lambda kv: int(kv[0]))],
-            glob=[dict(k=int(k), band=v["band_max"], event=v["event"], n_params=v["n_params"])
+            glob=[dict(k=int(k), band=v["band_max"], colour=v["colour_max"], joint=max(v["band_max"], v["colour_max"]),
+                       event=v["event"], n_params=v["n_params"], passes=v["passes"])
                   for k, v in sorted(r["global_nmf"].items(), key=lambda kv: int(kv[0]))],
             trunc=[dict(f=float(f), band=v["band_max"], rho=v["rho_exit"], n_exit=v["n_exit"])
                    for f, v in sorted(r["truncation"].items(), key=lambda kv: float(kv[0]))],
@@ -103,9 +109,19 @@ def build():
     def at(ion, fam, k):
         return next(e for e in h["g2"]["per_ion"][ion][fam] if e["k"] == k)
 
+    def r_diag(ion):
+        d = g2["per_ion"][ion]["diagnostic"]
+        return None if not d else bool(d["events_vs_observables"])
+
+    def r_diag_k(ion):
+        d = g2["per_ion"][ion]["diagnostic"]
+        return None if not d else int(d["k"])
+
     h["g2"]["contrast"] = {ion: dict(
         k=K, event_global=at(ion, "glob", K)["event"], event_local=at(ion, "local", K)["event"],
         band_global=at(ion, "glob", K)["band"], band_local=at(ion, "local", K)["band"],
+        colour_global=at(ion, "glob", K)["colour"], colour_local=at(ion, "local", K)["colour"],
+        matched_k=r_diag_k(ion), events_vs_observables_at_matched=r_diag(ion),
         params_global=at(ion, "glob", K)["n_params"], params_local=at(ion, "local", K)["n_params"],
         event_ratio=at(ion, "local", K)["event"] / at(ion, "glob", K)["event"],
         band_ratio=at(ion, "glob", K)["band"] / at(ion, "local", K)["band"]) for ion in IONS}
@@ -129,7 +145,11 @@ def build():
                               interp_whole_band=i["whole"]["band"] if i else None,
                               interp_whole_colour=i["whole"]["colour"] if i else None,
                               interp_matrix_band=i["matrix_only"]["band"] if i else None,
-                              interp_matrix_colour=i["matrix_only"]["colour"] if i else None, lam=i["lam"] if i else None))
+                              interp_matrix_colour=i["matrix_only"]["colour"] if i else None, lam=i["lam"] if i else None,
+                              fresh_joint=max(r16["band"], r16["colour"]),
+                              anchor_joint=max(t["band"], t["colour"]) if t else None,
+                              interp_whole_joint=max(i["whole"]["band"], i["whole"]["colour"]) if i else None,
+                              interp_matrix_joint=max(i["matrix_only"]["band"], i["matrix_only"]["colour"]) if i else None))
         readable = [f for f in fresh if not f["gray"]]
         failing = [f for f in readable if not f["exists"]]
         h["g3"]["per_ion"][ion] = dict(
@@ -161,6 +181,28 @@ def build():
     kr = pc["k_rec"]
     h["g3"]["part_c"] = dict(k_rec=kr, band=pc["table"]["Arec"][str(kr)]["band"], colour=pc["table"]["Arec"][str(kr)]["colour"],
                              eps_star=pc["eps_star"]["eps"], eps_err=pc["eps_star"]["max_dm"], n_ions=13)
+    # ---- the fair scalar comparator (the referee's point, 2026-10-06): the joint minimax eps from the existing grids ----
+    h["minimax"] = dict(rule=mm["rule"], per_record={})
+    for key, r in mm["per_record"].items():
+        h["minimax"]["per_record"][key] = dict(
+            record=r["record"], live=r["live_bands"],
+            prereg_eps=r["prereg"]["eps"], prereg_band=r["prereg"]["max_band"], prereg_colour=r["prereg"]["max_colour"],
+            prereg_joint=r["prereg"]["joint"],
+            band_eps=r["band_minimax"]["eps"], band_band=r["band_minimax"]["max_band"],
+            mm_eps=r["joint_minimax"]["eps"], mm_band=r["joint_minimax"]["max_band"], mm_colour=r["joint_minimax"]["max_colour"],
+            mm_joint=r["joint_minimax"]["joint"], mm_interior=r["joint_minimax"]["interior"])
+    # ---- what the operator costs, from the records (offline / stored / online) ----
+    h["cost"] = dict(note=co["note"], per_record={}, r2m_60NdII=co.get("r2m_60NdII"))
+    for key, d in co["per_record"].items():
+        h["cost"]["per_record"][key] = dict(
+            record=d["record"], op_tag=d["op_tag"], ng=d["stored"]["ng"], n=d["n"], seeds=d["seeds"],
+            build_s=d["offline"]["build_wall_s"], build_packets=d["offline"]["build_packets"], kernel_events=d["offline"]["kernel_events"],
+            matrix_bytes=d["stored"]["matrix_bytes"], exit_lines=d["stored"]["exit_lines"], op_kb=d["stored"]["serialized_kb"],
+            ref_s=d["online"]["ref_wall_s"], op_s=d["online"]["op_wall_s"], op_over_ref=d["online"]["op_over_ref"],
+            scalar_s=d["online"].get("scalar_wall_s"), scalar_over_ref=d["online"].get("scalar_over_ref"),
+            ref_ev_per_pkt=d["online"]["ref_events_per_packet"], op_ev_per_pkt=d["online"]["op_events_per_packet"])
+    ratios = [d["op_over_ref"] for d in h["cost"]["per_record"].values()]
+    h["cost"]["op_over_ref_min"] = min(ratios); h["cost"]["op_over_ref_max"] = max(ratios)
     return h
 
 

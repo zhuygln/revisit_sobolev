@@ -714,3 +714,192 @@ repeated.
 `gate3_support.json`; figures `docs/figures/paperB/gate3_*.{pdf,png}`.
 `analyse.py` refuses a record whose seeds, packet count, grids or N_g = 16
 differ from this section.
+
+---
+
+## G2R — the frequency-adjacency ablation (preregistered 2026-10-06; not run until the PI approves this section)
+
+**Why.** The referee's reading of the PRL draft (the PI's decision,
+`plan_review.md` 2026-10-06): the inversion of G2 is measured, but it
+compares two differently optimised families — the local family at block
+count N_g against a rank-k factorisation — and so does not by itself
+show that *adjacency in frequency* rather than *low rank* or *parameter
+count* is what the light samples. "Locality and low rank are not mutually
+exclusive." The control below destroys adjacency and nothing else.
+
+**The question.** Does keeping neighbouring physical frequencies together
+matter, at fixed block count, rank bound, parameter count, exit tables,
+fine operator, build events, evaluation seeds and transport?
+
+**Construction** (`paperB/gate2r/operators_perm.py`). G2's local family is
+the 128-group fine energy matrix (G1's log-spaced edges, built from
+`R2build` on the build seeds 101–103) block-coarsened into N_g contiguous
+index blocks and expanded back onto the fine groups, each block column's
+mass spread by the fine exit-energy marginal within it, on the shared
+128-group exit tables (`L128_ng{N_g}`; the block coarse-graining equals
+the aggregation Σ_{i∈I,j∈J} E_i R_ij / Σ_{i∈I} E_i of the fine flow, which
+`tests/test_paperB_gate2r.py` pins against the frozen G2 matrices at
+10⁻¹²). The ablation: **permute the 128 fine indices → apply the same
+block coarse-graining → undo the permutation → transport on the same
+tables.** Per (ion, N_g), 32 orderings: `P000` the physical order
+(identical to `L128_ng{N_g}` by construction and required to reproduce
+it) and `P001 … P031`, the fixed permutations
+`numpy.random.default_rng(1000 + m).permutation(128)`, m = 1 … 31. Every
+ordering has N_g archetypal exit distributions and N_g² matrix
+parameters.
+
+**State, packets, seeds, ions, grid.** G2's state, packets (Ce II 3×10⁵,
+Nd II 10⁶ per seed), evaluation seeds 1–3, build seeds 101–103, live-band
+rule, metrics and thresholds (max |Δm| ≤ 0.10 mag over the live bands and
+max |Δcolour| ≤ 0.10 mag against `R2`). Ce II and Nd II; La II is not run
+(it decides nothing in G2). N_g ∈ {2, 4, 8, 16, 32}, one process per
+(ion, N_g) (`run_g2r.py`), the reference pair `R2build`/`R2` rerun in each
+(deterministic: `R2` must equal G2's record to 10⁻⁶ mag), `K128` and
+`K128build` recorded. After the transport the event-level loss of every
+ordering against the independent `K128` is computed and stored and the
+128×128 matrix of every scrambled ordering is dropped from the record
+(the physical one is kept).
+
+**Statistic per (ion, N_g).** For each ordering the joint transport error
+E_joint = max(max_b |Δm_b|, max_c |Δcolour_c|) against `R2` over the live
+bands and colours. The rank of the physical ordering
+
+    r = 1 + #{ m ≥ 1 : E_joint(m) ≤ E_joint(0) }
+
+(a tie counts against the physical ordering), the permutation p-value
+r/32 (1/32 = 0.031 when it beats every scrambled ordering). Reported
+alongside, never part of the ladder: the scrambled minimum, median and
+maximum, the fraction of scrambled orderings passing the criterion, the
+event-level loss of every ordering with the physical ordering's rank on
+it (so that the referee can see whether scrambled partitions fit the
+microscopic events comparably), and the in-sample TV distance.
+
+**Gray** (per ion; `analyse.py`): G1's conditions 1–4 on every leg; (6)
+`R2` differs from G2's record by more than 10⁻⁶ mag in a live band; (7)
+`P000` differs from G2's `L128_ng{N_g}` leg by more than 10⁻⁶ mag in a
+live band; (10) fewer than 32 orderings in a record; (11) a block count
+of the grid without a record; (12) no K*_local in G2's verdict.
+
+**Readings.** Per decisive ion, on the rank at K*_local (G2's: Ce II 16,
+Nd II 2) and across the grid:
+
+- Green: r = 1 at K*_local **and** r = 1 in at least 4 of the 5 block
+  counts.
+- Red: r > 8 at K*_local (the physical ordering outside the top quartile
+  of the 32).
+- Yellow: everything between.
+- Overall: Gray if either decisive ion is Gray; Red if either is Red;
+  Green if both are Green; Yellow otherwise.
+
+**Decision.** Green → the Letter's mechanism sentence reads "frequency
+adjacency provides transport-relevant structure beyond rank or parameter
+count alone"; the words "locality rather than low rank" are not used in
+any case (a transport-optimised low-rank representation might still
+exist; this control does not exclude it). Red → the locality mechanism
+claim is abandoned and the Letter is reframed around the failure of
+microscopic reconstruction error as the model-selection objective (the
+PI's fallback title: "Microscopic fidelity does not predict observable
+fidelity in lanthanide fluorescence transport"). Yellow → the PI decides
+with the numbers.
+
+**What may not change after the run:** the 31 permutation seeds, the
+N_g grid, the thresholds, the rank statistic and the ladder. What may:
+the packet count upward on a Gray (the whole ion rerun), and bug fixes
+with the run repeated.
+
+**Records** `paperB/gate2r/g2r_<ion>_k<N_g>.json`, `g2r_verdict.json`;
+figure `docs/figures/paperB/g2r_adjacency.{pdf,png}`. `analyse.py` refuses
+a record whose seeds, packet count, permutation seeds or block count
+differ from this section. Expected cost from G2's per-leg times: about
+50 min for Ce II and 7.6 h for Nd II, sequential (`run_all.sh`).
+
+---
+
+## G3U — the paired-seed uncertainty of the near-threshold G3 readings (preregistered 2026-10-06; not run until the PI approves this section)
+
+**Why.** G3's `mags_seed_std` is the scatter of individual legs over
+three seeds; it is not the uncertainty of the closure-minus-reference
+statistic that decides a letter, and the maximum over bands and colours
+carries a winner's-curse bias the scatter does not show. G3U attaches a
+paired-seed interval to every reading that was close to the threshold.
+**It annotates G3; it does not re-gate it.** The frozen letters, C1–C5
+and F70 stand; the Letter carries the interval next to each near-threshold
+reading.
+
+**The affected set is mechanical** (`paperB/gate3u/analyse.py --affected`,
+from the frozen records `gate3/analyse.py` reads — the highest packet count
+per state — and the two blend records): every *decision leg* — for a
+state of a decisive ion `Afix_ng16` (transfer), `Arec_ng16` (existence at
+N_g = 16), `Arec_ng32` (the "recovered at 32" statement), `Aint_ng16` and
+`AintM_ng16` (the interpolants); for a blend every valid leg of the
+families searched for a K* (`Adirect`, `Amix`, `Arec`) — whose max band
+**or** max colour error lies within the window **[0.07, 0.13] mag**. La II
+is excluded by rule. On the frozen records the rule selects 33 legs in 18
+records (13 Ce II states, 4 Nd II states, both blends); the list is
+derived, never typed.
+
+**Rerun** (`run_g3u.py --record <frozen record>`, one process per record).
+`R2build` on the build seeds 101–103 (a rebuild, not scored); the
+reference `R2` and the affected closures on the common evaluation seed set
+**S′ = {1, …, 12}** (the first three are G3's own), the per-seed
+magnitudes stored (`legs.py` now keeps `mags_per_seed`). Packets per G3
+(the frozen record's own count). **The trained operators are preserved:**
+`Arec_ng{N}` is rebuilt from the build seeds, the anchor is loaded from
+the saved `ref` kernel, the interpolants are rebuilt from the saved
+endpoint kernels with the frozen λ, the blend operators from the blend's
+build seeds and the saved single-ion kernels; every operator's matrix is
+compared entry by entry with the matrix in the frozen record
+(`operator_match`), and a difference above 10⁻¹⁰ is Gray. The live bands
+and colours are the state's frozen set (G1's rule on the 3-seed record).
+
+**Statistic.** For seed s and band b, d_{s,b} = m^closure_{s,b} −
+m^ref_{s,b}; colours from the differences of the live pairs. The 12-seed
+point estimate E_joint = max(max_b |mean_s d_{s,b}|, max_c |mean_s
+d_{s,c}|). The paired bootstrap resamples the 12 seed indices with
+replacement (B = 10,000, generator seed 0) and in every replicate
+recomputes the maximum over bands and colours, so the interval carries
+the winner's curse of choosing the largest band or colour. Reported per
+case: the frozen 3-seed values, the 12-seed E_joint, its 68 % and 95 %
+percentile intervals, and P(E_joint ≤ 0.10).
+
+- **DECIDED** if the 95 % interval excludes 0.10 (pass or fail);
+- **WITHIN NOISE** otherwise — the letter is reported with that qualifier
+  in the Letter and as an error bar on Figure 2.
+
+**Gray** per case: operator mismatch; fewer than 12 seeds completed; the
+per-seed scatter over seeds 1–3 differing from the frozen record's
+`mags_seed_std` by more than 10⁻⁶ mag (determinism); G1's conditions 1–4
+on any leg, an invalid ledger excluding that leg's seed and being
+disclosed.
+
+**What may not change after the run:** the window, the seed set, the
+bootstrap size and seed, the interval levels, the decided/within-noise
+rule. What may: bug fixes with the run repeated.
+
+**Records** `paperB/gate3u/g3u_<axis>_<state>_<ion>.json`,
+`g3u_partb_blend3.json`, `g3u_partc_p1blend.json`, `g3u_verdict.json`.
+Expected cost from G3's per-leg times: about 1 h (Ce II), 1.2 h (Nd II)
+and 1 h (the blends), sequential.
+
+---
+
+## Post-hoc readings that need no transport (2026-10-06, registered before the referee revision was written)
+
+Both are pure functions of the frozen records and change no reading.
+
+- **The fair scalar comparator** (`paperB/scalar/minimax.py`). The
+  operator is judged by max |Δm| over the live bands and max |Δcolour| at
+  one threshold; the preregistered ε* minimises the *mean* band error. From
+  the existing ε grids (G1's final records, G3 part (c)), ε*_mm =
+  argmin_ε max(max_b |Δm_b|, max_c |Δcolour_c|) and its value are reported
+  in the Letter's main comparison; the preregistered ε* stays the gate
+  definition in the End Matter. Known before writing: Nd II band-only
+  minimax 0.822 mag at ε = 0.10 against 1.058 mag at ε* = 0 (the PI's
+  check); the joint values on every record are in `minimax.json`.
+- **The cost layers** (`paperB/cost/costs.py`): offline (the build
+  reference's wall time and events), stored (matrix bytes against exit
+  tables), online (reference, operator and the ε = 0.10 closure, same
+  seeds and packets), from the records' `t_wall`, `serialized_bytes`,
+  `n_exit_samples` and `events_per_packet`, with the stated limitation
+  that the operator does not remove the reference calculation at a new
+  state or mixture.

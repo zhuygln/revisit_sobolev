@@ -9,6 +9,12 @@
 % equivalents; End Matter up to two pages, not counted).
 %
 % Built with revtex4-2 (aps, prl, twocolumn) since 2026-10-05.
+% Referee revision (2026-10-06, the PI's decision in paperB/plan_review.md):
+% the inversion stated as the 32-archetype result; "by construction",
+% "every run", "not separable", "best scalar" corrected; the model equation
+% as implemented (exit tables marginal over the input group); the joint
+% minimax scalar; the cost layers; the mechanism sentence hedged until the
+% preregistered adjacency ablation G2R is read (prl_gate.md "G2R").
 \documentclass[aps,prl,twocolumn,superscriptaddress,nofootinbib,longbibliography]{revtex4-2}
 \usepackage{graphicx}
 \usepackage{amsmath}
@@ -32,18 +38,20 @@ physical state fixed, we compare two reduced representations of the
 redistribution of absorbed energy across frequency: a coarse graining into
 contiguous frequency groups, and a global non-negative factorisation with
 the same number of archetypal exit distributions and many more free
-parameters. The global representation reproduces the microscopic
-redistribution events \PBNdEventRatio\ times better and the emergent
-broad-band light \PBNdBandRatio\ times worse. Frequency locality, not
-fidelity to the microscopic distribution, is the structure the radiation
-samples. The local operator reaches a \PBdmMax~mag photometric criterion
-with a handful of groups where the best scalar thermalisation closure
-misses by more than a magnitude; it remains compact across gas
-temperature, density, illumination and a realistic \PBBlendNIons-ion
-mixture, where \PBBlendKrec\ groups suffice and the scalar closure misses
-by \PBBlendEpsErr~mag; but it is state dependent, interpolable along single
-state coordinates and not along a coupled trajectory, and for one ion its
-required resolution changes with the state.
+parameters. At \PBContrastK\ archetypes on Nd\,\textsc{ii} the global
+representation reproduces the microscopic redistribution events
+\PBNdEventRatio\ times better and the emergent broad-band light
+\PBNdBandRatio\ times worse. Fidelity to the microscopic distribution is
+not the criterion that selects the representation the radiation samples.
+The local operator reaches a \PBdmMax~mag photometric criterion with a
+handful of groups where the scalar thermalisation closure, tuned to the
+same criterion, misses by \PBNdEpsMMErr\ and \PBCeEpsMMErr~mag; it
+remains compact across gas temperature, density, illumination and a
+realistic \PBBlendNIons-ion mixture, where \PBBlendKrec\ groups suffice
+and the scalar closure misses by \PBBlendEpsMMErr~mag; but it is state
+dependent, interpolable along single state coordinates while the one
+coupled trajectory tested required a refit, and for one ion its required
+resolution changes with the state.
 \end{abstract}
 
 \maketitle
@@ -87,15 +95,16 @@ energy-conserving downward macroatom as the unreduced reference, and build
 reduced operators from the reference's own events on one set of random
 seeds, scoring them on another. Three preregistered gates then ask, in
 order, whether a compact operator exists where the scalar closure fails;
-whether the structure it exploits is locality in frequency or a globally
-low rank of the redistribution law; and whether that structure survives
-changes of state and composition --- the three results sections below. The second gate is
-the result of this Letter. At matched complexity, the representation that
-reproduces the microscopic redistribution better reproduces the light
-worse, and the data identify frequency locality as the missing organising
-principle. In lanthanide fluorescence transport, generic fidelity to the
-microscopic redistribution does not identify the degrees of freedom that
-control the emergent radiation; a frequency-local representation does.
+whether a representation that keeps contiguous frequencies together
+reaches the observables with no more archetypal exit distributions than a
+global low-rank one; and whether that structure survives changes of state
+and composition --- the three results sections below. The second gate is
+the result of this Letter. At matched archetype count and at the high end
+of that count, the representation that reproduces the microscopic
+redistribution better reproduces the light worse. In lanthanide
+fluorescence transport, generic fidelity to the microscopic redistribution
+does not identify the degrees of freedom that control the emergent
+radiation; a frequency-local representation does.
 
 \section{Set-up}
 \label{sec:method}
@@ -112,7 +121,7 @@ is a downward macroatom: on absorption the packet walks the radiative
 cascade with branching probabilities $A\beta$ until it exits in a line
 whose photon escapes, conserving energy at every step; the identity
 between injected and accounted energy is verified to $10^{-10}$ on every
-run.
+run that enters a reading (End Matter).
 
 The reduced operator is built from the reference's events (absorbed
 frequency, exit frequency, energy before and after). On $N_g$ log-spaced
@@ -136,10 +145,13 @@ readings and the amendments made during the runs are in the End Matter.
 
 \section{A compact operator exists where a scalar closure fails}
 \label{sec:compression}
-The optimally tuned scalar misses the reference by \PBCeEpsErr~mag on
-Ce\,\textsc{ii} and \PBNdEpsErr~mag on Nd\,\textsc{ii}; the group operator
-meets the criterion at $N_g=\PBCeNgStar$ and $N_g=\PBNdNgStar$
-(Fig.~\ref{fig:flagship}a). The compression is not an artefact of one
+The scalar closure at its minimax $\epsilon$ --- the grid value that
+minimises the same joint band-and-colour statistic the operator is judged
+by --- misses the reference by \PBCeEpsMMErr~mag on Ce\,\textsc{ii} and
+\PBNdEpsMMErr~mag on Nd\,\textsc{ii} (the preregistered $\epsilon^\star$,
+which minimises the mean band error, misses by \PBCeEpsErr\ and
+\PBNdEpsErr~mag; End Matter); the group operator meets the criterion at
+$N_g=\PBCeNgStar$ and $N_g=\PBNdNgStar$ (Fig.~\ref{fig:flagship}a). The compression is not an artefact of one
 cascade prescription: replacing the reference by a radiation-field-driven
 macroatom with internal upward transitions moves the photometry by
 \PBCeShift~mag on Ce\,\textsc{ii}, and an operator rebuilt from that
@@ -155,13 +167,16 @@ reduced model to explain; the explanation is the next section.
 \caption{\textbf{Better on the microscopic events, worse on the light.}
 (a) A scalar closure fails where a small operator succeeds: maximum
 photometric error against the energy-conserving downward macroatom for the
-group operator at $N_g=2\ldots32$ (solid) and the optimally tuned scalar
-$\epsilon^\star$ (dashed); dotted, the criterion. (b)~Photometric error and
-(c)~event-level total-variation loss against the number of archetypal exit
-distributions, for local frequency coarsening (solid) and the global
-factorisation (open). (d)~The two against each other: the global points
-move left, fitting the microscopic redistribution better, while staying
-high, reproducing the emergent light worse.}
+group operator at $N_g=2\ldots32$ (solid) and the scalar closure at its
+preregistered $\epsilon^\star$ (dashed); dotted, the criterion.
+(b)~Band error and (c)~event-level total-variation loss against the number
+of archetypal exit distributions, for local frequency coarsening (solid)
+and the global factorisation (open). (d)~The two against each other: at
+the high-count end of the ladder the global points move left, fitting the
+microscopic redistribution better, while staying high, reproducing the
+emergent light worse. Panels (b)--(d) show the band error; the criterion
+also bounds the colour error, and the contrast quoted in the text is the
+\PBContrastK-archetype point.}
 \label{fig:flagship}
 \end{figure*}
 
@@ -173,17 +188,21 @@ $N_g$ contiguous frequency blocks, and a global non-negative factorisation
 into $k$ archetypal exit distributions mixed freely for every fine input
 group. The matched axis is the number of archetypes. At equal count the
 global family is far the more expressive, with \PBParamsGlobal\ free
-numbers against \PBParamsLocal\ at \PBContrastK\ archetypes, and it fits
-the microscopic redistribution better by construction. If the compression
-of the first results section reflected a globally low-rank
-redistribution law, the global family would reach the photometric
-criterion with fewer archetypes.
+numbers against \PBParamsLocal\ at \PBContrastK\ archetypes. The
+factorisation minimises a Frobenius reconstruction error of the fine
+matrix, not the energy-weighted total-variation loss reported here, so its
+microscopic advantage is measured, not built in: it holds at the high end
+of the ladder and not at every count. If the compression of the first
+results section reflected a globally low-rank redistribution law, the
+global family would reach the photometric criterion with fewer
+archetypes.
 
 It does not. On Ce\,\textsc{ii} the local operator passes at
 \PBCeKlocal\ archetypes and the global one at \PBCeKglobal; on
-Nd\,\textsc{ii} the local operator passes at \PBNdKlocal\ and the global
-family is \PBNdKglobal\ at every rank tried. The contrast is sharpest where
-both are measured at the same count. At \PBContrastK\ archetypes on
+Nd\,\textsc{ii} the local operator passes at \PBNdKlocal\ and no member
+of the global family passes at any rank tried (its count is
+\PBNdKglobal). The contrast is sharpest at the high end of the ladder,
+where both families are well resolved. At \PBContrastK\ archetypes on
 Nd\,\textsc{ii} the global operator's event-level total-variation loss is
 \PBNdEventGlobal\ against the local operator's \PBNdEventLocal, and its
 photometric error is \PBNdBandGlobal~mag against \PBNdBandLocal~mag:
@@ -193,24 +212,35 @@ E_{\rm obs}^{\rm global} > E_{\rm obs}^{\rm local},
 \label{eq:inversion}
 \end{equation}
 by factors of \PBNdEventRatio\ and \PBNdBandRatio\ respectively, and the
-same inversion holds on every ion (Fig.~\ref{fig:flagship}b--d). The degrees
-of freedom that minimise a generic distance between microscopic
+same inversion holds on every ion at that count
+(Fig.~\ref{fig:flagship}b--d; colours in Table~\ref{tab:contrast}). It is
+a statement about the high-count end of the ladder, not about every rank:
+at the local operator's own passing count the global family fits the
+events better on Ce\,\textsc{ii} (\PBCeKlocal\ archetypes) and does not
+on Nd\,\textsc{ii} (\PBNdKlocal), where its event loss is the larger. The
+degrees of freedom that minimise a generic distance between microscopic
 redistribution distributions are not the degrees of freedom that carry the
-radiation field. What the radiation samples is that neighbouring absorbed
-frequencies share a transport-relevant response: an operator that keeps
-contiguous frequencies together reproduces the light with a few blocks,
-and a factorisation free to mix distant frequencies, however well it
-reconstructs the events, does not.
+radiation field. The operator that keeps contiguous frequencies together
+reproduces the light with a few blocks; the factorisation, free to mix
+distant frequencies, does not, however well it reconstructs the events at
+the counts where it does. Whether adjacency itself carries the
+transport-relevant structure, rather than the rank bound or the parameter
+count the two families do not share, is the subject of a preregistered
+ablation of the frequency ordering at fixed block count (End Matter).
 
-The compression is two-level. Writing
-$P(\nu_{\rm out}\mid\nu_{\rm in}) = P(j\mid i)\,P(\nu_{\rm out}\mid i,j)$,
-the first factor is extremely coarse, while the second still needs a sparse
-but real set of exit lines: truncating the exit tables by retained energy,
-the light needs \PBCeLstar\ of the distinct exit lines on Ce\,\textsc{ii}
-and \PBNdLstar\ on Nd\,\textsc{ii} at the same thresholds. We do not claim
-that the atomic network has only a handful of degrees of freedom. We claim
-that the part of it the transport needs is organised by frequency locality,
-and that microscopic reconstruction error does not find it.
+The compression is two-level. The reduced model as implemented is
+$P_{\rm red}(\nu_{\rm out}\mid\nu_{\rm in}) \approx
+P(j\mid i)\,P(\nu_{\rm out}\mid j)$ with $i=i(\nu_{\rm in})$: the
+group-to-group factor is extremely coarse, and once the output group is
+chosen the exit line is drawn from that group's table, which no longer
+remembers which input group produced it. The second factor still needs a
+sparse but real set of exit lines: truncating the tables by retained
+energy, the light needs \PBCeLstar\ of the distinct exit lines on
+Ce\,\textsc{ii} and \PBNdLstar\ on Nd\,\textsc{ii} at the same
+thresholds. We do not claim that the atomic network has only a handful of
+degrees of freedom. We claim that microscopic reconstruction error does
+not find the part of it the transport needs, and that a representation
+keeping contiguous frequencies together does.
 
 
 
@@ -243,9 +273,11 @@ tabulated family $R(\theta)$. Its boundary is the coupled trajectory: at
 three days on Nd\,\textsc{ii} the transported operator misses by
 \PBNdTrajAnchor~mag, the interpolant by \PBNdTrajWhole~mag, and only the
 operator rebuilt there passes, at \PBNdTrajKrec\ groups with
-\PBNdTrajFresh~mag. The family is compact but not separable in
-independently varied coordinates; interpolation was tested one axis at a
-time and the one coupled path tested breaks it. Ce\,\textsc{ii} adds a
+\PBNdTrajFresh~mag. The one-dimensional interpolation that succeeds along
+independently varied coordinates does not predict the tested coupled
+trajectory; the present calculation does not distinguish multivariate
+coupling from insufficient sampling or an inadequate interpolation
+coordinate. Ce\,\textsc{ii} adds a
 second qualification: its rebuilt \PBNgT-group operator fails at
 \PBCeNFreshFail\ of \PBCeNStates\ states, on colour, by at most
 \PBCeWorstColourOver~mag, and a \PBCeKrecMax-group operator passes at
@@ -258,27 +290,30 @@ built on the three-ion blend passes at \PBKdirect\ groups: per-species
 operators do not compose. Yet on the full \PBBlendNIons-ion composition of
 the benchmark state --- the mixture a transport calculation actually needs
 --- the operator built on the blend passes at \PBBlendKrec\ groups
-(\PBBlendBand~mag in band, \PBBlendColour\ in colour) while the best scalar
-closure misses by \PBBlendEpsErr~mag, the widest scalar failure in this
-work. The combined physical system is itself highly compressible even
-though it cannot be assembled from its parts.
+(\PBBlendBand~mag in band, \PBBlendColour\ in colour) while the scalar
+closure at its minimax $\epsilon$ misses by \PBBlendEpsMMErr~mag, the
+widest scalar failure in this work. The combined physical system is itself
+highly compressible even though it cannot be assembled from its parts.
+This demonstrates compression of that mixture at the tested state;
+predictive transfer of a mixture-specific operator to other states has not
+been demonstrated.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{figures/fig2_generality.pdf}
-\caption{\textbf{Transfer is not compression.} Maximum photometric error
+\caption{\textbf{Transfer is not compression.} The decision statistic ---
+the larger of the maximum band error and the maximum colour error ---
 against the state's own reference for the original operator transported
 unchanged (filled squares), the operator rebuilt at the state (open
 circles), and at each axis' interior point the whole-operator interpolant
 from the two bracketing states (filled diamonds; matrix-only interpolant,
 open diamonds). Rows: Ce\,\textsc{ii}, Nd\,\textsc{ii}, the La\,\textsc{ii}
 control; columns: gas temperature, density, source spectrum, and the
-trajectory along which all move together. Dotted: the band criterion; the
-letter is the preregistered reading of each state (A transported operator
-passes; B only the interpolant; C only a fresh fit; D none at \PBNgT\
-groups). The criterion also bounds the colour error, so a circle below the
-line can read D. Grey: states excluded by the preregistered validity
-checks.}
+trajectory along which all move together. Dotted: the criterion, on the
+same statistic; the letter is the preregistered reading of each state (A
+transported operator passes; B only the interpolant; C only a fresh fit;
+D none at \PBNgT\ groups). Grey: states excluded by the preregistered
+validity checks.}
 \label{fig:generality}
 \end{figure*}
 
@@ -288,15 +323,23 @@ Of the order $10^6$ transitions of a lanthanide ion, the transport sees a
 fine distribution of redistribution events; of that distribution, the
 emergent light sees a small frequency-local operator; and most of the
 information between the two is discarded without harm. The decisive
-evidence is the inversion of Eq.~(\ref{eq:inversion}): a representation
-that reproduces the microscopic redistribution better reproduces the light
-worse, so the microscopic distribution is the wrong target for a reduced
-model of this process and frequency locality is the right one. The local
+evidence is the inversion of Eq.~(\ref{eq:inversion}) at
+\PBContrastK\ archetypes: a representation that reproduces the microscopic
+redistribution better reproduces the light worse, so the microscopic
+distribution is the wrong target for a reduced model of this process. The
+representation the light accepts keeps contiguous frequencies together;
+whether adjacency itself, rather than rank or parameter count, is what it
+exploits is the question the preregistered ordering ablation (End Matter)
+settles. The local
 operator is not universal --- it is a state-dependent family, interpolable
-along single coordinates, refit where coordinates move together, with a
-resolution that is itself state-dependent for Ce\,\textsc{ii} --- and it
-does not compose from single species; but on the realistic mixture it is
-as compact as on any single ion. The limitations are those of the
+along single coordinates, refit on the one coupled trajectory tested, with
+a resolution that is itself state-dependent for Ce\,\textsc{ii} --- and it
+does not compose from single species; but on the realistic mixture, at
+the one state tested, it is as compact as on any single ion. It is built
+from the reference's own events, so it does not yet remove the reference
+calculation for a new state or mixture; its practical form is a
+precomputed table $R(\theta)$, plausible along single coordinates and not
+yet established generally. The limitations are those of the
 set-up: single-zone, time-independent, with the radiation field imposed
 and its influence measured only through the source-spectrum axis, on one
 coupled path. None of them touches the inversion, which is measured on
@@ -313,8 +356,10 @@ gate --- the state, the grids, the metrics, the thresholds, the gray
 conditions that invalidate a reading and the readings themselves fixed and
 committed before the run --- and read gray-first.
 Table~\ref{tab:gates} gives the per-ion readings of the first gate (the
-group count at which the operator meets the criterion, the best scalar and
-its error) and of the second (the archetype counts of the local and global
+group count at which the operator meets the criterion, the preregistered
+scalar $\epsilon^\star$ with its maximum band error, and the minimax
+$\epsilon^\star_{\rm mm}$ of the main text with the joint statistic) and
+of the second (the archetype counts of the local and global
 families, and the fraction of exit lines the light needs), with the
 robustness check against the radiation-field-driven macroatom;
 Table~\ref{tab:contrast} the microscopic and observable errors of
@@ -327,6 +372,50 @@ operator against transition matrix alone. The third gate's first reading
 is Red for Ce\,\textsc{ii} (the resolution result above) and its second Red
 for Nd\,\textsc{ii} (the trajectory); its mixture readings are Yellow for
 composability and Green for the realistic blend.
+
+\paragraph{The scalar comparator.} The preregistered $\epsilon^\star$ is
+the grid value minimising the mean band error, reported by its maximum
+band error; the operator is judged by the maximum band and colour error at
+one threshold. The main text therefore quotes the scalar at
+$\epsilon^\star_{\rm mm}$, the grid value minimising that same joint
+statistic, recomputed from the existing grids: \PBNdEpsMM\ on
+Nd\,\textsc{ii} (\PBNdEpsMMErr~mag against \PBNdEpsErr~mag at
+$\epsilon^\star$), \PBCeEpsMM\ on Ce\,\textsc{ii} (\PBCeEpsMMErr~mag),
+and \PBBlendEpsMM\ on the \PBBlendNIons-ion blend (\PBBlendEpsMMErr~mag
+against \PBBlendEpsErr~mag). No reading changes.
+
+\paragraph{Cost.} Table~\ref{tab:cost} separates what the operator costs.
+Offline, the reference macroatom is run on the build seeds and the
+operator is built from its events. Stored, the operator is an
+$N_g\times N_g$ matrix of a few hundred bytes and discrete exit tables of
+up to a few megabytes --- the tables, not the matrix, are the object.
+Online, transport with the operator costs \PBOpOverRefMin--\PBOpOverRefMax\
+of transport with the downward macroatom at the same seeds and packets,
+because one draw from $R_{ij}$ and one from a table replaces a cascade
+that is itself cheap once the line list is in memory; the scalar closure
+at $\epsilon=0.1$ costs \PBNdScalarOverRef\ to
+\PBBlendScalarOverRef\ times the reference because coherent scattering
+multiplies the interactions per packet. The operator therefore does not
+yet remove the reference calculation for a new state or mixture; its
+practical path is a precomputed table $R(\theta)$, which the third gate
+shows to be plausible along single coordinates and not yet established
+generally.
+
+\paragraph{Preregistered controls in progress.} Two were preregistered on
+the referee's reading and are not run at the time of this draft. The
+ordering ablation takes the frozen fine operator of the second gate,
+permutes its frequency indices, applies the same block coarse-graining
+and undoes the permutation, so that the block count, rank bound,
+parameter count, exit tables, events, seeds and transport are unchanged
+and only physical adjacency is destroyed; thirty-one fixed random
+orderings against the physical one, on Ce\,\textsc{ii} and
+Nd\,\textsc{ii} at every block count of the ladder, read by the rank of
+the physical ordering. The paired-seed check re-transports every
+decision leg of the third gate whose error lies within a preregistered
+window of the threshold on twelve common seeds, with the trained
+operators preserved, and reports a paired bootstrap interval on the joint
+statistic that decides each letter.
+% TO BE COMPLETED: the G2R and G3U results replace this paragraph.
 
 \paragraph{Amendments during the runs.} Three were made and are recorded
 in the archived preregistration with what had been seen when each was
@@ -352,9 +441,10 @@ Sobolev code with worldline relativity and energy packets. Its extended
 validation on coarse line-opacity treatments is the subject of a companion
 methods paper (in preparation); the particular tests this Letter depends on
 are documented in the public record cited below and are independent of
-that paper. Every run reported here closes the identity between injected
-and accounted energy to $10^{-10}$, and the record carries each run's
-ledger. The resolved Sobolev transport is pinned against a deterministic
+that paper. Every run that enters a reading closes the identity between
+injected and accounted energy to $10^{-10}$; a run whose ledger fails that
+check is excluded from every reading, as the amendments paragraph
+records, and the record carries each run's ledger. The resolved Sobolev transport is pinned against a deterministic
 formal-solution reference on identical rays, the downward macroatom
 reproduces an explicit level-by-level cascade's energy per line digit for
 digit, and every operator is built on seeds disjoint from those it is
@@ -393,10 +483,12 @@ macroatom with internal upward transitions, the reference itself moves
 
 \begin{table*}[p]
 \centering
-\caption{Microscopic against observable error at \PBContrastK\ archetypes.}
+\caption{Microscopic against observable error at \PBContrastK\ archetypes,
+in band and in colour.}
 \label{tab:contrast}
 \input{tab_contrast}
 \end{table*}
+
 
 \begin{table*}[p]
 \centering
@@ -407,6 +499,17 @@ interior-point interpolation error (whole operator / transition matrix
 only) on the three single-coordinate axes, in mag.}
 \label{tab:generality}
 \input{tab_generality}
+\end{table*}
+
+\begin{table*}[p]
+\centering
+\caption{What the operator costs, from the records: the build reference
+run (three build seeds at the stated packets) and its events, the stored
+operator at the gate's group count (matrix against exit tables), and the
+wall time of the reference, the operator and the scalar closure at
+$\epsilon=0.1$ on the same evaluation seeds and packets.}
+\label{tab:cost}
+\input{tab_cost}
 \end{table*}
 
 \bibliographystyle{apsrev4-2}
