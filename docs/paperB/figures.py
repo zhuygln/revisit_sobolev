@@ -3,13 +3,27 @@
 same frozen record the manuscript's macros come from; no number is typed
 here). The PI froze these two on 2026-09-22.
 
-  Figure 1 -- Compression survives the physics.  For La II, Ce II and Nd II:
+  (Revised 2026-10-05, the PI: the discovery is the first figure.)
+
+  Figure 1 -- the flagship. (a) a scalar closure fails where a small
+      operator succeeds (G1); (b-d) better on the microscopic events, worse
+      on the light (G2). Figure 2 -- generality (G3). End Matter figure --
+      the operator follows the fluorescence physics it is built from (the
+      R2M robustness check). The former standalone figures are kept
+      reproducible below.
+
+  Former Figure 1 -- Compression survives the physics.  For La II, Ce II and Nd II:
       the optimally tuned scalar eps* and the group operators R_2 ... R_32
       against the energy-conserving downward macroatom, with the R2M
       robustness check (the same operator rebuilt from the
       radiation-field-driven macroatom's events) on the right.
       The message: eps* fails where a small R succeeds, and R follows the
       reference physics when that physics changes.
+
+  Figure 3 -- Transfer is not compression.  Per ion and state axis, the
+      anchor operator transported unchanged, the operator rebuilt at the
+      state, and the whole-operator interpolation at the interior point,
+      with the preregistered A/B/C/D reading; G3 (F70).
 
   Figure 2 -- Why the compression works.  Transport error and event-level
       error against the number of archetypal exit distributions, for local
@@ -51,11 +65,8 @@ def save(fig, out_dir, stem):
     return written
 
 
-def figure1(h, out_dir):
-    """eps* fails where a small R succeeds; and R follows the physics."""
+def _panel_existence(ax, h):
     names, dm_max = h["ion_names"], h["g1"]["dm_max"]
-    fig, axes = plt.subplots(1, 2, figsize=(11, 4.1), gridspec_kw=dict(width_ratios=[1.45, 1]))
-    ax = axes[0]
     for ion in h["ions"]:
         r = h["g1"]["per_ion"][ion]; c = COL[ion]
         ng = [t["ng"] for t in r["table"]]; band = [t["band_max"] for t in r["table"]]
@@ -69,31 +80,11 @@ def figure1(h, out_dir):
     ax.set_xticks([2, 4, 8, 16, 32]); ax.set_xticklabels(["2", "4", "8", "16", "32"])
     ax.set_xlabel("frequency groups $N_g$")
     ax.set_ylabel(r"max $|\Delta m|$ over live bands  [mag]")
-    ax.set_title("a. the scalar fails where a small operator succeeds", fontsize=9, loc="left")
     ax.legend(fontsize=7, loc="lower left")
 
-    ax = axes[1]
-    x = np.arange(len(h["ions"])); w = 0.28
-    ref_shift = [abs(h["r2m"]["per_ion"][i]["shift_max"]) for i in h["ions"]]
-    rebuilt = [h["r2m"]["per_ion"][i]["rebuilt_band"] for i in h["ions"]]
-    downward = [h["r2m"]["per_ion"][i]["downward_band"] for i in h["ions"]]
-    ax.bar(x - w, ref_shift, w, color="0.55", label="the reference itself moves")
-    ax.bar(x, downward, w, color="#CC79A7", label=r"$R_8$ trained on the old reference")
-    ax.bar(x + w, rebuilt, w, color="#009E73", label=r"$R_8$ rebuilt on the new reference")
-    ax.axhline(dm_max, color="k", ls=":", lw=1.2)
-    ax.set_yscale("log"); ax.set_xticks(x); ax.set_xticklabels([names[i] for i in h["ions"]])
-    ax.set_ylabel(r"max $|\Delta m|$ vs the new reference  [mag]")
-    ax.set_title("b. when the fluorescence physics changes, the operator follows it", fontsize=9, loc="left")
-    ax.legend(fontsize=7, loc="lower left", framealpha=0.95)
-    ax.set_ylim(top=max(ref_shift) * 6)
-    fig.tight_layout()
-    return save(fig, out_dir, "fig1_compression")
 
-
-def figure2(h, out_dir):
-    """Locality, not rank; and events are not observables."""
+def _panels_inversion(axes, h, legend=True):
     names, dm_max = h["ion_names"], h["g1"]["dm_max"]
-    fig, axes = plt.subplots(1, 3, figsize=(15, 4.1))
     for ion in h["ions"]:
         r = h["g2"]["per_ion"][ion]; c = COL[ion]
         loc, glo = r["local"], r["glob"]
@@ -110,19 +101,113 @@ def figure2(h, out_dir):
         ax.set_xticklabels(["1", "2", "4", "8", "16", "32"])
         ax.set_xlabel("archetypal exit distributions")
     axes[0].set_yscale("log"); axes[0].set_ylabel(r"max $|\Delta m|$  [mag]")
-    axes[0].set_title("a. transport error (solid: local, open: global)", fontsize=9, loc="left")
-    axes[0].legend(fontsize=6, ncol=2)
+    if legend:
+        axes[0].legend(fontsize=6, ncol=2)
     axes[1].set_ylabel("event-level total-variation loss")
-    axes[1].set_title("b. microscopic error: the global family wins", fontsize=9, loc="left")
     axes[2].set_yscale("log"); axes[2].set_xlabel("event-level total-variation loss")
     axes[2].set_ylabel(r"max $|\Delta m|$  [mag]")
-    axes[2].set_title("c. better on events, worse on the light", fontsize=9, loc="left")
     axes[2].annotate("", xy=(0.08, 0.88), xytext=(0.40, 0.88), xycoords="axes fraction", textcoords="axes fraction",
                      arrowprops=dict(arrowstyle="->", color="0.4", lw=1.1))
     axes[2].annotate("the global family fits the events better", (0.10, 0.91), xycoords="axes fraction", fontsize=7, color="0.35")
     axes[2].annotate("passes", (0.02, 0.10), xycoords="axes fraction", fontsize=7, color="0.35")
+
+
+def figure1(h, out_dir):
+    """The flagship (the PI, 2026-10-05): the discovery is the first figure.
+    (a) a scalar closure fails where a small operator succeeds (G1);
+    (b-d) better on the microscopic events, worse on the light (G2)."""
+    # two by two: at PRL full width (about 7 in) a 1 x 4 strip renders its
+    # labels below 4 pt; this layout keeps them near 7 pt
+    fig, ax2 = plt.subplots(2, 2, figsize=(9.6, 7.6))
+    axes = [ax2[0][0], ax2[0][1], ax2[1][0], ax2[1][1]]
+    _panel_existence(axes[0], h)
+    _panels_inversion(axes[1:], h)
+    axes[0].set_title("a. a scalar closure fails; a small operator succeeds", fontsize=9, loc="left")
+    axes[1].set_title("b. transport error (solid: local, open: global)", fontsize=9, loc="left")
+    axes[2].set_title("c. microscopic error: the global family wins", fontsize=9, loc="left")
+    axes[3].set_title("d. better on the events, worse on the light", fontsize=9, loc="left")
+    fig.tight_layout()
+    return save(fig, out_dir, "fig1_flagship")
+
+
+def figure_robustness(h, out_dir):
+    """End Matter: the operator follows the fluorescence physics it is built
+    from (the R2M robustness check, F68)."""
+    names, dm_max = h["ion_names"], h["g1"]["dm_max"]
+    fig, ax = plt.subplots(figsize=(6.0, 4.0))
+    x = np.arange(len(h["ions"])); w = 0.28
+    ref_shift = [abs(h["r2m"]["per_ion"][i]["shift_max"]) for i in h["ions"]]
+    rebuilt = [h["r2m"]["per_ion"][i]["rebuilt_band"] for i in h["ions"]]
+    downward = [h["r2m"]["per_ion"][i]["downward_band"] for i in h["ions"]]
+    ax.bar(x - w, ref_shift, w, color="0.55", label="the reference itself moves")
+    ax.bar(x, downward, w, color="#CC79A7", label=r"$R_8$ trained on the old reference")
+    ax.bar(x + w, rebuilt, w, color="#009E73", label=r"$R_8$ rebuilt on the new reference")
+    ax.axhline(dm_max, color="k", ls=":", lw=1.2)
+    ax.set_yscale("log"); ax.set_xticks(x); ax.set_xticklabels([names[i] for i in h["ions"]])
+    ax.set_ylabel(r"max $|\Delta m|$ vs the new reference  [mag]")
+    ax.set_ylim(top=max(ref_shift) * 6)
+    ax.legend(fontsize=7, loc="lower left", framealpha=0.95)
+    fig.tight_layout()
+    return save(fig, out_dir, "figEM_robustness")
+
+
+def figure2(h, out_dir):
+    """Kept for the record: the three inversion panels alone (the former
+    Figure 2); the Letter now carries them inside Figure 1."""
+    fig, axes = plt.subplots(1, 3, figsize=(15, 4.1))
+    _panels_inversion(axes, h)
     fig.tight_layout()
     return save(fig, out_dir, "fig2_mechanism")
+
+
+AXLAB = {"T": r"$\log T_{\rm gas}$", "D": r"$\log n_{\rm ion}$", "J": r"$\log T_{\rm core}$", "P": r"$\log t$"}
+CLS = {"A": "#009E73", "B": "#0072B2", "C": "#E69F00", "D": "#D55E00", "GRAY": "0.6"}
+
+
+def figure3(h, out_dir):
+    """The Letter's Figure 2 -- transfer is not compression. Per ion (rows)
+    and state axis (columns): the anchor operator transported unchanged
+    (filled squares), the operator rebuilt at the state (open circles), and
+    at the interior point the whole-operator interpolation (diamonds), each
+    against the state's own reference; the letter is the preregistered
+    reading (A transfers, B interpolates, C only a fresh fit passes, D none)."""
+    g3 = h["g3"]; names = h["ion_names"]; dm_max = h["g1"]["dm_max"]
+    ions = [i for i in ("58CeII", "60NdII", "57LaII") if i in g3["per_ion"]]
+    axes_names = g3["axes"]
+    # sized for PRL full width: 12 panels at (3.0 x 2.5) in each render at ~0.6 scale,
+    # which keeps tick labels near 6 pt (the earlier 3.6 x 2.9 fell below 5 pt)
+    fig, axes = plt.subplots(len(ions), len(axes_names), figsize=(3.0 * len(axes_names), 2.5 * len(ions)), squeeze=False, sharey="row")
+    for ri, ion in enumerate(ions):
+        sts = g3["per_ion"][ion]["states"]
+        for ci, ax_name in enumerate(axes_names):
+            ax = axes[ri][ci]
+            for st in sorted((x for x in sts if x["axis"] == ax_name), key=lambda x: x["coord_value"]):
+                c = st["coord_value"]; col = CLS[st["cls"]]
+                ax.plot([c], [st["fresh_band"]], "o", color=col, ms=6, mfc="none", mew=1.4)
+                if st["anchor_band"] is not None:
+                    ax.plot([c], [st["anchor_band"]], "s", color=col, ms=6)
+                if st["interp_whole_band"] is not None:
+                    ax.plot([c], [st["interp_whole_band"]], "D", color=col, ms=6)
+                    ax.plot([c], [st["interp_matrix_band"]], "d", color=col, ms=5, mfc="none")
+                top = max(st["fresh_band"], st["anchor_band"] or 0.0, st["interp_whole_band"] or 0.0)
+                ax.annotate(st["cls"], (c, top), textcoords="offset points", xytext=(0, 5), ha="center", fontsize=9, color=col)
+            ax.axhline(dm_max, color="k", ls=":", lw=1)
+            ax.set_yscale("log"); ax.set_ylim(2e-3, 1.5)
+            ax.tick_params(labelsize=9)
+            if ri == len(ions) - 1:
+                ax.set_xlabel(AXLAB[ax_name])
+            if ci == 0:
+                ax.set_ylabel(f"{names[ion]}\nmax $|\\Delta m|$ vs $R_2(\\theta)$ [mag]", fontsize=9)
+            if ri == 0:
+                ax.set_title({"T": "gas temperature", "D": "density", "J": "source spectrum", "P": "trajectory (all coordinates)"}[ax_name], fontsize=10)
+    from matplotlib.lines import Line2D
+    hs = [Line2D([], [], marker="s", color="0.3", ls="", ms=6, label="anchor $R_{16}$ transported"),
+          Line2D([], [], marker="o", color="0.3", ls="", ms=6, mfc="none", mew=1.4, label="fresh $R_{16}$ built at the state"),
+          Line2D([], [], marker="D", color="0.3", ls="", ms=6, label="whole-operator interpolation"),
+          Line2D([], [], marker="d", color="0.3", ls="", ms=5, mfc="none", label="matrix-only interpolation (diagnostic)")]
+    fig.legend(handles=hs, loc="lower center", ncol=4, fontsize=9, frameon=False, bbox_to_anchor=(0.5, -0.02))
+    fig.tight_layout(rect=(0, 0.04, 1, 1))
+    return save(fig, out_dir, "fig2_generality")
 
 
 def main(out_dir=None, which=None):
@@ -132,7 +217,11 @@ def main(out_dir=None, which=None):
     if which in (None, 1):
         written += figure1(h, out_dir)
     if which in (None, 2):
-        written += figure2(h, out_dir)
+        written += figure3(h, out_dir)            # the Letter's Figure 2: generality
+    if which in (None, 3):
+        written += figure_robustness(h, out_dir)  # End Matter
+    if which == 4:
+        written += figure2(h, out_dir)            # the former standalone mechanism figure, for the record
     return written
 
 

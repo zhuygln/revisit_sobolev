@@ -1,10 +1,32 @@
 # Sobolev Validity in Kilonova Ejecta — Results Report
 
-**Status:** Paper I and Paper III are frozen records; Paper III is tagged
-`paper3-freeze` and carries the boxed correction of `paper3/CORRECTION.md`.
-Paper IV is complete on the corrected transport — findings F1–F66, 603 tests,
-the computational result set tagged `paper4-freeze`.
-**Date:** 2026-09-12. **Repo:** `zhuygln/revisit_sobolev`.
+> **Current status (2026-09-29).** This report is the archival, chronological
+> ledger of a repository that now holds four distinct programs; the title is
+> the first of them and is kept for the record. A new reader should start
+> here, not at §1.
+>
+> | program | question | state |
+> |---|---|---|
+> | **Paper I** (§1–§4.20) | the error of the Sobolev approximation proper against resolved profiles, and of the expansion-opacity closure against Sobolev | frozen record |
+> | **Paper III** (§4.21–§4.44) | whether the fluorescence redistribution operator compresses to a small group-to-group matrix, with the historical photon-packet treatment | frozen, tagged `paper3-freeze`, under the boxed correction of `paper3/CORRECTION.md` (the bin-leg inversion bug, F58) |
+> | **Paper IV** (§4.45–§4.61) | coarse line-opacity treatments under energy-conserving fluorescence on published benchmark states; a methods paper | complete, tagged `paper4-freeze`, referee revision applied, **ready for MNRAS submission** |
+> | **Paper B** (§4.62–§4.65) | can detailed energy-conserving lanthanide fluorescence be replaced by a compact effective operator, why, and how far does it generalise | gates G1–G3 preregistered, run and frozen (`paperB-g3-freeze`); **manuscript in preparation** (`docs/paperB/`) |
+>
+> Paper B's result in one sentence: detailed lanthanide fluorescence has a
+> much lower observable complexity than its microscopic transition network;
+> the reduced description is frequency-local and remains compact across
+> physical states and realistic mixtures, but its parameters — and sometimes
+> its required resolution — depend on the thermodynamic and radiation-field
+> state (F67–F70). G4 of the original Paper B roadmap (operator error against
+> a composition-pattern proxy) is demoted to a post-manuscript robustness
+> candidate and is not a gate.
+
+**Status of the ledger:** Paper I and Paper III are frozen records; Paper III
+is tagged `paper3-freeze` and carries the boxed correction of
+`paper3/CORRECTION.md`. Paper IV is complete on the corrected transport —
+findings F1–F66, the computational result set tagged `paper4-freeze`. Paper B
+adds F67–F70; the root suite is at 651 tests.
+**Date:** 2026-09-29. **Repo:** `zhuygln/revisit_sobolev`.
 
 **Manuscripts:** [paper4/manuscript.pdf](paper4/manuscript.pdf) — the Paper IV
 methods paper (every number a macro generated from `paper4/FROZEN.json`;
@@ -5677,9 +5699,13 @@ Red. **The axis actually driving that Red is P, the physical trajectory**
 (all four coordinates moving together, not a controllable single
 coordinate) — reported below, outside the C3 table.
 
-Per axis, for every ion: transfer of the θ₀ anchor **fails** on T, D and
-P; it **holds** on J, the source-spectrum axis Paper III assumed
-irrelevant and this gate measured instead. The whole-operator
+Per axis: transfer of the θ₀ anchor **fails** on T, D and P for every
+ion; on J, the source-spectrum axis Paper III assumed irrelevant and this
+gate measured instead, it **holds** for Nd II and La II and **fails for
+Ce II** (at the coolest source, on colour alone, by 0.007 mag over the
+threshold — the frozen record reads Ce II's transfer as failing on all
+four axes, and that reading is authoritative; an earlier version of this
+sentence said J held for every ion, corrected 2026-10-05). The whole-operator
 interpolation **passes at every interior point tested, on every axis, for
 every ion**, with one exception: Nd II's trajectory axis (P), the one
 axis that moves every physical coordinate together rather than one at a
@@ -5724,9 +5750,9 @@ physical state and realistic composition, but the effective operator is
 state dependent: one-dimensional interpolation predicts most state
 changes, while coupled trajectories and species mixing expose
 nonlinearities that require refitting or richer tabulation.** Transfer of
-a fixed, energy-conserving compact operator holds only along the
-source-spectrum axis and fails whenever gas temperature, density, or the
-physical trajectory changes; a whole-operator interpolation built from
+a fixed, energy-conserving compact operator fails whenever gas
+temperature, density, or the physical trajectory changes, and survives
+only along the source-spectrum axis, and there only for Nd II and La II; a whole-operator interpolation built from
 two bracketing states — carrying the conditional exit spectrum, not only
 the transition matrix — recovers every one of those failures except one.
 That one exception is genuinely a different outcome, not a variant of the

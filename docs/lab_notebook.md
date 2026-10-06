@@ -3576,6 +3576,170 @@ scary. A residual of 1e70 looks like the whole run is garbage; it wasn't
 -- the photometry was fine, only one diagnostic accumulator got hit by
 something this machine does rarely and still doesn't have a name for.
 
+## 9bq. Paper B: manuscript mode -- G4 demoted, the full draft written on the frozen record (2026-09-29)
+
+The PI's call after G3: write, don't run. G4 (operator error vs a
+composition-pattern proxy) is demoted to a post-manuscript robustness
+candidate -- after G3 the operator is a state-dependent reduced model and
+a proxy comparison establishes nothing G1-G3 don't, while calling a few
+composition patterns "nuclear uncertainty" without a propagated nuclear
+ensemble would be too strong. No G4 run, no surrogate.
+
+Order as instructed: the report's top got a current-status block (a new
+reader was otherwise facing "Sobolev validity" as the research question
+5,000 lines before Paper B), then Results 4 from G3 first while the caveats
+were fresh, then Discussion, Introduction, Method. The Results-4
+progression is the PI's: state dependence -> failure of transfer is not
+failure of compression -> interpolation R = R(theta) -> the coupled
+trajectory as the boundary of that statement -> N_g*(theta) on Ce ->
+composition (C4 and C5 read together, not as a contradiction).
+
+Machinery: FROZEN.json now carries G3 (five hashed sources); 221 macros;
+tab_generality; Figure 3 generated from the frozen record (anchor squares
+above the criterion, fresh circles below, interpolation diamonds bridging
+the gap everywhere but the Nd trajectory panel); check_claims.py ported
+from Paper IV (its macros are (name, value, fmt) triples -- the port
+needed a one-line change) and wired into `make check`; references.bib
+shared with Paper IV.
+
+The read-through earned its keep again, on the first pass: "by up to
+0.150 mag ... at the interior temperature point" -- the macro was the
+anchor's error AT the interior point, not the axis maximum (0.48 at the
+ends), so "up to" was wrong; and "at any tested resolution" for the
+composed mixture had to become "at any VALID tested resolution", since the
+32-group leg is the one the gray-first audit excluded. Neither was a wrong
+number; both were a wrong word around a right number, which is exactly
+what substituting the values into the sentences exposes and the LaTeX
+source hides.
+
+One honest detail the freeze surfaced that the verdict summary had not:
+on the Nd trajectory the whole-operator interpolant fails on BAND (0.117)
+with colour fine (0.075), while the matrix-only diagnostic fails on
+COLOUR (0.110) with band fine (0.057). Both fail, on different criteria.
+The manuscript says so rather than "interpolation fails".
+
+*A slip in the same session, recorded because the rule exists for it:* the
+commit message's "Suite: N" was filled by a shell variable that came back
+empty (the background test run had been launched from docs/paperB, where
+`.venv/bin/python` does not resolve, so it ran nothing), and the PR body
+carried a suite count typed from expectation rather than read from the
+run. Caught on the next look at the output, the suite rerun from the
+repository root, and both corrected. The standing rule is not only for
+tables: any number that reaches a record, a commit or a PR comes from an
+output that was actually read.
+
+## 9br. Paper B: the PRL reframing -- G2 is the discovery (2026-10-05)
+
+The PI replaced plan.md with the submission map (their GitHub integration
+is read-only, so it went in from here, verbatim) and reordered the paper:
+G2's inversion -- the representation that reproduces the microscopic
+events better reproduces the light worse -- is the discovery, G1 is the
+set-up, G3 the generality proof. The literature position is explicit and
+defensive: observable-aware reduction (goal-oriented model reduction),
+redistribution matrices (Hummer), low-rank transport, fluorescence in
+kilonovae (Shingles et al.'s line-by-line ARTIS) and the heuristic
+character of a scalar epsilon (Fontes et al.) are all prior; the novelty
+is the CONTROLLED inversion on identical events, opacity and observables,
+and frequency locality as the organising structure. The safe sentence is
+the PI's: in lanthanide fluorescence transport, generic fidelity to the
+microscopic redistribution does not identify the degrees of freedom that
+control the emergent radiation; a frequency-local representation does.
+
+Done in the manuscript: abstract and Introduction open on the general
+coarse-graining question for a non-kilonova physicist before R_ij appears;
+the macroatom is described as a stochastic detailed-network treatment,
+not as a closure of the same kind as epsilon (my earlier sentence had
+lumped them); the G2 heading is "Observable fidelity is not microscopic
+fidelity" with the inversion as the Letter's one display equation; Method
+trimmed to state, reference, operator, local/global constructions, seed
+split, observables, criterion; gate tables, amendment history and the
+transport validation moved to End Matter, which also makes the Letter
+self-contained without Paper IV (cited only as "in preparation"); the
+13-ion N_g = 4 / 1.69 mag result stays in the abstract, Results 4 and the
+Conclusions; the Letter ends on the PI's physical statement. Core: 2,250
+words + 3 full-width figures (was 3,738 + 3 figures + 3 tables -- over the
+3,750 APS budget once figure equivalents are added).
+
+The report inconsistency the PI caught: 4.65 said transfer "holds on J
+for every ion". The frozen record has Ce II failing J too (J2500, colour,
+0.007 mag over). Corrected in the report, README row and paperB/README;
+the frozen record is authoritative and the manuscript already said "every
+axis" for Ce. The notebook's 9bn said the same wrong thing in passing --
+left as written (it is a dated log) with this correction standing.
+
+Three bib entries (Hummer 1962; Benner, Gugercin & Willcox 2015; Peng,
+McClarren & Frank 2020) were written from memory and are flagged VERIFY in
+references.bib; they are not to be trusted until checked against ADS, which
+the plan's pre-submission novelty audit requires anyway.
+
+## 9bs. Paper B: submission polish -- the five changes, REVTeX, the flagship figure, the literature check (2026-10-05)
+
+The PI approved the PRL framing at ee16d79 ("stop adding experiments and
+move into submission polishing") and asked for five substantive changes
+before the REVTeX pass; all applied. (1) "many-body process" -> "high-
+dimensional microscopic process" (fluorescence through a transition
+network is not what a PRL reader hears as many-body). (2) The macroatom is
+NOT "exact": it is the unreduced reference within the adopted atomic and
+transport model -- "simulated without the reduction under study". A real
+referee-proofing point; "exactly" would have invited the obvious
+objection. (3) "the dominant non-local process" -> "a major mechanism of
+non-local redistribution in wavelength"; "dominant" invites an argument
+nobody needs. (4) The model-reduction citation: Benner, Gugercin & Willcox
+2015 is a parametric projection-based survey, not the cleanest support for
+"the appropriate reduced model depends on the quantity of interest"; Zahm,
+Billaud-Friess & Nouy 2017 (SIAM J. Sci. Comput. 39, A1647, DOI
+10.1137/16M106385X, supplied by the PI) is the direct one and now leads.
+(5) End Matter validation no longer asks the referee to trust an
+unpublished companion paper: the particular tests the Letter depends on
+are stated and pointed at the public record; the companion work holds the
+extended validation.
+
+Bibliography: the PI verified the three from-memory entries against the
+publishers (Hummer: MNRAS 125, 21-37, DOI 10.1093/mnras/125.1.21; Benner:
+SIAM Review 57(4) 483-531, DOI 10.1137/130932715; Peng: JCP 421, 109735,
+DOI 10.1016/j.jcp.2020.109735) -- genuine, now with pages and DOIs, VERIFY
+notes removed. Zahm 2017's title and page range are mine from memory and
+still carry a note.
+
+The visual hierarchy now matches the intellectual one (the PI's "not
+mandatory, but"): Figure 1 is the flagship -- (a) the scalar fails where a
+small operator succeeds, (b-d) the inversion -- so an editor who reads the
+abstract and the first figure sees "better on the microscopic events,
+worse on the light". The R2M robustness bars went to an End Matter figure;
+generality is Figure 2. figures.py keeps the former standalone figures
+reproducible (which=4) for the record. In restructuring figures.py I
+sliced out the generality function and its constants along with the old
+Figure 1 -- caught at once by the NameError on regeneration, restored.
+
+REVTeX: `tlmgr install revtex` worked (TinyTeX had network); the class is
+revtex4-2 [aps,prl,twocolumn]; abstract before \maketitle; figures and
+tables as figure*/table*; apsrev4-2 bibliography style. No PDF renderer on
+the box, so pymupdf went into the venv as a dev-only tool to rasterise the
+two-column pages for inspection.
+
+The targeted literature check the plan requires, done with four web
+searches on 2026-10-05 (not ADS; the PI's final ADS/arXiv pass still
+stands): "reduced model microscopic vs observable fidelity frequency-local
+vs low-rank fluorescence" returned reduced-order radiative-transfer work
+(POD/Galerkin ROMs, Planck-averaged spectral models, low-rank transport)
+and partial-redistribution H2 fluorescence -- none performing a
+local-versus-global comparison scored on observables; "kilonova
+fluorescence redistribution matrix effective operator macroatom" returned
+line-by-line ARTIS (Shingles et al. 2023), Fontes et al.'s line-binned
+opacities, and -- as the only hit on the specific framing -- our own
+public repository (the education PR #7); "redistribution NMF fluorescence
+coarse graining observable-aware" returned NMF spectral-unmixing papers
+unrelated to transport; "goal-oriented / quantity-of-interest model
+reduction radiative transfer" returned goal-oriented inference and
+goal-oriented adaptive meshing for inverse transfer, radiosity model
+reduction and reduced-basis RTE -- the field the Introduction now cites,
+none of it the inversion on identical fluorescence events. No paper found
+that performs the controlled inversion. The plan's ADS search terms are
+unchanged and remain the PI's pre-submission step.
+
+A cover-letter draft (docs/paperB/cover_letter.md) carries the PI's
+editorial pitch and a pre-send checklist.
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,
