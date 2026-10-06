@@ -22,6 +22,28 @@ matrix for the event-level metric, and ε = 0 … 1 in steps of 0.05, with
 3×10⁵ energy packets per seed. `analyse.py` refuses a record that
 is not the preregistered experiment. Tests: `tests/test_paperB_gate1.py`.
 
+## The referee revision (2026-10-06): G2R, G3U, the minimax scalar, the costs
+
+    .venv/bin/python paperB/gate2r/run_g2r.py --ion 58CeII --k 16   # G2R: NOT before the PI approves prl_gate.md's G2R section
+    paperB/gate2r/run_all.sh                                        # Ce II then Nd II, N_g = 2 ... 32 (~9 h, sequential, retried)
+    .venv/bin/python paperB/gate2r/analyse.py                        # rank of the physical ordering per (ion, N_g) -> g2r_verdict.json; --markdown; figure.py
+    .venv/bin/python paperB/gate3u/analyse.py --affected             # the mechanically defined near-threshold G3 legs (33 in 18 records)
+    .venv/bin/python paperB/gate3u/run_g3u.py --record gate3_P_P3d_60NdII.json   # G3U: one frozen record, 12 common seeds
+    .venv/bin/python paperB/gate3u/analyse.py                        # paired bootstrap per case -> g3u_verdict.json; --markdown
+    .venv/bin/python paperB/scalar/minimax.py                        # the joint minimax eps from the existing grids (no transport); --markdown
+    .venv/bin/python paperB/cost/costs.py                            # offline / stored / online cost layers from the records; --markdown
+
+`gate2r/` is the frequency-adjacency ablation the PI preregistered on the
+referee's reading (`operators_perm.py`: the 128 fine groups permuted, the
+same block coarse-graining as G2's local family, the permutation undone;
+32 orderings per ion and block count, read by the rank of the physical
+ordering). `gate3u/` re-transports the near-threshold G3 decision legs
+on twelve common seeds with the trained operators preserved and attaches
+a paired-bootstrap interval to the joint decision statistic (it annotates
+G3, it does not re-gate it). `scalar/` and `cost/` are post-hoc readings
+of the frozen records. Tests: `tests/test_paperB_gate2r.py`,
+`test_paperB_gate3u.py`, `test_paperB_minimax.py`, `test_paperB_cost.py`.
+
 ## After G1: R2M robustness, the exit-table audit, G2 (preregistered, not run)
 
     .venv/bin/python paperB/r2m/run_r2m.py --ion 57LaII          # then 58CeII, 60NdII (10 s / 2.5 min / 6 min at 3e5)
@@ -105,13 +127,19 @@ dependence is nontrivial. No neural surrogate is warranted yet (one
 failure of separable interpolation is not evidence against a better-chosen
 low-dimensional table).
 
-**The manuscript is a complete first draft** (`docs/paperB/manuscript.tex`,
-2026-09-29): every section written on the frozen G1–G3 record in the PI's
-progression, three figures and three tables generated from
-`paperB/FROZEN.json`, every number a macro, the claim read-through
-(`make claims`) clean. **G4 is demoted** to a post-manuscript robustness
-candidate and is not a gate. Open on the PI's side: the referee-style read
-of the draft; the Paper IV MNRAS submission is independent.
+**The manuscript is a complete draft under referee revision**
+(`docs/paperB/manuscript.tex`; the PRL reframing of 2026-10-05, merged as
+PR #14; the referee revision of 2026-10-06): every section written on the
+frozen G1–G3 record in the PI's progression, every number a macro from
+`paperB/FROZEN.json`, the claim read-through (`make claims`) clean. The
+referee's central criticism is accepted (the PI, `plan_review.md`
+2026-10-06): the inversion is a 32-archetype result and does not by
+itself separate adjacency from low rank; G2R tests that, G3U attaches
+paired-seed intervals to the near-threshold G3 readings, and the wording
+("by construction", "every run", "not separable", "best scalar", the
+model equation) is corrected. **G4 is demoted** to a post-manuscript
+robustness candidate and is not a gate. The Paper IV MNRAS submission is
+independent.
 
 Three implementation issues surfaced during the run, all disclosed in full
 in §4.65 and `paperB/gate3/bug_snapshot/`: a confirmed, fixed, disclosed

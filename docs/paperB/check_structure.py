@@ -24,7 +24,8 @@ def main():
     for name, text in (("numbers.tex", LT.numbers_tex(LT.json.loads(LT.FROZEN.read_text()))),
                        ("tab_gates.tex", LT.tab_gates(LT.json.loads(LT.FROZEN.read_text()))),
                        ("tab_contrast.tex", LT.tab_contrast(LT.json.loads(LT.FROZEN.read_text()))),
-                       ("tab_generality.tex", LT.tab_generality(LT.json.loads(LT.FROZEN.read_text())))):
+                       ("tab_generality.tex", LT.tab_generality(LT.json.loads(LT.FROZEN.read_text()))),
+                       ("tab_cost.tex", LT.tab_cost(LT.json.loads(LT.FROZEN.read_text())))):
         p = HERE / name
         if not p.exists() or p.read_text() != text:
             problems.append(f"{name} is not the regeneration of paperB/FROZEN.json (run `make tables`)")
@@ -32,7 +33,8 @@ def main():
     defined = set(re.findall(r"\\newcommand\{\\(\w+)\}", (HERE / "numbers.tex").read_text()))
     used = set(re.findall(r"\\(PB\w+)", tex)) | set(re.findall(r"\\(PB\w+)", (HERE / "tab_gates.tex").read_text())) \
         | set(re.findall(r"\\(PB\w+)", (HERE / "tab_contrast.tex").read_text())) \
-        | set(re.findall(r"\\(PB\w+)", (HERE / "tab_generality.tex").read_text()))
+        | set(re.findall(r"\\(PB\w+)", (HERE / "tab_generality.tex").read_text())) \
+        | set(re.findall(r"\\(PB\w+)", (HERE / "tab_cost.tex").read_text()))
     for m in sorted(used - defined):
         problems.append(f"manuscript uses undefined macro \\{m}")
     for inc in re.findall(r"\\includegraphics\[[^\]]*\]\{([^}]+)\}", tex):

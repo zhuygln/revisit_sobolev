@@ -3740,6 +3740,76 @@ unchanged and remain the PI's pre-submission step.
 A cover-letter draft (docs/paperB/cover_letter.md) carries the PI's
 editorial pitch and a pre-send checklist.
 
+### 9bt. The referee report accepted: one bounded revision preregistered (2026-10-06)
+
+The PI accepted the referee's central criticism of the PRL draft (merged
+as PR #14, f46e3c8): the inversion of G2 is measured, but it compares two
+differently optimised families and does not by itself show adjacency
+rather than low rank. The PI's decision is verbatim in
+`paperB/plan_review.md`. Done today, on the branch
+`claude/paperB-referee-prereg` (PR A), before any transport:
+
+- **G2R preregistered** (`paperB/prl_gate.md` "G2R", `paperB/gate2r/`):
+  the frozen 128-group fine operator of G2, its indices permuted, the same
+  block coarse-graining as the local family, the permutation undone --
+  31 fixed random orderings plus the physical one, Ce II and Nd II, N_g =
+  2 ... 32, read by the rank of the physical ordering (Green iff first at
+  K*_local and in >= 4 of 5 block counts on both ions; Red iff outside the
+  top quartile at K*_local on either). The construction was verified
+  before preregistering: the block coarse-graining on the fine matrix
+  reproduces G2's frozen `L128_ng{N}` matrices at 1e-12 on both ions and
+  every N (`tests/test_paperB_gate2r.py`), the permuted operator keeps the
+  exit tables and the per-block rows, and a 2000-packet La II smoke run
+  went through the runner and the reader end to end. The scrambled
+  orderings' matrices are dropped from the records after their event loss
+  is computed (32 x 128 x 128 numbers per record would be ~5 MB of text
+  each). Expected cost from G2's per-leg times: ~50 min Ce II, ~7.6 h
+  Nd II, sequential with retries (the bit-60 host fault is still open).
+- **G3U preregistered** (`paperB/gate3u/`): the near-threshold G3
+  decision legs -- band or colour error within [0.07, 0.13] mag -- derived
+  mechanically from the frozen records (33 legs in 18 records: 13 Ce II
+  states, 4 Nd II states, both blends; La II excluded by rule),
+  re-transported on 12 common seeds with the trained operators preserved
+  (rebuilt from the build seeds or loaded from the saved kernels, every
+  matrix compared with the frozen record's at 1e-10), a paired bootstrap
+  of 10,000 on the joint statistic max(band, colour) with the winner's
+  curse inside the interval; "decided" iff the 95 % interval excludes
+  0.10, else "within noise". G3U annotates G3, it does not re-gate it.
+  `legs.py` now keeps `mags_per_seed` (additive; no frozen record
+  changes). A 3000-packet smoke run exercised the operator-match check
+  (the disk-loaded anchor matched at 0.0; the rebuilt kernel at smoke
+  precision did not, and was gray as designed).
+- **The joint minimax scalar** from the existing grids
+  (`paperB/scalar/minimax.py`): Nd II eps = 0.10 -> 0.822 mag (band
+  0.822, colour 0.753) against 1.058 at the preregistered eps* = 0 (the
+  PI's check confirmed exactly); Ce II unchanged at eps = 0 (joint 1.434);
+  La II 0.068 at 0.20; the 13-ion blend eps = 0.05 -> 1.552 against 1.691.
+  No reading changes. The manuscript's main comparison quotes these; the
+  End Matter keeps eps* as the gate definition.
+- **The cost layers** from the records (`paperB/cost/costs.py`): the
+  operator transports at 0.94-1.15x the downward macroatom at the same
+  seeds and packets; the scalar closure at eps = 0.10 at 4-9x; the stored
+  operator is 32-2,048 B of matrix against 16 kB-4.1 MB of exit tables.
+  Stated with the limitation: the operator does not remove the reference
+  calculation at a new state or mixture.
+- **Manuscript**: 19 exact replacements -- the inversion stated as the
+  32-archetype result with the matched-count flags (Ce II does, Nd II does
+  not); "by construction" out (NMF minimises a Frobenius error, not the TV
+  loss); "every run" -> every run that enters a reading; the PI's wording
+  on the coupled trajectory and on the 13-ion scope; the model equation as
+  implemented, P_red(nu_out | nu_in) ~ P(j | i) P(nu_out | j); the
+  mechanism sentence hedged until G2R; the scalar at its minimax eps; a
+  cost paragraph and Table; an End Matter paragraph on the two controls
+  in progress (marked TO BE COMPLETED). Figure 2 now plots the joint
+  statistic; Figure 1's caption names the band error and the 32-archetype
+  scope. `make check` green (289 macros, 22 claim sentences, 0 problems);
+  core 2,609 words with two full-width figures (budget 3,750); the PDF 8
+  pages (the End Matter grew by the cost table and two paragraphs).
+
+Not done, by design: no G2R or G3U transport before the PI approves the
+sections and the PR is merged and tagged `paperB-g2r-prereg`; the title
+stays until G2R is read (the PI's fallback title is recorded).
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

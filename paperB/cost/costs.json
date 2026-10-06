@@ -1,0 +1,176 @@
+{
+ "note": "the operator is built from the reference's own events: at a new state or mixture it does not remove the reference calculation",
+ "per_record": {
+  "57LaII": {
+   "n": 300000,
+   "seeds": 3,
+   "build_seeds": 3,
+   "offline": {
+    "build_wall_s": 1.4824268817901611,
+    "build_packets": 900000,
+    "build_events_per_packet": 0.7458233333333334,
+    "kernel_events": 322994
+   },
+   "stored": {
+    "ng": 2,
+    "matrix_entries": 4,
+    "matrix_bytes": 32,
+    "exit_lines": 524,
+    "serialized_bytes": 15918,
+    "serialized_kb": 15.544921875
+   },
+   "online": {
+    "ref_wall_s": 1.4348092079162598,
+    "op_wall_s": 1.5108447074890137,
+    "op_over_ref": 1.0529934566583794,
+    "ref_events_per_packet": 0.7435877777777778,
+    "op_events_per_packet": 0.74627,
+    "ref_interactions": 669229,
+    "op_interactions": 671643,
+    "scalar_tag": "E0.10",
+    "scalar_wall_s": 5.961988210678101,
+    "scalar_over_ref": 4.155248083009279,
+    "scalar_events_per_packet": 0.74033
+   },
+   "record": "paperB/gate1/gate1_57LaII.json",
+   "op_tag": "A2_ng2",
+   "ng_star": 2,
+   "fine": {
+    "ng": 128,
+    "bytes_total": 298158,
+    "bytes_matrix": 283552,
+    "bytes_tables": 14606,
+    "n_exit": 524
+   }
+  },
+  "58CeII": {
+   "n": 300000,
+   "seeds": 3,
+   "build_seeds": 3,
+   "offline": {
+    "build_wall_s": 11.912034511566162,
+    "build_packets": 900000,
+    "build_events_per_packet": 5.426911111111111,
+    "kernel_events": 5439289
+   },
+   "stored": {
+    "ng": 16,
+    "matrix_entries": 256,
+    "matrix_bytes": 2048,
+    "exit_lines": 12510,
+    "serialized_bytes": 309858,
+    "serialized_kb": 302.595703125
+   },
+   "online": {
+    "ref_wall_s": 11.024186849594116,
+    "op_wall_s": 12.72710919380188,
+    "op_over_ref": 1.154471469636825,
+    "ref_events_per_packet": 5.427690000000001,
+    "op_events_per_packet": 5.417728888888889,
+    "ref_interactions": 4884921,
+    "op_interactions": 4875956,
+    "scalar_tag": "E0.10",
+    "scalar_wall_s": 48.46440362930298,
+    "scalar_over_ref": 4.396188516261162,
+    "scalar_events_per_packet": 12.956828888888888
+   },
+   "record": "paperB/gate1/gate1_58CeII.json",
+   "op_tag": "A2_ng16",
+   "ng_star": 16,
+   "fine": {
+    "ng": 128,
+    "bytes_total": 585826,
+    "bytes_matrix": 283556,
+    "bytes_tables": 302270,
+    "n_exit": 12510
+   }
+  },
+  "60NdII": {
+   "n": 1000000,
+   "seeds": 3,
+   "build_seeds": 3,
+   "offline": {
+    "build_wall_s": 127.67536497116089,
+    "build_packets": 3000000,
+    "build_events_per_packet": 8.212898000000001,
+    "kernel_events": 18641032
+   },
+   "stored": {
+    "ng": 2,
+    "matrix_entries": 4,
+    "matrix_bytes": 32,
+    "exit_lines": 86187,
+    "serialized_bytes": 2071838,
+    "serialized_kb": 2023.279296875
+   },
+   "online": {
+    "ref_wall_s": 126.92192125320435,
+    "op_wall_s": 133.82997012138367,
+    "op_over_ref": 1.0544275472666225,
+    "ref_events_per_packet": 8.219072333333335,
+    "op_events_per_packet": 8.215583,
+    "ref_interactions": 24657217,
+    "op_interactions": 24646749,
+    "scalar_tag": "E0.10",
+    "scalar_wall_s": 514.6410784721375,
+    "scalar_over_ref": 4.054784810934656,
+    "scalar_events_per_packet": 13.567537999999999
+   },
+   "record": "paperB/gate1/gate1_60NdII_n1e6.json",
+   "op_tag": "A2_ng2",
+   "ng_star": 2,
+   "fine": {
+    "ng": 128,
+    "bytes_total": 2354078,
+    "bytes_matrix": 283560,
+    "bytes_tables": 2070518,
+    "n_exit": 86187
+   }
+  },
+  "blend13": {
+   "n": 1000000,
+   "seeds": 3,
+   "build_seeds": 3,
+   "offline": {
+    "build_wall_s": 192.84445548057556,
+    "build_packets": 3000000,
+    "build_events_per_packet": 12.224347999999999,
+    "kernel_events": 30634068
+   },
+   "stored": {
+    "ng": 4,
+    "matrix_entries": 16,
+    "matrix_bytes": 128,
+    "exit_lines": 175086,
+    "serialized_bytes": 4205926,
+    "serialized_kb": 4107.349609375
+   },
+   "online": {
+    "ref_wall_s": 186.64268016815186,
+    "op_wall_s": 175.83791303634644,
+    "op_over_ref": 0.9421098801084988,
+    "ref_events_per_packet": 12.207128666666668,
+    "op_events_per_packet": 12.298596666666667,
+    "ref_interactions": 36621386,
+    "op_interactions": 36895790,
+    "scalar_tag": "E0.10",
+    "scalar_wall_s": 1640.0505621433258,
+    "scalar_over_ref": 8.787114290610038,
+    "scalar_events_per_packet": 44.55965866666666
+   },
+   "record": "paperB/gate3/gate3_partc_p1blend.json",
+   "op_tag": "Arec_ng4",
+   "ng_star": 4,
+   "n_ions": 14
+  }
+ },
+ "r2m_60NdII": {
+  "n": 300000,
+  "R2_wall_s": 39.49953317642212,
+  "R2M_wall_s": 71.91146755218506,
+  "R2_events_per_packet": 8.213657777777778,
+  "R2M_events_per_packet": 13.371047777777777,
+  "A2_ng8_wall_s": 39.49194693565369,
+  "A2M_ng8_wall_s": 63.57103729248047
+ }
+}

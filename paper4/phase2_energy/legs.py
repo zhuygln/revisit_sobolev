@@ -263,6 +263,10 @@ def run_legs(zone, atom, n, legs=LADDER, seeds=SEEDS, ng=NG, relativity="worldli
         per_seed = [photometer(observe([r], l_core, spec["scale"]), edges, nu_c, phot.D_40MPC)["mags"] for r in res]
         o["mags_seed_std"] = {b: float(np.std([m[b] for m in per_seed], ddof=1)) if len(per_seed) > 1 else np.nan
                               for b in o["mags"]}
+        # the per-seed magnitudes themselves, in seed order (Paper B G3U,
+        # 2026-10-06: a paired-seed difference closure minus reference needs
+        # them; the pooled `mags` and the scatter alone cannot give it)
+        o["mags_per_seed"] = [{b: float(m[b]) for b in o["mags"]} for m in per_seed]
         acc = [energy_accounting(r) for r in res]
         o["energy"] = {k: float(np.mean([a[k] for a in acc])) for k in acc[0] if k != "packets"}
         o["energy"]["packets"] = spec["packets"]

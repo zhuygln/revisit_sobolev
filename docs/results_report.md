@@ -1,6 +1,6 @@
 # Sobolev Validity in Kilonova Ejecta — Results Report
 
-> **Current status (2026-09-29).** This report is the archival, chronological
+> **Current status (2026-10-06).** This report is the archival, chronological
 > ledger of a repository that now holds four distinct programs; the title is
 > the first of them and is kept for the record. A new reader should start
 > here, not at §1.
@@ -10,14 +10,18 @@
 > | **Paper I** (§1–§4.20) | the error of the Sobolev approximation proper against resolved profiles, and of the expansion-opacity closure against Sobolev | frozen record |
 > | **Paper III** (§4.21–§4.44) | whether the fluorescence redistribution operator compresses to a small group-to-group matrix, with the historical photon-packet treatment | frozen, tagged `paper3-freeze`, under the boxed correction of `paper3/CORRECTION.md` (the bin-leg inversion bug, F58) |
 > | **Paper IV** (§4.45–§4.61) | coarse line-opacity treatments under energy-conserving fluorescence on published benchmark states; a methods paper | complete, tagged `paper4-freeze`, referee revision applied, **ready for MNRAS submission** |
-> | **Paper B** (§4.62–§4.65) | can detailed energy-conserving lanthanide fluorescence be replaced by a compact effective operator, why, and how far does it generalise | gates G1–G3 preregistered, run and frozen (`paperB-g3-freeze`); **manuscript in preparation** (`docs/paperB/`) |
+> | **Paper B** (§4.62–§4.65) | can detailed energy-conserving lanthanide fluorescence be replaced by a compact effective operator, why, and how far does it generalise | gates G1–G3 preregistered, run and frozen (`paperB-g3-freeze`); PRL draft (`docs/paperB/`, PR #14) **under referee revision**: the adjacency ablation G2R and the paired-seed check G3U preregistered (`paperB/prl_gate.md`), not yet run; the joint minimax scalar and the cost layers added from the frozen records |
 >
 > Paper B's result in one sentence: detailed lanthanide fluorescence has a
 > much lower observable complexity than its microscopic transition network;
-> the reduced description is frequency-local and remains compact across
-> physical states and realistic mixtures, but its parameters — and sometimes
-> its required resolution — depend on the thermodynamic and radiation-field
-> state (F67–F70). G4 of the original Paper B roadmap (operator error against
+> at 32 archetypes the representation that reproduces the microscopic events
+> better reproduces the light worse, the representation the light accepts
+> keeps contiguous frequencies together, and it remains compact across
+> physical states and a realistic mixture, but its parameters — and
+> sometimes its required resolution — depend on the thermodynamic and
+> radiation-field state (F67–F70). Whether adjacency itself, rather than
+> rank or parameter count, is the mechanism is the preregistered G2R
+> (2026-10-06, not yet run). G4 of the original Paper B roadmap (operator error against
 > a composition-pattern proxy) is demoted to a post-manuscript robustness
 > candidate and is not a gate.
 
@@ -25,8 +29,8 @@
 is tagged `paper3-freeze` and carries the boxed correction of
 `paper3/CORRECTION.md`. Paper IV is complete on the corrected transport —
 findings F1–F66, the computational result set tagged `paper4-freeze`. Paper B
-adds F67–F70; the root suite is at 651 tests.
-**Date:** 2026-09-29. **Repo:** `zhuygln/revisit_sobolev`.
+adds F67–F70; the root suite is at 665 tests (652 before the referee revision).
+**Date:** 2026-10-06. **Repo:** `zhuygln/revisit_sobolev`.
 
 **Manuscripts:** [paper4/manuscript.pdf](paper4/manuscript.pdf) — the Paper IV
 methods paper (every number a macro generated from `paper4/FROZEN.json`;
@@ -5741,7 +5745,7 @@ not enough at these lanthanide mass fractions.
 
 C5 (the realistic mixture): **Green**. On the full 13-ion P1 blend, the
 recomputed operator passes at N_g = 4 (0.088 mag band, 0.073 mag colour),
-while the best scalar ε (ε* = 0, the coherent limit) misses by 1.69 mag —
+while the best scalar ε (ε* = 0, the coherent limit) misses by 1.69 mag (the joint minimax ε = 0.05 misses by 1.55 mag, `paperB/scalar/minimax.json`, 2026-10-06) —
 the widest scalar failure recorded in this program, on the composition
 transport actually uses.
 

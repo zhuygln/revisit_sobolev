@@ -123,9 +123,9 @@ def figure1(h, out_dir):
     _panel_existence(axes[0], h)
     _panels_inversion(axes[1:], h)
     axes[0].set_title("a. a scalar closure fails; a small operator succeeds", fontsize=9, loc="left")
-    axes[1].set_title("b. transport error (solid: local, open: global)", fontsize=9, loc="left")
-    axes[2].set_title("c. microscopic error: the global family wins", fontsize=9, loc="left")
-    axes[3].set_title("d. better on the events, worse on the light", fontsize=9, loc="left")
+    axes[1].set_title("b. band error (solid: local, open: global)", fontsize=9, loc="left")
+    axes[2].set_title("c. microscopic error: the global family wins at high count", fontsize=9, loc="left")
+    axes[3].set_title("d. at high count: better on the events, worse on the light", fontsize=9, loc="left")
     fig.tight_layout()
     return save(fig, out_dir, "fig1_flagship")
 
@@ -170,8 +170,12 @@ def figure3(h, out_dir):
     (filled squares), the operator rebuilt at the state (open circles), and
     at the interior point the whole-operator interpolation (diamonds), each
     against the state's own reference; the letter is the preregistered
-    reading (A transfers, B interpolates, C only a fresh fit passes, D none)."""
-    g3 = h["g3"]; names = h["ion_names"]; dm_max = h["g1"]["dm_max"]
+    reading (A transfers, B interpolates, C only a fresh fit passes, D none).
+    Revised 2026-10-06 (the referee, the PI): the y value is the JOINT
+    decision statistic max(max |dm|, max |dcolour|), so the letters and the
+    dotted threshold refer to the same quantity (three Ce/Nd readings are
+    decided by colour alone and were invisible on a band-only axis)."""
+    g3 = h["g3"]; names = h["ion_names"]; dm_max = h["g1"]["dm_max"]; ng_t = g3["ng_t"]
     ions = [i for i in ("58CeII", "60NdII", "57LaII") if i in g3["per_ion"]]
     axes_names = g3["axes"]
     # sized for PRL full width: 12 panels at (3.0 x 2.5) in each render at ~0.6 scale,
@@ -183,13 +187,14 @@ def figure3(h, out_dir):
             ax = axes[ri][ci]
             for st in sorted((x for x in sts if x["axis"] == ax_name), key=lambda x: x["coord_value"]):
                 c = st["coord_value"]; col = CLS[st["cls"]]
-                ax.plot([c], [st["fresh_band"]], "o", color=col, ms=6, mfc="none", mew=1.4)
-                if st["anchor_band"] is not None:
-                    ax.plot([c], [st["anchor_band"]], "s", color=col, ms=6)
-                if st["interp_whole_band"] is not None:
-                    ax.plot([c], [st["interp_whole_band"]], "D", color=col, ms=6)
-                    ax.plot([c], [st["interp_matrix_band"]], "d", color=col, ms=5, mfc="none")
-                top = max(st["fresh_band"], st["anchor_band"] or 0.0, st["interp_whole_band"] or 0.0)
+                # the y value is the joint decision statistic max(band, colour): the one the letters are read on
+                ax.plot([c], [st["fresh_joint"]], "o", color=col, ms=6, mfc="none", mew=1.4)
+                if st["anchor_joint"] is not None:
+                    ax.plot([c], [st["anchor_joint"]], "s", color=col, ms=6)
+                if st["interp_whole_joint"] is not None:
+                    ax.plot([c], [st["interp_whole_joint"]], "D", color=col, ms=6)
+                    ax.plot([c], [st["interp_matrix_joint"]], "d", color=col, ms=5, mfc="none")
+                top = max(st["fresh_joint"], st["anchor_joint"] or 0.0, st["interp_whole_joint"] or 0.0)
                 ax.annotate(st["cls"], (c, top), textcoords="offset points", xytext=(0, 5), ha="center", fontsize=9, color=col)
             ax.axhline(dm_max, color="k", ls=":", lw=1)
             ax.set_yscale("log"); ax.set_ylim(2e-3, 1.5)
@@ -197,12 +202,12 @@ def figure3(h, out_dir):
             if ri == len(ions) - 1:
                 ax.set_xlabel(AXLAB[ax_name])
             if ci == 0:
-                ax.set_ylabel(f"{names[ion]}\nmax $|\\Delta m|$ vs $R_2(\\theta)$ [mag]", fontsize=9)
+                ax.set_ylabel(f"{names[ion]}\nmax(band, colour) error vs the state's reference [mag]", fontsize=8)
             if ri == 0:
                 ax.set_title({"T": "gas temperature", "D": "density", "J": "source spectrum", "P": "trajectory (all coordinates)"}[ax_name], fontsize=10)
     from matplotlib.lines import Line2D
-    hs = [Line2D([], [], marker="s", color="0.3", ls="", ms=6, label="anchor $R_{16}$ transported"),
-          Line2D([], [], marker="o", color="0.3", ls="", ms=6, mfc="none", mew=1.4, label="fresh $R_{16}$ built at the state"),
+    hs = [Line2D([], [], marker="s", color="0.3", ls="", ms=6, label=f"anchor $R_{{{ng_t}}}$ transported"),
+          Line2D([], [], marker="o", color="0.3", ls="", ms=6, mfc="none", mew=1.4, label=f"fresh $R_{{{ng_t}}}$ built at the state"),
           Line2D([], [], marker="D", color="0.3", ls="", ms=6, label="whole-operator interpolation"),
           Line2D([], [], marker="d", color="0.3", ls="", ms=5, mfc="none", label="matrix-only interpolation (diagnostic)")]
     fig.legend(handles=hs, loc="lower center", ncol=4, fontsize=9, frameon=False, bbox_to_anchor=(0.5, -0.02))
