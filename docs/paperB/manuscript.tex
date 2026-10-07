@@ -287,7 +287,9 @@ reference, both the original operator transported unchanged and an
 operator rebuilt there (Fig.~\ref{fig:generality}), both at \PBNgT\ groups.
 The transported operator is not predictive: it fails on every axis for
 Ce\,\textsc{ii} and on all but the source-spectrum axis for the other two
-ions. The rebuilt operator passes at every readable state of
+ions (Ce\,\textsc{ii}'s source-axis failure is a colour miss within the
+seed noise, End Matter; its temperature, density and trajectory failures
+are not). The rebuilt operator passes at every readable state of
 Nd\,\textsc{ii} and La\,\textsc{ii}, with at most \PBNdKrecMax\ groups
 needed anywhere on Nd\,\textsc{ii}. There is no universal $R_{ij}$; the
 failure of transfer is not a failure of compression.
@@ -302,8 +304,10 @@ source axes for every ion, reducing Nd\,\textsc{ii}'s error at the interior
 temperature from \PBNdFixT\ to \PBNdIntWT~mag. The useful object is a
 tabulated family $R(\theta)$. Its boundary is the coupled trajectory: at
 three days on Nd\,\textsc{ii} the transported operator misses by
-\PBNdTrajAnchor~mag, the interpolant by \PBNdTrajWhole~mag, and only the
-operator rebuilt there passes, at \PBNdTrajKrec\ groups with
+\PBNdTrajAnchor~mag, the interpolant by \PBNdTrajWhole~mag --- on twelve
+paired seeds \PBUNdTrajWhole~mag with a 95\% interval
+[\PBUNdTrajWholeLo, \PBUNdTrajWholeHi], decided (End Matter) --- and only
+the operator rebuilt there passes, at \PBNdTrajKrec\ groups with
 \PBNdTrajFresh~mag. The one-dimensional interpolation that succeeds along
 independently varied coordinates does not predict the tested coupled
 trajectory; the present calculation does not distinguish multivariate
@@ -312,7 +316,10 @@ coordinate. Ce\,\textsc{ii} adds a
 second qualification: its rebuilt \PBNgT-group operator fails at
 \PBCeNFreshFail\ of \PBCeNStates\ states, on colour, by at most
 \PBCeWorstColourOver~mag, and a \PBCeKrecMax-group operator passes at
-every one. Compactness survives; a fixed representation size does not.
+every one; several of these readings sit within the seed noise of the
+threshold (End Matter), and the paired-seed check moves none of the
+decided ones across it. Compactness survives; a fixed representation size
+does not.
 
 Composition closes the argument. Three single-ion operators combined by an
 opacity-share rule, with no fit to the blend, do not reach the criterion at
@@ -343,8 +350,11 @@ control; columns: gas temperature, density, source spectrum, and the
 trajectory along which all move together. Dotted: the criterion, on the
 same statistic; the letter is the preregistered reading of each state (A
 transported operator passes; B only the interpolant; C only a fresh fit;
-D none at \PBNgT\ groups). Grey: states excluded by the preregistered
-validity checks.}
+D none at \PBNgT\ groups). Vertical bars: the paired-seed 95\% interval
+on \PBUSeeds\ seeds for the readings within \PBUWinLo--\PBUWinHi~mag of
+the threshold, with the twelve-seed estimate as a tick (dark grey where
+the reference run was not reproduced seed for seed, End Matter). Grey
+letters: states excluded by the preregistered validity checks.}
 \label{fig:generality}
 \end{figure*}
 
@@ -457,11 +467,32 @@ first --- the inversion of the main text, inside the ablation
 itself, at identical rank and parameter count.
 
 \paragraph{The paired-seed check.} Preregistered with the ablation: every
-decision leg of the third gate whose error lies within a window of the
-threshold is re-transported on twelve common seeds, with the trained
-operators preserved, and a paired bootstrap interval on the joint
-statistic is attached to its reading.
-% TO BE COMPLETED: the G3U results replace this paragraph.
+decision leg of the third gate whose band or colour error lies within
+\PBUWinLo--\PBUWinHi~mag of the threshold --- \PBUCases\ legs in
+\PBURecords\ records, derived from the frozen records by that rule --- is
+re-transported on \PBUSeeds\ common seeds with the trained operators
+preserved (rebuilt or reloaded, every matrix matched to the frozen one),
+and the joint statistic is given a paired bootstrap interval
+(\PBUBoot\ replicates over the seed index, the maximum over bands and
+colours recomputed in each, so the interval carries the winner's curse).
+The frozen letters are not re-read; the check annotates them.
+\PBUPass\ cases are decided passes and \PBUFail\ decided failures (the
+95\% interval excludes the threshold), \PBUNoise\ are within noise, and
+\PBUFlips\ twelve-seed estimates fall on the other side of the threshold
+from the three-seed reading, all on Ce\,\textsc{ii} at $3\times10^5$
+packets. The readings the text rests on are decided: the Nd\,\textsc{ii}
+trajectory interpolant fails (\PBUNdTrajWhole~mag,
+[\PBUNdTrajWholeLo, \PBUNdTrajWholeHi]); Ce\,\textsc{ii}'s
+source-axis transfer, a colour miss on three seeds, is within noise on
+twelve (\PBUCeJFix~mag, [\PBUCeJFixLo, \PBUCeJFixHi]); the
+\PBBlendNIons-ion operator at \PBBlendKrec\ groups is within noise
+(\PBUBlend~mag, [\PBUBlendLo, \PBUBlendHi]); the three-ion operator at
+\PBKdirect\ groups is a decided pass. Two cases are gray: at one day the
+Ce\,\textsc{ii} reference run of the third gate is not reproduced seed
+for seed (its build reference and closures are, bit for bit), a second
+instance of the non-reproducible class the energy audit found, now caught
+by the determinism check; against the reproducible twelve-seed reference
+the state reads as before.
 
 \paragraph{Amendments during the runs.} Three were made and are recorded
 in the archived preregistration with what had been seen when each was
@@ -506,7 +537,8 @@ number in this Letter is generated, and the scripts that regenerate the
 numbers, tables and figures are archived at
 \texttt{github.com/zhuygln/revisit\_sobolev} (tags \texttt{paperB-g2-prereg},
 \texttt{paperB-g2-freeze}, \texttt{paperB-g3-prereg},
-\texttt{paperB-g3-freeze}, \texttt{paperB-g2r-prereg}).
+\texttt{paperB-g3-freeze}, \texttt{paperB-g2r-prereg},
+\texttt{paperB-g2r-freeze}).
 
 \begin{figure}[p]
 \centering

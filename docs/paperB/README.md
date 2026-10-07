@@ -10,7 +10,10 @@ revision in progress (2026-10-06, the PI's decision in
 `paperB/plan_review.md`):** the inversion is stated as the 32-archetype
 result; the mechanism sentence is hedged until the preregistered
 frequency-adjacency ablation G2R is read (`paperB/prl_gate.md` "G2R");
-the near-threshold G3 readings get a paired-seed interval (G3U); the
+the near-threshold G3 readings get a paired-seed interval (G3U, run:
+F72); the ablation ran (F71: the physical ordering first in 8 of 10 cells;
+Ce II Green, Nd II Yellow by 0.001 mag at two blocks; overall Yellow, the
+PI's call on the mechanism sentence); the
 scalar comparator is the joint minimax ε (`paperB/scalar/`); the cost
 layers are in the End Matter (`paperB/cost/`); the model equation is the
 implemented one, P_red(ν_out | ν_in) ≈ P(j | i) P(ν_out | j). The Letter is structured
@@ -29,7 +32,7 @@ still to be confirmed against the DOI.
 
     make -C docs/paperB freeze    # paperB/FROZEN.json from the committed gate records
     make -C docs/paperB tables    # numbers.tex, tab_gates.tex, tab_contrast.tex, tab_generality.tex, tab_cost.tex
-    make -C docs/paperB figures   # figures/fig1_flagship, fig2_generality, figEM_robustness
+    make -C docs/paperB figures   # figures/fig1_flagship, fig2_generality, fig3_adjacency, figEM_robustness
     make -C docs/paperB           # manuscript.pdf (pdflatex + bibtex), then `check`
     make -C docs/paperB check     # freeze --check + check_structure.py + check_claims.py -q + wordcount.py
     make -C docs/paperB claims    # the read-through: every sentence quoting a number, macros substituted
@@ -55,6 +58,11 @@ regeneration of the frozen record. Tests: `tests/test_paperB_freeze.py`.
   preregistered A/B/C/D reading of each state; the y axis is the joint
   decision statistic max(band, colour), the one the letters are read on
   (2026-10-06).
+- **The adjacency figure (`fig3_adjacency`, single column; G2R, F71)** — the
+  physical frequency ordering against 31 scrambled orderings at every block
+  count, same blocks, tables, events, seeds and transport. It sits in the
+  mechanism section, so REVTeX numbers it Fig. 2 and the generality figure
+  Fig. 3; the file stems keep the hierarchy names.
 - **End Matter figure — the operator follows the fluorescence physics it is
   built from** (the radiation-field-driven macroatom robustness check).
 

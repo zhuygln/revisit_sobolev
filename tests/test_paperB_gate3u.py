@@ -96,3 +96,25 @@ def test_read_case_is_gray_on_operator_mismatch_or_scatter_mismatch(monkeypatch)
     assert "operator" in " ".join(U.read_case(rerun, frozen, "Arec_ng16")["gray"])
     rerun, frozen = _frozen_and_rerun(scatter_dev=1e-3)
     assert "scatter" in " ".join(U.read_case(rerun, frozen, "Arec_ng16")["gray"])
+
+
+def test_the_frozen_g3u_verdict_reads_as_recorded():
+    """The real record (2026-10-07): 33 cases, 5 decided pass, 13 decided fail, 13 within noise, 2 gray (the P1d Ce II
+    reference not reproduced seed for seed; its closures are); 7 point estimates on the other side of the threshold."""
+    p = ROOT / "paperB/gate3u/g3u_verdict.json"
+    if not p.exists():
+        pytest.skip("no G3U verdict")
+    v = json.loads(p.read_text())
+    s = v["summary"]
+    assert s["n_cases"] == s["n_affected"] == 33 and len(v["records"]) == 18
+    assert s["status"] == {"DECIDED_PASS": 5, "DECIDED_FAIL": 13, "WITHIN_NOISE": 13, "GRAY": 2} and len(s["flips"]) == 7
+    gray = [(n, c["leg"]) for n, r in v["records"].items() for c in r["cases"] if c["status"] == "GRAY"]
+    assert gray == [("g3u_P_P1d_58CeII_n1e6.json", "Arec_ng16"), ("g3u_P_P1d_58CeII_n1e6.json", "Arec_ng32")]
+    for n, r in v["records"].items():
+        for c in r["cases"]:
+            assert c["n_seeds"] == 12 and c["operator_match"] == 0.0, (n, c["leg"])
+            assert c["bootstrap"]["ci95"][0] <= c["e_joint"] <= c["bootstrap"]["ci95"][1]
+    nd = next(c for c in v["records"]["g3u_P_P3d_60NdII.json"]["cases"] if c["leg"] == "Aint_ng16")
+    assert nd["status"] == "DECIDED_FAIL" and nd["bootstrap"]["ci95"][0] > 0.10
+    j = next(c for c in v["records"]["g3u_J_J2500_58CeII.json"]["cases"] if c["leg"] == "Afix_ng16")
+    assert j["status"] == "WITHIN_NOISE" and j["frozen"]["passes"] is False and j["e_joint"] < 0.10

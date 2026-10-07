@@ -45,9 +45,10 @@ def build():
     mm, mm_rel, mm_sha = load("paperB/scalar/minimax.json")
     co, co_rel, co_sha = load("paperB/cost/costs.json")
     g2r, g2r_rel, g2r_sha = load("paperB/gate2r/g2r_verdict.json")
+    g3u, g3u_rel, g3u_sha = load("paperB/gate3u/g3u_verdict.json")
 
     h = dict(sources={g1_rel: g1_sha, r2m_rel: r2m_sha, aud_rel: aud_sha, g2_rel: g2_sha, g3_rel: g3_sha, mm_rel: mm_sha, co_rel: co_sha,
-                      g2r_rel: g2r_sha},
+                      g2r_rel: g2r_sha, g3u_rel: g3u_sha},
              ions=list(IONS), ion_names=NAME, decisive=list(DECISIVE))
 
     # ---- G1 (F67) ----
@@ -228,6 +229,30 @@ def build():
     dec = [i for i in DECISIVE if i in h["g2r"]["per_ion"]]
     h["g2r"]["n_cells"] = sum(h["g2r"]["per_ion"][i]["n_cells"] for i in dec)
     h["g2r"]["n_first"] = sum(h["g2r"]["per_ion"][i]["n_rank1_cells"] for i in dec)
+    # ---- G3U (F72): the paired-seed intervals of the near-threshold G3 readings; annotates, never re-gates ----
+    PU = g3u["prereg"]; su = g3u["summary"]
+    h["g3u"] = dict(n_cases=su["n_cases"], n_affected=su["n_affected"], n_records=len(g3u["records"]), status=su["status"],
+                    n_flips=len(su["flips"]), n_seeds=len(PU["seeds"]), window=list(PU["window"]), n_boot=PU["n_boot"], cases=[], named={})
+    FAM = {"Arec_ng16": "fresh", "Afix_ng16": "anchor", "Aint_ng16": "interp_whole", "AintM_ng16": "interp_matrix", "Arec_ng32": "fresh32"}
+    for name, r in g3u["records"].items():
+        for c in r["cases"]:
+            b = c["bootstrap"]
+            h["g3u"]["cases"].append(dict(record=name, ion=r.get("ion"), label=r.get("label"), part=r.get("part"), leg=c["leg"],
+                                          family=FAM.get(c["leg"], c["leg"]), frozen_e=c["frozen"]["e_joint"], frozen_passes=c["frozen"]["passes"],
+                                          e=c["e_joint"], lo=b["ci95"][0], hi=b["ci95"][1], lo68=b["ci68"][0], hi68=b["ci68"][1],
+                                          p_pass=b["p_pass"], status=c["status"], gray=c["gray"]))
+    def case(ion, label, leg, part=None):
+        return next((c for c in h["g3u"]["cases"] if c["leg"] == leg and ((part and c["part"] == part) or (c["ion"] == ion and c["label"] == label))), None)
+    h["g3u"]["named"] = dict(nd_traj_whole=case("60NdII", "P3d", "Aint_ng16"), nd_traj_matrix=case("60NdII", "P3d", "AintM_ng16"),
+                             ce_j2500_fix=case("58CeII", "J2500", "Afix_ng16"), ce_t2500_fresh=case("58CeII", "T2500", "Arec_ng16"),
+                             ce_p1d_fresh=case("58CeII", "P1d", "Arec_ng16"), blend_arec4=case(None, None, "Arec_ng4", part="c"),
+                             blend3_adirect4=case(None, None, "Adirect_ng4", part="b"))
+    # the intervals onto the G3 states (for Figure 2): per family the 95 % interval, the 12-seed point and the status
+    for ion in IONS:
+        for st in h["g3"]["per_ion"][ion]["states"]:
+            for c in h["g3u"]["cases"]:
+                if c["ion"] == ion and c["label"] == st["label"] and c["family"] in ("fresh", "anchor", "interp_whole", "interp_matrix"):
+                    st[f"{c['family']}_u"] = dict(e=c["e"], lo=c["lo"], hi=c["hi"], status=c["status"])
     return h
 
 

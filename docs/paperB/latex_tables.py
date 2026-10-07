@@ -142,6 +142,19 @@ def macros(h):
                     (f"PB{s}AdjMed{w}", c["scr_median"], "f3"), (f"PB{s}AdjRank{w}", c["rank"], "int"),
                     (f"PB{s}AdjEvRank{w}", c["event_rank"], "int"), (f"PB{s}AdjEv{w}", c["event_physical"], "f3"),
                     (f"PB{s}AdjEvMed{w}", c["event_scr_median"], "f3")]
+    # ---- G3U: the paired-seed intervals ----
+    u = h["g3u"]
+    out += [("PBUCases", u["n_cases"], "int"), ("PBURecords", u["n_records"], "int"), ("PBUSeeds", u["n_seeds"], "int"),
+            ("PBUBoot", u["n_boot"], "com"), ("PBUWinLo", u["window"][0], "f2"), ("PBUWinHi", u["window"][1], "f2"),
+            ("PBUPass", u["status"]["DECIDED_PASS"], "int"), ("PBUFail", u["status"]["DECIDED_FAIL"], "int"),
+            ("PBUNoise", u["status"]["WITHIN_NOISE"], "int"), ("PBUGray", u["status"]["GRAY"], "int"), ("PBUFlips", u["n_flips"], "int")]
+    UN = dict(nd_traj_whole="UNdTrajWhole", nd_traj_matrix="UNdTrajMatrix", ce_j2500_fix="UCeJFix", ce_t2500_fresh="UCeTFresh",
+              ce_p1d_fresh="UCePFresh", blend_arec4="UBlend", blend3_adirect4="UAdirect")
+    for key, nm in UN.items():
+        c = u["named"][key]
+        if c:
+            out += [(f"PB{nm}", c["e"], "f3"), (f"PB{nm}Lo", c["lo"], "f3"), (f"PB{nm}Hi", c["hi"], "f3"), (f"PB{nm}P", c["p_pass"], "pct0"),
+                    (f"PB{nm}Frozen", c["frozen_e"], "f3"), (f"PB{nm}Status", c["status"].lower().replace("_", " "), "word")]
     return out
 
 

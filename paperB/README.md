@@ -42,6 +42,15 @@ PI's call**. On Nd II at 32 blocks the physical ordering fits the events
 worse than most scrambled orderings and the light three times better than
 the best: the inversion at identical rank and parameter count.
 
+**G3U ran 2026-10-07 (F72, §4.67):** of 33 near-threshold decision legs
+on twelve paired seeds (operators matched at 0.0), 5 decided pass, 13
+decided fail, 13 within noise, 2 gray; the decisive readings are decided
+(the Nd II trajectory interpolant fails, 0.118 [0.113, 0.123]), Ce II's
+3×10⁵-packet readings near the threshold are noise-limited (7 point
+estimates cross), and the frozen P1d Ce II reference at 10⁶ packets is not
+reproduced seed for seed while its closures are (gray; the letter
+unchanged; `gate3u/nonreproducible_p1d.md`). No frozen letter is re-read.
+
 `gate2r/` is the frequency-adjacency ablation the PI preregistered on the
 referee's reading (`operators_perm.py`: the 128 fine groups permuted, the
 same block coarse-graining as G2's local family, the permutation undone;

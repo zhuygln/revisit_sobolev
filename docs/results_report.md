@@ -10,7 +10,7 @@
 > | **Paper I** (§1–§4.20) | the error of the Sobolev approximation proper against resolved profiles, and of the expansion-opacity closure against Sobolev | frozen record |
 > | **Paper III** (§4.21–§4.44) | whether the fluorescence redistribution operator compresses to a small group-to-group matrix, with the historical photon-packet treatment | frozen, tagged `paper3-freeze`, under the boxed correction of `paper3/CORRECTION.md` (the bin-leg inversion bug, F58) |
 > | **Paper IV** (§4.45–§4.61) | coarse line-opacity treatments under energy-conserving fluorescence on published benchmark states; a methods paper | complete, tagged `paper4-freeze`, referee revision applied, **ready for MNRAS submission** |
-> | **Paper B** (§4.62–§4.66) | can detailed energy-conserving lanthanide fluorescence be replaced by a compact effective operator, why, and how far does it generalise | gates G1–G3 preregistered, run and frozen (`paperB-g3-freeze`); PRL draft (`docs/paperB/`, PR #14) **under referee revision**: the adjacency ablation G2R run (F71: the physical ordering beats all 31 scrambled orderings in 8 of 10 cells; Ce II Green, Nd II Yellow by 0.001 mag at two blocks; overall Yellow, the PI's call) and the paired-seed check G3U running; the joint minimax scalar and the cost layers added from the frozen records |
+> | **Paper B** (§4.62–§4.67) | can detailed energy-conserving lanthanide fluorescence be replaced by a compact effective operator, why, and how far does it generalise | gates G1–G3 preregistered, run and frozen (`paperB-g3-freeze`); PRL draft (`docs/paperB/`, PR #14) **under referee revision**: the adjacency ablation G2R run (F71: the physical ordering beats all 31 scrambled orderings in 8 of 10 cells; Ce II Green, Nd II Yellow by 0.001 mag at two blocks; overall Yellow, the PI's call) and the paired-seed check G3U run (F72: the decisive readings are decided, Ce II's near-threshold readings at 3×10⁵ packets are noise-limited, one frozen reference run not reproducible); the joint minimax scalar and the cost layers from the frozen records; **PR B carries the results into the Letter** |
 >
 > Paper B's result in one sentence: detailed lanthanide fluorescence has a
 > much lower observable complexity than its microscopic transition network;
@@ -29,7 +29,7 @@
 is tagged `paper3-freeze` and carries the boxed correction of
 `paper3/CORRECTION.md`. Paper IV is complete on the corrected transport —
 findings F1–F66, the computational result set tagged `paper4-freeze`. Paper B
-adds F67–F71; the root suite is at 665 tests (652 before the referee revision).
+adds F67–F72; the root suite is at 667 tests (652 before the referee revision).
 **Date:** 2026-10-06. **Repo:** `zhuygln/revisit_sobolev`.
 
 **Manuscripts:** [paper4/manuscript.pdf](paper4/manuscript.pdf) — the Paper IV
@@ -5892,6 +5892,168 @@ transport panel alone, `docs/paperB/figures/fig3_adjacency`). Frozen into
 > worse than most scrambled orderings and the light three times better
 > than the best of them: the inversion at identical rank and parameter
 > count. A transport-optimised low-rank representation is not excluded.
+
+### 4.67 Paper B G3U: the paired-seed uncertainty of the near-threshold G3 readings, the fair scalar, the costs (F72)
+
+**Why (2026-10-06).** The referee: G3's `mags_seed_std` is the scatter of
+individual legs, not the uncertainty of the closure-minus-reference
+statistic that decides a letter, and the maximum over bands and colours
+carries a winner's-curse bias the scatter does not show. The PI's decision
+(`paperB/plan_review.md`): a bounded paired-seed rerun of a mechanically
+defined affected set, annotating G3, never re-gating it; the fair minimax
+scalar from the existing grids; the cost layers from the records.
+Preregistered in `paperB/prl_gate.md` "G3U" and "Post-hoc readings",
+tagged `paperB-g2r-prereg`.
+
+**The affected set** (`paperB/gate3u/analyse.py --affected`): every
+decision leg of the decisive ions' G3 states (`Afix_ng16`, `Arec_ng16`,
+`Arec_ng32`, `Aint_ng16`, `AintM_ng16`) and every valid K*-family leg of
+the two blend records whose max band **or** max colour error lies in
+[0.07, 0.13] mag on the frozen highest-packet-count record: **33 legs in 18
+records** (13 Ce II states, 4 Nd II states, both blends; La II excluded by
+rule). Run 2026-10-07 03:14–06:24 UTC, one process per record, the
+reference and the affected closures on the common seeds 1–12 at the frozen
+packet count, the trained operators rebuilt from the build seeds or loaded
+from the saved kernels and compared entry by entry with the frozen
+matrices: **every operator matched at 0.0.** The part (c) rerun died on its
+first attempt with the open bit-60 `IndexError` (index 2⁶⁰ + 1,086,790 on
+an array of 375,912) and completed on the retry.
+
+**Statistic.** d_{s,b} = m^closure_{s,b} − m^ref_{s,b} per seed and live
+band (colours from the live pairs); the 12-seed E_joint = max over bands
+and colours of |mean_s d|; the paired bootstrap (B = 10,000, seed 0)
+resamples the seed index and recomputes the maximum in every replicate.
+DECIDED iff the 95 % interval excludes 0.10; WITHIN NOISE otherwise; GRAY
+on an operator mismatch, fewer than 12 seeds, or a seeds-1–3 scatter that
+differs from the frozen record's by more than 10⁻⁶ mag (determinism).
+Table machine-generated (`paperB/gate3u/analyse.py --markdown`):
+
+| record | leg | frozen (3 seeds) band / colour | E_joint, 12 seeds | 68 % | 95 % | P(E_joint ≤ 0.10) | status |
+|---|---|---|---|---|---|---|---|
+| D_D0.3_58CeII | AintM_ng16 | 0.130 / 0.083 | 0.133 | [0.131, 0.135] | [0.129, 0.137] | 0.00 | decided fail |
+| D_D0.3_58CeII | Arec_ng16 | 0.056 / 0.091 | 0.073 | [0.063, 0.083] | [0.055, 0.092] | 1.00 | decided pass |
+| D_D0.3_60NdII | AintM_ng16 | 0.110 / 0.165 | 0.163 | [0.160, 0.167] | [0.156, 0.170] | 0.00 | decided fail |
+| D_D3_58CeII | Arec_ng16 | 0.089 / 0.081 | 0.109 | [0.094, 0.124] | [0.078, 0.138] | 0.27 | within noise |
+| D_D3_58CeII | Arec_ng32 | 0.078 / 0.134 | 0.084 | [0.067, 0.101] | [0.054, 0.118] | 0.83 | within noise |
+| J_J2500_58CeII | Afix_ng16 | 0.070 / 0.107 | 0.086 | [0.075, 0.098] | [0.065, 0.108] | 0.88 | within noise |
+| J_J2500_58CeII | Arec_ng16 | 0.051 / 0.087 | 0.064 | [0.052, 0.076] | [0.040, 0.087] | 1.00 | decided pass |
+| J_J5000_58CeII | Aint_ng16 | 0.050 / 0.097 | 0.086 | [0.079, 0.098] | [0.071, 0.107] | 0.88 | within noise |
+| J_J5000_58CeII | Arec_ng16 | 0.083 / 0.162 | 0.092 | [0.086, 0.114] | [0.077, 0.137] | 0.58 | within noise |
+| J_J5000_58CeII | Arec_ng32 | 0.050 / 0.097 | 0.045 | [0.041, 0.063] | [0.033, 0.077] | 1.00 | decided pass |
+| J_J7000_58CeII | Afix_ng16 | 0.096 / 0.074 | 0.095 | [0.084, 0.106] | [0.075, 0.118] | 0.67 | within noise |
+| J_J7000_58CeII | Arec_ng16 | 0.092 / 0.134 | 0.112 | [0.105, 0.123] | [0.097, 0.131] | 0.06 | within noise |
+| P_P1d_58CeII_n1e6 | Arec_ng16 | 0.119 / 0.151 | 0.137 | [0.131, 0.143] | [0.127, 0.149] | 0.00 | gray |
+| P_P1d_58CeII_n1e6 | Arec_ng32 | 0.055 / 0.078 | 0.075 | [0.068, 0.082] | [0.062, 0.089] | 1.00 | gray |
+| P_P3d_58CeII_n1e6 | AintM_ng16 | 0.093 / 0.160 | 0.165 | [0.161, 0.169] | [0.157, 0.173] | 0.00 | decided fail |
+| P_P3d_58CeII_n1e6 | Aint_ng16 | 0.084 / 0.075 | 0.084 | [0.081, 0.095] | [0.077, 0.105] | 0.93 | within noise |
+| P_P3d_58CeII_n1e6 | Arec_ng16 | 0.068 / 0.096 | 0.098 | [0.089, 0.106] | [0.081, 0.115] | 0.61 | within noise |
+| P_P3d_60NdII | AintM_ng16 | 0.057 / 0.110 | 0.119 | [0.114, 0.125] | [0.110, 0.130] | 0.00 | decided fail |
+| P_P3d_60NdII | Aint_ng16 | 0.117 / 0.075 | 0.118 | [0.115, 0.120] | [0.113, 0.123] | 0.00 | decided fail |
+| P_P5d_58CeII | Arec_ng16 | 0.068 / 0.107 | 0.077 | [0.077, 0.093] | [0.071, 0.102] | 0.96 | within noise |
+| P_P5d_60NdII | Afix_ng16 | 0.331 / 0.115 | 0.332 | [0.331, 0.333] | [0.330, 0.335] | 0.00 | decided fail |
+| T_T2500_58CeII | Arec_ng16 | 0.070 / 0.084 | 0.122 | [0.110, 0.133] | [0.100, 0.146] | 0.02 | decided fail |
+| T_T3000_58CeII | AintM_ng16 | 0.099 / 0.149 | 0.129 | [0.122, 0.136] | [0.116, 0.143] | 0.00 | decided fail |
+| T_T3000_58CeII | Aint_ng16 | 0.064 / 0.089 | 0.090 | [0.077, 0.104] | [0.067, 0.117] | 0.77 | within noise |
+| T_T3000_58CeII | Arec_ng16 | 0.066 / 0.116 | 0.118 | [0.112, 0.124] | [0.106, 0.130] | 0.00 | decided fail |
+| T_T3000_60NdII | AintM_ng16 | 0.087 / 0.085 | 0.082 | [0.078, 0.086] | [0.074, 0.090] | 1.00 | decided pass |
+| T_T4000_58CeII | Afix_ng16 | 0.126 / 0.129 | 0.158 | [0.139, 0.177] | [0.121, 0.195] | 0.00 | decided fail |
+| T_T4000_58CeII | Arec_ng16 | 0.099 / 0.112 | 0.094 | [0.085, 0.103] | [0.076, 0.112] | 0.75 | within noise |
+| T_T5000_58CeII_n1e6 | Arec_ng16 | 0.080 / 0.112 | 0.115 | [0.110, 0.120] | [0.104, 0.125] | 0.00 | decided fail |
+| partb_blend3 | Adirect_ng2 | 0.146 / 0.075 | 0.151 | [0.142, 0.160] | [0.134, 0.168] | 0.00 | decided fail |
+| partb_blend3 | Adirect_ng4 | 0.083 / 0.053 | 0.071 | [0.069, 0.079] | [0.065, 0.084] | 1.00 | decided pass |
+| partc_p1blend | Arec_ng2 | 0.161 / 0.077 | 0.139 | [0.125, 0.153] | [0.113, 0.167] | 0.00 | decided fail |
+| partc_p1blend | Arec_ng4 | 0.088 / 0.073 | 0.095 | [0.087, 0.104] | [0.080, 0.111] | 0.70 | within noise |
+
+33 cases of 33 affected legs: decided pass 5, decided fail 13, within noise 13, gray 2; point estimate on the other side of the threshold from the frozen reading: 7.
+
+
+**Read plainly.** (i) The readings the Letter rests on are decided: the
+Nd II trajectory interpolant fails (0.118 [0.113, 0.123]; matrix-only
+0.119 [0.110, 0.130]) — outcome C at P3d is not a noise draw; the Nd II
+anchor at 5 d fails by a mile (0.332); the three-ion `Adirect_ng4` passes
+(0.071 [0.065, 0.084]). (ii) Ce II at 3×10⁵ packets is noise-limited near
+the threshold: of its 27 cases, 13 are within noise and 7 twelve-seed
+point estimates fall on the other side of the threshold from the frozen
+3-seed reading. One is decided against the frozen side: `T2500 Arec_ng16`
+(frozen 0.084, passes; 12 seeds 0.122 [0.100, 0.146], decided fail) — the
+frozen C at T2500 rests on a favourable 3-seed draw. The C5 blend's
+`Arec_ng4` moves from 0.088 to 0.095 [0.080, 0.111], within noise (k_rec =
+4 is a near-threshold pass; `Arec_ng2` is a decided fail). The Ce II J-axis
+transfer, a colour miss by 0.007 on three seeds, is within noise on twelve
+(0.086 [0.065, 0.108], 88 % pass): "transfer fails on every axis for Ce
+II" is, on the source axis, a within-noise reading and the Letter now says
+so. **No frozen letter is re-read** (preregistered); the Letter carries the
+intervals (Figure 2's bars) and the qualifiers. (iii) **A second
+non-reproducible run**, caught by the determinism check: the frozen P1d
+Ce II reference at 10⁶ packets (`gate3_P_P1d_58CeII_n1e6.json`, git
+0b34f2f) is not reproduced seed for seed — up to 0.010 mag in a band, seed
+scatter 0.009 against 0.024 — while its build reference (18,708,447
+interactions, identical), its closures (identical to the printed digits,
+operators at 0.0) and the same-day `T5000` record at the same commit all
+reproduce at 0.0. Its energy identity is clean (3.7×10⁻¹⁷). This is the
+class the 2026-09-27 audit named (a run altered by the host fault without
+crashing); the two P1d cases are GRAY as preregistered, and against the
+reproducible 12-seed reference the state reads D as before (R16 0.137
+[0.127, 0.149] decided fail; R32 0.075 [0.062, 0.089] decided pass). Note:
+`paperB/gate3u/nonreproducible_p1d.md`. No frozen record is edited.
+
+**The fair scalar** (`paperB/scalar/minimax.py`, no transport; the PI's
+Nd II check reproduced exactly). The preregistered ε* minimises the mean
+band error and is reported by its max; the joint minimax ε*_mm =
+argmin_ε max(max band, max colour) is the comparator matched to the
+operator's criterion. Table machine-generated (`--markdown`):
+
+| record | live bands | preregistered ε* (mean-optimal) | its max band / colour | band-only minimax ε | its max band / colour | joint minimax ε*_mm | its max band / colour | E_joint at ε*_mm |
+|---|---|---|---|---|---|---|---|---|
+| La II | g r i z J H K | 0.20 | 0.068 / 0.067 | 0.50 | 0.047 / 0.085 | 0.20 | 0.068 / 0.067 | 0.068 |
+| Ce II | r i z J H K | 0.00 | 1.397 / 1.434 | 0.00 | 1.397 / 1.434 | 0.00 | 1.397 / 1.434 | 1.434 |
+| Nd II | g r i z J H K | 0.00 | 1.058 / 1.054 | 0.10 | 0.822 / 0.753 | 0.10 | 0.822 / 0.753 | 0.822 |
+| 13-ion blend | r i z J H K | 0.00 | 1.691 / 1.173 | 0.05 | 1.552 / 1.233 | 0.05 | 1.552 / 1.233 | 1.552 |
+
+
+No reading changes (B2's ratio on Nd II becomes 9.6 instead of 12.3,
+still Green by a wide margin). The Letter's main comparison quotes ε*_mm;
+the End Matter keeps ε* as the gate definition.
+
+**The costs** (`paperB/cost/costs.py`, from the records' `t_wall`,
+`serialized_bytes`, `n_exit_samples`, `events_per_packet`; `--markdown`):
+
+| record | packets × seeds | offline: build run [s] | kernel events | stored: N_g | matrix [B] | exit lines | operator [kB] | online: reference [s] | operator [s] | operator / reference | scalar ε = 0.10 [s] |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| La II | 300,000 × 3 | 1 | 322,994 | 2 | 32 | 524 | 16 | 1 | 2 | 1.05 | 6 |
+| Ce II | 300,000 × 3 | 12 | 5,439,289 | 16 | 2,048 | 12,510 | 303 | 11 | 13 | 1.15 | 48 |
+| Nd II | 1,000,000 × 3 | 128 | 18,641,032 | 2 | 32 | 86,187 | 2023 | 127 | 134 | 1.05 | 515 |
+| 13-ion blend | 1,000,000 × 3 | 193 | 30,634,068 | 4 | 128 | 175,086 | 4107 | 187 | 176 | 0.94 | 1640 |
+
+Nd II under the radiation-field-driven macroatom (R2M, 300,000 packets): reference 39 s downward against 72 s radiation-field-driven (8.2 against 13.4 events per packet); the 8-group operators 39 s and 64 s.
+
+
+Offline, the reference macroatom is run on the build seeds and the
+operator built from its events; stored, the operator is 32–2,048 B of
+matrix against 16 kB–4.1 MB of exit tables (the tables are the object);
+online, the operator transports at 0.94–1.15× the downward macroatom at
+the same seeds and packets, the scalar closure at 4–9×. The operator does
+not remove the reference calculation at a new state or mixture; its
+practical path is a precomputed table R(θ), plausible along single axes
+(G3), not established generally.
+
+> **F72 — The near-threshold G3 readings carry paired-seed intervals; the
+> decisive ones are decided, Ce II's 3×10⁵-packet readings near the
+> threshold are noise-limited, and one frozen reference run is not
+> reproducible.** Of 33 near-threshold decision legs re-transported on
+> twelve paired seeds with the trained operators preserved (all matched
+> at 0.0), 5 are decided passes, 13 decided failures, 13 within noise and
+> 2 gray; 7 twelve-seed estimates cross the threshold relative to the
+> three-seed reading, all on Ce II. The Nd II trajectory interpolant is a
+> decided failure (0.118 [0.113, 0.123]); Ce II's source-axis transfer
+> failure is within noise (0.086 [0.065, 0.108]); the 13-ion operator at 4
+> groups is within noise (0.095 [0.080, 0.111]) and the three-ion one at 4
+> groups a decided pass. The P1d Ce II reference at 10⁶ packets is not
+> reproduced seed for seed (its closures are): a second non-reproducible
+> run, gray under the rule, the state's letter unchanged. The joint minimax
+> scalar misses by 0.82 mag on Nd II (ε = 0.10), 1.43 on Ce II and 1.55 on
+> the 13-ion blend (ε = 0.05); the operator transports at 0.94–1.15× the
+> reference. No frozen letter is re-read.
 
 ## 5. Findings register
 

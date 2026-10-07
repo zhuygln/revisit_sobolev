@@ -3829,6 +3829,36 @@ mechanism sentence in the PI's prescribed form marked for the PI's
 confirmation on the Yellow. The G3U chain (18 records, sequential)
 started 03:14 UTC right after.
 
+### 9bv. G3U run and read (F72); PR B (2026-10-07)
+
+The G3U chain ran 03:14-06:24 UTC, 18 records, one retry (part (c)'s
+first attempt died with the bit-60 IndexError, index 2^60 + 1,086,790 on
+an array of 375,912; the retry completed clean). Every rebuilt or reloaded
+operator matched the frozen matrix at 0.0. Reading: 33 cases -- 5 decided
+pass, 13 decided fail, 13 within noise, 2 gray; 7 twelve-seed point
+estimates cross the threshold relative to the frozen three-seed reading,
+all Ce II at 3e5 packets (one decided against the frozen side: T2500
+Arec_ng16, frozen 0.084 -> 0.122 [0.100, 0.146]). The decisive readings
+hold: Nd II P3d interpolant 0.118 [0.113, 0.123] decided fail; Ce II J2500
+transfer within noise (0.086 [0.065, 0.108]); C5's Arec_ng4 within noise
+(0.095 [0.080, 0.111]); part (b)'s Adirect_ng4 decided pass. The two gray
+cases are the real finding of the day: the frozen P1d Ce II reference at
+1e6 packets (git 0b34f2f, 2026-09-24) is NOT reproduced seed for seed (up
+to 0.010 mag in a band), while its build reference, its closures and the
+same-commit same-day T5000 record reproduce at 0.0 -- a second instance
+of the non-reproducible class the 2026-09-27 audit named, caught by the
+determinism check instead of an exploding ledger
+(`paperB/gate3u/nonreproducible_p1d.md`). The letter D at P1d is unchanged
+against the reproducible 12-seed reference. No frozen record edited; no
+letter re-read (preregistered).
+
+F72 written (report 4.67 with the three machine-generated tables, README
+row), frozen (`g3u`, 53 macros, the intervals onto Figure 2 as bars with
+the twelve-seed tick), the manuscript's paired-seed paragraph, the
+trajectory sentence with its interval, the Ce II source-axis qualifier.
+`make check` green; core 2,885 words with two full-width and one
+single-column figure (budget 3,750).
+
 ## 10. Standing environment notes
 
 - Everything SEDONA lives *outside* this repo: code `~/personal/pubsed`,

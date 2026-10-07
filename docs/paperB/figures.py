@@ -194,7 +194,15 @@ def figure3(h, out_dir):
                 if st["interp_whole_joint"] is not None:
                     ax.plot([c], [st["interp_whole_joint"]], "D", color=col, ms=6)
                     ax.plot([c], [st["interp_matrix_joint"]], "d", color=col, ms=5, mfc="none")
-                top = max(st["fresh_joint"], st["anchor_joint"] or 0.0, st["interp_whole_joint"] or 0.0)
+                # the paired-seed 95 % interval of G3U where the reading was near the threshold (annotates; the frozen point stays)
+                for fam, dx in (("fresh", -0.03), ("anchor", 0.03), ("interp_whole", -0.03), ("interp_matrix", 0.03)):
+                    uu = st.get(f"{fam}_u")
+                    if uu:
+                        ucol = "0.45" if uu["status"] == "GRAY" else col
+                        ax.plot([c + dx, c + dx], [uu["lo"], uu["hi"]], "-", color=ucol, lw=1.0, alpha=0.9)
+                        ax.plot([c + dx], [uu["e"]], "_", color=ucol, ms=5, mew=1.0)
+                top = max(st["fresh_joint"], st["anchor_joint"] or 0.0, st["interp_whole_joint"] or 0.0,
+                          *[st[f"{f}_u"]["hi"] for f in ("fresh", "anchor", "interp_whole", "interp_matrix") if st.get(f"{f}_u")])
                 ax.annotate(st["cls"], (c, top), textcoords="offset points", xytext=(0, 5), ha="center", fontsize=9, color=col)
             ax.axhline(dm_max, color="k", ls=":", lw=1)
             ax.set_yscale("log"); ax.set_ylim(2e-3, 1.5)
@@ -202,15 +210,16 @@ def figure3(h, out_dir):
             if ri == len(ions) - 1:
                 ax.set_xlabel(AXLAB[ax_name])
             if ci == 0:
-                ax.set_ylabel(f"{names[ion]}\nmax(band, colour) error vs the state's reference [mag]", fontsize=8)
+                ax.set_ylabel(f"{names[ion]}\nmax(band, colour) error [mag]", fontsize=8)
             if ri == 0:
                 ax.set_title({"T": "gas temperature", "D": "density", "J": "source spectrum", "P": "trajectory (all coordinates)"}[ax_name], fontsize=10)
     from matplotlib.lines import Line2D
     hs = [Line2D([], [], marker="s", color="0.3", ls="", ms=6, label=f"anchor $R_{{{ng_t}}}$ transported"),
           Line2D([], [], marker="o", color="0.3", ls="", ms=6, mfc="none", mew=1.4, label=f"fresh $R_{{{ng_t}}}$ built at the state"),
           Line2D([], [], marker="D", color="0.3", ls="", ms=6, label="whole-operator interpolation"),
-          Line2D([], [], marker="d", color="0.3", ls="", ms=5, mfc="none", label="matrix-only interpolation (diagnostic)")]
-    fig.legend(handles=hs, loc="lower center", ncol=4, fontsize=9, frameon=False, bbox_to_anchor=(0.5, -0.02))
+          Line2D([], [], marker="d", color="0.3", ls="", ms=5, mfc="none", label="matrix-only interpolation (diagnostic)"),
+          Line2D([], [], marker="_", color="0.3", ls="-", lw=1.0, ms=5, label="paired-seed 95 % interval, 12 seeds (near-threshold cases)")]
+    fig.legend(handles=hs, loc="lower center", ncol=3, fontsize=8, frameon=False, bbox_to_anchor=(0.5, -0.04))
     fig.tight_layout(rect=(0, 0.04, 1, 1))
     return save(fig, out_dir, "fig2_generality")
 
