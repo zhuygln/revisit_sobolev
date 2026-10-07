@@ -33,6 +33,15 @@ is not the preregistered experiment. Tests: `tests/test_paperB_gate1.py`.
     .venv/bin/python paperB/scalar/minimax.py                        # the joint minimax eps from the existing grids (no transport); --markdown
     .venv/bin/python paperB/cost/costs.py                            # offline / stored / online cost layers from the records; --markdown
 
+**G2R ran 2026-10-06/07 (F71, §4.66):** the physical ordering reproduces
+the light better than all 31 scrambled orderings in 8 of 10 (ion, block
+count) cells and in every cell at or above the count where the ion passes
+(p = 0.031 each); Ce II Green, Nd II Yellow (second at its two-block
+passing count by 0.001 mag, inside the seed noise), **overall Yellow — the
+PI's call**. On Nd II at 32 blocks the physical ordering fits the events
+worse than most scrambled orderings and the light three times better than
+the best: the inversion at identical rank and parameter count.
+
 `gate2r/` is the frequency-adjacency ablation the PI preregistered on the
 referee's reading (`operators_perm.py`: the 128 fine groups permuted, the
 same block coarse-graining as G2's local family, the permutation undone;

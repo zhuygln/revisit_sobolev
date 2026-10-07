@@ -215,6 +215,33 @@ def figure3(h, out_dir):
     return save(fig, out_dir, "fig2_generality")
 
 
+def figure_adjacency(h, out_dir):
+    """The Letter's Figure 3 (2026-10-07, G2R): per decisive ion the joint
+    transport error of the physical frequency ordering (diamond) against
+    the 31 scrambled orderings (grey) at every block count -- same blocks,
+    rank bound, parameter count, exit tables, events, seeds and transport;
+    only the adjacency of the frequencies in a block differs. Single column."""
+    g = h["g2r"]; names = h["ion_names"]; dm_max = h["g1"]["dm_max"]
+    ions = [i for i in h["decisive"] if i in g["per_ion"]]
+    fig, axes = plt.subplots(len(ions), 1, figsize=(3.4, 2.6 * len(ions)), squeeze=False, sharex=True)
+    for ri, ion in enumerate(ions):
+        ax = axes[ri][0]; r = g["per_ion"][ion]
+        for c in r["cells"]:
+            k = c["k"]
+            jit = np.random.default_rng(k).uniform(-0.12, 0.12, len(c["scrambled"]))
+            ax.plot(k * 2 ** jit, c["scrambled"], ".", color="0.6", ms=3.5, alpha=0.8)
+            ax.plot([k], [c["e_physical"]], "D", color=COL[ion], ms=6, mec="k")
+        ax.axhline(dm_max, color="k", ls=":", lw=1.1)
+        ax.set_yscale("log"); ax.set_xscale("log", base=2)
+        ax.set_xticks(g["k_grid"]); ax.set_xticklabels([str(k) for k in g["k_grid"]])
+        ax.set_ylabel("max(band, colour) error  [mag]", fontsize=8)
+        ax.set_title(f"{names[ion]}: physical order (diamond) vs {g['n_scrambled']} scrambled", fontsize=8, loc="left")
+        ax.tick_params(labelsize=8)
+    axes[-1][0].set_xlabel("contiguous blocks $N_g$ of the ordering", fontsize=8)
+    fig.tight_layout()
+    return save(fig, out_dir, "fig3_adjacency")
+
+
 def main(out_dir=None, which=None):
     h = json.loads(FROZEN.read_text())
     out_dir = Path(out_dir) if out_dir else HERE / "figures"
@@ -224,6 +251,8 @@ def main(out_dir=None, which=None):
     if which in (None, 2):
         written += figure3(h, out_dir)            # the Letter's Figure 2: generality
     if which in (None, 3):
+        written += figure_adjacency(h, out_dir)   # the Letter's Figure 3: adjacency (G2R)
+    if which in (None, 5):
         written += figure_robustness(h, out_dir)  # End Matter
     if which == 4:
         written += figure2(h, out_dir)            # the former standalone mechanism figure, for the record

@@ -8,7 +8,7 @@ export SOURCE_DATE_EPOCH_TEX_PRIMITIVES = 1
 all: manuscript.pdf
 	@$(MAKE) --no-print-directory check
 
-manuscript.pdf: manuscript.tex numbers.tex tab_gates.tex tab_contrast.tex tab_generality.tex tab_cost.tex references.bib figures/fig1_flagship.pdf figures/fig2_generality.pdf figures/figEM_robustness.pdf
+manuscript.pdf: manuscript.tex numbers.tex tab_gates.tex tab_contrast.tex tab_generality.tex tab_cost.tex tab_adjacency.tex references.bib figures/fig1_flagship.pdf figures/fig2_generality.pdf figures/fig3_adjacency.pdf figures/figEM_robustness.pdf
 	pdflatex -interaction=nonstopmode manuscript.tex
 	bibtex manuscript
 	pdflatex -interaction=nonstopmode manuscript.tex

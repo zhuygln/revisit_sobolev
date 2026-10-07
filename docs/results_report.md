@@ -10,7 +10,7 @@
 > | **Paper I** (§1–§4.20) | the error of the Sobolev approximation proper against resolved profiles, and of the expansion-opacity closure against Sobolev | frozen record |
 > | **Paper III** (§4.21–§4.44) | whether the fluorescence redistribution operator compresses to a small group-to-group matrix, with the historical photon-packet treatment | frozen, tagged `paper3-freeze`, under the boxed correction of `paper3/CORRECTION.md` (the bin-leg inversion bug, F58) |
 > | **Paper IV** (§4.45–§4.61) | coarse line-opacity treatments under energy-conserving fluorescence on published benchmark states; a methods paper | complete, tagged `paper4-freeze`, referee revision applied, **ready for MNRAS submission** |
-> | **Paper B** (§4.62–§4.65) | can detailed energy-conserving lanthanide fluorescence be replaced by a compact effective operator, why, and how far does it generalise | gates G1–G3 preregistered, run and frozen (`paperB-g3-freeze`); PRL draft (`docs/paperB/`, PR #14) **under referee revision**: the adjacency ablation G2R and the paired-seed check G3U preregistered (`paperB/prl_gate.md`), not yet run; the joint minimax scalar and the cost layers added from the frozen records |
+> | **Paper B** (§4.62–§4.66) | can detailed energy-conserving lanthanide fluorescence be replaced by a compact effective operator, why, and how far does it generalise | gates G1–G3 preregistered, run and frozen (`paperB-g3-freeze`); PRL draft (`docs/paperB/`, PR #14) **under referee revision**: the adjacency ablation G2R run (F71: the physical ordering beats all 31 scrambled orderings in 8 of 10 cells; Ce II Green, Nd II Yellow by 0.001 mag at two blocks; overall Yellow, the PI's call) and the paired-seed check G3U running; the joint minimax scalar and the cost layers added from the frozen records |
 >
 > Paper B's result in one sentence: detailed lanthanide fluorescence has a
 > much lower observable complexity than its microscopic transition network;
@@ -19,9 +19,9 @@
 > keeps contiguous frequencies together, and it remains compact across
 > physical states and a realistic mixture, but its parameters — and
 > sometimes its required resolution — depend on the thermodynamic and
-> radiation-field state (F67–F70). Whether adjacency itself, rather than
-> rank or parameter count, is the mechanism is the preregistered G2R
-> (2026-10-06, not yet run). G4 of the original Paper B roadmap (operator error against
+> radiation-field state (F67–F70). The ordering ablation G2R (F71) shows
+> that it is the adjacency of the frequencies in a block, not the block
+> count, rank bound or parameter count, that the light responds to. G4 of the original Paper B roadmap (operator error against
 > a composition-pattern proxy) is demoted to a post-manuscript robustness
 > candidate and is not a gate.
 
@@ -29,7 +29,7 @@
 is tagged `paper3-freeze` and carries the boxed correction of
 `paper3/CORRECTION.md`. Paper IV is complete on the corrected transport —
 findings F1–F66, the computational result set tagged `paper4-freeze`. Paper B
-adds F67–F70; the root suite is at 665 tests (652 before the referee revision).
+adds F67–F71; the root suite is at 665 tests (652 before the referee revision).
 **Date:** 2026-10-06. **Repo:** `zhuygln/revisit_sobolev`.
 
 **Manuscripts:** [paper4/manuscript.pdf](paper4/manuscript.pdf) — the Paper IV
@@ -5781,6 +5781,117 @@ nontrivial. Not a fixed universal operator, but a compact, tabulable one —
 R_ij(θ_small) over a handful of state coordinates, refit rather than
 interpolated where coordinates move together — is the manuscript's fourth
 step, stated plainly rather than averaged into a single "outcome B".**
+
+### 4.66 Paper B G2R: the frequency-adjacency ablation (F71)
+
+**Why (2026-10-06).** The referee's reading of the PRL draft, accepted by
+the PI (`paperB/plan_review.md`): G2's inversion compares two differently
+optimised families and so does not by itself show that *adjacency in
+frequency*, rather than low rank or parameter count, is what the light
+samples. G2R destroys adjacency and nothing else: the frozen 128-group fine
+operator of G2 (`R2build`, build seeds 101–103), its frequency indices
+permuted, the **same** block coarse-graining as the local family
+`L128_ng{N_g}` applied, the permutation undone, transported on the same
+128-group exit tables against the same `R2` on the same evaluation seeds.
+Thirty-one fixed random orderings (`default_rng(1000 + m)`, m = 1 … 31)
+plus the physical one, Ce II and Nd II, N_g ∈ {2, 4, 8, 16, 32}, one process
+per (ion, N_g). Preregistered in `paperB/prl_gate.md` "G2R", tagged
+`paperB-g2r-prereg`, run 2026-10-06/07 (ten units, no retry, no crash;
+Ce II ≈ 10 min and Nd II ≈ 1.6 h per unit). The block coarse-graining on the
+fine matrix was pinned to the frozen G2 matrices at 10⁻¹² before the run
+(`tests/test_paperB_gate2r.py`).
+
+**Determinism.** In every unit the rerun `R2` and the physical ordering
+`P000` reproduce G2's frozen `R2` and `L128_ng{N_g}` magnitudes to 0.0 mag
+(bit-identical); no gray condition fired.
+
+**Statistic.** Per (ion, N_g) the joint error E_joint = max(max |Δm| over
+the live bands, max |Δcolour|) of every ordering; the rank of the physical
+ordering among the 32 (a tie counts against it), p = rank/32; the
+scrambled minimum, median and maximum; the fraction of scrambled orderings
+passing the 0.10/0.10 criterion; the event-level loss of every ordering
+against the independent `K128` with the physical ordering's rank on it.
+Tables machine-generated (`paperB/gate2r/analyse.py --markdown`):
+
+Ce II: K*_local = 16, the physical ordering ranks 1 of 32 there and first in 4 of 5 block counts; **GREEN**:
+
+| N_g | E_joint physical | rank / 32 | p | scrambled min | median | max | scrambled passing | m_event physical | m_event scrambled median | m_event rank |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 2 | 0.265 | 32 | 1.000 | 0.208 | 0.239 | 0.255 | 0.00 | 0.289 | 0.290 | 8 |
+| 4 | 0.146 | 1 | 0.031 | 0.186 | 0.230 | 0.261 | 0.00 | 0.244 | 0.290 | 1 |
+| 8 | 0.115 | 1 | 0.031 | 0.183 | 0.229 | 0.262 | 0.00 | 0.238 | 0.282 | 1 |
+| 16 | 0.067 | 1 | 0.031 | 0.140 | 0.204 | 0.277 | 0.00 | 0.182 | 0.256 | 1 |
+| 32 | 0.051 | 1 | 0.031 | 0.060 | 0.145 | 0.234 | 0.03 | 0.138 | 0.193 | 1 |
+
+Nd II: K*_local = 2, the physical ordering ranks 2 of 32 there and first in 4 of 5 block counts; **YELLOW**:
+
+| N_g | E_joint physical | rank / 32 | p | scrambled min | median | max | scrambled passing | m_event physical | m_event scrambled median | m_event rank |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 2 | 0.069 | 2 | 0.062 | 0.068 | 0.091 | 0.109 | 0.87 | 0.189 | 0.191 | 2 |
+| 4 | 0.063 | 1 | 0.031 | 0.073 | 0.087 | 0.106 | 0.90 | 0.172 | 0.192 | 1 |
+| 8 | 0.032 | 1 | 0.031 | 0.054 | 0.087 | 0.103 | 0.97 | 0.169 | 0.187 | 1 |
+| 16 | 0.016 | 1 | 0.031 | 0.049 | 0.081 | 0.100 | 0.97 | 0.153 | 0.166 | 2 |
+| 32 | 0.010 | 1 | 0.031 | 0.028 | 0.064 | 0.079 | 1.00 | 0.132 | 0.121 | 27 |
+
+G2R reading **YELLOW** -> PI.
+
+**Reading (preregistered ladder).** Ce II: K*_local = 16; the physical
+ordering ranks first at N_g = 4, 8, 16 and 32 (p = 0.031 each) and last at
+N_g = 2, where no ordering comes within a factor of two of the criterion —
+**GREEN**. Nd II: K*_local = 2; the physical ordering ranks first at
+N_g = 4, 8, 16 and 32 (p = 0.031 each) and **second** at N_g = 2, where one
+scrambled two-block partition edges it by 0.001 mag (0.068 against 0.069;
+the R2 seed scatter is 0.003–0.014 mag per band) and 87 % of the scrambled
+orderings pass the criterion anyway — **YELLOW** (Green fails only on the
+rank at K*_local; Red is far away). Overall **YELLOW → the PI decides with
+the numbers**, as preregistered.
+
+**What the ladder shows, read plainly.** In 8 of the 10 cells, and in
+every cell at or above the count at which either ion passes the criterion,
+the operator on the physical ordering reproduces the light better than all
+31 scrambled orderings of the same blocks — at identical block count, rank
+bound, parameter count, exit tables, events, seeds and transport. The
+margin is not marginal: at N_g = 16 on Ce II 0.067 mag against a scrambled
+minimum of 0.140 and median 0.204; at N_g = 32 on Nd II 0.010 mag against
+0.028 and 0.064. The two exceptions are the coarsest count on each ion,
+where two blocks of 64 groups are too coarse for the physical ordering to
+matter on Ce II (every ordering fails by ≥ 0.2 mag) and too easy for it to
+matter on Nd II (most orderings pass).
+
+**Events against observables, inside the ablation.** On Ce II the physical
+ordering also fits the microscopic events best from N_g = 4 up (rank 1 on
+m_event), so there adjacency helps both. On Nd II at N_g = 32 the physical
+ordering fits the events *worse* than most scrambled orderings (m_event
+0.132 against a scrambled median of 0.121, rank 27 of 32) while
+reproducing the light three times better than the best of them (0.010
+against 0.028 mag) — the G2 inversion reproduced within a family of
+identical rank and parameter count, which is the cleanest form of the
+Letter's point.
+
+**What G2R does not show.** It does not exclude a transport-optimised
+low-rank representation; the PI's wording is the one to use: *frequency
+adjacency provides transport-relevant structure beyond rank or parameter
+count alone*. "Locality rather than low rank" is not written anywhere.
+
+**Record.** `paperB/gate2r/g2r_<ion>_k<N_g>.json` (the scrambled orderings'
+128×128 matrices dropped after their event loss was computed; the physical
+one kept), `g2r_verdict.json`, figure
+`docs/figures/paperB/g2r_adjacency.{pdf,png}` (the Letter's Figure 3 is the
+transport panel alone, `docs/paperB/figures/fig3_adjacency`). Frozen into
+`paperB/FROZEN.json` (`g2r`) and quoted by macro.
+
+> **F71 — Frequency adjacency carries transport-relevant structure beyond
+> block count, rank bound and parameter count.** With everything else held
+> fixed, the operator on the physical frequency ordering reproduces the
+> light better than all 31 scrambled orderings in 8 of 10 (ion, block
+> count) cells and in every cell at or above the count where the ion
+> passes the criterion (p = 0.031 each); the preregistered reading is Green
+> on Ce II and Yellow on Nd II (second at its two-block passing count by
+> 0.001 mag, inside the seed noise), overall Yellow for the PI's call. On
+> Nd II at 32 blocks the physical ordering fits the microscopic events
+> worse than most scrambled orderings and the light three times better
+> than the best of them: the inversion at identical rank and parameter
+> count. A transport-optimised low-rank representation is not excluded.
 
 ## 5. Findings register
 

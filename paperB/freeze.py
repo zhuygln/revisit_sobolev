@@ -44,8 +44,10 @@ def build():
     g3, g3_rel, g3_sha = load("paperB/gate3/gate3_verdict.json")
     mm, mm_rel, mm_sha = load("paperB/scalar/minimax.json")
     co, co_rel, co_sha = load("paperB/cost/costs.json")
+    g2r, g2r_rel, g2r_sha = load("paperB/gate2r/g2r_verdict.json")
 
-    h = dict(sources={g1_rel: g1_sha, r2m_rel: r2m_sha, aud_rel: aud_sha, g2_rel: g2_sha, g3_rel: g3_sha, mm_rel: mm_sha, co_rel: co_sha},
+    h = dict(sources={g1_rel: g1_sha, r2m_rel: r2m_sha, aud_rel: aud_sha, g2_rel: g2_sha, g3_rel: g3_sha, mm_rel: mm_sha, co_rel: co_sha,
+                      g2r_rel: g2r_sha},
              ions=list(IONS), ion_names=NAME, decisive=list(DECISIVE))
 
     # ---- G1 (F67) ----
@@ -203,6 +205,29 @@ def build():
             ref_ev_per_pkt=d["online"]["ref_events_per_packet"], op_ev_per_pkt=d["online"]["op_events_per_packet"])
     ratios = [d["op_over_ref"] for d in h["cost"]["per_record"].values()]
     h["cost"]["op_over_ref_min"] = min(ratios); h["cost"]["op_over_ref_max"] = max(ratios)
+    # ---- G2R (F71): the frequency-adjacency ablation ----
+    P = g2r["prereg"]
+    h["g2r"] = dict(reading=g2r["reading"], decision=g2r["decision"], n_scrambled=P["n_scrambled"], n_orderings=P["n_scrambled"] + 1,
+                    k_grid=list(P["k_grid"]), per_ion={})
+    for ion in g2r["per_ion"]:
+        r = g2r["per_ion"][ion]
+        cells = [dict(k=int(k), e_physical=c["e_physical"], band_physical=c["band_physical"], colour_physical=c["colour_physical"],
+                      rank=c["rank"], p=c["p_value"], scr_min=c["scrambled"]["min"], scr_median=c["scrambled"]["median"],
+                      scr_max=c["scrambled"]["max"], scr_frac_pass=c["scrambled"]["frac_pass"], physical_passes=c["physical_passes"],
+                      event_physical=c["event_physical"], event_scr_median=c["event_scrambled"]["median"], event_rank=c["event_rank"],
+                      scrambled=[o["e_joint"] for o in c["orderings"] if o["perm_id"] != 0],
+                      scrambled_event=[o["event"] for o in c["orderings"] if o["perm_id"] != 0])
+                 for k, c in sorted(r["cells"].items(), key=lambda kv: int(kv[0]))]
+        at = next(c for c in cells if c["k"] == r["k_local"])
+        h["g2r"]["per_ion"][ion] = dict(reading=r["reading"], k_local=r["k_local"], rank_at_k_local=r["rank_at_k_local"],
+                                        n_rank1_cells=r["n_rank1_cells"], n_cells=len(cells), gray=r["gray"], cells=cells,
+                                        at_k_local=dict(e_physical=at["e_physical"], scr_min=at["scr_min"], scr_median=at["scr_median"],
+                                                        scr_frac_pass=at["scr_frac_pass"], p=at["p"]),
+                                        first_cells=[c["k"] for c in cells if c["rank"] == 1],
+                                        not_first_cells=[c["k"] for c in cells if c["rank"] != 1])
+    dec = [i for i in DECISIVE if i in h["g2r"]["per_ion"]]
+    h["g2r"]["n_cells"] = sum(h["g2r"]["per_ion"][i]["n_cells"] for i in dec)
+    h["g2r"]["n_first"] = sum(h["g2r"]["per_ion"][i]["n_rank1_cells"] for i in dec)
     return h
 
 
