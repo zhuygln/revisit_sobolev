@@ -33,6 +33,23 @@ is not the preregistered experiment. Tests: `tests/test_paperB_gate1.py`.
     .venv/bin/python paperB/scalar/minimax.py                        # the joint minimax eps from the existing grids (no transport); --markdown
     .venv/bin/python paperB/cost/costs.py                            # offline / stored / online cost layers from the records; --markdown
 
+**G2R ran 2026-10-06/07 (F71, §4.66):** the physical ordering reproduces
+the light better than all 31 scrambled orderings in 8 of 10 (ion, block
+count) cells and in every tested cell with N_g ≥ 4 (p = 0.031 each); Ce II Green, Nd II Yellow (second at its two-block
+passing count by 0.001 mag, inside the seed noise), **overall Yellow — the
+PI's call**. On Nd II at 32 blocks the physical ordering fits the events
+worse than most scrambled orderings and the light three times better than
+the best: the inversion at identical rank and parameter count.
+
+**G3U ran 2026-10-07 (F72, §4.67):** of 33 near-threshold decision legs
+on twelve paired seeds (operators matched at 0.0), 5 decided pass, 13
+decided fail, 13 within noise, 2 gray; the decisive readings are decided
+(the Nd II trajectory interpolant fails, 0.118 [0.113, 0.123]), Ce II's
+3×10⁵-packet readings near the threshold are noise-limited (7 point
+estimates cross), and the frozen P1d Ce II reference at 10⁶ packets is not
+reproduced seed for seed while its closures are (gray; the letter
+unchanged; `gate3u/nonreproducible_p1d.md`). No frozen letter is re-read.
+
 `gate2r/` is the frequency-adjacency ablation the PI preregistered on the
 referee's reading (`operators_perm.py`: the 128 fine groups permuted, the
 same block coarse-graining as G2's local family, the permutation undone;

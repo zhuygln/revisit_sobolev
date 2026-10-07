@@ -133,3 +133,21 @@ def test_check_prereg_refuses_a_foreign_record():
     with pytest.raises(ValueError):
         G2R.check_prereg(bad)
     assert G2R.check_prereg(dict(row, k=3), strict=False)
+
+
+def test_the_frozen_g2r_verdict_reads_as_recorded():
+    """The real record (2026-10-07): Ce II Green (first at 4, 8, 16, 32; last at 2), Nd II Yellow (second at its
+    passing count of 2 by one scrambled ordering; first elsewhere); overall Yellow -> the PI."""
+    p = ROOT / "paperB/gate2r/g2r_verdict.json"
+    if not p.exists():
+        pytest.skip("no G2R verdict")
+    v = json.loads(p.read_text())
+    assert v["reading"] == "YELLOW" and v["decision"] == "PI" and v["ions_gray"] == []
+    ce, nd = v["per_ion"]["58CeII"], v["per_ion"]["60NdII"]
+    assert ce["reading"] == "GREEN" and ce["rank_at_k_local"] == 1 and ce["n_rank1_cells"] == 4 and ce["ranks"]["2"] == 32
+    assert nd["reading"] == "YELLOW" and nd["rank_at_k_local"] == 2 and nd["n_rank1_cells"] == 4
+    for ion in (ce, nd):
+        for k, c in ion["cells"].items():
+            assert c["ref_dev_from_G2"] == 0.0 and c["physical_dev_from_G2"] == 0.0 and len(c["orderings"]) == 32
+    assert abs(nd["cells"]["2"]["e_physical"] - nd["cells"]["2"]["scrambled"]["min"]) < 0.002
+    assert nd["cells"]["32"]["event_rank"] == 27 and nd["cells"]["32"]["rank"] == 1

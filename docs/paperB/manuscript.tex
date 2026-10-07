@@ -192,10 +192,10 @@ numbers against \PBParamsLocal\ at \PBContrastK\ archetypes. The
 factorisation minimises a Frobenius reconstruction error of the fine
 matrix, not the energy-weighted total-variation loss reported here, so its
 microscopic advantage is measured, not built in: it holds at the high end
-of the ladder and not at every count. If the compression of the first
-results section reflected a globally low-rank redistribution law, the
-global family would reach the photometric criterion with fewer
-archetypes.
+of the ladder and not at every count. This comparison tests whether a
+generic global low-rank representation selected by microscopic
+reconstruction preserves the transported observables; it does not test
+all possible transport-optimised low-rank representations.
 
 It does not. On Ce\,\textsc{ii} the local operator passes at
 \PBCeKlocal\ archetypes and the global one at \PBCeKglobal; on
@@ -225,8 +225,27 @@ reproduces the light with a few blocks; the factorisation, free to mix
 distant frequencies, does not, however well it reconstructs the events at
 the counts where it does. Whether adjacency itself carries the
 transport-relevant structure, rather than the rank bound or the parameter
-count the two families do not share, is the subject of a preregistered
-ablation of the frequency ordering at fixed block count (End Matter).
+count the two families do not share, was tested by a preregistered
+ablation that changes nothing else: the fine operator's frequency
+indices are permuted, the same block coarse-graining is applied, and the
+permutation is undone, so that block count, rank bound, parameter count,
+exit tables, events, seeds and transport are identical and only the
+physical adjacency of the frequencies in a block is destroyed. Against
+\PBNScrambled\ fixed scrambled orderings at every block count
+(Fig.~\ref{fig:adjacency}; Table~\ref{tab:adjacency}), the physical
+ordering ranks first in \PBAdjFirst\ of \PBAdjCells\ cells, each at the
+permutation probability \PBAdjP, and in every tested cell with
+$N_g\ge4$; the two exceptions are the coarsest two-block cells. On
+Ce\,\textsc{ii} at two blocks no ordering comes near the criterion; on
+Nd\,\textsc{ii} at two blocks \PBNdAdjScrPass\ of the scrambled
+orderings pass it and one of them edges the physical ordering by a
+thousandth of a magnitude, inside the seed noise, so that cell has almost
+no power to discriminate adjacency. The preregistered reading is
+\PBCeGtwoR\ on Ce\,\textsc{ii} and \PBNdGtwoR\ on Nd\,\textsc{ii}.
+Taken together, the ablation shows that frequency adjacency carries
+transport-relevant structure at the resolutions where the ordering is
+discriminating, beyond what rank bound or parameter count alone captures;
+a transport-optimised low-rank representation is not excluded.
 
 The compression is two-level. The reduced model as implemented is
 $P_{\rm red}(\nu_{\rm out}\mid\nu_{\rm in}) \approx
@@ -244,6 +263,17 @@ keeping contiguous frequencies together does.
 
 
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{figures/fig3_adjacency.pdf}
+\caption{\textbf{Adjacency, isolated.} The joint error of the operator
+built on the physical frequency ordering (diamonds) against
+\PBNScrambled\ scrambled orderings of the same fine operator at the same block count
+(grey): identical rank bound, parameter
+count, exit tables, events, seeds and transport. Dotted: the criterion.}
+\label{fig:adjacency}
+\end{figure}
+
 \section{A state-dependent family, compact throughout}
 \label{sec:generality}
 Is the local operator a property of the ion or of the state it was built
@@ -256,7 +286,9 @@ reference, both the original operator transported unchanged and an
 operator rebuilt there (Fig.~\ref{fig:generality}), both at \PBNgT\ groups.
 The transported operator is not predictive: it fails on every axis for
 Ce\,\textsc{ii} and on all but the source-spectrum axis for the other two
-ions. The rebuilt operator passes at every readable state of
+ions (Ce\,\textsc{ii}'s source-axis failure is a colour miss within the
+seed noise, End Matter; its temperature, density and trajectory failures
+are not). The rebuilt operator passes at every readable state of
 Nd\,\textsc{ii} and La\,\textsc{ii}, with at most \PBNdKrecMax\ groups
 needed anywhere on Nd\,\textsc{ii}. There is no universal $R_{ij}$; the
 failure of transfer is not a failure of compression.
@@ -271,8 +303,10 @@ source axes for every ion, reducing Nd\,\textsc{ii}'s error at the interior
 temperature from \PBNdFixT\ to \PBNdIntWT~mag. The useful object is a
 tabulated family $R(\theta)$. Its boundary is the coupled trajectory: at
 three days on Nd\,\textsc{ii} the transported operator misses by
-\PBNdTrajAnchor~mag, the interpolant by \PBNdTrajWhole~mag, and only the
-operator rebuilt there passes, at \PBNdTrajKrec\ groups with
+\PBNdTrajAnchor~mag, the interpolant by \PBNdTrajWhole~mag --- on twelve
+paired seeds \PBUNdTrajWhole~mag with a 95\% interval
+[\PBUNdTrajWholeLo, \PBUNdTrajWholeHi], decided (End Matter) --- and only
+the operator rebuilt there passes, at \PBNdTrajKrec\ groups with
 \PBNdTrajFresh~mag. The one-dimensional interpolation that succeeds along
 independently varied coordinates does not predict the tested coupled
 trajectory; the present calculation does not distinguish multivariate
@@ -281,7 +315,10 @@ coordinate. Ce\,\textsc{ii} adds a
 second qualification: its rebuilt \PBNgT-group operator fails at
 \PBCeNFreshFail\ of \PBCeNStates\ states, on colour, by at most
 \PBCeWorstColourOver~mag, and a \PBCeKrecMax-group operator passes at
-every one. Compactness survives; a fixed representation size does not.
+every one; several of these readings sit within the seed noise of the
+threshold (End Matter), and the paired-seed check moves none of the
+decided ones across it. Compactness survives; a fixed representation size
+does not.
 
 Composition closes the argument. Three single-ion operators combined by an
 opacity-share rule, with no fit to the blend, do not reach the criterion at
@@ -312,8 +349,11 @@ control; columns: gas temperature, density, source spectrum, and the
 trajectory along which all move together. Dotted: the criterion, on the
 same statistic; the letter is the preregistered reading of each state (A
 transported operator passes; B only the interpolant; C only a fresh fit;
-D none at \PBNgT\ groups). Grey: states excluded by the preregistered
-validity checks.}
+D none at \PBNgT\ groups). Vertical bars: the paired-seed 95\% interval
+on \PBUSeeds\ seeds for the readings within \PBUWinLo--\PBUWinHi~mag of
+the threshold, with the twelve-seed estimate as a tick (dark grey where
+the reference run was not reproduced seed for seed, End Matter). Grey
+letters: states excluded by the preregistered validity checks.}
 \label{fig:generality}
 \end{figure*}
 
@@ -327,10 +367,13 @@ evidence is the inversion of Eq.~(\ref{eq:inversion}) at
 \PBContrastK\ archetypes: a representation that reproduces the microscopic
 redistribution better reproduces the light worse, so the microscopic
 distribution is the wrong target for a reduced model of this process. The
-representation the light accepts keeps contiguous frequencies together;
-whether adjacency itself, rather than rank or parameter count, is what it
-exploits is the question the preregistered ordering ablation (End Matter)
-settles. The local
+representation the light accepts keeps contiguous frequencies together,
+and the ordering ablation shows that it is the adjacency, not the block
+count or the parameter count, that the light responds to wherever the
+ordering is discriminating: scramble the frequencies within the same
+blocks and the operator loses most of what it reproduces, on both decisive
+ions in every tested cell with $N_g\ge4$.
+The local
 operator is not universal --- it is a state-dependent family, interpolable
 along single coordinates, refit on the one coupled trajectory tested, with
 a resolution that is itself state-dependent for Ce\,\textsc{ii} --- and it
@@ -401,21 +444,55 @@ practical path is a precomputed table $R(\theta)$, which the third gate
 shows to be plausible along single coordinates and not yet established
 generally.
 
-\paragraph{Preregistered controls in progress.} Two were preregistered on
-the referee's reading and are not run at the time of this draft. The
-ordering ablation takes the frozen fine operator of the second gate,
-permutes its frequency indices, applies the same block coarse-graining
-and undoes the permutation, so that the block count, rank bound,
-parameter count, exit tables, events, seeds and transport are unchanged
-and only physical adjacency is destroyed; thirty-one fixed random
-orderings against the physical one, on Ce\,\textsc{ii} and
-Nd\,\textsc{ii} at every block count of the ladder, read by the rank of
-the physical ordering. The paired-seed check re-transports every
-decision leg of the third gate whose error lies within a preregistered
-window of the threshold on twelve common seeds, with the trained
-operators preserved, and reports a paired bootstrap interval on the joint
-statistic that decides each letter.
-% TO BE COMPLETED: the G2R and G3U results replace this paragraph.
+\paragraph{The ordering ablation.} Preregistered after the referee's
+reading, with the thirty-one permutation seeds, the grid, the statistic
+and the ladder fixed before the run. The physical ordering and the
+reference reproduce the second gate's frozen runs exactly, seed for seed.
+The reading is on the rank of the physical ordering among the
+\PBNOrderings\ at the count where the local operator first passes
+(\PBCeKlocal\ on Ce\,\textsc{ii}, \PBNdKlocal\ on Nd\,\textsc{ii}) and
+across the grid: Green if first there and in at least four of the five
+counts, Red if outside the top quartile there. Ce\,\textsc{ii} reads
+\PBCeGtwoR\ (first at its passing count and at every count but two
+blocks); Nd\,\textsc{ii} reads \PBNdGtwoR, second of \PBNOrderings\ at
+its passing count of two blocks --- where \PBNdAdjScrPass\ of the
+scrambled orderings also pass --- and first at every other count; the
+combined reading is \PBGtwoR, which the preregistration leaves to the
+authors' judgement with the numbers. Table~\ref{tab:adjacency} carries
+every cell with the event-level loss alongside: on Ce\,\textsc{ii} the
+physical ordering also fits the events best from four blocks up, while on
+Nd\,\textsc{ii} at thirty-two blocks it fits them worse than most
+scrambled orderings (rank \PBNdAdjEvRankThirtyTwo) and reproduces the light
+first --- the inversion of the main text, inside the ablation
+itself, at identical rank and parameter count.
+
+\paragraph{The paired-seed check.} Preregistered with the ablation: every
+decision leg of the third gate whose band or colour error lies within
+\PBUWinLo--\PBUWinHi~mag of the threshold --- \PBUCases\ legs in
+\PBURecords\ records, derived from the frozen records by that rule --- is
+re-transported on \PBUSeeds\ common seeds with the trained operators
+preserved (rebuilt or reloaded, every matrix matched to the frozen one),
+and the joint statistic is given a paired bootstrap interval
+(\PBUBoot\ replicates over the seed index, the maximum over bands and
+colours recomputed in each, so the interval carries the winner's curse).
+The frozen letters are not re-read; the check annotates them.
+\PBUPass\ cases are decided passes and \PBUFail\ decided failures (the
+95\% interval excludes the threshold), \PBUNoise\ are within noise, and
+\PBUFlips\ twelve-seed estimates fall on the other side of the threshold
+from the three-seed reading, all on Ce\,\textsc{ii} at $3\times10^5$
+packets. The readings the text rests on are decided: the Nd\,\textsc{ii}
+trajectory interpolant fails (\PBUNdTrajWhole~mag,
+[\PBUNdTrajWholeLo, \PBUNdTrajWholeHi]); Ce\,\textsc{ii}'s
+source-axis transfer, a colour miss on three seeds, is within noise on
+twelve (\PBUCeJFix~mag, [\PBUCeJFixLo, \PBUCeJFixHi]); the
+\PBBlendNIons-ion operator at \PBBlendKrec\ groups is within noise
+(\PBUBlend~mag, [\PBUBlendLo, \PBUBlendHi]); the three-ion operator at
+\PBKdirect\ groups is a decided pass. Two cases are gray: at one day the
+Ce\,\textsc{ii} reference run of the third gate is not reproduced seed
+for seed (its build reference and closures are, bit for bit), a second
+instance of the non-reproducible class the energy audit found, now caught
+by the determinism check; against the reproducible twelve-seed reference
+the state reads as before.
 
 \paragraph{Amendments during the runs.} Three were made and are recorded
 in the archived preregistration with what had been seen when each was
@@ -460,7 +537,8 @@ number in this Letter is generated, and the scripts that regenerate the
 numbers, tables and figures are archived at
 \texttt{github.com/zhuygln/revisit\_sobolev} (tags \texttt{paperB-g2-prereg},
 \texttt{paperB-g2-freeze}, \texttt{paperB-g3-prereg},
-\texttt{paperB-g3-freeze}).
+\texttt{paperB-g3-freeze}, \texttt{paperB-g2r-prereg},
+\texttt{paperB-g2r-freeze}).
 
 \begin{figure}[p]
 \centering
@@ -510,6 +588,17 @@ wall time of the reference, the operator and the scalar closure at
 $\epsilon=0.1$ on the same evaluation seeds and packets.}
 \label{tab:cost}
 \input{tab_cost}
+\end{table*}
+
+\begin{table*}[p]
+\centering
+\caption{The ordering ablation, per decisive ion and block count: the
+physical ordering's joint error and its rank among the \PBNOrderings\
+orderings (a tie counts against it), the scrambled orderings' minimum
+and median, and the event-level loss with the physical ordering's rank
+on it.}
+\label{tab:adjacency}
+\input{tab_adjacency}
 \end{table*}
 
 \bibliographystyle{apsrev4-2}
