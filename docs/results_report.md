@@ -5847,8 +5847,7 @@ rank at K*_local; Red is far away). Overall **YELLOW → the PI decides with
 the numbers**, as preregistered.
 
 **What the ladder shows, read plainly.** In 8 of the 10 cells, and in
-every cell at or above the count at which either ion passes the criterion,
-the operator on the physical ordering reproduces the light better than all
+every tested cell with N_g ≥ 4, the operator on the physical ordering reproduces the light better than all
 31 scrambled orderings of the same blocks — at identical block count, rank
 bound, parameter count, exit tables, events, seeds and transport. The
 margin is not marginal: at N_g = 16 on Ce II 0.067 mag against a scrambled
@@ -5884,8 +5883,8 @@ transport panel alone, `docs/paperB/figures/fig3_adjacency`). Frozen into
 > block count, rank bound and parameter count.** With everything else held
 > fixed, the operator on the physical frequency ordering reproduces the
 > light better than all 31 scrambled orderings in 8 of 10 (ion, block
-> count) cells and in every cell at or above the count where the ion
-> passes the criterion (p = 0.031 each); the preregistered reading is Green
+> count) cells and in every tested cell with N_g ≥ 4 (p = 0.031 each); the
+> two exceptions are the coarsest two-block cells; the preregistered reading is Green
 > on Ce II and Yellow on Nd II (second at its two-block passing count by
 > 0.001 mag, inside the seed noise), overall Yellow for the PI's call. On
 > Nd II at 32 blocks the physical ordering fits the microscopic events

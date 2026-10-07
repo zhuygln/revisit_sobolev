@@ -1,4 +1,4 @@
-# Cover letter — draft (2026-10-05; revised 2026-10-06 with the referee revision, to be finalised after G2R)
+# Cover letter — draft (2026-10-05; revised 2026-10-07 after the referee revision)
 
 To the Editors, Physical Review Letters
 
@@ -27,10 +27,13 @@ microscopic redistribution events roughly twice as well and the emergent
 broad-band light roughly twenty times worse. The reduced model that best
 reproduces microscopic lanthanide fluorescence is not the model that best
 reproduces the light; microscopic reconstruction error is not the
-criterion that selects the representation the radiation samples. [After
-G2R: whether frequency adjacency itself carries the transport-relevant
-structure, beyond rank or parameter count, is settled by a preregistered
-ablation of the frequency ordering at fixed block count.]
+criterion that selects the representation the radiation samples. A
+preregistered ablation that permutes the frequency ordering at fixed block
+count, leaving rank bound, parameter count, exit tables, events, seeds and
+transport unchanged, shows that frequency adjacency carries
+transport-relevant structure at the resolutions where the ordering is
+discriminating, beyond what rank bound or parameter count alone captures;
+a transport-optimised low-rank representation is not excluded.
 
 The inversion is not an anchor-state curiosity. The frequency-local
 operator remains compact across gas temperature, density, illumination and

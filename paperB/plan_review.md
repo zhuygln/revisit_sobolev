@@ -1086,3 +1086,42 @@ in the hedged form until G2R is read; Figure 2 plots the joint statistic;
 Figure 1 names the \(k = 32\) scope. The two runs start after this PR is
 merged and tagged `paperB-g2r-prereg`; PR B carries their results and the
 final mechanism sentence or the fallback reframing.
+
+
+## The PI's reading of G2R and G3U: keep the mechanism claim, keep the title, no more experiments (2026-10-07)
+
+Verbatim:
+
+> **Decision: keep the mechanism claim. Do not use the fallback title. Do not run anything else.** I read G2R Yellow as **supportive but qualified**, not as a failure of the locality/adjacency interpretation.
+>
+> The reason is quite specific. Ce II is Green. Nd II becomes Yellow only because at the *coarsest successful representation*, \(N_g=2\), the physical ordering ranks second by **0.001 mag**, inside the seed scatter, while **87% of scrambled orderings also pass**. That cell has almost no power to discriminate adjacency. In contrast, at every tested \(N_g\ge4\) for both decisive ions, the physical frequency ordering ranks first, and the Nd II \(N_g=32\) control is especially strong: **identical rank bound and parameter count, worse event reconstruction, yet substantially better light**. That is the causal control we wanted.
+>
+> I would therefore use this mechanism sentence:
+>
+> > **Taken together, the ablation shows that frequency adjacency carries transport-relevant structure at the resolutions where the ordering is discriminating, beyond what rank bound or parameter count alone captures; a transport-optimized low-rank representation is not excluded.**
+>
+> That is stronger than retreating to "microscopic fidelity does not predict observable fidelity," but it does not overclaim that locality is uniquely necessary.
+>
+> There are **two textual fixes I would require before merging PR #16**. First, the current sentence saying the physical ordering wins "in every cell at or above the count where either ion passes" is internally inconsistent with the Nd \(N_g=2\) result. Replace it with essentially: "The physical ordering ranks first in 8 of 10 cells and in every tested cell with \(N_g\ge4\); the two exceptions are the coarsest two-block cells." Second, the manuscript still contains:
+>
+> > "If the compression … reflected a globally low-rank redistribution law, the global family would reach the photometric criterion with fewer archetypes."
+>
+> I would **delete that inference**. G2R does not prove that no transport-optimized low-rank representation exists, and your new sentence correctly says so. Replace it with:
+>
+> > **"This comparison tests whether a generic global low-rank representation selected by microscopic reconstruction preserves the transported observables; it does not test all possible transport-optimized low-rank representations."**
+>
+> With those changes, I would **keep the current title** *Effective line redistribution in kilonova ejecta: transport-relevant structure is frequency-local*. The result now supports it sufficiently, provided the text carries the qualification above.
+>
+> G3U also did exactly what we needed. It strengthens the important negative result—Nd trajectory interpolation is decisively outside the threshold—and reveals that several marginal Ce classifications were simply noise-limited. I would view that as increased credibility, not a weakening of the paper. The newly disclosed P1d host-fault case should stay disclosed exactly as it is; no scientific rerun program follows from it because the state classification is unchanged.
+>
+> I attempted to apply the mechanism wording directly to the PR branch, but the connected GitHub integration still has **read-only repository-content permissions** and returned a 403. So I have **not merged PR #16**; I do not want to merge while those two sentences remain. Once those edits are applied, my call is:
+>
+> **MERGE PR #16 → freeze/tag `paperB-g2r-freeze` → no more science experiments → author/affiliation completion → cover letter + PRL justification + referee suggestions → submission.**
+>
+> At this point the paper has a much cleaner PRL argument than before the referee report: the original inversion is still there, and now you have a preregistered, equal-complexity causal ablation showing that **physical frequency adjacency itself matters whenever the representation has enough resolution for the ordering to be distinguishable**.
+
+**Applied (2026-10-07):** the two sentences replaced as prescribed (the
+"every cell at or above the count where either ion passes" phrase also
+corrected in the report, the READMEs and the Conclusions; the low-rank
+inference deleted), the mechanism sentence written verbatim, the title
+kept; PR #16 merged and tagged `paperB-g2r-freeze`. No further experiment.

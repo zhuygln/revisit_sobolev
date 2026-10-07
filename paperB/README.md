@@ -35,8 +35,7 @@ is not the preregistered experiment. Tests: `tests/test_paperB_gate1.py`.
 
 **G2R ran 2026-10-06/07 (F71, §4.66):** the physical ordering reproduces
 the light better than all 31 scrambled orderings in 8 of 10 (ion, block
-count) cells and in every cell at or above the count where the ion passes
-(p = 0.031 each); Ce II Green, Nd II Yellow (second at its two-block
+count) cells and in every tested cell with N_g ≥ 4 (p = 0.031 each); Ce II Green, Nd II Yellow (second at its two-block
 passing count by 0.001 mag, inside the seed noise), **overall Yellow — the
 PI's call**. On Nd II at 32 blocks the physical ordering fits the events
 worse than most scrambled orderings and the light three times better than

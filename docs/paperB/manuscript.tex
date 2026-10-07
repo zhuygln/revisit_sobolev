@@ -192,10 +192,10 @@ numbers against \PBParamsLocal\ at \PBContrastK\ archetypes. The
 factorisation minimises a Frobenius reconstruction error of the fine
 matrix, not the energy-weighted total-variation loss reported here, so its
 microscopic advantage is measured, not built in: it holds at the high end
-of the ladder and not at every count. If the compression of the first
-results section reflected a globally low-rank redistribution law, the
-global family would reach the photometric criterion with fewer
-archetypes.
+of the ladder and not at every count. This comparison tests whether a
+generic global low-rank representation selected by microscopic
+reconstruction preserves the transported observables; it does not test
+all possible transport-optimised low-rank representations.
 
 It does not. On Ce\,\textsc{ii} the local operator passes at
 \PBCeKlocal\ archetypes and the global one at \PBCeKglobal; on
@@ -233,20 +233,19 @@ exit tables, events, seeds and transport are identical and only the
 physical adjacency of the frequencies in a block is destroyed. Against
 \PBNScrambled\ fixed scrambled orderings at every block count
 (Fig.~\ref{fig:adjacency}; Table~\ref{tab:adjacency}), the physical
-ordering reproduces the light best in \PBAdjFirst\ of \PBAdjCells\
-cells, each at the permutation probability \PBAdjP, and in every cell at
-or above the count where either ion passes. The two exceptions are the
-coarsest count on each ion: on Ce\,\textsc{ii} at two blocks no ordering
-comes near the criterion, and on Nd\,\textsc{ii} at two blocks
-\PBNdAdjScrPass\ of the scrambled orderings pass it and one of them edges
-the physical ordering by a thousandth of a magnitude, inside the seed
-noise. The preregistered reading is \PBCeGtwoR\ on Ce\,\textsc{ii} and
-\PBNdGtwoR\ on Nd\,\textsc{ii}.
-% TO BE COMPLETED (the PI's call on the Yellow): the mechanism sentence.
-% Written here in the PI's prescribed form, to be confirmed or amended:
-Frequency adjacency provides transport-relevant structure beyond rank or
-parameter count alone; a transport-optimised low-rank representation is
-not excluded.
+ordering ranks first in \PBAdjFirst\ of \PBAdjCells\ cells, each at the
+permutation probability \PBAdjP, and in every tested cell with
+$N_g\ge4$; the two exceptions are the coarsest two-block cells. On
+Ce\,\textsc{ii} at two blocks no ordering comes near the criterion; on
+Nd\,\textsc{ii} at two blocks \PBNdAdjScrPass\ of the scrambled
+orderings pass it and one of them edges the physical ordering by a
+thousandth of a magnitude, inside the seed noise, so that cell has almost
+no power to discriminate adjacency. The preregistered reading is
+\PBCeGtwoR\ on Ce\,\textsc{ii} and \PBNdGtwoR\ on Nd\,\textsc{ii}.
+Taken together, the ablation shows that frequency adjacency carries
+transport-relevant structure at the resolutions where the ordering is
+discriminating, beyond what rank bound or parameter count alone captures;
+a transport-optimised low-rank representation is not excluded.
 
 The compression is two-level. The reduced model as implemented is
 $P_{\rm red}(\nu_{\rm out}\mid\nu_{\rm in}) \approx
@@ -370,9 +369,10 @@ redistribution better reproduces the light worse, so the microscopic
 distribution is the wrong target for a reduced model of this process. The
 representation the light accepts keeps contiguous frequencies together,
 and the ordering ablation shows that it is the adjacency, not the block
-count or the parameter count, that the light responds to: scramble the
-frequencies within the same blocks and the operator loses most of what it
-reproduces, on both decisive ions and at every count above the coarsest.
+count or the parameter count, that the light responds to wherever the
+ordering is discriminating: scramble the frequencies within the same
+blocks and the operator loses most of what it reproduces, on both decisive
+ions in every tested cell with $N_g\ge4$.
 The local
 operator is not universal --- it is a state-dependent family, interpolable
 along single coordinates, refit on the one coupled trajectory tested, with
